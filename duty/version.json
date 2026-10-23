@@ -1,0 +1,13 @@
+{
+ "version": "2.44",
+ "date": "2026-10-23",
+ "notes": [
+  "직원 정보 점검·확정 전 점검·월 준비 점검 추가",
+  "근무표 칸을 누르면 그 근무가 들어간 이유 표시",
+  "휴대폰 신청 화면 정리",
+  "임시저장 전 표 자동 보관·설정 저장 잊음 방지·저장 위치 표시",
+  "새 버전 알림 기능"
+ ],
+ "download": "https://appraisal-fee.github.io/rohslaw/duty/duty_pc.html",
+ "manual": "https://appraisal-fee.github.io/rohslaw/duty/manual.pdf"
+}
