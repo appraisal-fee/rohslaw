@@ -1,6 +1,8 @@
 {
-  "version": "1.0",
-  "date": "2026-10-23",
-  "notes": ["새 버전 알림 기능 추가"],
-  "download": "https://appraisal-fee.github.io/rohslaw/pdf-converter/index.html"
+ "version": "2.9",
+ "date": "2026-10-23",
+ "notes": [
+  "감정서 불러오기 — 파일을 올리면 먼저 읽어 분석 범위를 고르는 단계 추가 (PDF: 쪽 미리보기·체크·범위 입력, 스캔은 고른 쪽만 글자 인식 / 워드·한글: 제목·문항 묶음 체크)"
+ ],
+ "download": "https://appraisal-fee.github.io/rohslaw/index.html"
 }

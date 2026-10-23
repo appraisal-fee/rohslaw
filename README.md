@@ -1,7 +1,5 @@
-# 감정료 산정 앱
+# 노상엽 업무 프로그램 배포처
 
-가톨릭대학교 부천성모병원 법원감정업무 운영내규(13.20) 기준 감정료 산정 앱 배포처입니다.
-
-- 앱: https://appraisal-fee.github.io/rohslaw/
-- `version.json`: 메일로 받은 앱 파일이 새 버전을 확인할 때 읽는 버전 정보
+- 감정료 산정 앱: https://appraisal-fee.github.io/rohslaw/ (`index.html`, 새 버전 알림 `version.json`)
+- PDF변환기, 글자(도장)넣기: https://appraisal-fee.github.io/rohslaw/pdf-converter.html (새 버전 알림 `pdf-converter-version.json`)
 - 개발자: 노상엽
