@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-10-24 -->
+<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-10-25 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -695,7 +695,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <footer>
     <span>개발자: 노상엽</span>
     <span>개발일자: 2026. 10. 16.</span>
-    <span>수정일자: 2026. 10. 24.</span>
+    <span>수정일자: 2026. 10. 25.</span>
     <span>버전 <b id="appVer"></b></span>
     <button type="button" class="linkbtn" id="updCheck">새 버전 확인</button>
     <span>HEIC(아이폰 사진)는 크롬·엣지에서 열리지 않으니 JPG로 저장해 올려 주세요.</span>
@@ -3295,7 +3295,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "1.1", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
+const APP_VERSION = "1.2", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -4791,8 +4791,11 @@ window.PII = (() => {
     $("piRrn").checked = P.kinds.rrn; $("piPhone").checked = P.kinds.phone; $("piName").checked = P.kinds.name; $("piAcct").checked = P.kinds.acct;
     $("piColor").value = P.color; $("piOnly").checked = P.only;
   }
+  // 켜고 끈 상태를 기억한다 (처음 쓰는 PC에서는 켜진 채로 시작)
+  try{ const v = localStorage.getItem("i2p.piiOn"); P.on = v === null ? true : v === "1"; }catch(_){ P.on = true; }
   $("piOn").addEventListener("change", () => {
     P.on = $("piOn").checked; $("piBody").hidden = !P.on;
+    try{ localStorage.setItem("i2p.piiOn", P.on ? "1" : "0"); }catch(_){}
     $("grid").classList.toggle("pi", P.on);
     if(P.on){ toUI(); summary(); }
     refreshAll();
@@ -4809,6 +4812,7 @@ window.PII = (() => {
   $("piScan").onclick = () => scan(items.filter(it => it.ocr !== 2));
   $("piStop").onclick = () => { stopScan = true; };
   toUI();
+  $("piOn").checked = P.on; $("piBody").hidden = !P.on; $("grid").classList.toggle("pi", P.on); summary();
 
   return {
     get on(){ return P.on; },

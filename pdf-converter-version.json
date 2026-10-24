@@ -1,6 +1,6 @@
 {
-  "version": "1.1",
-  "date": "2026-10-24",
-  "notes": ["개인정보 가리기 추가 — 이미지를 PDF로 만들 때 주민·외국인등록번호, 전화번호, 이름·주소, 계좌·카드번호·이메일을 자동으로 찾아 가리고 저장 전에 확인·수정"],
+  "version": "1.2",
+  "date": "2026-10-25",
+  "notes": ["개인정보 가리기가 처음부터 켜진 채로 시작하고, 켜고 끈 상태를 기억합니다"],
   "download": "https://appraisal-fee.github.io/rohslaw/pdf-converter.html"
 }
