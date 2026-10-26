@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-10-25 -->
+<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-10-27 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -222,6 +222,12 @@ select,input[type=text]{font:inherit;width:100%;padding:7px 9px;border:1px solid
 .pic{font-weight:700;color:#c62f28;font-variant-numeric:tabular-nums}
 .pistage{display:grid;place-items:center;min-width:min(900px,86vw)}
 #piCanvas{cursor:crosshair;touch-action:none;box-shadow:0 1px 6px rgba(0,0,0,.25);background:#fff}
+.redbar{display:grid;gap:6px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--sunk)}
+.redv{position:absolute;z-index:3;opacity:.82;outline:1.5px solid #e0302a;pointer-events:none}
+.redv.drawing{background:rgba(0,0,0,.35)!important;outline:1.5px dashed #1f6fd1}
+.redmode .ov{cursor:crosshair}
+.redmode .redv{pointer-events:auto;cursor:pointer}
+.redmode .redv:hover{outline:3px solid #e0302a;opacity:.6}
 .keepbox{display:grid;gap:4px;padding:8px 10px;border:1px dashed var(--line);border-radius:8px;background:var(--sunk)}
 .res .m.good{color:var(--ok);font-weight:700}
 footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16px}
@@ -328,12 +334,14 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
             <label class="check"><input type="checkbox" id="piPhone"> 전화·휴대폰 번호</label>
             <label class="check"><input type="checkbox" id="piName"> 이름·주소 (성명·주소 등 항목명 뒤)</label>
             <label class="check"><input type="checkbox" id="piAcct"> 계좌·카드번호·이메일</label>
+            <label class="check"><input type="checkbox" id="piPid"> 병원 등록번호·환자 라벨(스티커)</label>
           </div>
           <div class="row">
             <button type="button" id="piScan" class="primary">개인정보 찾기</button>
             <button type="button" id="piStop" hidden>멈추기</button>
             <label class="check" style="margin-left:auto">가리는 색 <select id="piColor" style="width:auto"><option value="#000000">검정</option><option value="#ffffff">흰색</option></select></label>
           </div>
+          <label class="check"><input type="checkbox" id="piDeep"> 꼼꼼히 찾기 (두 가지 방식으로 읽어 서식·라벨·서명란까지 찾음, 시간 약 2배)</label>
           <div class="ptext" id="piProg" aria-live="polite"></div>
           <p class="note" id="piSum"></p>
           <label class="check"><input type="checkbox" id="piOnly"> 가린 곳이 있는 장만 보기</label>
@@ -602,6 +610,24 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         <div class="label">3. 원하는 자리에 직접 쓰기</div>
         <div class="tip">빈 곳을 누르면 글자 상자(또는 고른 이미지)가 생기고, 누르면 고르고, 끌면 옮겨집니다. 이미지는 모서리 ■를 끌어 크기를 바꾸고, 이미지 위를 두 번 누르면 그 자리에 글자 상자가 생깁니다.</div>
       </div>
+      <div class="redbar">
+        <b>개인정보 가리기</b>
+        <div class="pigrid">
+          <label class="check"><input type="checkbox" id="rdRrn"> 주민·외국인등록번호</label>
+          <label class="check"><input type="checkbox" id="rdPhone"> 전화·휴대폰 번호</label>
+          <label class="check"><input type="checkbox" id="rdName"> 이름·주소</label>
+          <label class="check"><input type="checkbox" id="rdAcct"> 계좌·카드번호·이메일</label>
+          <label class="check"><input type="checkbox" id="rdPid"> 병원 등록번호·환자 라벨</label>
+        </div>
+        <div class="row">
+          <button type="button" id="rdScan" class="primary">개인정보 찾기</button>
+          <button type="button" id="rdStop" hidden>멈추기</button>
+          <button type="button" id="rdClear" class="danger">가린 칸 모두 빼기</button>
+          <span class="ptext" id="rdProg" aria-live="polite"></span>
+        </div>
+        <p class="note" id="rdSum"></p>
+        <p class="note">찾은 곳은 아래 쪽에 검은 칸으로 보입니다. 놓친 곳은 '누르면 넣을 것'에서 <b>가릴 칸 그리기</b>를 고른 뒤 쪽 위를 끌어 가리고, 잘못 가린 칸은 그 상태에서 누르면 빠집니다. 가린 쪽은 저장할 때 그림으로 바뀌어 원래 글자가 파일에서 완전히 지워집니다(그 쪽은 글자 검색·복사가 되지 않습니다).</p>
+      </div>
       <div class="toolrow">
         <label>누르면 넣을 것 <select id="tbPut"><option value="text">글자 상자</option></select></label>
         <label title="끄면 도장을 한 번 찍은 뒤 글자 상자로 돌아갑니다"><input type="checkbox" id="tbRepeat"> 도장 계속 찍기</label>
@@ -695,7 +721,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <footer>
     <span>개발자: 노상엽</span>
     <span>개발일자: 2026. 10. 16.</span>
-    <span>수정일자: 2026. 10. 25.</span>
+    <span>수정일자: 2026. 10. 27.</span>
     <span>버전 <b id="appVer"></b></span>
     <button type="button" class="linkbtn" id="updCheck">새 버전 확인</button>
     <span>HEIC(아이폰 사진)는 크롬·엣지에서 열리지 않으니 JPG로 저장해 올려 주세요.</span>
@@ -3295,7 +3321,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "1.2", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
+const APP_VERSION = "1.3", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -3711,7 +3737,8 @@ async function loadTextPdf(file){
     info.querySelector("span").textContent = /encrypt/i.test(String(e && e.message)) ? "암호가 걸린 PDF라 열 수 없음" : "손상됐거나 읽을 수 없는 PDF";
     info.querySelector("span").style.color = "var(--bad)"; return;
   }
-  T.file = file; T.boxes = []; T.sel = null; T.imgs = []; T.isel = null; $("ibRow").hidden = true;
+  T.file = file; T.boxes = []; T.sel = null; T.imgs = []; T.isel = null; T.red = []; $("ibRow").hidden = true;
+  $("rdProg").textContent = "";
   if(T.pdfjs){ try{ T.pdfjs.destroy(); }catch(_){} }
   T.pdfjs = await pdfjsLib.getDocument({data:T.bytes.slice(), CMapReaderFactory:LocalCMapFactory, cMapUrl:"local/", cMapPacked:true, useWorkerFetch:false, isEvalSupported:false}).promise;
   T.pages = doc.getPages().map((p, i) => {
@@ -3781,6 +3808,7 @@ function renderAllOverlays(){
       }
     }
     for(const ib of T.imgs) if(ib.page === pg.i) placeImg(ib);
+    renderRed(pg);
     for(const bx of T.boxes) if(bx.page === pg.i) placeBox(bx);
   }
 }
@@ -3791,7 +3819,7 @@ function renderAllOverlays(){
 const ghost = document.createElement("div"); ghost.className = "ghost"; ghost.hidden = true; ghost.textContent = "여기에 글자 넣기";
 function ghostMove(e, pg){
   if(running || !T.font || e.target !== pg.ov || T.sel || T.isel){ ghost.hidden = true; return; }
-  ghost.textContent = $("tbPut").value === "text" ? "여기에 글자 넣기" : "여기에 이미지 넣기";
+  ghost.textContent = $("tbPut").value === "text" ? "여기에 글자 넣기" : $("tbPut").value === "redact" ? "끌어서 가릴 칸 그리기" : "여기에 이미지 넣기";
   const r = pg.ov.getBoundingClientRect(), d = T.defaults, s = pg.s;
   if(ghost.parentNode !== pg.ov) pg.ov.appendChild(ghost);
   ghost.hidden = false;
@@ -3862,6 +3890,7 @@ function dragBox(e, bx, handle, done){
 }
 function onPagePointer(e, pg){
   if(running || e.button !== 0 || e.target !== pg.ov) return;
+  if($("tbPut").value === "redact"){ e.preventDefault(); selectBox(null); selectImg(null); drawRedBox(e, pg); return; }
   if(!T.font){ flashFontNote(); return; }
   e.preventDefault();
   if(T.sel){                                       // 글자를 쓰던 중이면 선택만 푼다
@@ -3934,8 +3963,9 @@ function readTool(){
 $("tbSize").addEventListener("input", readTool);
 function updateTextUI(){
   const n = T.boxes.filter(b => b.text.trim()).length, ni = T.imgs.length, ns = T.stamps.filter(stampLive).length;
-  $("tbCount").textContent = `글자 상자 ${n}개 · 이미지 ${ni}개 · 일괄 문구 ${ns}개`;
-  $("textRun").disabled = running || !T.pages.length || (!n && !ni && !ns);
+  const nr = (T.red || []).reduce((s, pg) => s + (pg ? pg.length : 0), 0);
+  $("tbCount").textContent = `글자 상자 ${n}개 · 이미지 ${ni}개 · 일괄 문구 ${ns}개` + (nr ? ` · 가림 ${nr}곳` : "");
+  $("textRun").disabled = running || !T.pages.length || (!n && !ni && !ns && !nr);
 }
 
 /* ---------- 도장·이미지 보관함 (이 PC의 브라우저에 기억) ---------- */
@@ -3951,8 +3981,9 @@ function rememberShape(id, part){
 const shapeOf = id => { const im = libGet(id); return im && im.st ? im.st : null; };
 function drawLib(){
   const put = $("tbPut"), cur = put.value;
-  put.innerHTML = `<option value="text">글자 상자</option>` + T.lib.map(im => `<option value="${im.id}">이미지: ${esc(im.name)}</option>`).join("");
-  put.value = T.lib.some(im => im.id === cur) ? cur : "text";
+  put.innerHTML = `<option value="text">글자 상자</option><option value="redact">가릴 칸 그리기 (개인정보)</option>` + T.lib.map(im => `<option value="${im.id}">이미지: ${esc(im.name)}</option>`).join("");
+  put.value = (cur === "redact" || T.lib.some(im => im.id === cur)) ? cur : "text";
+  pagesEl.classList.toggle("redmode", put.value === "redact");
   const box = $("imgLib"); box.replaceChildren();
   T.lib.forEach(im => {
     const r = document.createElement("div"); r.className = "libitem" + (put.value === im.id ? " on" : "");
@@ -3969,7 +4000,8 @@ function drawLib(){
 function onPutChange(){
   selectBox(null); selectImg(null); drawLib();
   try{ localStorage.setItem("i2p.put", $("tbPut").value); }catch(_){}
-  if($("tbPut").value !== "text" && activeTab === "text"){ const im = libGet($("tbPut").value); toast(`쪽을 누르면 '${im.name}' 이미지가 그 자리에 들어갑니다.`); }
+  if($("tbPut").value === "redact" && activeTab === "text") toast("쪽 위를 끌면 그 자리가 가려집니다. 가린 칸을 누르면 빠집니다.");
+  else if($("tbPut").value !== "text" && activeTab === "text"){ const im = libGet($("tbPut").value); toast(`쪽을 누르면 '${im.name}' 이미지가 그 자리에 들어갑니다.`); }
 }
 $("tbPut").addEventListener("change", onPutChange);
 function removeLib(im){
@@ -4267,7 +4299,10 @@ function drawBlock(page, pg, b, fonts){
 
 $("textRun").onclick = async () => {
   if(running || !T.pages.length) return;
-  if(!T.font){ flashFontNote(); return; }
+  // 글자를 하나도 쓰지 않고 가리기만 할 때는 글꼴이 필요 없다
+  const needFont = T.stamps.some(st => stampLive(st) && st.text.trim()) || T.boxes.some(b => b.text.trim()) || T.imgs.some(ib => fillVars(ib.text).trim());
+  if(needFont && !T.font){ flashFontNote(); return; }
+  if(redBusy){ toast("개인정보 찾기가 끝난 뒤에 저장해 주세요."); return; }
   if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
   setBusy(true); $("textRun").disabled = true; $("textRes").replaceChildren();
   const pg = progress($("textProg")); pg.show();
@@ -4277,7 +4312,28 @@ $("textRun").onclick = async () => {
     const doc = await PDFDocument.load(T.bytes, {updateMetadata:false});
     doc.registerFontkit(fontkit);
     pg.set(0.15, "글꼴을 넣는 중"); await sleep(0);
-    const pages = doc.getPages(), n = pages.length;
+    let pages = doc.getPages();
+    const n = pages.length;
+    // 개인정보를 가린 쪽: 그 쪽을 그림으로 바꾸고 가린 자리를 칠한다 (원래 글자가 파일에 남지 않도록)
+    const flatP = [], redIdx = T.pages.filter(P => (T.red[P.i] || []).length).map(P => P.i);
+    for(let r = 0; r < redIdx.length; r++){
+      const i = redIdx[r], P = T.pages[i];
+      pg.set(0.1 + r/redIdx.length*0.1, `${r + 1} / ${redIdx.length}쪽 개인정보 지우는 중`); await sleep(0);
+      const pp = await T.pdfjs.getPage(i + 1), sc = 200/72, vp = pp.getViewport({scale:sc});
+      const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+      const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+      await pp.render({canvasContext:g, viewport:vp, background:"rgb(255,255,255)"}).promise; pp.cleanup();
+      g.fillStyle = window.PII ? PII.color() : "#000";
+      for(const m of T.red[i]) g.fillRect(Math.floor(m.x*sc) - 1, Math.floor(m.y*sc) - 1, Math.ceil(m.w*sc) + 2, Math.ceil(m.h*sc) + 2);
+      const jb = await new Promise(res => c.toBlob(res, "image/jpeg", 0.9));
+      c.width = c.height = 1;
+      const jpg = await doc.embedJpg(new Uint8Array(await jb.arrayBuffer()));
+      const np = doc.insertPage(i, [P.W, P.H]);
+      np.drawImage(jpg, {x:0, y:0, width:P.W, height:P.H});
+      doc.removePage(i + 1);
+      flatP[i] = {i, W:P.W, H:P.H, rot:0, crop:{x:0, y:0, width:P.W, height:P.H}};
+    }
+    pages = doc.getPages();
     const maps = T.stamps.filter(stampLive).map(st => [st, stampTargets(st, n)]);
     // 문서에 실제로 쓰는 글자만 남긴 글꼴을 넣는다
     let allText = " ";
@@ -4289,9 +4345,9 @@ $("textRun").onclick = async () => {
     for(const id of used){ const im = libGet(id); if(im) emb.set(id, im.kind === "png" ? await doc.embedPng(im.bytes) : await doc.embedJpg(im.bytes)); }
     const drawImg = (page, P, id, x, y, w, h, op) => { const e = emb.get(id); if(!e) return; const [ux, uy] = toUser(P, x, y + h); const o = {x:ux, y:uy, width:w, height:h, rotate:degrees(P.rot)}; if(op != null && op < 1) o.opacity = Math.max(0.05, op); page.drawImage(e, o); };
     const shrink = u => trueTypeKeepSubset(u, allText) || u;
-    const fonts = {reg: await doc.embedFont(shrink(T.font.reg), {subset:false}), bold: T.font.bold ? await doc.embedFont(shrink(T.font.bold), {subset:false}) : null, asc:T.font.asc, desc:T.font.desc};
+    const fonts = needFont ? {reg: await doc.embedFont(shrink(T.font.reg), {subset:false}), bold: T.font.bold ? await doc.embedFont(shrink(T.font.bold), {subset:false}) : null, asc:T.font.asc, desc:T.font.desc} : null;
     for(let i = 0; i < n; i++){
-      const P = T.pages[i];
+      const P = flatP[i] || T.pages[i];
       for(const [st, map] of maps) if(map.has(i)){
         const b = stampBlock(st, map.get(i), P);
         if(b.img) drawImg(pages[i], P, b.img.id, b.ix, b.iy, b.iw, b.ih, b.op);
@@ -4316,16 +4372,162 @@ $("textRun").onclick = async () => {
 
 drawStamps(); updateTextUI();
 
+/* =========================================================
+   PDF 개인정보 가리기: 글자가 들어 있는 PDF는 글자 정보로, 스캔 PDF는 글자 인식으로 찾는다.
+   T.red[쪽] = [{x,y,w,h,auto,kind}] (화면에 보이는 쪽 기준 pt)
+   ========================================================= */
+T.red = [];
+let redBusy = false, redStop = false;
+function renderRed(pg){
+  pg.ov.querySelectorAll(".redv").forEach(n => n.remove());
+  const s = pg.s, col = window.PII ? PII.color() : "#000";
+  (T.red[pg.i] || []).forEach((m, j) => {
+    const d = document.createElement("div"); d.className = "redv" + (m.auto ? " auto" : ""); d.dataset.j = j;
+    d.title = "개인정보 가림 (가릴 칸 그리기 상태에서 누르면 빠집니다)";
+    Object.assign(d.style, {left:m.x*s + "px", top:m.y*s + "px", width:m.w*s + "px", height:m.h*s + "px", background:col});
+    pg.ov.appendChild(d);
+  });
+}
+function redCount(){ return T.red.reduce((s, p) => s + (p ? p.length : 0), 0); }
+// 가린 칸 누르기 = 빼기 (가릴 칸 그리기 상태일 때만)
+pagesEl.addEventListener("pointerdown", e => {
+  const d = e.target.closest && e.target.closest(".redv");
+  if(!d || running || $("tbPut").value !== "redact") return;
+  e.preventDefault(); e.stopPropagation();
+  const pg = d.parentNode._pg || T.pages.find(p => p.ov === d.parentNode);
+  T.red[pg.i].splice(+d.dataset.j, 1); renderRed(pg); updateTextUI(); redSummary();
+}, true);
+function drawRedBox(e, pg){
+  const r = pg.ov.getBoundingClientRect(), s = pg.s, sx = (e.clientX - r.left)/s, sy = (e.clientY - r.top)/s;
+  const tmp = document.createElement("div"); tmp.className = "redv drawing"; pg.ov.appendChild(tmp);
+  const ov = pg.ov; try{ ov.setPointerCapture(e.pointerId); }catch(_){}
+  let box = null;
+  const mv = ev => {
+    const x = (ev.clientX - r.left)/s, y = (ev.clientY - r.top)/s;
+    box = {x:Math.max(0, Math.min(sx, x)), y:Math.max(0, Math.min(sy, y)), w:Math.abs(x - sx), h:Math.abs(y - sy)};
+    Object.assign(tmp.style, {left:box.x*s + "px", top:box.y*s + "px", width:box.w*s + "px", height:box.h*s + "px"});
+  };
+  const up = () => {
+    ov.removeEventListener("pointermove", mv); ov.removeEventListener("pointerup", up); ov.removeEventListener("pointercancel", up);
+    tmp.remove();
+    if(box && box.w*s > 4 && box.h*s > 4){ (T.red[pg.i] = T.red[pg.i] || []).push(Object.assign(box, {auto:false, kind:"manual"})); renderRed(pg); updateTextUI(); redSummary(); }
+  };
+  ov.addEventListener("pointermove", mv); ov.addEventListener("pointerup", up); ov.addEventListener("pointercancel", up);
+}
+function redSummary(){
+  const n = redCount(), pages = T.red.filter(p => p && p.length).length;
+  $("rdSum").textContent = n ? `${pages}쪽에서 ${n}곳을 가립니다. 가린 쪽은 저장할 때 그림으로 바뀝니다.` : "";
+}
+// pdf.js 글자 조각 → 낱말 (띄어쓰기마다 나누고 칸은 글자 수 비율로)
+function textWords(items, vp){
+  const out = [];
+  for(const it of items){
+    const str = it.str || ""; if(!str.trim()) continue;
+    const t = pdfjsLib.Util.transform(vp.transform, it.transform);
+    const len = Math.hypot(t[0], t[1]) || 1, dx = t[0]/len, dy = t[1]/len;
+    if(Math.abs(dy) > 0.2) continue;                         // 기울거나 세로로 쓴 글자는 건너뛴다
+    const fh = Math.hypot(t[2], t[3]) || it.height || 10, w = (it.width || 0)*vp.scale;
+    const x0 = dx >= 0 ? t[4] : t[4] - w, base = t[5], chars = [...str], n = chars.length;
+    // 글자마다 폭이 다르므로(한글은 넓고 숫자·띄어쓰기는 좁다) 글자 폭 비율로 자리를 나눈다
+    mctx.font = `${Math.max(4, fh)}px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif`;
+    const cw = chars.map(ch => mctx.measureText(ch).width || fh*0.5), tot = cw.reduce((a, b) => a + b, 0) || 1;
+    const pos = [0]; cw.forEach(v => pos.push(pos[pos.length - 1] + v*w/tot));
+    let i = 0;
+    while(i < n){
+      while(i < n && /\s/.test(chars[i])) i++;
+      let j = i; while(j < n && !/\s/.test(chars[j])) j++;
+      if(j > i) out.push({text:chars.slice(i, j).join(""), bbox:{x0:x0 + pos[i], x1:x0 + pos[j], y0:base - fh*0.85, y1:base + fh*0.2}});
+      i = j;
+    }
+  }
+  return out;
+}
+/* 스캔한 쪽을 글자 인식용으로 그린다. 쪽 안 그림의 원래 해상도보다 크게 그리면 흐려지므로
+   원래 해상도까지만 그린 뒤 부드럽게 키운다 (작은 화면 캡처를 PDF로 만든 경우 등) */
+async function renderForOcr(page, vp, k){
+  let ns = k;
+  try{
+    const ops = await page.getOperatorList(), O = pdfjsLib.OPS;
+    let best = 0;
+    for(let i = 0; i < ops.fnArray.length; i++){
+      if(ops.fnArray[i] !== O.paintImageXObject && ops.fnArray[i] !== O.paintJpegXObject) continue;
+      const id = ops.argsArray[i][0];
+      const img = page.objs.has(id) ? page.objs.get(id) : (page.commonObjs.has(id) ? page.commonObjs.get(id) : null);
+      if(img && img.width) best = Math.max(best, img.width/vp.width, img.height/vp.height);
+    }
+    if(best) ns = Math.max(0.5, Math.min(k, best));
+  }catch(_){}
+  const draw = async sc => {
+    const v = page.getViewport({scale:sc}), c = document.createElement("canvas");
+    c.width = Math.round(v.width); c.height = Math.round(v.height);
+    const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+    await page.render({canvasContext:g, viewport:v, background:"rgb(255,255,255)"}).promise;
+    return c;
+  };
+  if(ns >= k*0.95) return draw(k);
+  const small = await draw(ns), v = page.getViewport({scale:k}), c = document.createElement("canvas");
+  c.width = Math.round(v.width); c.height = Math.round(v.height);
+  const g = c.getContext("2d"); g.imageSmoothingQuality = "high"; g.drawImage(small, 0, 0, c.width, c.height);
+  small.width = small.height = 1;
+  return c;
+}
+async function redScan(){
+  if(running || redBusy || !T.pages.length) return;
+  if(!window.PII){ toast("개인정보 찾기 기능을 불러오지 못했습니다."); return; }
+  redBusy = true; redStop = false;
+  $("rdScan").disabled = true; $("rdStop").hidden = false; $("textRun").disabled = true;
+  const pt = $("rdProg"), kinds = PII.kinds(), t0 = performance.now(), doc = T.pdfjs;
+  let w = null;
+  const per = [], names = new Set();
+  try{
+    for(let i = 0; i < T.pages.length && !redStop; i++){
+      pt.textContent = `${i + 1} / ${T.pages.length}쪽 살펴보는 중`;
+      const page = await doc.getPage(i + 1), vp = page.getViewport({scale:1});
+      const tc = await page.getTextContent();
+      const words = textWords(tc.items, vp);
+      let passes;
+      if(words.reduce((s, x) => s + x.text.length, 0) >= 20) passes = [PII.toRows(words)];   // 글자가 들어 있는 쪽
+      else {                                                                                   // 스캔한 쪽: 그림으로 그려 글자 인식
+        if(!w){ pt.textContent = "글자 인식 준비 중…"; w = (await PII.engine())[0]; }
+        const k = PII.ocrScale(vp.width, vp.height), c = await renderForOcr(page, vp, k);
+        passes = await PII.ocrCanvas(c, w, k);
+        c.width = c.height = 1;
+      }
+      page.cleanup();
+      const d = PII.detectAll(passes, kinds);
+      per[i] = {rows:passes.flat(), masks:d.masks}; d.names.forEach(x => names.add(x));
+    }
+  }catch(e){ console.error(e); pt.textContent = "개인정보를 찾지 못했습니다. 다시 해 보세요."; }
+  // 찾은 이름이 다른 쪽에 또 나오면 그곳도 가린다. 사람이 직접 그린 칸은 남긴다
+  const nm = [...names];
+  per.forEach((p, i) => {
+    if(!p) return;
+    const manual = (T.red[i] || []).filter(m => !m.auto);
+    T.red[i] = p.masks.concat(kinds.name ? PII.namePass(p.rows, nm, p.masks) : [], manual);
+  });
+  T.pages.forEach(renderRed);
+  redBusy = false; $("rdScan").disabled = false; $("rdStop").hidden = true;
+  const n = redCount();
+  pt.textContent = redStop ? "찾기를 멈췄습니다." : `다 찾았습니다 · ${fmtSec((performance.now() - t0)/1000)} 걸림` + (n ? "" : " · 찾은 개인정보가 없습니다");
+  redSummary(); updateTextUI();
+  const first = T.red.findIndex(p => p && p.length);
+  if(first >= 0) T.pages[first].el.scrollIntoView({block:"start", behavior:"smooth"});
+}
+$("rdScan").onclick = redScan;
+$("rdStop").onclick = () => { redStop = true; };
+$("rdClear").onclick = () => { if(running || redBusy) return; T.red = []; T.pages.forEach(renderRed); redSummary(); updateTextUI(); };
+
 resetters.text = () => {
   if(T.pdfjs){ try{ T.pdfjs.destroy(); }catch(_){} }
   pio.disconnect(); renderQ = [];
-  Object.assign(T, {file:null, bytes:null, pdfjs:null, pages:[], boxes:[], sel:null, imgs:[], isel:null});
+  Object.assign(T, {file:null, bytes:null, pdfjs:null, pages:[], boxes:[], sel:null, imgs:[], isel:null, red:[]});
+  redStop = true; $("rdProg").textContent = "";
   $("ibRow").hidden = true;
   pagesEl.replaceChildren(); $("textEmpty").hidden = false;
   $("textInfo").hidden = true; $("textInfo").replaceChildren(); $("textName").value = "";
   clearOutput("text"); updateTextUI();
 };
-hasWork.text = () => !!T.file && (T.boxes.some(b => b.text.trim()) || T.imgs.length > 0) && !saved("text");
+hasWork.text = () => !!T.file && (T.boxes.some(b => b.text.trim()) || T.imgs.length > 0 || T.red.some(p => p && p.length)) && !saved("text");
 $("stampClear").onclick = () => { if(running) return; T.stamps.length = 0; drawStamps(); scheduleOverlay(); updateTextUI(); };
 /* =========================================================
    이미지 → PDF 탭: 저장할 때 첫 장(또는 고른 쪽)에 도장 찍기
@@ -4486,9 +4688,9 @@ window.__T = T;
    저장 전에 사람이 확인·수정한다. 가린 칸은 그림 자체에 칠해져 PDF에 원본이 남지 않는다.
    ========================================================= */
 window.PII = (() => {
-  const P = {on:false, kinds:{rrn:true, phone:true, name:true, acct:true}, color:"#000000", only:false};
-  try{ const s = JSON.parse(localStorage.getItem("i2p.pii") || "null"); if(s){ Object.assign(P.kinds, s.kinds || {}); if(s.color) P.color = s.color; } }catch(_){}
-  const save = () => { try{ localStorage.setItem("i2p.pii", JSON.stringify({kinds:P.kinds, color:P.color})); }catch(_){} };
+  const P = {on:false, kinds:{rrn:true, phone:true, name:true, acct:true, pid:true}, color:"#000000", only:false, deep:true};
+  try{ const s = JSON.parse(localStorage.getItem("i2p.pii") || "null"); if(s){ Object.assign(P.kinds, s.kinds || {}); if(s.color) P.color = s.color; if(s.deep === false) P.deep = false; } }catch(_){}
+  const save = () => { try{ localStorage.setItem("i2p.pii", JSON.stringify({kinds:P.kinds, color:P.color, deep:P.deep})); }catch(_){} };
 
   /* ---------- 글자 인식 엔진 ---------- */
   let workers = null, engineErr = null;
@@ -4521,8 +4723,34 @@ window.PII = (() => {
   const NAME_LABEL = new RegExp(`(${alt(["환자성명","환자이름","환자명","보호자성명","보호자이름","보호자","성명","성함","이름","예금주","신청인","대리인","수령인","피보험자","보험자","계약자","연대보증인","보증인","수진자","진료자"])})[\\s_.·\\-~|]*[:：;]*[\\s_.·\\-~|]*`, "g");
   const ADDR_LABEL = new RegExp(`(${alt(["자택주소","현주소","주소지","주소","거주지","소재지"])})[\\s_.·\\-~|]*[:：;]*[\\s_.·\\-~|]*`, "g");
   const STOP_LABEL = new RegExp(`(${alt(["전화","연락처","휴대","핸드폰","이메일","주민","생년","성별","관계","우편","직업"])}|T\\s*E\\s*L|E\\s*-?\\s*mail)`, "i");
-  const NOT_NAME = /^(및|의|은|는|이|가|을|를|과|와|등|외|란|칸|본인|미상|없음|확인|서명|날인|인)$/;
+  const PID_LABEL = new RegExp(`(${alt(["의무기록번호","병록번호","등록번호","환자번호","차트번호","수진자번호","진료번호","환자ID","환자 ID"])})[\\s_.·\\-~|]*[:：;]*[\\s_.·\\-~|]*`, "g");
+  const NOT_NAME = /^(및|의|은|는|이|가|을|를|과|와|등|외|란|칸|본인|미상|없음|확인|서명|날인|인|[과와의은는이가을를에로도만]+)$/;
 
+  /* 항목명 뒤의 이름 고르기 (rest: 항목명 바로 뒤 글자들)
+     쌍점이 있으면 '홍 길동', '홍 길 동'처럼 띄어 쓴 조각을 2~4자가 될 때까지 잇는다.
+     쌍점이 없으면 붙여 쓴 이름 하나, 또는 줄 끝까지 한 글자씩 띄어 쓴 이름만 본다
+     ('대리인 이 서 명 하게'처럼 문장이 이어지는 경우를 이름으로 잘못 보지 않도록) */
+  function nameAfter(rest, colon){
+    const toks = rest.split(" ");
+    let out = "", n = 0, i = 0;
+    const hangulRun = t => (/^[가-힣]+/.exec(t) || [""])[0];
+    if(!colon){
+      const r0 = hangulRun(toks[0] || "");
+      if(r0.length >= 2 && r0.length <= 4 && (r0.length === toks[0].length || /^[^가-힣]/.test(toks[0].slice(r0.length)))) return r0;
+      // 한 글자씩 띄어 쓴 이름: 뒤에 한글이 더 이어지지 않아야 한다
+      while(i < toks.length && /^[가-힣]$/.test(toks[i]) && n < 4){ out += (out ? " " : "") + toks[i]; n++; i++; }
+      if(n >= 2 && n <= 4 && !(i < toks.length && /^[가-힣]/.test(toks[i]))) return out;
+      return "";
+    }
+    for(; i < toks.length; i++){
+      const t = toks[i], r = hangulRun(t);
+      if(!r) break;
+      if(n + r.length > 4) break;
+      out += (out ? " " : "") + r; n += r.length;
+      if(r.length !== t.length) break;                // 글자 뒤에 괄호 등이 붙어 있으면 거기까지
+    }
+    return n >= 2 ? out : "";
+  }
   // 한 줄 안에서 찾기: 줄의 글자를 이어 붙이고 글자마다 어느 낱말인지 기억해 둔다
   function scanLine(words, kinds){
     const ws = words.filter(w => w.text && w.text.trim());
@@ -4542,7 +4770,20 @@ window.PII = (() => {
     const each = (re, str, fn) => { re.lastIndex = 0; let m; while((m = re.exec(str))){ fn(m); if(m[0].length === 0) re.lastIndex++; } };
     const cp = idx => [...plain.slice(0, idx)].length;   // 문자열 위치 → 글자 위치
 
-    if(kinds.rrn) each(/(?<![0-9])\d{2}[01]\d[0-3]\d\s*[-–—~=_.:]?\s*[1-8]\d{6}(?![0-9])/g, num, m => add(cp(m.index), cp(m.index + m[0].length), "rrn"));
+    if(kinds.rrn){
+      each(/(?<![0-9])\d{2}[01]\d[0-3]\d\s*[-–—~=_.:]?\s*[1-8]\d{6}(?![0-9])/g, num, m => add(cp(m.index), cp(m.index + m[0].length), "rrn"));
+      // 뒷자리를 X·*로 가린 번호(680714-1XXXXXX)도 생년월일이 드러나므로 가린다. 인식기가 X를 0·(·)·C로 읽기도 한다
+      each(/(?<![0-9])\d{2}[01]\d\s?[0-3]\d\s*[-–—~=_.:]?\s*[1-8][0-9Xx×*＊●○#()\[\]{}<>¢CcKk%]{4,8}/g, num, m => {
+        const tail = m[0].replace(/^\d{2}[01]\d\s?[0-3]\d\s*[-–—~=_.:]?\s*[1-8]/, "");
+        if(/^\d+$/.test(tail) && !/[-–—~=_.:]/.test(m[0])) return;   // 숫자만 길게 이어진 것은 다른 번호일 수 있다
+        add(cp(m.index), cp(m.index + m[0].length), "rrn");
+      });
+    }
+    if(kinds.pid) each(PID_LABEL, plain, m => {
+      const start = cp(m.index + m[0].length), rest = num.slice(m.index + m[0].length);
+      const mm = /^[A-Za-z]{0,2}[-\s]?\d[\d\s-]{3,13}\d/.exec(rest);
+      if(mm && mm[0].replace(/\D/g, "").length >= 5) add(start, start + [...mm[0]].length, "pid");
+    });
     if(kinds.acct){
       each(/(?<![0-9])\d{4}\s*[- ]\s*\d{4}\s*[- ]\s*\d{4}\s*[- ]\s*\d{3,4}(?![0-9])/g, num, m => add(cp(m.index), cp(m.index + m[0].length), "card"));
       each(/[A-Za-z0-9._%+\-]+\s?@\s?[A-Za-z0-9\-]+(?:\s?\.\s?[A-Za-z0-9\-]+)*\s?\.\s?[A-Za-z]{2,}/g, plain, m => add(cp(m.index), cp(m.index + m[0].length), "email"));
@@ -4567,10 +4808,13 @@ window.PII = (() => {
       each(NAME_LABEL, plain, m => {
         const start = cp(m.index + m[0].length);
         const rest = chars.slice(start).join("");
-        const mm = /^([가-힣](?: ?[가-힣]){1,4})(?![가-힣])/.exec(rest);
-        if(!mm || NOT_NAME.test(mm[1].replace(/ /g, ""))) return;
-        if(STOP_LABEL.test(mm[1])) return;
-        add(start, start + [...mm[1]].length, "name");
+        // 항목명 뒤에 쌍점(:)이 있으면 '홍 길 동'처럼 띄어 쓴 이름도, 없으면 붙여 쓴 2~4자만 이름으로 본다
+        // (쌍점 없이 '대리인 이 서명하게…'처럼 문장이 이어지는 경우를 이름으로 잘못 보지 않도록)
+        const colon = /[:：;]/.test(m[0]);
+        const nm = nameAfter(rest, colon);
+        if(!nm || NOT_NAME.test(nm.replace(/ /g, ""))) return;
+        if(STOP_LABEL.test(nm) || NAME_STOP.test(nm.replace(/ /g, ""))) return;
+        add(start, start + [...nm].length, "name");
       });
       // 주소: 항목명 뒤부터 줄 끝까지 (다른 항목명이 나오면 그 앞까지)
       each(ADDR_LABEL, plain, m => {
@@ -4585,27 +4829,156 @@ window.PII = (() => {
     }
     // 글자 범위 → 낱말 상자 안에서 글자 비율로 잘라 낸 칸
     return hits.map(h => {
-      const per = new Map();
-      for(let k = h.a; k < h.b; k++){
-        const mp = map[k]; if(!mp) continue;
-        const [wi, ci] = mp, cur = per.get(wi);
-        per.set(wi, cur ? [Math.min(cur[0], ci), Math.max(cur[1], ci + 1)] : [ci, ci + 1]);
-      }
-      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-      per.forEach(([ca, cb], wi) => {
-        const w = ws[wi], b = w.bbox, len = Math.max(1, [...w.text].length), bw = b.x1 - b.x0;
-        const ax = ca === 0 ? b.x0 : b.x0 + bw*ca/len, bx = cb >= len ? b.x1 : b.x0 + bw*cb/len;
-        x0 = Math.min(x0, ax); x1 = Math.max(x1, bx); y0 = Math.min(y0, b.y0); y1 = Math.max(y1, b.y1);
-      });
-      if(!isFinite(x0)) return null;
-      const pad = (y1 - y0)*0.18;
-      return {x:x0 - pad, y:y0 - pad, w:x1 - x0 + 2*pad, h:y1 - y0 + 2*pad, kind:h.kind, auto:true};
+      const box = boxOf(ws, map.slice(h.a, h.b).filter(Boolean));
+      return box && Object.assign(box, {kind:h.kind, auto:true, text:chars.slice(h.a, h.b).join("")});
     }).filter(Boolean);
   }
-  function findInResult(data, kinds){
+  // [낱말 번호, 낱말 안 글자 위치] 목록 → 둘러싼 칸 (글자 비율로 낱말 상자를 자른다)
+  function boxOf(ws, cells){
+    const per = new Map();
+    for(const [wi, ci] of cells){ const cur = per.get(wi); per.set(wi, cur ? [Math.min(cur[0], ci), Math.max(cur[1], ci + 1)] : [ci, ci + 1]); }
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    per.forEach(([ca, cb], wi) => {
+      const w = ws[wi], b = w.bbox, len = Math.max(1, [...w.text].length), bw = b.x1 - b.x0;
+      const ax = ca === 0 ? b.x0 : b.x0 + bw*ca/len, bx = cb >= len ? b.x1 : b.x0 + bw*cb/len;
+      x0 = Math.min(x0, ax); x1 = Math.max(x1, bx); y0 = Math.min(y0, b.y0); y1 = Math.max(y1, b.y1);
+    });
+    if(!isFinite(x0)) return null;
+    const pad = (y1 - y0)*0.18;
+    return {x:x0 - pad, y:y0 - pad, w:x1 - x0 + 2*pad, h:y1 - y0 + 2*pad};
+  }
+  const isHangul = t => /^[가-힣]+$/.test(t);
+  const NAME_STOP = /^(남|여|남자|여자|세|만|환자|본인|성명|이름|보호자|서명|날인|등록|번호|병동|외래|입원|진료과|과|의사|간호사|동의서|설명|확인|병원|성모|가톨릭|대학교)$/;
+  const NAME_PART_STOP = /(번호|계좌|은행|주소|전화|카드|병원|센터|의원|학교|보험|진료|수술|검사|동의|설명|서약|확인)/;
+  const overlaps = (a, b) => { const ix = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)), iy = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y)); return ix*iy > 0.4*Math.min(a.w*a.h, b.w*b.h); };
+
+  /* 한 쪽 전체에서 찾기: 줄마다 찾은 뒤, 환자 라벨(스티커)과 이름을 더 찾는다
+     lines: [{words:[{text, bbox:{x0,y0,x1,y1}}]}]  → {masks, names} */
+  function detect(lines, kinds){
+    const masks = [], names = new Set();
+    for(const l of lines) masks.push(...scanLine(l.words || [], kinds));
+    masks.filter(m => m.kind === "name").forEach(m => { const n = m.text.replace(/\s/g, ""); if(n.length >= 2 && n.length <= 4) names.add(n); });
+    // 환자 라벨: 주민번호 바로 위·옆에 등록번호와 이름이 항목명 없이 찍힌다 (예: 1873778 / 유 태 호 / 680714-1XXXXXX)
+    if(kinds.pid || kinds.name) for(const R of masks.filter(m => m.kind === "rrn")){
+      // 주민번호 앞에 '주민등록번호' 같은 항목명이 있으면 일반 서식이지 라벨이 아니다
+      const own = lines.find(l => (l.words || []).some(w => { const cx = (w.bbox.x0 + w.bbox.x1)/2, cy = (w.bbox.y0 + w.bbox.y1)/2; return cx >= R.x && cx <= R.x + R.w && cy >= R.y && cy <= R.y + R.h; }));
+      if(own && /주\s*민|등\s*록\s*번\s*호|외\s*국\s*인|생\s*년/.test(own.words.filter(w => w.bbox.x1 <= R.x + R.w*0.3).map(w => w.text).join(" "))) continue;
+      const xa = R.x - 0.7*R.w, xb = R.x + 2.2*R.w, ya = R.y - 4.5*R.h, yb = R.y + 0.7*R.h;
+      for(const l of lines){
+        const ws = (l.words || []).filter(w => w.text && w.text.trim());
+        const inR = w => { const cx = (w.bbox.x0 + w.bbox.x1)/2, cy = (w.bbox.y0 + w.bbox.y1)/2; return cx > xa && cx < xb && cy > ya && cy < yb; };
+        // 등록번호: 숫자만 5~10자리
+        if(kinds.pid) ws.forEach((w, i) => {
+          const t = w.text.replace(/[OoDQ]/g, "0").replace(/[lI|!]/g, "1");
+          if(inR(w) && /^\d{5,10}$/.test(t)){ const b = boxOf(ws, [...w.text].map((_, k) => [i, k])); if(b && !masks.some(m => overlaps(m, b))) masks.push(Object.assign(b, {kind:"pid", auto:true})); }
+        });
+        // 이름: 한글로만 된 낱말을 이어 2~4자 (글자마다 띄어진 '유 태 호'도)
+        if(kinds.name){
+          let grp = [];
+          const flush = () => {
+            const txt = grp.map(i => ws[i].text).join("");
+            const after = ws[grp[grp.length - 1] + 1];
+            if(grp.length && txt.length >= 2 && txt.length <= 4 && !NAME_STOP.test(txt) && !NAME_PART_STOP.test(txt) && !(after && /^[:：;]/.test(after.text))){
+              const b = boxOf(ws, grp.flatMap(i => [...ws[i].text].map((_, k) => [i, k])));
+              if(b && !masks.some(m => overlaps(m, b))){ masks.push(Object.assign(b, {kind:"name", auto:true, text:txt})); names.add(txt); }
+            }
+            grp = [];
+          };
+          ws.forEach((w, i) => {
+            const near = grp.length && (w.bbox.x0 - ws[grp[grp.length - 1]].bbox.x1) < 1.6*(w.bbox.y1 - w.bbox.y0);
+            if(inR(w) && isHangul(w.text) && w.text.length <= 4 && (!grp.length || near)) grp.push(i);
+            else { flush(); if(inR(w) && isHangul(w.text) && w.text.length <= 4) grp.push(i); }
+          });
+          flush();
+        }
+      }
+    }
+    return {masks, names:[...names]};
+  }
+  /* 찾은 이름이 같은 문서의 다른 곳(서명란 아래 '유태호' 등)에 또 나오면 그곳도 가린다.
+     인식기가 한 글자를 잘못 읽어도(유태후) 성이 같고 나머지가 한 글자만 다르면 같은 이름으로 본다 */
+  function namePass(lines, names, existing){
     const out = [];
-    for(const b of data.blocks || []) for(const p of b.paragraphs || []) for(const l of p.lines || []) out.push(...scanLine(l.words || [], kinds));
+    if(!names.length) return out;
+    for(const l of lines){
+      const ws = (l.words || []).filter(w => w.text && w.text.trim());
+      const seq = [];
+      ws.forEach((w, i) => [...w.text].forEach((ch, k) => seq.push({ch, i, k, last:k === [...w.text].length - 1})));
+      for(const nm of names){
+        const L = nm.length;
+        for(let a = 0; a + L <= seq.length; a++){
+          const win = seq.slice(a, a + L);
+          if(win[0].k !== 0 || !win[L - 1].last) continue;            // 낱말 경계에서 시작·끝
+          if(!win.every(c => /[가-힣]/.test(c.ch))) continue;
+          if(win.some((c, j) => j && c.i !== win[j - 1].i && c.k !== 0)) continue;
+          let diff = 0; win.forEach((c, j) => { if(c.ch !== nm[j]) diff++; });
+          if(diff === 0 || (L >= 3 && win[0].ch === nm[0] && diff <= 1)){
+            const b = boxOf(ws, win.map(c => [c.i, c.k]));
+            if(b && ![...existing, ...out].some(m => overlaps(m, b))) out.push(Object.assign(b, {kind:"name", auto:true, text:nm}));
+          }
+        }
+      }
+    }
     return out;
+  }
+  /* 그림(캔버스)을 읽어 줄 목록으로. k: 캔버스가 원본보다 몇 배인지 (좌표는 원본 기준으로 돌려준다) */
+  /* 두 가지 방식으로 읽는다
+     6 = 한 덩어리로 읽기: 일반 문서의 '성명 : 홍길동' 같은 줄을 잘 읽는다
+     11 = 흩어진 글자 찾기: 서식·표·환자 라벨처럼 칸이 나뉜 곳, 서명란 아래 이름을 더 찾는다
+     돌려주는 값: 방식마다 가로줄 목록 [[줄…], [줄…]] */
+  async function ocrCanvas(c, w, k, modes){
+    modes = modes || (P.deep ? ["6", "11"] : ["6"]);
+    const passes = [];
+    for(const md of modes){
+      if(w._psm !== md){ await w.setParameters({tessedit_pageseg_mode:md}); w._psm = md; }
+      const {data} = await w.recognize(c, {}, {blocks:true, text:false, hocr:false, tsv:false});
+      const words = [];
+      for(const b of data.blocks || []) for(const p of b.paragraphs || []) for(const l of p.lines || [])
+        for(const x of l.words || []) words.push({text:x.text, bbox:{x0:x.bbox.x0/k, y0:x.bbox.y0/k, x1:x.bbox.x1/k, y1:x.bbox.y1/k}});
+      passes.push(toRows(words));
+    }
+    return passes;
+  }
+  // 여러 방식의 결과를 합친다 (같은 자리를 두 번 가리지 않음)
+  function detectAll(passes, kinds){
+    const masks = [], names = new Set();
+    for(const rows of passes){
+      const d = detect(rows, kinds);
+      d.masks.forEach(m => {
+        const x = masks.find(q => overlaps(q, m));
+        if(!x){ masks.push(m); return; }
+        // 같은 자리를 두 방식이 다르게 잡았으면 둘을 합친 넓이로 가린다 (예: 주소를 한쪽은 일부만 읽음)
+        const x1 = Math.max(x.x + x.w, m.x + m.w), y1 = Math.max(x.y + x.h, m.y + m.h);
+        x.x = Math.min(x.x, m.x); x.y = Math.min(x.y, m.y); x.w = x1 - x.x; x.h = y1 - x.y;
+      });
+      d.names.forEach(n => names.add(n));
+    }
+    return {masks, names:[...names]};
+  }
+  /* 낱말을 눈에 보이는 가로줄로 다시 묶는다. 흩어진 글자 찾기는 '성명 :'과 '홍길동'을 다른 줄로 돌려줄 때가 있어서,
+     높이가 비슷하고 세로로 겹치는 낱말을 한 줄로 모은 뒤 왼쪽부터 늘어놓는다 */
+  function toRows(words){
+    const rows = [];
+    words.filter(w => w.text && w.text.trim()).sort((a, b) => (a.bbox.y0 + a.bbox.y1) - (b.bbox.y0 + b.bbox.y1)).forEach(w => {
+      const cy = (w.bbox.y0 + w.bbox.y1)/2, h = w.bbox.y1 - w.bbox.y0;
+      let best = null, bd = Infinity;
+      for(const r of rows){
+        const d = Math.abs(r.cy - cy), rh = r.h;
+        if(d < 0.55*Math.max(h, rh) && Math.max(h, rh) < 2.2*Math.min(h, rh) && d < bd){ best = r; bd = d; }
+      }
+      if(best){ best.words.push(w); best.cy = (best.cy*(best.words.length - 1) + cy)/best.words.length; best.h = Math.max(best.h, h); }
+      else rows.push({cy, h, words:[w]});
+    });
+    rows.forEach(r => r.words.sort((a, b) => a.bbox.x0 - b.bbox.x0));
+    return rows.map(r => ({words:r.words}));
+  }
+  /* 인식하기 좋은 크기로: 작은 화면 캡처는 키우고(최대 4배) 큰 스캔은 줄인다 */
+  function ocrScale(w, h){ return Math.min(4, 2200/Math.max(w, h)); }
+  function prepCanvas(src, w, h){
+    const k = ocrScale(w, h), cw = Math.max(1, Math.round(w*k)), ch = Math.max(1, Math.round(h*k));
+    const c = new OffscreenCanvas(cw, ch), g = c.getContext("2d");
+    g.fillStyle = "#fff"; g.fillRect(0, 0, cw, ch); g.imageSmoothingQuality = "high"; g.drawImage(src, 0, 0, cw, ch);
+    return {c, k};
   }
 
   /* ---------- 쪽 단위 처리 ---------- */
@@ -4620,20 +4993,32 @@ window.PII = (() => {
   }
   async function ocrItem(it, w){
     const srcs = await sources(it);
-    const masks = [];
+    it.lines = []; it.det = []; it.names = [];
     for(const s of srcs){
-      const k = Math.min(1, 2200/Math.max(s.w, s.h)), cw = Math.round(s.w*k), ch = Math.round(s.h*k);
-      const c = new OffscreenCanvas(cw, ch), g = c.getContext("2d");
-      g.fillStyle = "#fff"; g.fillRect(0, 0, cw, ch); g.drawImage(s.bmp, 0, 0, cw, ch); s.bmp.close();
-      const {data} = await w.recognize(c, {}, {blocks:true, text:false, hocr:false, tsv:false});
-      masks.push(findInResult(data, P.kinds).map(r => ({x:r.x/k, y:r.y/k, w:r.w/k, h:r.h/k, kind:r.kind, auto:true})));
+      const {c, k} = prepCanvas(s.bmp, s.w, s.h); s.bmp.close();
+      const passes = await ocrCanvas(c, w, k);
       c.width = c.height = 1;
+      const d = detectAll(passes, P.kinds);
+      it.lines.push(passes.flat()); it.det.push(d.masks); it.names.push(...d.names);
     }
     it.nw = srcs[0].w; it.nh = srcs[0].h;
-    // 사람이 직접 그린 칸은 남긴다
-    const manual = (it.masks || []).map(pg => (pg || []).filter(m => !m.auto));
-    it.masks = masks.map((m, i) => m.concat(manual[i] || []));
     it.ocr = 2;
+    mergeItem(it, [...new Set(it.names)]);
+  }
+  // 자동으로 찾은 칸 + 같은 이름 + 사람이 직접 그린 칸
+  function mergeItem(it, names){
+    if(!it.lines) return;
+    const manual = (it.masks || []).map(pg => (pg || []).filter(m => !m.auto));
+    it.masks = it.lines.map((lines, i) => {
+      const base = it.det[i] || [];
+      const extra = P.kinds.name ? namePass(lines, names, base) : [];
+      return base.concat(extra, manual[i] || []);
+    });
+  }
+  // 모든 장에서 찾은 이름을 모아 다시 한 번 훑는다 (예: 1쪽 라벨의 이름이 3쪽 서명란에도 있을 때)
+  function documentPass(){
+    const names = [...new Set(items.flatMap(it => it.names || []))];
+    items.forEach(it => { if(it.ocr === 2){ mergeItem(it, names); paintThumb(it); } });
   }
 
   /* ---------- 화면: 카드 미리보기 ---------- */
@@ -4695,6 +5080,7 @@ window.PII = (() => {
       }
     }));
     list.forEach(it => { if(it.ocr === 1) it.ocr = 0; paintThumb(it); });
+    documentPass(); applyFilter();
     scanning = false; $("piScan").disabled = false; $("piStop").hidden = true; $("runBtn").disabled = !items.length;
     pt.textContent = stopScan ? "찾기를 멈췄습니다." : `다 찾았습니다 · ${fmtSec((performance.now() - t0)/1000)} 걸림`;
     summary();
@@ -4788,7 +5174,8 @@ window.PII = (() => {
 
   /* ---------- 설정 칸 ---------- */
   function toUI(){
-    $("piRrn").checked = P.kinds.rrn; $("piPhone").checked = P.kinds.phone; $("piName").checked = P.kinds.name; $("piAcct").checked = P.kinds.acct;
+    $("piRrn").checked = P.kinds.rrn; $("piPhone").checked = P.kinds.phone; $("piName").checked = P.kinds.name; $("piAcct").checked = P.kinds.acct; $("piPid").checked = P.kinds.pid !== false;
+    syncKindsOut();
     $("piColor").value = P.color; $("piOnly").checked = P.only;
   }
   // 켜고 끈 상태를 기억한다 (처음 쓰는 PC에서는 켜진 채로 시작)
@@ -4800,13 +5187,17 @@ window.PII = (() => {
     if(P.on){ toUI(); summary(); }
     refreshAll();
   });
-  ["piRrn","piPhone","piName","piAcct"].forEach(id => $(id).addEventListener("change", () => {
-    P.kinds = {rrn:$("piRrn").checked, phone:$("piPhone").checked, name:$("piName").checked, acct:$("piAcct").checked};
-    save();
-    // 찾을 항목이 바뀌면 다시 찾아야 한다
-    items.forEach(it => { if(it.ocr === 2){ it.ocr = 0; } });
+  // 가릴 항목은 'PDF 글자 넣기' 탭과 함께 쓴다
+  const KIND_IDS = {rrn:["piRrn","rdRrn"], phone:["piPhone","rdPhone"], name:["piName","rdName"], acct:["piAcct","rdAcct"], pid:["piPid","rdPid"]};
+  function syncKindsOut(){ for(const k in KIND_IDS) for(const id of KIND_IDS[k]){ const el = $(id); if(el) el.checked = P.kinds[k] !== false; } }
+  Object.entries(KIND_IDS).forEach(([k, ids]) => ids.forEach(id => { const el = $(id); if(el) el.addEventListener("change", () => {
+    P.kinds[k] = el.checked; syncKindsOut(); save();
+    items.forEach(it => { if(it.ocr === 2) it.ocr = 0; });
     summary(); $("piProg").textContent = "찾을 항목이 바뀌었습니다. '개인정보 찾기'를 다시 눌러 주세요.";
-  }));
+    document.dispatchEvent(new Event("pii-kinds"));
+  }); }));
+  $("piDeep").checked = P.deep;
+  $("piDeep").addEventListener("change", () => { P.deep = $("piDeep").checked; save(); items.forEach(it => { if(it.ocr === 2) it.ocr = 0; }); summary(); });
   $("piColor").addEventListener("change", () => { P.color = $("piColor").value; save(); refreshAll(); });
   $("piOnly").addEventListener("change", () => { P.only = $("piOnly").checked; applyFilter(); });
   $("piScan").onclick = () => scan(items.filter(it => it.ocr !== 2));
@@ -4825,7 +5216,10 @@ window.PII = (() => {
     scan,
     masksFor: (it, page) => (P.on && it.masks && it.masks[page] && it.masks[page].length) ? it.masks[page] : null,
     busy: () => scanning,
-    _find: scanLine
+    _find: scanLine, _engine: engine,
+    // 'PDF 글자 넣기' 탭에서 쓰는 도구
+    kinds: () => Object.assign({}, P.kinds),
+    engine, ocrCanvas, ocrScale, detect, detectAll, namePass, toRows
   };
 })();
 
