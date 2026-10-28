@@ -3886,6 +3886,7 @@ window.__authGate=true;
     const host = $('#secs'); host.innerHTML = '';
     if (!state.sections.length) { host.innerHTML = '<div class="empty">아직 대조표가 없습니다. 1단계에서 자료를 넣어 주세요.</div>'; return; }
     let mainNo = 0, annexNo = 0;
+    missingImgBanner(host);
     state.sections.forEach((sec, si) => {
       const el = document.createElement('div'); el.className = 'sec'; el.dataset.sec = sec.id;
       const lbl = sec.type === 'main' ? '본문 구간 ' + (++mainNo) : '별첨 대조표 ' + (++annexNo);
@@ -3910,6 +3911,32 @@ window.__authGate=true;
       $('[data-s=del]', el).onclick = () => { if (confirm(lbl + '을(를) 지울까요?')) { state.sections.splice(si, 1); renderSections(); autosave(); } };
     });
     updateStat();
+  }
+  // 예전 버전(v2.0 이하)에서 그림이 빠진 채 저장된 대조표를 알아보고 안내
+  function missingImgBanner(host) {
+    let imgs = 0, mentions = 0; const txt = (items) => (items || []).map(it => it && it.k === 'line' ? (it.runs || []).map(r => r.t).join('') : '').join(' ');
+    state.sections.forEach(s => {
+      const all = s.type === 'main' ? s.rows.flatMap(r => [].concat(r.old || [], r.new || [])) : [].concat(s.old || [], s.new || []);
+      imgs += all.filter(it => it && it.k === 'img').length;
+      const notes = s.type === 'main' ? s.rows.map(r => txt(r.note)).join(' ') : txt(s.reason);
+      mentions += (notes.match(/그림/g) || []).length;
+    });
+    if (!mentions || imgs >= mentions) return;
+    const b = document.createElement('div'); b.className = 'warnbox'; b.style.marginBottom = '12px';
+    b.innerHTML = `<b>비고에는 그림(서식) 변경이 ${mentions}곳 적혀 있는데, 대조표 칸에 그림이 ${imgs ? imgs + '개뿐입니다' : '하나도 없습니다'}.</b><br>
+      v2.0 이하에서 저장한 작업이면, 그때의 오류로 그림이 빠진 채 저장되었을 수 있습니다(새 버전으로 열어도 저장된 내용은 되살아나지 않음).
+      <b>현행·개정안 파일로 다시 비교</b>하면 그림과 별첨 대조표가 제대로 만들어집니다.
+      <div class="row" style="margin-top:6px"><button class="btn sm pri" id="mbRe">파일 다시 올려 비교하기</button>${window.__auth ? '<button class="btn sm" id="mbVer">이력에서 원본으로 다시 비교</button>' : ''}<button class="btn sm" id="mbX">닫기</button></div>`;
+    host.appendChild(b);
+    $('#mbRe', b).onclick = () => { goStep(1); $('.mode[data-mode="files"]').click(); toast('현행·개정안 파일을 올리고 「비교해서 대조표 만들기」를 누르세요.', 5000); };
+    const mv = $('#mbVer', b); if (mv) mv.onclick = () => window.__auth.openHist && window.__auth.openHist('versions');
+    $('#mbX', b).onclick = () => b.remove();
+  }
+  // 저장해 둔 원본 파일 두 개로 다시 비교
+  async function compareFromFiles(oldFile, newFile) {
+    goStep(1); $('.mode[data-mode="files"]').click();
+    await loadFile('old', oldFile, $('#slot-old')); await loadFile('new', newFile, $('#slot-new'));
+    if (state.docs.old && state.docs.new) await runCompare(state.docs.old, state.docs.new, {});
   }
   function updateStat() {
     const rows = state.sections.filter(s => s.type === 'main').reduce((a, s) => a + s.rows.length, 0);
@@ -4315,7 +4342,7 @@ window.__authGate=true;
   applyDocCSS(); buildSetForm();
   window.addEventListener('beforeunload', () => { try { flushCells(); localStorage.setItem(AKEY(), JSON.stringify({ app: 'sinkujomun', ver: 1, savedAt: new Date().toISOString(), meta: state.meta, settings: state.settings, sections: state.sections })); } catch (e) { } });
   if (!window.__authGate) setTimeout(offerRestore, 300);
-  window.__app = { runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, projectData, loadProject, offerRestore, fileBase, download, goStep };
+  window.__app = { runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
   Object.defineProperty(window.__app, 'state', { get: () => state });
 })();
 
@@ -4948,7 +4975,7 @@ window.__authGate=true;
     return all(store).then(list => { localStorage.setItem(lsKey(store), JSON.stringify(list.filter(x => x.id !== id))); });
   }
 
-  const AU = window.__auth = { user: null, log, saveVersion };
+  const AU = window.__auth = { user: null, log, saveVersion, openHist: (t) => openHist(t) };
   /* 기억 설정: 이 PC 브라우저에만 저장 */
   const LS = { get: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } }, del: (k) => { try { localStorage.removeItem(k); } catch (e) { } } };
   const tokKey = (id) => 'sinkujomun_pwtoken_' + id;
@@ -4979,7 +5006,9 @@ window.__authGate=true;
     const ku = yrs ? (() => { const d = new Date(); d.setFullYear(d.getFullYear() + yrs); return d.toISOString(); })() : '';
     let oldDoc = null; const F = app.state.files || {}; const of = F.old || F.edit;
     if (S.keepOldDoc && of && of.buf && of.buf.byteLength < 30e6) oldDoc = { name: of.name, b64: RG.util.bytesToB64(new Uint8Array(of.buf)) };
-    const v = { keepUntil: ku, oldDoc, id: uid(), ts: now(), userId: AU.user.id, userName: AU.user.name, title: data.meta && data.meta.title || '', name: name || '', memo: memo || '', data: json, size: json.length, rows: data.sections.reduce((a, s) => a + (s.rows ? s.rows.length : 0), 0), annex: data.sections.filter(s => s.type === 'annex').length, edits: [] };
+    let newDoc = null; const nf = F.new; // 개정안 원본도 함께 보관 → 나중에 원본으로 다시 비교 가능
+    if (S.keepOldDoc && nf && nf.buf && nf.buf.byteLength < 30e6 && F.old) newDoc = { name: nf.name, b64: RG.util.bytesToB64(new Uint8Array(nf.buf)) };
+    const v = { keepUntil: ku, oldDoc, newDoc, id: uid(), ts: now(), userId: AU.user.id, userName: AU.user.name, title: data.meta && data.meta.title || '', name: name || '', memo: memo || '', data: json, size: json.length, rows: data.sections.reduce((a, s) => a + (s.rows ? s.rows.length : 0), 0), annex: data.sections.filter(s => s.type === 'annex').length, edits: [] };
     try { await put('versions', v); if (!quiet) { app.toast('버전을 저장했습니다: ' + (v.name || fmt(v.ts))); await log('버전 저장', v.title, v.name); } }
     catch (e) { app.toast('버전 저장 실패(저장 공간 부족일 수 있음): ' + e.message, 6000); }
     return v;
@@ -5201,7 +5230,7 @@ window.__authGate=true;
       <div class="muted" style="margin-bottom:6px">${view.length}개 · "작업 저장"을 누를 때도 자동으로 버전이 남습니다. 이름·메모는 [수정]으로 고칠 수 있습니다. 내규관리내규 3.나.3에 따라 대조표와 개정 전(현행) 내규를 보존기한까지 지우지 않습니다.</div>
       <div class="hscroll"><table class="htab"><thead><tr><th style="width:130px">저장 일시</th><th style="width:100px">사용자</th><th style="width:200px">내규</th><th style="width:170px">버전 이름</th><th>메모</th><th style="width:80px">내용</th><th style="width:92px">보존기한</th><th style="width:200px"></th></tr></thead><tbody>
       ${view.map(v => `<tr data-id="${v.id}"><td>${fmt(v.ts)}</td><td>${esc(v.userName)}</td><td>${esc(v.title)}</td><td><b>${esc(v.name)}</b></td><td style="white-space:pre-wrap">${esc(v.memo)}${v.edits && v.edits.length ? '<div class="ed">수정됨 ' + v.edits.length + '회 (마지막 ' + esc(v.edits[v.edits.length - 1].by) + ')</div>' : ''}</td><td class="muted">본문 ${v.rows}행<br>별첨 ${v.annex}개<br>${Math.round(v.size / 1024)}KB</td><td>${v.keepUntil ? v.keepUntil.slice(0, 10) : '-'}${v.oldDoc ? '<div class="muted">현행 원본 보관</div>' : ''}</td>
-        <td class="act"><button class="btn sm pri" data-a="open">열기</button><button class="btn sm" data-a="dl">내려받기</button>${v.oldDoc ? '<button class="btn sm" data-a="orig" title="개정 전(현행) 내규 원본 파일">현행 원본</button>' : ''}${canEdit(v) ? '<button class="btn sm" data-a="edit">수정</button><button class="btn sm red" data-a="del">삭제</button>' : ''}</td></tr>`).join('') || '<tr><td colspan="8" class="muted" style="text-align:center;padding:20px">저장된 버전이 없습니다.</td></tr>'}</tbody></table></div>`;
+        <td class="act"><button class="btn sm pri" data-a="open">열기</button><button class="btn sm" data-a="dl">내려받기</button>${v.oldDoc ? '<button class="btn sm" data-a="orig" title="개정 전(현행) 내규 원본 파일">현행 원본</button>' : ''}${v.oldDoc && v.newDoc ? '<button class="btn sm" data-a="recmp" title="보관된 현행·개정안 원본으로 대조표를 새로 만듭니다">원본으로 다시 비교</button>' : ''}${canEdit(v) ? '<button class="btn sm" data-a="edit">수정</button><button class="btn sm red" data-a="del">삭제</button>' : ''}</td></tr>`).join('') || '<tr><td colspan="8" class="muted" style="text-align:center;padding:20px">저장된 버전이 없습니다.</td></tr>'}</tbody></table></div>`;
     $('#vQ', body).onkeydown = (e) => { if (e.key === 'Enter') { body._q = e.target.value.trim(); drawVersions(body, redraw); } };
     $('#vAdd', body).onclick = async () => { A().flushCells(); const n = prompt('버전 이름', '버전 ' + fmt(now())); if (n === null) return; await saveVersion(n, '', false); drawVersions(body, redraw); };
     $$('tr[data-id]', body).forEach(tr => {
@@ -5218,6 +5247,12 @@ window.__authGate=true;
         tr.replaceWith(row);
         $('[data-a=no]', row).onclick = () => drawVersions(body, redraw);
         $('[data-a=ok]', row).onclick = async () => { const nv = { title: $('.eG', row).value.trim(), name: $('.eN', row).value.trim(), memo: $('.eM', row).value.trim() }; const ch = Object.keys(nv).filter(k => nv[k] !== v[k]); if (ch.length) v.edits = (v.edits || []).concat([{ at: now(), by: AU.user.name, what: ch.join(','), before: { title: v.title, name: v.name, memo: v.memo } }]); Object.assign(v, nv); await put('versions', v); drawVersions(body, redraw); };
+      };
+      const rc = $('[data-a=recmp]', tr); if (rc) rc.onclick = async () => {
+        if (!confirm('보관된 현행·개정안 원본으로 대조표를 새로 만듭니다. 지금 화면의 대조표는 자동으로 버전에 남겨 둡니다. 계속할까요?')) return;
+        await saveVersion('다시 비교 전 자동 보관', '', true);
+        const f = (d) => new File([Uint8Array.from(atob(d.b64), c => c.charCodeAt(0))], d.name);
+        A().closeModal(); await A().compareFromFiles(f(v.oldDoc), f(v.newDoc)); await log('원본으로 다시 비교', v.title, v.name || fmt(v.ts));
       };
       const og = $('[data-a=orig]', tr); if (og) og.onclick = () => { const b = Uint8Array.from(atob(v.oldDoc.b64), c => c.charCodeAt(0)); A().download(new Blob([b]), v.oldDoc.name); };
       const dl = $('[data-a=del]', tr); if (dl) dl.onclick = async () => {
@@ -5349,7 +5384,7 @@ window.__authGate=true;
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '2.1';
+  const APP_VERSION = '2.2';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
