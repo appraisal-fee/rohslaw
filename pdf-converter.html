@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-10-27 -->
+<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-10-28 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -228,6 +228,21 @@ select,input[type=text]{font:inherit;width:100%;padding:7px 9px;border:1px solid
 .redmode .ov{cursor:crosshair}
 .redmode .redv{pointer-events:auto;cursor:pointer}
 .redmode .redv:hover{outline:3px solid #e0302a;opacity:.6}
+.mini{padding:3px 7px;font-size:12px}
+#tbSize{width:58px}
+.tblrow input[type=number]{width:66px}
+.tblrow .sep{width:1px;align-self:stretch;background:var(--line)}
+.tblbox{position:absolute;z-index:2}
+.tblbox .tl{position:absolute;inset:0;pointer-events:none}
+.tblbox .tl i{position:absolute;display:block}
+.tblbox.nolines,.tblbox:hover{outline:1px dashed rgba(28,90,135,.5)}
+.tblbox.on{outline:2px solid #1c5a87;outline-offset:2px}
+.tblbox .tc{position:absolute;box-sizing:border-box;display:flex;align-items:center;overflow:visible}
+.tblbox .tc-in{width:100%;min-height:1em;white-space:pre-wrap;word-break:break-all;overflow-wrap:anywhere;font-family:i2pText,"Malgun Gothic",sans-serif;outline:none;cursor:text}
+.tblbox .tc:focus-within{background:rgba(255,240,150,.35)}
+.tblbox .tb-bar{position:absolute;left:0;bottom:100%;display:none;gap:4px;padding-bottom:6px;white-space:nowrap;z-index:3}
+.tblbox.on .tb-bar{display:flex}
+.tblbox.on .ib-rs{display:block}
 .keepbox{display:grid;gap:4px;padding:8px 10px;border:1px dashed var(--line);border-radius:8px;background:var(--sunk)}
 .res .m.good{color:var(--ok);font-weight:700}
 footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16px}
@@ -631,7 +646,8 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
       <div class="toolrow">
         <label>누르면 넣을 것 <select id="tbPut"><option value="text">글자 상자</option></select></label>
         <label title="끄면 도장을 한 번 찍은 뒤 글자 상자로 돌아갑니다"><input type="checkbox" id="tbRepeat"> 도장 계속 찍기</label>
-        <label>크기 <input type="number" id="tbSize" min="5" max="72" step="0.5" value="11"> pt</label>
+        <label>크기 <button type="button" id="tbSizeDn" class="mini" aria-label="글자 작게">가−</button><input type="number" id="tbSize" min="4" max="96" step="0.5" value="11"><button type="button" id="tbSizeUp" class="mini" aria-label="글자 크게">가+</button> pt</label>
+        <label>정렬 <select id="tbAlign"><option value="left">왼쪽</option><option value="center">가운데</option><option value="right">오른쪽</option></select></label>
         <label>색 <select id="tbColor"><option value="#111111">검정</option><option value="#1f45b5">파랑</option><option value="#c8231d">빨강</option><option value="#6b6b6b">회색</option></select></label>
         <label><input type="checkbox" id="tbBold"> 굵게</label>
         <label><input type="checkbox" id="tbBorder"> 테두리</label>
@@ -639,6 +655,32 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         <label><input type="checkbox" id="tbVert"> 세로로 쓰기</label>
         <label>보기 <select id="tbZoom"><option value="fit">화면 폭에 맞춤</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option></select></label>
         <span class="cnt" id="tbCount"></span>
+        <div class="ibrow tblrow" id="tblRow" hidden>
+          <b id="tblWhich">새로 넣을 표</b>
+          <label>보관함 <select id="tblTpl"></select></label>
+          <button type="button" id="tblTplDel" class="danger" disabled>보관함에서 지우기</button>
+          <span class="sep"></span>
+          <label>칸 <input type="number" id="tblRows" min="1" max="60" value="3"> 줄 × <input type="number" id="tblCols" min="1" max="20" value="3"> 칸</label>
+          <label>너비 <input type="number" id="tblW" min="10" max="400" step="1" value="120"> mm</label>
+          <label>줄 높이 <input type="number" id="tblRH" min="3" max="100" step="0.5" value="8"> mm</label>
+          <label title="예: 1:2:1 이면 가운데 칸이 두 배">칸 너비 비율 <input type="text" id="tblRatio" placeholder="같게" autocomplete="off" style="width:84px"></label>
+          <span class="sep"></span>
+          <label>보일 선 <select id="tblPreset"><option value="all">모든 선</option><option value="outer">바깥 테두리만</option><option value="rows">바깥 + 가로선</option><option value="hlines">가로선만</option><option value="none">선 없음</option><option value="custom">직접 고르기</option></select></label>
+          <label><input type="checkbox" id="tblLO"> 바깥 테두리</label>
+          <label><input type="checkbox" id="tblLH"> 안쪽 가로선</label>
+          <label><input type="checkbox" id="tblLV"> 안쪽 세로선</label>
+          <label>선 굵기 <select id="tblLW"><option value="0.5">가늘게</option><option value="0.8">보통</option><option value="1.5">굵게</option></select></label>
+          <label>선 색 <select id="tblLC"><option value="#111111">검정</option><option value="#777777">회색</option><option value="#1f45b5">파랑</option><option value="#c8231d">빨강</option></select></label>
+          <span class="sep"></span>
+          <label>글자 <input type="number" id="tblTS" min="4" max="72" step="0.5" value="10"> pt</label>
+          <label>정렬 <select id="tblTA"><option value="left">왼쪽</option><option value="center">가운데</option><option value="right">오른쪽</option></select></label>
+          <label><input type="checkbox" id="tblHB"> 첫 줄 굵게</label>
+          <span class="sep"></span>
+          <label>이름 <input type="text" id="tblTplName" placeholder="예: 접수 확인표" autocomplete="off" style="width:120px"></label>
+          <label><input type="checkbox" id="tblTplWith"> 칸 내용도 함께</label>
+          <button type="button" id="tblTplSave">표 보관함에 저장</button>
+          <span class="note" style="flex-basis:100%">칸을 눌러 글자를 쓰고 Tab으로 다음 칸으로 갑니다. 표 위 ✥ 옮기기로 옮기고 모서리 ■로 크기를 바꿉니다. 보관함에 저장한 표는 다음에 열어도 남아 있고, '도장을 프로그램에 담아 저장'에도 함께 담깁니다.</span>
+        </div>
         <div class="ibrow" id="ibRow" hidden>
           <b>고른 이미지</b>
           <label>위에 쓸 글자 <textarea id="ibText" rows="1" placeholder="예: {날짜} (Enter) {시간}"></textarea></label>
@@ -721,7 +763,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <footer>
     <span>개발자: 노상엽</span>
     <span>개발일자: 2026. 10. 16.</span>
-    <span>수정일자: 2026. 10. 27.</span>
+    <span>수정일자: 2026. 10. 28.</span>
     <span>버전 <b id="appVer"></b></span>
     <button type="button" class="linkbtn" id="updCheck">새 버전 확인</button>
     <span>HEIC(아이폰 사진)는 크롬·엣지에서 열리지 않으니 JPG로 저장해 올려 주세요.</span>
@@ -3321,7 +3363,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "1.3", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
+const APP_VERSION = "1.4", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -3737,7 +3779,7 @@ async function loadTextPdf(file){
     info.querySelector("span").textContent = /encrypt/i.test(String(e && e.message)) ? "암호가 걸린 PDF라 열 수 없음" : "손상됐거나 읽을 수 없는 PDF";
     info.querySelector("span").style.color = "var(--bad)"; return;
   }
-  T.file = file; T.boxes = []; T.sel = null; T.imgs = []; T.isel = null; T.red = []; $("ibRow").hidden = true;
+  T.file = file; T.boxes = []; T.sel = null; T.imgs = []; T.isel = null; T.red = []; T.tables = []; T.tsel = null; $("ibRow").hidden = true;
   $("rdProg").textContent = "";
   if(T.pdfjs){ try{ T.pdfjs.destroy(); }catch(_){} }
   T.pdfjs = await pdfjsLib.getDocument({data:T.bytes.slice(), CMapReaderFactory:LocalCMapFactory, cMapUrl:"local/", cMapPacked:true, useWorkerFetch:false, isEvalSupported:false}).promise;
@@ -3784,6 +3826,7 @@ function styleBlock(div, b, s){
   const bw = Math.max(1, b.size*0.06*s);
   div.style.border = b.border ? `${bw}px solid ${b.color}` : "none";
   div.style.margin = b.border ? `-${bw}px` : "0";
+  div.style.textAlign = b.vertical ? "left" : (b.align || "left");
   div.style.writingMode = b.vertical ? "vertical-rl" : "horizontal-tb";
   div.style.textOrientation = b.vertical ? "upright" : "mixed";
 }
@@ -3808,6 +3851,7 @@ function renderAllOverlays(){
       }
     }
     for(const ib of T.imgs) if(ib.page === pg.i) placeImg(ib);
+    for(const t of T.tables) if(t.page === pg.i) placeTable(t);
     renderRed(pg);
     for(const bx of T.boxes) if(bx.page === pg.i) placeBox(bx);
   }
@@ -3818,8 +3862,8 @@ function renderAllOverlays(){
    상자 클릭 → 글자 고치기 / 상자를 끌기 → 옮기기 */
 const ghost = document.createElement("div"); ghost.className = "ghost"; ghost.hidden = true; ghost.textContent = "여기에 글자 넣기";
 function ghostMove(e, pg){
-  if(running || !T.font || e.target !== pg.ov || T.sel || T.isel){ ghost.hidden = true; return; }
-  ghost.textContent = $("tbPut").value === "text" ? "여기에 글자 넣기" : $("tbPut").value === "redact" ? "끌어서 가릴 칸 그리기" : "여기에 이미지 넣기";
+  if(running || !T.font || e.target !== pg.ov || T.sel || T.isel || T.tsel){ ghost.hidden = true; return; }
+  ghost.textContent = {text:"여기에 글자 넣기", redact:"끌어서 가릴 칸 그리기", table:"여기에 표 넣기"}[$("tbPut").value] || "여기에 이미지 넣기";
   const r = pg.ov.getBoundingClientRect(), d = T.defaults, s = pg.s;
   if(ghost.parentNode !== pg.ov) pg.ov.appendChild(ghost);
   ghost.hidden = false;
@@ -3843,7 +3887,7 @@ function placeBox(bx){
     try{ tx.contentEditable = "plaintext-only"; }catch(_){}
     if(tx.contentEditable !== "plaintext-only") tx.contentEditable = "true";
     tx.textContent = bx.text;
-    tx.addEventListener("input", () => { bx.text = tx.innerText.replace(/\n$/, ""); tx.classList.toggle("empty", !bx.text); updateTextUI(); });
+    tx.addEventListener("input", () => { bx.text = tx.innerText.replace(/\n$/, ""); tx.classList.toggle("empty", !bx.text); positionBox(bx); updateTextUI(); });
     tx.addEventListener("focus", () => { if(T.sel !== bx) selectBox(bx); el.classList.add("edit"); });
     tx.addEventListener("blur", () => { el.classList.remove("edit"); setTimeout(() => { if(!bx.text.trim() && T.sel !== bx) removeBox(bx); }, 150); });
     tx.addEventListener("keydown", e => { if(e.key === "Escape"){ e.preventDefault(); tx.blur(); selectBox(null); } });
@@ -3863,11 +3907,19 @@ function placeBox(bx){
   }
   if(bx.el.parentNode !== pg.ov) pg.ov.appendChild(bx.el);
   const s = pg.s, tx = bx.el.querySelector(".tb-text");
-  bx.el.style.left = (bx.x * s) + "px"; bx.el.style.top = (bx.y * s) + "px";
-  styleBlock(tx, {x:0, y:0, pad:boxPad(bx), size:bx.size, color:bx.color, bold:bx.bold, bg:bx.bg, border:bx.border, vertical:bx.vertical}, s);
+  styleBlock(tx, {x:0, y:0, pad:boxPad(bx), size:bx.size, color:bx.color, bold:bx.bold, bg:bx.bg, border:bx.border, vertical:bx.vertical, align:bx.align}, s);
+  positionBox(bx);
   tx.style.left = tx.style.top = ""; tx.style.position = "relative";
   tx.classList.toggle("empty", !bx.text);
   bx.el.classList.toggle("on", T.sel === bx);
+}
+/* 정렬에 따라 x가 가리키는 곳: 왼쪽 정렬=왼쪽 끝, 가운데=가운데, 오른쪽=오른쪽 끝.
+   그래서 오른쪽 정렬한 금액처럼 글자가 늘어도 오른쪽 끝이 그 자리에 머문다 */
+const alignF = b => (b.vertical ? 0 : ({center:0.5, right:1}[b.align] || 0));
+function positionBox(bx){
+  if(!bx.el) return;
+  const s = T.pages[bx.page].s, tx = bx.el.querySelector(".tb-text"), f = alignF(bx);
+  bx.el.style.left = (bx.x*s - f*(tx ? tx.offsetWidth : 0)) + "px"; bx.el.style.top = (bx.y*s) + "px";
 }
 function dragBox(e, bx, handle, done){
   const pg = T.pages[bx.page], s = pg.s, sx = e.clientX, sy = e.clientY, ox = bx.x, oy = bx.y;
@@ -3879,7 +3931,8 @@ function dragBox(e, bx, handle, done){
     moved = true; bx.el.classList.add("moving");
     bx.x = Math.min(pg.W - 4, Math.max(0, ox + dx/s));
     bx.y = Math.min(pg.H - 4, Math.max(0, oy + dy/s));
-    bx.el.style.left = (bx.x * s) + "px"; bx.el.style.top = (bx.y * s) + "px";
+    if(bx.el.classList.contains("tbox")) positionBox(bx);
+    else { bx.el.style.left = (bx.x * s) + "px"; bx.el.style.top = (bx.y * s) + "px"; }
   };
   const up = () => {
     handle.removeEventListener("pointermove", mv); handle.removeEventListener("pointerup", up); handle.removeEventListener("pointercancel", up);
@@ -3898,8 +3951,13 @@ function onPagePointer(e, pg){
     selectBox(null); selectImg(null); ghostMove(e, pg); return;
   }
   if(T.isel) selectImg(null);                      // 도장을 고른 상태면 풀고 바로 이어서 넣는다
+  if(T.tsel){                                      // 표를 고른 상태면 선택만 푼다
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    selectTable(null); return;
+  }
   const r = pg.ov.getBoundingClientRect(), s = pg.s;
   const x = (e.clientX - r.left)/s, y = (e.clientY - r.top)/s;
+  if($("tbPut").value === "table" || $("tbPut").value.startsWith("tpl:")){ newTable(pg, x, y); return; }
   const put = libGet($("tbPut").value);
   if(put){                                         // 이미지 넣기: 누른 점이 이미지 가운데
     const D = Object.assign({}, T.idef, put.st || {}), w = Math.min(pg.W*0.8, D.wmm*PT_MM), h = w*put.h/put.w;
@@ -3915,7 +3973,7 @@ function onPagePointer(e, pg){
 /* 글자 상자 만들기 (x, y는 쪽 좌표 pt) */
 function newTextBox(pg, x, y){
   const d = T.defaults;
-  const bx = {page:pg.i, x:Math.max(0, x), y:Math.max(0, y - d.size*LINE/2), text:"", size:d.size, color:d.color, bold:d.bold, bg:d.bg, border:d.border, vertical:d.vertical, el:null};
+  const bx = {page:pg.i, x:Math.max(0, x), y:Math.max(0, y - d.size*LINE/2), text:"", size:d.size, color:d.color, bold:d.bold, bg:d.bg, border:d.border, vertical:d.vertical, align:d.align || "left", el:null};
   if(bx.vertical){ bx.x = Math.max(0, x - d.size*LINE/2); bx.y = Math.max(0, y); }
   T.boxes.push(bx); placeBox(bx); selectBox(bx); ghost.hidden = true;
   const tx = bx.el.querySelector(".tb-text"); tx.focus(); placeCaret(tx);
@@ -3926,7 +3984,8 @@ function selectBox(bx){
   const prev = T.sel; T.sel = bx;
   if(prev && prev.el) prev.el.classList.remove("on");
   if(bx && bx.el) bx.el.classList.add("on");
-  if(bx){ $("tbSize").value = bx.size; $("tbColor").value = bx.color; $("tbBold").checked = bx.bold; $("tbBg").checked = bx.bg; $("tbBorder").checked = bx.border; $("tbVert").checked = bx.vertical; }
+  if(bx && T.tsel) selectTable(null);
+  if(bx){ $("tbSize").value = bx.size; $("tbColor").value = bx.color; $("tbBold").checked = bx.bold; $("tbBg").checked = bx.bg; $("tbBorder").checked = bx.border; $("tbVert").checked = bx.vertical; $("tbAlign").value = bx.align || "left"; }
   if(prev && prev !== bx && !prev.text.trim()) removeBox(prev);
   updateTextUI();
 }
@@ -3938,6 +3997,14 @@ function removeBox(bx){
 }
 /* 고른 상자: Delete로 지우기, 화살표로 1pt씩(Shift는 10pt) 옮기기 — 글자를 고치는 중이 아닐 때 */
 document.addEventListener("keydown", e => {
+  if(activeTab === "text" && T.tsel && !e.target.matches("input,select,textarea,[contenteditable]")){
+    const t = T.tsel, st = e.shiftKey ? 10 : 1;
+    const mv = {ArrowLeft:[-st,0], ArrowRight:[st,0], ArrowUp:[0,-st], ArrowDown:[0,st]}[e.key];
+    if(mv){ e.preventDefault(); t.x = Math.max(0, t.x + mv[0]); t.y = Math.max(0, t.y + mv[1]); placeTable(t); }
+    else if(e.key === "Delete"){ e.preventDefault(); removeTable(t); }
+    else if(e.key === "Escape"){ selectTable(null); }
+    return;
+  }
   if(activeTab === "text" && T.isel && !e.target.matches("input,select,textarea,[contenteditable]")){
     const ib = T.isel, st = e.shiftKey ? 10 : 1;
     const mv = {ArrowLeft:[-st,0], ArrowRight:[st,0], ArrowUp:[0,-st], ArrowDown:[0,st]}[e.key];
@@ -3956,16 +4023,33 @@ document.addEventListener("keydown", e => {
 });
 /* 도구 줄: 고른 상자에 적용 + 새 상자의 기본값 */
 function readTool(){
-  T.defaults = {size:+$("tbSize").value || 11, color:$("tbColor").value, bold:$("tbBold").checked, bg:$("tbBg").checked, border:$("tbBorder").checked, vertical:$("tbVert").checked};
-  if(T.sel){ Object.assign(T.sel, T.defaults); placeBox(T.sel); }
+  T.defaults = {size:Math.max(4, Math.min(96, +$("tbSize").value || 11)), color:$("tbColor").value, bold:$("tbBold").checked, bg:$("tbBg").checked, border:$("tbBorder").checked, vertical:$("tbVert").checked, align:$("tbAlign").value};
+  try{ localStorage.setItem("i2p.tdefaults", JSON.stringify(T.defaults)); }catch(_){}
+  const bx = T.sel;
+  if(bx){
+    // 정렬을 바꿔도 상자가 제자리에 보이도록 기준점을 옮긴다
+    if((bx.align || "left") !== T.defaults.align && bx.el){
+      const s = T.pages[bx.page].s, w = bx.el.querySelector(".tb-text").offsetWidth/s;
+      const left = bx.x - alignF(bx)*w;
+      Object.assign(bx, T.defaults);
+      bx.x = left + alignF(bx)*w;
+    } else Object.assign(bx, T.defaults);
+    placeBox(bx);
+  }
 }
-["tbSize","tbColor","tbBold","tbBg","tbBorder","tbVert"].forEach(id => $(id).addEventListener("change", readTool));
+try{ const d = JSON.parse(localStorage.getItem("i2p.tdefaults") || "null"); if(d){ Object.assign(T.defaults, d); $("tbSize").value = T.defaults.size; $("tbColor").value = T.defaults.color; $("tbBold").checked = !!T.defaults.bold; $("tbBg").checked = !!T.defaults.bg; $("tbBorder").checked = !!T.defaults.border; $("tbVert").checked = !!T.defaults.vertical; $("tbAlign").value = T.defaults.align || "left"; } }catch(_){}
+["tbSize","tbColor","tbBold","tbBg","tbBorder","tbVert","tbAlign"].forEach(id => $(id).addEventListener("change", readTool));
+$("tbSizeDn").onclick = () => { $("tbSize").value = Math.max(4, (+$("tbSize").value || 11) - 1); readTool(); };
+$("tbSizeUp").onclick = () => { $("tbSize").value = Math.min(96, (+$("tbSize").value || 11) + 1); readTool(); };
+// 단추를 눌러도 글자 상자에서 커서가 빠지지 않게
+["tbSizeDn","tbSizeUp"].forEach(id => $(id).addEventListener("pointerdown", e => e.preventDefault()));
 $("tbSize").addEventListener("input", readTool);
 function updateTextUI(){
   const n = T.boxes.filter(b => b.text.trim()).length, ni = T.imgs.length, ns = T.stamps.filter(stampLive).length;
   const nr = (T.red || []).reduce((s, pg) => s + (pg ? pg.length : 0), 0);
-  $("tbCount").textContent = `글자 상자 ${n}개 · 이미지 ${ni}개 · 일괄 문구 ${ns}개` + (nr ? ` · 가림 ${nr}곳` : "");
-  $("textRun").disabled = running || !T.pages.length || (!n && !ni && !ns && !nr);
+  const nt = (T.tables || []).length;
+  $("tbCount").textContent = `글자 상자 ${n}개 · 이미지 ${ni}개` + (nt ? ` · 표 ${nt}개` : "") + ` · 일괄 문구 ${ns}개` + (nr ? ` · 가림 ${nr}곳` : "");
+  $("textRun").disabled = running || !T.pages.length || (!n && !ni && !ns && !nr && !nt);
 }
 
 /* ---------- 도장·이미지 보관함 (이 PC의 브라우저에 기억) ---------- */
@@ -3981,8 +4065,11 @@ function rememberShape(id, part){
 const shapeOf = id => { const im = libGet(id); return im && im.st ? im.st : null; };
 function drawLib(){
   const put = $("tbPut"), cur = put.value;
-  put.innerHTML = `<option value="text">글자 상자</option><option value="redact">가릴 칸 그리기 (개인정보)</option>` + T.lib.map(im => `<option value="${im.id}">이미지: ${esc(im.name)}</option>`).join("");
-  put.value = (cur === "redact" || T.lib.some(im => im.id === cur)) ? cur : "text";
+  let tpls = []; try{ tpls = TPL; }catch(_){}
+  put.innerHTML = `<option value="text">글자 상자</option><option value="table">표 넣기 (새 표)</option>` + tpls.map((x, i) => `<option value="tpl:${i}">표: ${esc(x.name)}</option>`).join("")
+    + `<option value="redact">가릴 칸 그리기 (개인정보)</option>` + T.lib.map(im => `<option value="${im.id}">이미지: ${esc(im.name)}</option>`).join("");
+  put.value = (cur === "redact" || cur === "table" || (/^tpl:\d+$/.test(cur) && tpls[+cur.slice(4)]) || T.lib.some(im => im.id === cur)) ? cur : "text";
+  if(typeof tblRowShow === "function") tblRowShow();
   pagesEl.classList.toggle("redmode", put.value === "redact");
   const box = $("imgLib"); box.replaceChildren();
   T.lib.forEach(im => {
@@ -4001,6 +4088,8 @@ function onPutChange(){
   selectBox(null); selectImg(null); drawLib();
   try{ localStorage.setItem("i2p.put", $("tbPut").value); }catch(_){}
   if($("tbPut").value === "redact" && activeTab === "text") toast("쪽 위를 끌면 그 자리가 가려집니다. 가린 칸을 누르면 빠집니다.");
+  else if($("tbPut").value === "table" && activeTab === "text") toast("아래 표 설정을 고른 뒤 쪽을 누르면 그 자리에 표가 들어갑니다.");
+  else if($("tbPut").value.startsWith("tpl:")){ const x = TPL[+$("tbPut").value.slice(4)]; if(x){ T.tdef = Object.assign({}, x); tblToUI(T.tdef); $("tblTpl").value = $("tbPut").value.slice(4); if(activeTab === "text") toast(`쪽을 누르면 '${x.name}' 표가 들어갑니다.`); } }
   else if($("tbPut").value !== "text" && activeTab === "text"){ const im = libGet($("tbPut").value); toast(`쪽을 누르면 '${im.name}' 이미지가 그 자리에 들어갑니다.`); }
 }
 $("tbPut").addEventListener("change", onPutChange);
@@ -4054,6 +4143,7 @@ $("embedSave").onclick = async () => {
   const data = {
     v:1, saved:new Date().toISOString(), put:$("tbPut").value, idef:T.idef,
     lib:T.lib.map(im => ({id:im.id, name:im.name, kind:im.kind, w:im.w, h:im.h, st:im.st || null, b64:b64enc(im.bytes)})),
+    tables:TPL,
     font:($("embedFont").checked && T.font) ? {name:T.font.name, reg:b64enc(T.font.reg), bold:T.font.bold ? b64enc(T.font.bold) : null} : (EMB && EMB.font && $("embedFont").checked ? EMB.font : null)
   };
   const json = JSON.stringify(data).replace(/</g, "\\u003c");
@@ -4133,6 +4223,7 @@ function resizeImg(e, ib){
 }
 function selectImg(ib){
   if(ib && T.sel) selectBox(null);
+  if(ib && T.tsel) selectTable(null);
   const prev = T.isel; T.isel = ib;
   if(prev && prev.el) prev.el.classList.remove("on");
   if(ib && ib.el) ib.el.classList.add("on");
@@ -4270,7 +4361,8 @@ function drawBlock(page, pg, b, fonts){
     const lw = Math.max(...b.lines.map(l => font.widthOfTextAtSize(l, S))) + (fake ? S*0.04 : 0);
     bw = lw + 2*b.pad; bh = b.lines.length*S*LINE + 2*b.pad;
   }
-  if(b.center) b = Object.assign({}, b, {x:b.cx - bw/2, y:b.cy - bh/2});
+  if(b.center) b = Object.assign({}, b, {x:b.cx - bw/2, y:b.cy - bh/2, align:"center"});
+  else if(b.align && !b.vertical) b = Object.assign({}, b, {x:b.x - alignF(b)*bw});
   if(b.bg || b.border){
     const [x, y] = toUser(pg, b.x, b.y + bh);
     const o = {x, y, width:bw, height:bh, rotate:rot};
@@ -4293,14 +4385,15 @@ function drawBlock(page, pg, b, fonts){
   } else {
     const lead = (S*LINE - (asc - desc)*S)/2;
     const inner = bw - 2*b.pad;
-    b.lines.forEach((ln, i) => { if(ln) put(ln, b.x + b.pad + (b.center ? (inner - font.widthOfTextAtSize(ln, S))/2 : 0), b.y + b.pad + i*S*LINE + lead + asc*S); });
+    const fa = alignF(b);
+    b.lines.forEach((ln, i) => { if(ln) put(ln, b.x + b.pad + fa*(inner - font.widthOfTextAtSize(ln, S) - (fake ? S*0.04 : 0)), b.y + b.pad + i*S*LINE + lead + asc*S); });
   }
 }
 
 $("textRun").onclick = async () => {
   if(running || !T.pages.length) return;
   // 글자를 하나도 쓰지 않고 가리기만 할 때는 글꼴이 필요 없다
-  const needFont = T.stamps.some(st => stampLive(st) && st.text.trim()) || T.boxes.some(b => b.text.trim()) || T.imgs.some(ib => fillVars(ib.text).trim());
+  const needFont = T.stamps.some(st => stampLive(st) && st.text.trim()) || T.boxes.some(b => b.text.trim()) || T.imgs.some(ib => fillVars(ib.text).trim()) || T.tables.some(t => t.cells.some(r => r.some(c => c.trim())));
   if(needFont && !T.font){ flashFontNote(); return; }
   if(redBusy){ toast("개인정보 찾기가 끝난 뒤에 저장해 주세요."); return; }
   if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
@@ -4340,6 +4433,7 @@ $("textRun").onclick = async () => {
     for(const [, map] of maps) for(const v of map.values()) allText += v;
     for(const bx of T.boxes) allText += bx.text;
     for(const ib of T.imgs) allText += fillVars(ib.text);
+    for(const t of T.tables) allText += t.cells.flat().join("");
     // 쓰는 이미지는 한 번씩만 넣는다
     const used = new Set([...T.imgs.map(b => b.imgId), ...maps.map(([st]) => st.img).filter(Boolean)]), emb = new Map();
     for(const id of used){ const im = libGet(id); if(im) emb.set(id, im.kind === "png" ? await doc.embedPng(im.bytes) : await doc.embedJpg(im.bytes)); }
@@ -4359,7 +4453,8 @@ $("textRun").onclick = async () => {
         if(t.trim()) drawBlock(pages[i], P, {lines:t.split("\n"), size:ib.size, color:ib.color, bold:ib.bold, pad:0, center:true, cx:ib.x + ib.w*ib.tx/100, cy:ib.y + ib.h*ib.ty/100, x:0, y:0}, fonts);
       }
       for(const bx of T.boxes) if(bx.page === i && bx.text.trim())
-        drawBlock(pages[i], P, {x:bx.x, y:bx.y, pad:boxPad(bx), lines:bx.text.split("\n"), size:bx.size, color:bx.color, bold:bx.bold, bg:bx.bg, border:bx.border, vertical:bx.vertical}, fonts);
+        drawBlock(pages[i], P, {x:bx.x, y:bx.y, pad:boxPad(bx), lines:bx.text.split("\n"), size:bx.size, color:bx.color, bold:bx.bold, bg:bx.bg, border:bx.border, vertical:bx.vertical, align:bx.align}, fonts);
+      for(const t of T.tables) if(t.page === i) drawTable(pages[i], P, t, fonts);
       if(i % 20 === 19){ pg.set(0.15 + (i+1)/n*0.6, `${i+1} / ${n}쪽에 글자 넣는 중`); await sleep(0); }
     }
     pg.set(0.8, "PDF 파일을 쓰는 중"); await sleep(0);
@@ -4371,6 +4466,224 @@ $("textRun").onclick = async () => {
 };
 
 drawStamps(); updateTextUI();
+
+/* =========================================================
+   표: 미리 고른 선만 그린 표를 쪽에 놓고 칸마다 글자를 쓴다.
+   표 모양(칸 수·크기·선·글자)은 '표 보관함'에 저장해 다음에도 쓴다
+   ========================================================= */
+T.tables = []; T.tsel = null;
+const TLINE_PRESETS = {all:[1,1,1], outer:[1,0,0], rows:[1,1,0], hlines:[0,1,0], none:[0,0,0]};
+T.tdef = {rows:3, cols:3, wmm:120, rhmm:8, ratio:"", lo:1, lh:1, lv:1, lw:0.8, lc:"#111111", size:10, align:"left", hb:false, cells:null};
+try{ const d = JSON.parse(localStorage.getItem("i2p.tdef") || "null"); if(d){ Object.assign(T.tdef, d); T.tdef.cells = null; } }catch(_){}
+let TPL = [];
+try{ TPL = JSON.parse(localStorage.getItem("i2p.tables") || "[]") || []; }catch(_){ TPL = []; }
+if(EMB && Array.isArray(EMB.tables)) EMB.tables.forEach(x => { if(x && x.name && !TPL.some(y => y.name === x.name)) TPL.push(x); });
+const saveTPL = () => { try{ localStorage.setItem("i2p.tables", JSON.stringify(TPL)); }catch(_){} };
+const saveTdef = () => { try{ const d = Object.assign({}, T.tdef); delete d.cells; localStorage.setItem("i2p.tdef", JSON.stringify(d)); }catch(_){} };
+const sum = a => a.reduce((x, y) => x + y, 0);
+const tPad = t => Math.max(1.5, t.size*0.3);
+function ratioArr(str, n){ const a = String(str || "").split(/[:：,\s/]+/).map(Number).filter(v => v > 0); return a.length === n ? a : Array(n).fill(1); }
+function blankCells(r, c, old){ return Array.from({length:r}, (_, i) => Array.from({length:c}, (_, j) => (old && old[i] && old[i][j] != null) ? old[i][j] : "")); }
+
+function makeTable(def, page, x, y){
+  const W = def.wmm*PT_MM, ra = def.cw ? def.cw : ratioArr(def.ratio, def.cols), tot = sum(ra);
+  const rh = def.rh && def.rh.length === def.rows ? def.rh.map(v => v*PT_MM) : Array(def.rows).fill(def.rhmm*PT_MM);
+  return {page, x, y, cw:ra.map(v => W*v/tot), rh, cells:blankCells(def.rows, def.cols, def.cells),
+          lo:def.lo, lh:def.lh, lv:def.lv, lw:def.lw, lc:def.lc, size:def.size, align:def.align, hb:!!def.hb, el:null};
+}
+function newTable(pg, x, y){
+  const t = makeTable(T.tdef, pg.i, x, y);
+  const W = sum(t.cw), H = sum(t.rh);
+  t.x = Math.max(0, Math.min(pg.W - W, x)); t.y = Math.max(0, Math.min(pg.H - H, y));
+  T.tables.push(t); placeTable(t); selectTable(t); ghost.hidden = true;
+  const first = t.el.querySelector(".tc-in"); if(first){ first.focus(); placeCaret(first); }
+  updateTextUI();
+}
+function placeTable(t){
+  const pg = T.pages[t.page], s = pg.s;
+  if(!t.el){
+    const el = document.createElement("div"); el.className = "tblbox";
+    el.innerHTML = `<div class="tb-bar"><span class="tb-move" title="끌어서 옮기기">✥ 옮기기</span><button type="button" class="tb-del" title="표 빼기 (Delete)">✕ 지우기</button></div><div class="tl"></div><div class="tg"></div><span class="ib-rs" title="끌어서 표 크기 바꾸기"></span>`;
+    el.addEventListener("pointerdown", e => {
+      e.stopPropagation();
+      if(e.button !== 0 || running || e.target.closest(".tb-del")) return;
+      if(T.tsel !== t) selectTable(t);
+      if(e.target.classList.contains("ib-rs")){ e.preventDefault(); resizeTable(e, t); }
+      else if(e.target.closest(".tb-move")){ e.preventDefault(); dragBox(e, t, e.target.closest(".tb-move")); }
+    });
+    el.querySelector(".tb-del").addEventListener("click", e => { e.stopPropagation(); removeTable(t); });
+    t.el = el;
+  }
+  const el = t.el;
+  if(el.parentNode !== pg.ov) pg.ov.appendChild(el);
+  const W = sum(t.cw), H = sum(t.rh), rows = t.rh.length, cols = t.cw.length;
+  Object.assign(el.style, {left:t.x*s + "px", top:t.y*s + "px", width:W*s + "px", height:H*s + "px"});
+  // 칸 (칸 수가 바뀌면 새로 만든다)
+  const g = el.querySelector(".tg"), sig = rows + "x" + cols;
+  if(g.dataset.sig !== sig){
+    g.dataset.sig = sig; g.replaceChildren();
+    for(let r = 0; r < rows; r++) for(let c = 0; c < cols; c++){
+      const cell = document.createElement("div"); cell.className = "tc"; cell.dataset.r = r; cell.dataset.c = c;
+      const inp = document.createElement("div"); inp.className = "tc-in"; inp.spellcheck = false;
+      try{ inp.contentEditable = "plaintext-only"; }catch(_){}
+      if(inp.contentEditable !== "plaintext-only") inp.contentEditable = "true";
+      inp.addEventListener("input", () => { t.cells[r][c] = inp.innerText.replace(/\n$/, ""); updateTextUI(); });
+      inp.addEventListener("focus", () => { if(T.tsel !== t) selectTable(t); el.classList.add("edit"); });
+      inp.addEventListener("blur", () => el.classList.remove("edit"));
+      inp.addEventListener("keydown", e => {
+        if(e.key === "Tab"){                      // Tab = 다음 칸, Shift+Tab = 앞 칸
+          e.preventDefault();
+          const all = [...g.querySelectorAll(".tc-in")], i = all.indexOf(inp), n = all[(i + (e.shiftKey ? -1 : 1) + all.length) % all.length];
+          n.focus(); placeCaret(n);
+        } else if(e.key === "Escape"){ e.preventDefault(); inp.blur(); }
+      });
+      cell.appendChild(inp); g.appendChild(cell);
+    }
+  }
+  const pad = tPad(t);
+  g.querySelectorAll(".tc").forEach(cell => {
+    const r = +cell.dataset.r, c = +cell.dataset.c, inp = cell.firstChild;
+    Object.assign(cell.style, {left:sum(t.cw.slice(0, c))*s + "px", top:sum(t.rh.slice(0, r))*s + "px", width:t.cw[c]*s + "px", height:t.rh[r]*s + "px", padding:pad*s + "px"});
+    Object.assign(inp.style, {fontSize:t.size*s + "px", lineHeight:LINE, textAlign:t.align, fontWeight:(t.hb && r === 0) ? 700 : 400, color:"#111"});
+    if(document.activeElement !== inp && inp.innerText.replace(/\n$/, "") !== t.cells[r][c]) inp.textContent = t.cells[r][c];
+  });
+  // 선 (고른 선만)
+  const L = el.querySelector(".tl"), lw = Math.max(1, t.lw*s), col = t.lc, parts = [];
+  const ln = (x, y, w, h) => parts.push(`<i style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:${col}"></i>`);
+  if(t.lo){ ln(-lw/2, -lw/2, W*s + lw, lw); ln(-lw/2, H*s - lw/2, W*s + lw, lw); ln(-lw/2, -lw/2, lw, H*s + lw); ln(W*s - lw/2, -lw/2, lw, H*s + lw); }
+  if(t.lh) for(let r = 1; r < rows; r++){ const y = sum(t.rh.slice(0, r))*s; ln(0, y - lw/2, W*s, lw); }
+  if(t.lv) for(let c = 1; c < cols; c++){ const x = sum(t.cw.slice(0, c))*s; ln(x - lw/2, 0, lw, H*s); }
+  L.innerHTML = parts.join("");
+  el.classList.toggle("on", T.tsel === t);
+  el.classList.toggle("nolines", !t.lo && !t.lh && !t.lv);
+}
+function resizeTable(e, t){
+  const pg = T.pages[t.page], s = pg.s, sx = e.clientX, sy = e.clientY, cw0 = t.cw.slice(), rh0 = t.rh.slice(), W0 = sum(cw0), H0 = sum(rh0), h = e.target;
+  try{ h.setPointerCapture(e.pointerId); }catch(_){}
+  const mv = ev => {
+    const W = Math.max(20, Math.min(pg.W - t.x, W0 + (ev.clientX - sx)/s)), H = Math.max(8, Math.min(pg.H - t.y, H0 + (ev.clientY - sy)/s));
+    t.cw = cw0.map(v => v*W/W0); t.rh = rh0.map(v => v*H/H0);
+    placeTable(t); tblToUI(t);
+  };
+  const up = () => { h.removeEventListener("pointermove", mv); h.removeEventListener("pointerup", up); h.removeEventListener("pointercancel", up); readTblTool(true); };
+  h.addEventListener("pointermove", mv); h.addEventListener("pointerup", up); h.addEventListener("pointercancel", up);
+}
+function selectTable(t){
+  if(t && T.sel) selectBox(null);
+  if(t && T.isel) selectImg(null);
+  const prev = T.tsel; T.tsel = t;
+  if(prev && prev.el) prev.el.classList.remove("on");
+  if(t && t.el) t.el.classList.add("on");
+  if(t) tblToUI(t);
+  tblRowShow(); updateTextUI();
+}
+function removeTable(t){
+  const i = T.tables.indexOf(t); if(i >= 0) T.tables.splice(i, 1);
+  if(t.el) t.el.remove();
+  if(T.tsel === t){ T.tsel = null; tblRowShow(); }
+  updateTextUI();
+}
+/* 표 설정 줄 */
+function tblRowShow(){ $("tblRow").hidden = !(T.tsel || $("tbPut").value === "table" || $("tbPut").value.startsWith("tpl:")); $("tblWhich").textContent = T.tsel ? "고른 표" : "새로 넣을 표"; }
+function presetOf(lo, lh, lv){ for(const [k, v] of Object.entries(TLINE_PRESETS)) if(v[0] === +lo && v[1] === +lh && v[2] === +lv) return k; return "custom"; }
+function tblToUI(src){
+  const d = src.cw ? {rows:src.rh.length, cols:src.cw.length, wmm:+(sum(src.cw)/PT_MM).toFixed(1), rhmm:+(src.rh[0]/PT_MM).toFixed(1),
+                      ratio:src.cw.map(v => +(v/Math.min(...src.cw)).toFixed(2)).join(":"), lo:src.lo, lh:src.lh, lv:src.lv, lw:src.lw, lc:src.lc, size:src.size, align:src.align, hb:src.hb} : src;
+  $("tblRows").value = d.rows; $("tblCols").value = d.cols; $("tblW").value = d.wmm; $("tblRH").value = d.rhmm;
+  $("tblRatio").value = /^1(:1)*$/.test(d.ratio || "") ? "" : (d.ratio || "");
+  $("tblLO").checked = !!+d.lo; $("tblLH").checked = !!+d.lh; $("tblLV").checked = !!+d.lv; $("tblPreset").value = presetOf(d.lo, d.lh, d.lv);
+  $("tblLW").value = d.lw; $("tblLC").value = d.lc; $("tblTS").value = d.size; $("tblTA").value = d.align; $("tblHB").checked = !!d.hb;
+}
+function readTblTool(fromResize){
+  const rows = Math.max(1, Math.min(60, Math.round(+$("tblRows").value) || 1)), cols = Math.max(1, Math.min(20, Math.round(+$("tblCols").value) || 1));
+  const D = {rows, cols, wmm:Math.max(10, +$("tblW").value || 120), rhmm:Math.max(3, +$("tblRH").value || 8), ratio:$("tblRatio").value.trim(),
+             lo:$("tblLO").checked ? 1 : 0, lh:$("tblLH").checked ? 1 : 0, lv:$("tblLV").checked ? 1 : 0, lw:+$("tblLW").value || 0.8, lc:$("tblLC").value,
+             size:Math.max(4, Math.min(72, +$("tblTS").value || 10)), align:$("tblTA").value, hb:$("tblHB").checked, cells:null};
+  $("tblPreset").value = presetOf(D.lo, D.lh, D.lv);
+  T.tdef = D; saveTdef();
+  const t = T.tsel; if(!t || fromResize === true) return;
+  // 칸 수가 바뀌면 글자를 지키면서 늘리거나 줄인다
+  const W = D.wmm*PT_MM, ra = ratioArr(D.ratio, cols), tot = sum(ra);
+  t.cells = blankCells(rows, cols, t.cells);
+  t.cw = ra.map(v => W*v/tot);
+  t.rh = (t.rh.length === rows && Math.abs(t.rh[0] - D.rhmm*PT_MM) < 0.3) ? t.rh : Array(rows).fill(D.rhmm*PT_MM);
+  Object.assign(t, {lo:D.lo, lh:D.lh, lv:D.lv, lw:D.lw, lc:D.lc, size:D.size, align:D.align, hb:D.hb});
+  placeTable(t); updateTextUI();
+}
+["tblRows","tblCols","tblW","tblRH","tblRatio","tblLO","tblLH","tblLV","tblLW","tblLC","tblTS","tblTA","tblHB"].forEach(id => $(id).addEventListener("change", () => readTblTool()));
+["tblRows","tblCols","tblW","tblRH","tblTS"].forEach(id => $(id).addEventListener("input", () => readTblTool()));
+$("tblPreset").addEventListener("change", () => {
+  const p = TLINE_PRESETS[$("tblPreset").value]; if(!p) return;
+  $("tblLO").checked = !!p[0]; $("tblLH").checked = !!p[1]; $("tblLV").checked = !!p[2]; readTblTool();
+});
+/* 표 보관함 */
+function drawTPL(){
+  const sel = $("tblTpl"), cur = sel.value;
+  sel.innerHTML = `<option value="">(지금 설정)</option>` + TPL.map((x, i) => `<option value="${i}">${esc(x.name)}${x.cells ? " · 내용 포함" : ""}</option>`).join("");
+  sel.value = TPL[cur] ? cur : "";
+  $("tblTplDel").disabled = sel.value === "";
+}
+$("tblTpl").addEventListener("change", () => {
+  const x = TPL[$("tblTpl").value]; $("tblTplDel").disabled = !x;
+  if(!x) return;
+  T.tdef = Object.assign({}, x); tblToUI(T.tdef);
+  if(T.tsel) selectTable(null);
+  $("tbPut").value = "tpl:" + $("tblTpl").value; drawLib();
+  toast(`쪽을 누르면 '${x.name}' 표가 들어갑니다.`);
+});
+$("tblTplSave").onclick = () => {
+  const name = $("tblTplName").value.trim();
+  if(!name){ $("tblTplName").focus(); toast("보관함에 넣을 표 이름을 적어 주세요."); return; }
+  const t = T.tsel;
+  const x = t ? {name, rows:t.rh.length, cols:t.cw.length, wmm:+(sum(t.cw)/PT_MM).toFixed(1), rhmm:+(t.rh[0]/PT_MM).toFixed(1), cw:t.cw.map(v => +(v/PT_MM).toFixed(2)), rh:t.rh.map(v => +(v/PT_MM).toFixed(2)),
+                 lo:t.lo, lh:t.lh, lv:t.lv, lw:t.lw, lc:t.lc, size:t.size, align:t.align, hb:t.hb, cells:$("tblTplWith").checked ? t.cells.map(r => r.slice()) : null}
+              : Object.assign({}, T.tdef, {name, cells:null});
+  const i = TPL.findIndex(y => y.name === name);
+  if(i >= 0) TPL[i] = x; else TPL.push(x);
+  saveTPL(); drawTPL(); drawLib(); $("tblTpl").value = String(i >= 0 ? i : TPL.length - 1); $("tblTplDel").disabled = false;
+  toast(`'${name}' 표를 보관함에 ${i >= 0 ? "고쳐 " : ""}저장했습니다. 다음에 열어도 남아 있습니다.`);
+};
+$("tblTplDel").onclick = () => {
+  const i = $("tblTpl").value; if(i === "" || !TPL[i]) return;
+  const nm = TPL[i].name; TPL.splice(+i, 1); saveTPL(); drawTPL(); if($("tbPut").value.startsWith("tpl:")) $("tbPut").value = "table"; drawLib(); toast(`'${nm}' 표를 보관함에서 지웠습니다.`);
+};
+tblToUI(T.tdef); drawTPL(); drawLib(); tblRowShow();
+
+/* PDF에 표 그리기 */
+function wrapCell(text, maxW, font, S){
+  const out = [];
+  for(const para of String(text).split("\n")){
+    let line = "", w = 0;
+    for(const ch of [...para]){
+      const cw = font.widthOfTextAtSize(ch, S);
+      if(line && w + cw > maxW){ out.push(line); line = ""; w = 0; }
+      line += ch; w += cw;
+    }
+    out.push(line);
+  }
+  return out;
+}
+function drawTable(page, P, t, fonts){
+  const rot = degrees(P.rot), col = hexRgb(t.lc), W = sum(t.cw), H = sum(t.rh), rows = t.rh.length, cols = t.cw.length;
+  const line = (x1, y1, x2, y2) => { const [a, b] = toUser(P, x1, y1), [c, d] = toUser(P, x2, y2); page.drawLine({start:{x:a, y:b}, end:{x:c, y:d}, thickness:t.lw, color:col}); };
+  if(t.lo){ line(t.x, t.y, t.x + W, t.y); line(t.x, t.y + H, t.x + W, t.y + H); line(t.x, t.y, t.x, t.y + H); line(t.x + W, t.y, t.x + W, t.y + H); }
+  if(t.lh) for(let r = 1; r < rows; r++){ const y = t.y + sum(t.rh.slice(0, r)); line(t.x, y, t.x + W, y); }
+  if(t.lv) for(let c = 1; c < cols; c++){ const x = t.x + sum(t.cw.slice(0, c)); line(x, t.y, x, t.y + H); }
+  if(!fonts) return;
+  const S = t.size, pad = tPad(t), asc = fonts.asc, desc = fonts.desc, lead = (S*LINE - (asc - desc)*S)/2, f = {center:0.5, right:1}[t.align] || 0;
+  for(let r = 0; r < rows; r++) for(let c = 0; c < cols; c++){
+    const txt = t.cells[r][c]; if(!txt || !txt.trim()) continue;
+    const bold = t.hb && r === 0, font = bold && fonts.bold ? fonts.bold : fonts.reg, fake = bold && !fonts.bold;
+    const cx = t.x + sum(t.cw.slice(0, c)), cy = t.y + sum(t.rh.slice(0, r)), inner = t.cw[c] - 2*pad;
+    const lines = wrapCell(txt, Math.max(1, inner), font, S), bh = lines.length*S*LINE;
+    const top = cy + (t.rh[r] - bh)/2;
+    lines.forEach((ln, i) => {
+      if(!ln) return;
+      const lw = font.widthOfTextAtSize(ln, S), x = cx + pad + f*(inner - lw), by = top + i*S*LINE + lead + asc*S;
+      for(const p of (fake ? [0, S*0.035] : [0])){ const [ux, uy] = toUser(P, x + p, by); page.drawText(ln, {x:ux, y:uy, size:S, font, color:rgb(0.067, 0.067, 0.067), rotate:rot}); }
+    });
+  }
+}
 
 /* =========================================================
    PDF 개인정보 가리기: 글자가 들어 있는 PDF는 글자 정보로, 스캔 PDF는 글자 인식으로 찾는다.
@@ -4520,14 +4833,15 @@ $("rdClear").onclick = () => { if(running || redBusy) return; T.red = []; T.page
 resetters.text = () => {
   if(T.pdfjs){ try{ T.pdfjs.destroy(); }catch(_){} }
   pio.disconnect(); renderQ = [];
-  Object.assign(T, {file:null, bytes:null, pdfjs:null, pages:[], boxes:[], sel:null, imgs:[], isel:null, red:[]});
+  Object.assign(T, {file:null, bytes:null, pdfjs:null, pages:[], boxes:[], sel:null, imgs:[], isel:null, red:[], tables:[], tsel:null});
+  tblRowShow();
   redStop = true; $("rdProg").textContent = "";
   $("ibRow").hidden = true;
   pagesEl.replaceChildren(); $("textEmpty").hidden = false;
   $("textInfo").hidden = true; $("textInfo").replaceChildren(); $("textName").value = "";
   clearOutput("text"); updateTextUI();
 };
-hasWork.text = () => !!T.file && (T.boxes.some(b => b.text.trim()) || T.imgs.length > 0 || T.red.some(p => p && p.length)) && !saved("text");
+hasWork.text = () => !!T.file && (T.boxes.some(b => b.text.trim()) || T.imgs.length > 0 || T.tables.length > 0 || T.red.some(p => p && p.length)) && !saved("text");
 $("stampClear").onclick = () => { if(running) return; T.stamps.length = 0; drawStamps(); scheduleOverlay(); updateTextUI(); };
 /* =========================================================
    이미지 → PDF 탭: 저장할 때 첫 장(또는 고른 쪽)에 도장 찍기
