@@ -1713,7 +1713,9 @@ window.__authGate=true;
   function annexLabel(b) {
     if (b.type !== 'p') return null;
     const s = ((b.num || '') + ' ' + b.text).trim();
-    const m = s.match(/^\[\s*별첨\s*([0-9]+(?:\s*[-의]\s*[0-9]+)?)\s*(?:의\s*부속[^\]]*)?\]/);
+    let m = s.match(/^\[\s*별첨\s*([0-9]+(?:\s*[-의]\s*[0-9]+)?)\s*(?:의\s*부속[^\]]*)?\]/);
+    // 괄호 없는 제목: "별첨 1. 의무기록 전송(출력)신청서", "별첨 2) …", "별첨1 …"
+    if (!m) m = s.match(/^별\s*첨\s*([0-9]+(?:\s*[-의]\s*[0-9]+)?)(?=\s*[.)\]:·\s]|$)/);
     if (m) {
       const isSub = /부속/.test(s.slice(0, 40));
       return { id: m[1].replace(/\s+/g, '').replace('의', '-') + (isSub ? '-부속' : ''), title: s };
@@ -2588,7 +2590,8 @@ window.__authGate=true;
         }
         const ti = { k: 'table', rows }; if (n.dataset.al) ti.aligned = true; if (n.dataset.ag) ti.ag = n.dataset.ag; items.push(ti); continue;
       }
-      const imgs = n.tagName === 'IMG' ? [n] : Array.from(n.querySelectorAll('img')).filter(i => !i.closest('table'));
+      // 이 칸 안의 '작은 표' 속 그림만 제외 (칸이 놓인 바깥 편집 표는 상관없음)
+      const imgs = n.tagName === 'IMG' ? [n] : Array.from(n.querySelectorAll('img')).filter(i => { const t = i.closest('table'); return !(t && n.contains(t)); });
       if (n.classList && n.classList.contains('im') || (n.tagName === 'IMG')) {
         flushLoose();
         imgs.forEach(i => { const o = { k: 'img', src: i.src, nw: +i.dataset.nw || i.naturalWidth || 0, nh: +i.dataset.nh || i.naturalHeight || 0, wp: +i.dataset.wp || 0 }; const ag = (n.dataset && n.dataset.ag) || (i.parentNode && i.parentNode.dataset && i.parentNode.dataset.ag); if (ag) o.ag = ag; items.push(o); });
@@ -2785,7 +2788,7 @@ window.__authGate=true;
         });
         if (sec.type === 'annex' && S.annexReasonRow !== false && sec.reason && sec.reason.length) units.push({ row: 'reason', cells: [[], sec.reason], note: [], first: true, reason: true });
         const imgMaxFirst = Math.max(60, avail - titleH - headH - px(S.cellPadV * 2 + 4) - (sec.type === 'annex' && sec.reason && sec.reason.length ? px(18) : 0));
-        const imgMax = Math.max(60, avail - headH - px(S.cellPadV * 2 + 4));
+        const imgMax = Math.max(60, avail - headH - px(S.cellPadV * 2 + 4) - (sec.type === 'annex' && sec.reason && sec.reason.length ? px(18) : 0));
         const cellInnerW = cols.w.map(w => px(g.cw) * w / 100 - px(S.cellPadH * 2) - 2);
         function itemH(it, ci, maxH) {
           meas.innerHTML = '<div style="width:' + cellInnerW[ci] + 'px">' + itemsHTML([it], { imgMaxH: maxH }) + '</div>';
@@ -5346,7 +5349,7 @@ window.__authGate=true;
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '2.0';
+  const APP_VERSION = '2.1';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
