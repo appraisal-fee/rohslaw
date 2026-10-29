@@ -675,6 +675,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
           <label>글자 <input type="number" id="tblTS" min="4" max="72" step="0.5" value="10"> pt</label>
           <label>정렬 <select id="tblTA"><option value="left">왼쪽</option><option value="center">가운데</option><option value="right">오른쪽</option></select></label>
           <label><input type="checkbox" id="tblHB"> 첫 줄 굵게</label>
+          <label><input type="checkbox" id="tblBG"> 흰 바탕</label>
           <span class="sep"></span>
           <label>이름 <input type="text" id="tblTplName" placeholder="예: 접수 확인표" autocomplete="off" style="width:120px"></label>
           <label><input type="checkbox" id="tblTplWith"> 칸 내용도 함께</label>
@@ -763,7 +764,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <footer>
     <span>개발자: 노상엽</span>
     <span>개발일자: 2026. 10. 16.</span>
-    <span>수정일자: 2026. 10. 28.</span>
+    <span>수정일자: 2026. 10. 29.</span>
     <span>버전 <b id="appVer"></b></span>
     <button type="button" class="linkbtn" id="updCheck">새 버전 확인</button>
     <span>HEIC(아이폰 사진)는 크롬·엣지에서 열리지 않으니 JPG로 저장해 올려 주세요.</span>
@@ -3363,7 +3364,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "1.4", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
+const APP_VERSION = "1.5", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -4025,6 +4026,13 @@ document.addEventListener("keydown", e => {
 function readTool(){
   T.defaults = {size:Math.max(4, Math.min(96, +$("tbSize").value || 11)), color:$("tbColor").value, bold:$("tbBold").checked, bg:$("tbBg").checked, border:$("tbBorder").checked, vertical:$("tbVert").checked, align:$("tbAlign").value};
   try{ localStorage.setItem("i2p.tdefaults", JSON.stringify(T.defaults)); }catch(_){}
+  const tt = T.tsel;
+  if(tt && !T.sel){   // 표를 골라 둔 상태: 글자 크기·색·흰 바탕을 표에 적용
+    tt.size = Math.max(4, Math.min(72, T.defaults.size)); tt.color = T.defaults.color; tt.bg = T.defaults.bg;
+    $("tblTS").value = tt.size; $("tblBG").checked = tt.bg;
+    T.tdef = Object.assign({}, T.tdef, {size:tt.size, color:tt.color, bg:tt.bg}); saveTdef();
+    placeTable(tt); updateTextUI(); return;
+  }
   const bx = T.sel;
   if(bx){
     // 정렬을 바꿔도 상자가 제자리에 보이도록 기준점을 옮긴다
@@ -4489,7 +4497,7 @@ function makeTable(def, page, x, y){
   const W = def.wmm*PT_MM, ra = def.cw ? def.cw : ratioArr(def.ratio, def.cols), tot = sum(ra);
   const rh = def.rh && def.rh.length === def.rows ? def.rh.map(v => v*PT_MM) : Array(def.rows).fill(def.rhmm*PT_MM);
   return {page, x, y, cw:ra.map(v => W*v/tot), rh, cells:blankCells(def.rows, def.cols, def.cells),
-          lo:def.lo, lh:def.lh, lv:def.lv, lw:def.lw, lc:def.lc, size:def.size, align:def.align, hb:!!def.hb, el:null};
+          lo:def.lo, lh:def.lh, lv:def.lv, lw:def.lw, lc:def.lc, size:def.size, align:def.align, hb:!!def.hb, bg:!!def.bg, color:def.color || "#111111", el:null};
 }
 function newTable(pg, x, y){
   const t = makeTable(T.tdef, pg.i, x, y);
@@ -4517,7 +4525,7 @@ function placeTable(t){
   const el = t.el;
   if(el.parentNode !== pg.ov) pg.ov.appendChild(el);
   const W = sum(t.cw), H = sum(t.rh), rows = t.rh.length, cols = t.cw.length;
-  Object.assign(el.style, {left:t.x*s + "px", top:t.y*s + "px", width:W*s + "px", height:H*s + "px"});
+  Object.assign(el.style, {left:t.x*s + "px", top:t.y*s + "px", width:W*s + "px", height:H*s + "px", background:t.bg ? "#ffffff" : "transparent"});
   // 칸 (칸 수가 바뀌면 새로 만든다)
   const g = el.querySelector(".tg"), sig = rows + "x" + cols;
   if(g.dataset.sig !== sig){
@@ -4544,7 +4552,7 @@ function placeTable(t){
   g.querySelectorAll(".tc").forEach(cell => {
     const r = +cell.dataset.r, c = +cell.dataset.c, inp = cell.firstChild;
     Object.assign(cell.style, {left:sum(t.cw.slice(0, c))*s + "px", top:sum(t.rh.slice(0, r))*s + "px", width:t.cw[c]*s + "px", height:t.rh[r]*s + "px", padding:pad*s + "px"});
-    Object.assign(inp.style, {fontSize:t.size*s + "px", lineHeight:LINE, textAlign:t.align, fontWeight:(t.hb && r === 0) ? 700 : 400, color:"#111"});
+    Object.assign(inp.style, {fontSize:t.size*s + "px", lineHeight:LINE, textAlign:t.align, fontWeight:(t.hb && r === 0) ? 700 : 400, color:t.color || "#111111"});
     if(document.activeElement !== inp && inp.innerText.replace(/\n$/, "") !== t.cells[r][c]) inp.textContent = t.cells[r][c];
   });
   // 선 (고른 선만)
@@ -4588,29 +4596,31 @@ function tblRowShow(){ $("tblRow").hidden = !(T.tsel || $("tbPut").value === "ta
 function presetOf(lo, lh, lv){ for(const [k, v] of Object.entries(TLINE_PRESETS)) if(v[0] === +lo && v[1] === +lh && v[2] === +lv) return k; return "custom"; }
 function tblToUI(src){
   const d = src.cw ? {rows:src.rh.length, cols:src.cw.length, wmm:+(sum(src.cw)/PT_MM).toFixed(1), rhmm:+(src.rh[0]/PT_MM).toFixed(1),
-                      ratio:src.cw.map(v => +(v/Math.min(...src.cw)).toFixed(2)).join(":"), lo:src.lo, lh:src.lh, lv:src.lv, lw:src.lw, lc:src.lc, size:src.size, align:src.align, hb:src.hb} : src;
+                      ratio:src.cw.map(v => +(v/Math.min(...src.cw)).toFixed(2)).join(":"), lo:src.lo, lh:src.lh, lv:src.lv, lw:src.lw, lc:src.lc, size:src.size, align:src.align, hb:src.hb, bg:src.bg, color:src.color} : src;
   $("tblRows").value = d.rows; $("tblCols").value = d.cols; $("tblW").value = d.wmm; $("tblRH").value = d.rhmm;
   $("tblRatio").value = /^1(:1)*$/.test(d.ratio || "") ? "" : (d.ratio || "");
   $("tblLO").checked = !!+d.lo; $("tblLH").checked = !!+d.lh; $("tblLV").checked = !!+d.lv; $("tblPreset").value = presetOf(d.lo, d.lh, d.lv);
-  $("tblLW").value = d.lw; $("tblLC").value = d.lc; $("tblTS").value = d.size; $("tblTA").value = d.align; $("tblHB").checked = !!d.hb;
+  $("tblLW").value = d.lw; $("tblLC").value = d.lc; $("tblTS").value = d.size; $("tblTA").value = d.align; $("tblHB").checked = !!d.hb; $("tblBG").checked = !!d.bg;
+  if(src.cw){ $("tbSize").value = d.size; $("tbBg").checked = !!d.bg; $("tbColor").value = d.color || "#111111"; }
 }
 function readTblTool(fromResize){
   const rows = Math.max(1, Math.min(60, Math.round(+$("tblRows").value) || 1)), cols = Math.max(1, Math.min(20, Math.round(+$("tblCols").value) || 1));
   const D = {rows, cols, wmm:Math.max(10, +$("tblW").value || 120), rhmm:Math.max(3, +$("tblRH").value || 8), ratio:$("tblRatio").value.trim(),
              lo:$("tblLO").checked ? 1 : 0, lh:$("tblLH").checked ? 1 : 0, lv:$("tblLV").checked ? 1 : 0, lw:+$("tblLW").value || 0.8, lc:$("tblLC").value,
-             size:Math.max(4, Math.min(72, +$("tblTS").value || 10)), align:$("tblTA").value, hb:$("tblHB").checked, cells:null};
+             size:Math.max(4, Math.min(72, +$("tblTS").value || 10)), align:$("tblTA").value, hb:$("tblHB").checked, bg:$("tblBG").checked, color:(T.tsel && T.tsel.color) || (T.tdef && T.tdef.color) || "#111111", cells:null};
   $("tblPreset").value = presetOf(D.lo, D.lh, D.lv);
   T.tdef = D; saveTdef();
   const t = T.tsel; if(!t || fromResize === true) return;
+  $("tbSize").value = D.size; $("tbBg").checked = D.bg;
   // 칸 수가 바뀌면 글자를 지키면서 늘리거나 줄인다
   const W = D.wmm*PT_MM, ra = ratioArr(D.ratio, cols), tot = sum(ra);
   t.cells = blankCells(rows, cols, t.cells);
   t.cw = ra.map(v => W*v/tot);
   t.rh = (t.rh.length === rows && Math.abs(t.rh[0] - D.rhmm*PT_MM) < 0.3) ? t.rh : Array(rows).fill(D.rhmm*PT_MM);
-  Object.assign(t, {lo:D.lo, lh:D.lh, lv:D.lv, lw:D.lw, lc:D.lc, size:D.size, align:D.align, hb:D.hb});
+  Object.assign(t, {lo:D.lo, lh:D.lh, lv:D.lv, lw:D.lw, lc:D.lc, size:D.size, align:D.align, hb:D.hb, bg:D.bg});
   placeTable(t); updateTextUI();
 }
-["tblRows","tblCols","tblW","tblRH","tblRatio","tblLO","tblLH","tblLV","tblLW","tblLC","tblTS","tblTA","tblHB"].forEach(id => $(id).addEventListener("change", () => readTblTool()));
+["tblRows","tblCols","tblW","tblRH","tblRatio","tblLO","tblLH","tblLV","tblLW","tblLC","tblTS","tblTA","tblHB","tblBG"].forEach(id => $(id).addEventListener("change", () => readTblTool()));
 ["tblRows","tblCols","tblW","tblRH","tblTS"].forEach(id => $(id).addEventListener("input", () => readTblTool()));
 $("tblPreset").addEventListener("change", () => {
   const p = TLINE_PRESETS[$("tblPreset").value]; if(!p) return;
@@ -4636,7 +4646,7 @@ $("tblTplSave").onclick = () => {
   if(!name){ $("tblTplName").focus(); toast("보관함에 넣을 표 이름을 적어 주세요."); return; }
   const t = T.tsel;
   const x = t ? {name, rows:t.rh.length, cols:t.cw.length, wmm:+(sum(t.cw)/PT_MM).toFixed(1), rhmm:+(t.rh[0]/PT_MM).toFixed(1), cw:t.cw.map(v => +(v/PT_MM).toFixed(2)), rh:t.rh.map(v => +(v/PT_MM).toFixed(2)),
-                 lo:t.lo, lh:t.lh, lv:t.lv, lw:t.lw, lc:t.lc, size:t.size, align:t.align, hb:t.hb, cells:$("tblTplWith").checked ? t.cells.map(r => r.slice()) : null}
+                 lo:t.lo, lh:t.lh, lv:t.lv, lw:t.lw, lc:t.lc, size:t.size, align:t.align, hb:t.hb, bg:!!t.bg, color:t.color, cells:$("tblTplWith").checked ? t.cells.map(r => r.slice()) : null}
               : Object.assign({}, T.tdef, {name, cells:null});
   const i = TPL.findIndex(y => y.name === name);
   if(i >= 0) TPL[i] = x; else TPL.push(x);
@@ -4665,6 +4675,9 @@ function wrapCell(text, maxW, font, S){
 }
 function drawTable(page, P, t, fonts){
   const rot = degrees(P.rot), col = hexRgb(t.lc), W = sum(t.cw), H = sum(t.rh), rows = t.rh.length, cols = t.cw.length;
+  if(t.bg){ const q = [[t.x, t.y], [t.x + W, t.y], [t.x + W, t.y + H], [t.x, t.y + H]].map(([x, y]) => toUser(P, x, y));
+    const xs = q.map(v => v[0]), ys = q.map(v => v[1]), x0 = Math.min(...xs), y0 = Math.min(...ys);
+    page.drawRectangle({x:x0, y:y0, width:Math.max(...xs) - x0, height:Math.max(...ys) - y0, color:rgb(1, 1, 1)}); }
   const line = (x1, y1, x2, y2) => { const [a, b] = toUser(P, x1, y1), [c, d] = toUser(P, x2, y2); page.drawLine({start:{x:a, y:b}, end:{x:c, y:d}, thickness:t.lw, color:col}); };
   if(t.lo){ line(t.x, t.y, t.x + W, t.y); line(t.x, t.y + H, t.x + W, t.y + H); line(t.x, t.y, t.x, t.y + H); line(t.x + W, t.y, t.x + W, t.y + H); }
   if(t.lh) for(let r = 1; r < rows; r++){ const y = t.y + sum(t.rh.slice(0, r)); line(t.x, y, t.x + W, y); }
@@ -4680,7 +4693,7 @@ function drawTable(page, P, t, fonts){
     lines.forEach((ln, i) => {
       if(!ln) return;
       const lw = font.widthOfTextAtSize(ln, S), x = cx + pad + f*(inner - lw), by = top + i*S*LINE + lead + asc*S;
-      for(const p of (fake ? [0, S*0.035] : [0])){ const [ux, uy] = toUser(P, x + p, by); page.drawText(ln, {x:ux, y:uy, size:S, font, color:rgb(0.067, 0.067, 0.067), rotate:rot}); }
+      for(const p of (fake ? [0, S*0.035] : [0])){ const [ux, uy] = toUser(P, x + p, by); page.drawText(ln, {x:ux, y:uy, size:S, font, color:hexRgb(t.color || "#111111"), rotate:rot}); }
     });
   }
 }
