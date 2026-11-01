@@ -88,6 +88,9 @@ input[type=text],input[type=number],select,textarea{border:1px solid var(--line)
 .flash{animation:flashk 1.8s ease-out}@keyframes flashk{0%,30%{box-shadow:0 0 0 3px #ff9800;background:#fff3cd}100%{box-shadow:0 0 0 0 rgba(255,152,0,0)}}
 .etab td.ctl.done{background:#e8f5e9}.etab td.ctl.done .rn{color:#2e7d32;font-weight:700}.etab td.ctl button.hasmemo{background:#fff6dd;border-color:#f1d58b}
 pre.rep{white-space:pre-wrap;font-size:12.5px;background:#f6f8fb;border:1px solid var(--line);border-radius:8px;padding:10px;max-height:50vh;overflow:auto}
+.sgcur .box{border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:12.5px;line-height:1.55;max-height:130px;overflow:auto;background:#fafbfd}
+.sglist{margin-top:8px;max-height:40vh;overflow:auto}.sgc{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin-bottom:8px}.sgc .h{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:13px}.sgc .dx{font-size:13px;line-height:1.6}.sgc ins{color:#c0392b;text-decoration:underline;background:#fff1f0}.sgc del{color:#999}.sgc .pill{font-size:11px}
+.sgpaste{margin-top:8px;border:1px dashed #9fb2d6;border-radius:8px;padding:8px}
 .warnbox{background:#fff8e6;border:1px solid #f1d58b;color:#6b4e00;border-radius:8px;padding:8px 11px;font-size:12.5px;margin:8px 0}
 .okbox{background:#effaf3;border:1px solid #bfe2cc;color:#1d5a35;border-radius:8px;padding:8px 11px;font-size:12.5px;margin:8px 0}
 /* 직접 고치기 */
@@ -369,7 +372,7 @@ pre.rep{white-space:pre-wrap;font-size:12.5px;background:#f6f8fb;border:1px soli
     <button class="btn" id="bAddAnnex">+ 별첨 대조표 추가</button>
   </div>
 </section>
-<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.01. · 문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다 · <a href="#" id="updCheck">새 버전 확인</a></div>
+<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.02. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
 </main>
 
 <!-- 설정 서랍 -->
@@ -5205,7 +5208,7 @@ window.__authGate=true;
     const i = sec.rows.indexOf(r);
     modal(`<h3>${i + 1}번째 행</h3><div class="pm">
       <button class="btn" data-r="merge" ${i === 0 ? 'disabled' : ''}>위 행과 합치기</button><button class="btn" data-r="split" ${i === 0 ? 'disabled' : ''}>여기서 구간 나누기<br><small class="muted">일부만 가로로 볼 때</small></button>
-      <button class="btn" data-r="pair">같은 줄 칸 하나 더(줄+)<br><small class="muted">현행·개정안 시작 줄 맞춤</small></button><button class="btn pri" data-r="pm">짝 맞추기 · 다시 대조</button></div>
+      <button class="btn" data-r="pair">같은 줄 칸 하나 더(줄+)<br><small class="muted">현행·개정안 시작 줄 맞춤</small></button><button class="btn" data-r="pm">짝 맞추기 · 다시 대조</button><button class="btn pri" data-r="sug" style="grid-column:1/3">💡 이 행 문구 제안 (규칙 · AI · 요청문 복사)</button></div>
       <div class="foot"><button class="btn" id="x">닫기</button></div>`, m => { $('#x', m).onclick = closeModal; $$('[data-r]', m).forEach(b => b.onclick = () => { closeModal(); rowAct(b.dataset.r, sec, r); }); });
   }
   function rowAct(a, sec, r) {
@@ -5219,6 +5222,7 @@ window.__authGate=true;
     else if (a === 'memo') { flushCells(); memoDialog(r, renderSections); return; }
     else if (a === 'pm') { flushCells(); pairMenu(sec, r); return; }
     else if (a === 'more') { flushCells(); rowMore(sec, r); return; }
+    else if (a === 'sug') { suggestDialog(sec, r); return; }
     else return;
     renderSections(); autosave();
   }
@@ -6014,11 +6018,14 @@ window.__authGate=true;
       ['batch', '🗂 여러 내규 일괄 비교', '현행·개정안 파일 여러 쌍을 이름으로 짝지어 대조표를 한 번에(.zip)'],
       ['rename', '🏷 이름 일괄 변경', '조직 개편 때 옛 부서명·직위명을 여러 내규에서 바꾸고 대조표까지'],
       ['reg', '📅 내규 대장', '내규별 다음 검토일·5년 보존 기한 관리, 엑셀(CSV) 주고받기'],
-      ['ren', '✏️ 옛 이름 목록', '형식 검사·일괄 변경에 쓸 옛 이름 → 새 이름 목록']
+      ['ren', '✏️ 옛 이름 목록', '형식 검사·일괄 변경에 쓸 옛 이름 → 새 이름 목록'],
+      ['sug', '💡 문구 제안', '고른 행의 개정안을 지시대로 고친 문구 후보 — 규칙(오프라인) · AI · 요청문 복사 (Ctrl+Alt+K)'],
+      ['plain', '✨ 문구 다듬기', '개정안 전체의 어려운 한자어·옛 표현을 알기 쉬운 말로 (법제처 정비 기준)'],
+      ['ai', '🤖 AI 문구 제안 설정', 'Claude 연결 켜기·끄기, API 키 (켤 때만 요청한 문장이 전송됨)']
     ];
     modal(`<h3>도구</h3><div class="toolgrid">${T.map(([k, t, d]) => `<button class="tool" data-t="${k}"><b>${t}</b><span>${d}</span></button>`).join('')}</div><div class="foot"><button class="btn" id="x">닫기</button></div>`, m => {
       $('#x', m).onclick = closeModal;
-      $$('.tool', m).forEach(b => b.onclick = () => { const k = b.dataset.t; closeModal(); ({ lint: lintDialog, list: changeListDialog, submit: submitDialog, full: fullTextDialog, batch: batchDialog, rename: renameBatchDialog, reg: registryDialog, ren: () => renamesDialog() })[k](); });
+      $$('.tool', m).forEach(b => b.onclick = () => { const k = b.dataset.t; closeModal(); ({ lint: lintDialog, list: changeListDialog, submit: submitDialog, full: fullTextDialog, batch: batchDialog, rename: renameBatchDialog, reg: registryDialog, ren: () => renamesDialog(), sug: () => suggestDialog(), plain: plainDialog, ai: aiSettingsDialog })[k](); });
     });
   }
   (function mountTools() {
@@ -6036,7 +6043,276 @@ window.__authGate=true;
     setTimeout(registryReminder, 2500);
   })();
 
-  window.__app = { parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
+  /* =========================================================
+     v2.5 문구 제안: ① 규칙(오프라인) ② AI 직접 연결(설정에서 켤 때만) ③ 요청문 복사→붙여 넣기
+     ========================================================= */
+  // 법제처 「알기 쉬운 법령 정비 기준」 등에 따른 표현 다듬기 (오프라인)
+  const PLAIN_RULES = [
+    [/의\s*규정에\s*의하여/g, '에 따라', '‘의 규정에 의하여’는 ‘에 따라’로'],
+    [/의\s*규정에\s*의한/g, '에 따른', '‘의 규정에 의한’은 ‘에 따른’으로'],
+    [/의\s*규정에\s*따라/g, '에 따라', '‘의 규정에 따라’는 ‘에 따라’로 간결하게'],
+    [/의\s*규정에\s*따른/g, '에 따른', '‘의 규정에 따른’은 ‘에 따른’으로 간결하게'],
+    [/에\s*의거하여|에\s*의거해/g, '에 따라', '‘의거하여’는 ‘따라’로'],
+    [/에\s*의거한/g, '에 따른', '‘의거한’은 ‘따른’으로'],
+    [/에\s*의하여/g, '에 따라', '‘에 의하여’는 ‘에 따라’로'],
+    [/당해(?=\s|[가-힣])/g, '해당', '‘당해’는 ‘해당’으로'],
+    [/동법(?=\s|[가-힣]|$)/g, '같은 법', '‘동법’은 ‘같은 법’으로'],
+    [/동\s?(조|항|호|목)(?=\s|[가-힣]|$)/g, '같은 $1', '‘동조·동항’은 ‘같은 조·같은 항’으로'],
+    [/동\s규정/g, '같은 규정', '‘동 규정’은 ‘같은 규정’으로'],
+    [/기타의\s/g, '그 밖의 ', '‘기타의’는 ‘그 밖의’로'],
+    [/(^|[\s,(])기타\s(?![등\d])/g, '$1그 밖의 ', '‘기타’는 ‘그 밖의’로'],
+    [/익일/g, '다음 날', '‘익일’은 ‘다음 날’로'], [/익월/g, '다음 달', '‘익월’은 ‘다음 달’로'], [/익년/g, '다음 해', '‘익년’은 ‘다음 해’로'],
+    [/금일/g, '오늘', '‘금일’은 ‘오늘’로'], [/명일/g, '내일', '‘명일’은 ‘내일’로'], [/금번/g, '이번', '‘금번’은 ‘이번’으로'], [/차기(?=\s|[가-힣])/g, '다음', '‘차기’는 ‘다음’으로'],
+    [/상기(?=\s|의)/g, '위', '‘상기’는 ‘위’로'], [/하기의/g, '다음의', '‘하기의’는 ‘다음의’로'],
+    [/일체의/g, '모든', '‘일체의’는 ‘모든’으로'], [/제반\s/g, '여러 ', '‘제반’은 ‘여러’로'], [/소정의/g, '정해진', '‘소정의’는 ‘정해진’으로'],
+    [/을\s요하는|를\s요하는/g, '이 필요한', '‘~을 요하는’은 ‘~이 필요한’으로'], [/요하는\s/g, '필요한 ', '‘요하는’은 ‘필요한’으로'],
+    [/득하여야/g, '받아야', '‘득하여야’는 ‘받아야’로'], [/득한다/g, '받는다', '‘득한다’는 ‘받는다’로'], [/득하여/g, '받아', '‘득하여’는 ‘받아’로'], [/득한(?=\s)/g, '받은', '‘득한’은 ‘받은’으로'],
+    [/구비하여야/g, '갖추어야', '‘구비하여야’는 ‘갖추어야’로'], [/구비된/g, '갖추어진', '‘구비된’은 ‘갖추어진’으로'], [/구비하고/g, '갖추고', '‘구비하고’는 ‘갖추고’로'],
+    [/징구하여/g, '받아', '‘징구’는 ‘받다’로'], [/징구한다/g, '받는다', '‘징구’는 ‘받다’로'],
+    [/송부하여야/g, '보내야', '‘송부’는 ‘보내다’로'], [/송부한다/g, '보낸다', '‘송부’는 ‘보내다’로'],
+    [/감안하여/g, '고려하여', '‘감안하여’는 ‘고려하여’로'], [/적의\s/g, '적절히 ', '‘적의’는 ‘적절히’로'], [/여하한/g, '어떠한', '‘여하한’은 ‘어떠한’으로'],
+    [/함에\s있어서?/g, '할 때', '‘~함에 있어’는 ‘~할 때’로'],
+    [/([가-힣]{2})토록(?=\s|[가-힣]|$)/g, '$1하도록', '‘~토록’은 ‘~하도록’으로'],
+    [/(필요|요청|발생|사용|퇴원|입원)시(?=\s|[,.]|$)/g, '$1 시', '‘~시’는 띄어 씀(‘필요 시’)'],
+    [/지체없이/g, '지체 없이', '‘지체 없이’로 띄어 씀'],
+    [/(할|될|볼|줄|알)수\s?(있|없)/g, '$1 수 $2', '‘~할 수’는 띄어 씀'],
+    [/하여야\s?함(?=[.\s]|$)/g, '하여야 한다', '문장은 ‘~한다’로 맺음'],
+    [/의\s*경우에는/g, '의 경우에는', ''],
+  ].filter(r => r[2]);
+  const isPh = (t) => /^\s*(<[^>]+>|\((생\s*략|현행과\s*같음)\))\s*$/.test(t) || /<현행과 동일>|<현행 .*과 동일>|\(현행 .*와 같음\)/.test(t);
+  function plainSuggest(text) {
+    const out = []; if (!text || isPh(text)) return out;
+    PLAIN_RULES.forEach(([re, rep, why]) => { re.lastIndex = 0; let m; while ((m = re.exec(text))) { const tail = text.slice(m.index); const rt = tail.replace(new RegExp(re.source), rep); const to = rt.slice(0, rt.length - (tail.length - m[0].length)); if (to !== m[0]) out.push({ from: m[0], to, why, at: m.index }); if (!re.global) break; } });
+    return out.sort((a, b) => a.at - b.at);
+  }
+  function applyPlain(text, sel) { let s = text; PLAIN_RULES.forEach(([re, rep, why]) => { if (sel && !sel.has(why)) return; if (isPh(s)) return; s = s.replace(re, rep); }); return s; }
+  RG.plainSuggest = plainSuggest; RG.applyPlain = applyPlain;
+  const STD_PHRASES = [
+    ['용어 정의', '이 내규에서 사용하는 용어의 뜻은 다음과 같다.'],
+    ['위임', '그 밖에 이 내규의 시행에 필요한 사항은 병원장이 따로 정한다.'],
+    ['준용', '이 내규에서 정하지 아니한 사항은 관계 법령 및 가톨릭중앙의료원 규정에 따른다.'],
+    ['예외', '다만, 부득이한 사유가 있는 경우에는 그러하지 아니하다.'],
+    ['서식', '제1항에 따른 서식은 별첨 1과 같다.'],
+    ['보고', '주관부서는 연 1회 이상 이행 실태를 점검하고, 그 결과를 내규검토위원회에 보고한다.'],
+    ['기록 보존', '관련 기록은 작성한 날부터 5년간 보존한다.'],
+    ['시행일', '이 내규는 ' + new Date().getFullYear() + '년 ' + (new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2) + '월 1일부터 시행한다.'],
+  ];
+
+  /* --- 행 찾기·글 꺼내기·반영 --- */
+  function rowById(id) { for (const s of state.sections) if (s.type === 'main') { const r = s.rows.find(x => x.id === id); if (r) return { sec: s, r }; } return null; }
+  function rowOfCell(cell) { if (!cell) return null; const td = cell.closest('tbody') && cell.closest('tr'); let tr = td; while (tr && !tr.querySelector('td.ctl')) tr = tr.previousElementSibling; const ctl = tr && tr.querySelector('td.ctl'); return ctl ? rowById(ctl.dataset.rid) : null; }
+  const linesOnly = (items) => (items || []).every(it => !it || it.k === 'line');
+  function sideText(items) { return isPlaceholder(items) ? '' : textOfItems(items); }
+  // 후보에 빠진 앞쪽 맥락 줄(상위 번호 제목 등, 현행과 같은 줄)은 되살림
+  function withCtx(r, newText) {
+    newText = String(newText || '').replace(/\r/g, '').replace(/\n{2,}/g, '\n').trim();
+    const cur = sideText(r.new).split('\n'), oldL = new Set(sideText(r.old).split('\n').map(x => x.trim())); const cand = newText.split('\n'); const keep = [];
+    const c0 = RG.splitNum((cand[0] || '').trim()).num;
+    for (const l of cur) { const t = l.trim(); if (!t || !oldL.has(t) || cand.some(c => c.trim() === t)) break; const n1 = RG.splitNum(t).num; if (n1 && (cand.some(c => RG.splitNum(c.trim()).num === n1) || c0 === n1)) break; keep.push(l); }
+    return keep.length && keep.length < cur.length ? keep.join('\n') + '\n' + newText : newText;
+  }
+  function setRowNew(r, newText, extraNote) {
+    newText = String(newText || '').replace(/\r/g, '').replace(/\n{2,}/g, '\n').trim();
+    newText = withCtx(r, newText);
+    const objs = (r.new || []).filter(it => it && it.k !== 'line');
+    if (linesOnly(r.old) && linesOnly(r.new)) {
+      const x = RG.compareSnippet(sideText(r.old), newText, cmpOpts()); r.old = x.old; r.new = x.new;
+      const keep = (r.note || []).filter(l => REASONS.indexOf((l.runs || []).map(y => y.t).join('')) >= 0);
+      r.note = (state.settings.autoNote !== false ? (x.autoNote || []).map(t => ({ k: 'line', runs: [{ t }], hang: 0 })) : []).concat(keep);
+    } else {
+      const lines = newText.split('\n').filter(Boolean).map(t => { const s = RG.splitNum(t); return RG.lineOf ? RG.lineOf(s.num, [{ t: s.text, m: 'chg' }]) : { k: 'line', runs: [{ t, m: 'chg' }] }; });
+      r.new = lines.concat(objs);
+    }
+    if (extraNote) r.note = (r.note || []).concat([{ k: 'line', runs: [{ t: extraNote }] }]);
+  }
+  // 표·그림이 든 칸: 글자만 바꾸고 바뀐 조각에 빨간 밑줄
+  function replaceRunsMarked(items, fn) {
+    let n = 0;
+    const doRuns = (runs) => { const out = []; (runs || []).forEach(r => { if (r.m === 'del' || !r.t) { out.push(r); return; } const t2 = fn(r.t); if (t2 === r.t) { out.push(r); return; } n++; const d = RG.charDiff(r.t, t2, {}); d.forEach(([op, s]) => { if (!s || op < 0) return; out.push(Object.assign({}, r, { t: s, m: op > 0 ? 'chg' : r.m })); }); }); return out; };
+    (items || []).forEach(it => { if (!it) return; if (it.k === 'line') it.runs = doRuns(it.runs); else if (it.k === 'table') it.rows.forEach(rw => rw.forEach(c => { c.runs = doRuns(c.runs); })); });
+    return n;
+  }
+
+  /* --- ① 개정안 전체 문구 다듬기 --- */
+  function plainDialog() {
+    flushCells();
+    const found = []; let no = 0;
+    state.sections.forEach(sec => {
+      if (sec.type === 'main') sec.rows.forEach(r => { no++; const items = r.new || []; const txts = []; items.forEach(it => { if (it && it.k === 'line') txts.push((it.runs || []).map(x => x.t).join('')); else if (it && it.k === 'table') it.rows.forEach(rw => rw.forEach(c => txts.push((c.runs || []).map(x => x.t).join('')))); }); txts.forEach(t => plainSuggest(t).forEach(s => found.push(Object.assign({ r, sec, no, ctx: t }, s)))); });
+      else (sec.new || []).forEach(it => { if (it && it.k === 'line') plainSuggest((it.runs || []).map(x => x.t).join('')).forEach(s => found.push(Object.assign({ sec, no: '별첨', ctx: (it.runs || []).map(x => x.t).join('') }, s))); });
+    });
+    const whys = Array.from(new Set(found.map(f => f.why)));
+    modal(`<h3>문구 다듬기 (알기 쉬운 표현)</h3><div class="muted">대조표의 <b>개정안 칸</b>에서 법제처 「알기 쉬운 법령 정비 기준」에 맞춰 바꿀 만한 표현을 찾았습니다. 고른 항목만 바꾸고, 바뀐 곳은 빨간 표시가 새로 붙습니다. (인터넷 없이 이 PC에서 처리)</div>
+      <div class="lintlist">${whys.length ? whys.map((w, i) => { const fs = found.filter(f => f.why === w); return `<label class="li nohover"><input type="checkbox" data-w="${i}" checked style="margin-top:3px"><div><div class="t">${esc(w)} <span class="muted">— ${fs.length}곳</span></div><div class="d">${fs.slice(0, 3).map(f => esc((f.no === '별첨' ? '별첨' : f.no + '행') + ': …' + f.ctx.slice(Math.max(0, f.at - 10), f.at)) + '<b style="color:#c0392b">' + esc(f.from) + '</b>→<b style="color:#1a7f37">' + esc(f.to) + '</b>' + esc(f.ctx.slice(f.at + f.from.length, f.at + f.from.length + 10)) + '…').join('<br>')}${fs.length > 3 ? '<br>외 ' + (fs.length - 3) + '곳' : ''}</div></div></label>`; }).join('') : '<div class="ok" style="padding:14px;text-align:center">바꿀 만한 표현이 없습니다. 👍</div>'}</div>
+      <label style="display:block;margin-top:6px"><input type="checkbox" id="plN" checked> 비고에 ‘자구 정비(알기 쉬운 표현)’ 적기</label>
+      <div class="foot"><button class="btn" id="x">닫기</button>${whys.length ? '<button class="btn pri" id="ok">고른 표현 바꾸기</button>' : ''}</div>`, m => {
+      $('#x', m).onclick = closeModal;
+      const ok = $('#ok', m); if (!ok) return;
+      ok.onclick = () => {
+        const sel = new Set($$('input[data-w]', m).filter(c => c.checked).map(c => whys[+c.dataset.w])); if (!sel.size) { toast('바꿀 항목을 고르세요.'); return; }
+        const noteOn = $('#plN', m).checked; const NOTE = '자구 정비(알기 쉬운 표현)';
+        const rows = new Set(found.filter(f => f.r && sel.has(f.why)).map(f => f.r)); let n = 0;
+        rows.forEach(r => {
+          const addNote = noteOn && !(r.note || []).some(l => (l.runs || []).map(y => y.t).join('') === NOTE);
+          if (linesOnly(r.old) && linesOnly(r.new) && !isPlaceholder(r.new)) { const before = sideText(r.new); const after = before.split('\n').map(l => applyPlain(l, sel)).join('\n'); if (after !== before) { setRowNew(r, after, addNote ? NOTE : ''); n++; } }
+          else { const k = replaceRunsMarked(r.new, (t) => applyPlain(t, sel)); if (k) { n++; if (addNote) r.note = (r.note || []).concat([{ k: 'line', runs: [{ t: NOTE }] }]); } }
+        });
+        state.sections.filter(s => s.type === 'annex').forEach(s => { if (replaceRunsMarked(s.new, (t) => applyPlain(t, sel))) n++; });
+        closeModal(); renderSections(); autosave(); LOG('문구 다듬기', n + '곳'); toast(n + '곳을 바꿨습니다. 잘못됐으면 Ctrl+Z로 되돌릴 수 있습니다.', 4500);
+      };
+    });
+  }
+
+  /* --- 지시 해석(규칙) --- */
+  function ruleByInstruction(cur, ins) {
+    const q = String(ins || '').trim(); const res = [];
+    const strip = (s) => s.trim().replace(/^["“‘'「]|["”’'」]$/g, '').trim();
+    let m;
+    if (/(다듬|정비|알기\s*쉽|쉽게|순화|자구)/.test(q)) { const t = cur.split('\n').map(l => applyPlain(l)).join('\n'); if (t !== cur) res.push({ text: t, note: '자구 정비(알기 쉬운 표현)', how: '알기 쉬운 표현으로 다듬기' }); }
+    const dm = q.match(/시행\s*일?[을를은는]?\s*(\d{4})\s*[.\-년/]\s*(\d{1,2})\s*[.\-월/]\s*(\d{1,2})/);
+    if (dm) { const d = dm[1] + '년 ' + (+dm[2]) + '월 ' + (+dm[3]) + '일'; const t = cur.replace(/\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일/, d).replace(/\d{4}\.\s*\d{1,2}\.\s*\d{1,2}\./, dm[1] + '. ' + (+dm[2]) + '. ' + (+dm[3]) + '.'); res.push({ text: t !== cur ? t : (cur ? cur + '\n' : '') + '이 내규는 ' + d + '부터 시행한다.', note: '시행일 지정', how: '시행일 바꾸기' }); }
+    const pairsArr = [];
+    q.split(/\n|;|,(?=\s*["“‘'「]?[^,]+?(?:을|를|→|->))/).forEach(part => {
+      let x;
+      if ((x = part.match(/^\s*(.+?)\s*(?:→|->|=>)\s*(.+?)\s*$/))) pairsArr.push([strip(x[1]), strip(x[2])]);
+      else if ((x = part.match(/^\s*(.+?)\s*(?:을|를|은|는)\s+(.+?)\s*(?:으로|로)\s*(?:바꿔|바꾸|변경|수정|고쳐|교체|대체)/))) pairsArr.push([strip(x[1]), strip(x[2])]);
+    });
+    pairsArr.forEach(([a, b]) => { if (a && cur.indexOf(a) >= 0) res.push({ text: cur.split(a).join(b), note: '‘' + a + '’→‘' + b + '’', how: '‘' + a + '’을(를) ‘' + b + '’(으)로' }); else if (a) res.miss = (res.miss || []).concat(a); });
+    if ((m = q.match(/^\s*(.+?)\s*(?:을|를)?\s*(?:삭제|지워|빼|없애)/)) && cur.indexOf(strip(m[1])) >= 0) { const a = strip(m[1]); res.push({ text: cur.split(a).join('').replace(/\s{2,}/g, ' ').replace(/\s+([,.])/g, '$1'), note: '‘' + a + '’ 삭제', how: '‘' + a + '’ 지우기' }); }
+    if ((m = q.match(/(?:끝|뒤|마지막)에\s*(.+?)\s*(?:을|를)?\s*(?:추가|넣어|덧붙|붙여)/))) { const a = strip(m[1]); res.push({ text: cur.replace(/\s+$/, '') + (/[.다]$/.test(cur.trim()) ? ' ' : '') + a, note: '문구 추가', how: '끝에 덧붙이기' }); }
+    if ((m = q.match(/(?:새\s*(?:줄|항|호|목)|다음\s*줄|아래)(?:에|로)?\s*(.+?)\s*(?:을|를)?\s*(?:추가|넣어|신설)/))) { const a = strip(m[1]); res.push({ text: cur.replace(/\s+$/, '') + '\n' + a, note: '신설', how: '아래 줄에 넣기' }); }
+    return res;
+  }
+
+  /* --- ②·③ AI 요청문 --- */
+  const AI_KEY = 'sinkujomun_ai';
+  const aiCfg = () => { try { return Object.assign({ on: false, key: '', model: 'claude-sonnet-5-5' }, JSON.parse(localStorage.getItem(AI_KEY) || '{}')); } catch (e) { return { on: false, key: '', model: 'claude-sonnet-5-5' }; } };
+  const aiSave = (c) => { try { localStorage.setItem(AI_KEY, JSON.stringify(c)); } catch (e) { } updFoot(); };
+  function updFoot() { const f = $('#privNote'); if (!f) return; const c = aiCfg(); f.textContent = '문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다' + (c.on && c.key ? ' (AI 문구 제안을 요청할 때만 그 문장을 보냅니다)' : ''); }
+  function presetDesc() { return state.settings.preset === 'moleg' ? '법제처 신·구조문대비표 방식(조·항·호·목, 「알기 쉬운 법령 정비 기준」)' : '부천성모병원 내규관리내규(9.1-4) 방식 — 번호 단계 1. → 가. → 1) → 가) → (1) → (가)'; }
+  function contextOf(sec, r) {
+    const i = sec.rows.indexOf(r); const pick = (x) => x ? sideText(x.new).replace(/\s+/g, ' ').slice(0, 160) : '';
+    return { prev: pick(sec.rows[i - 1]), next: pick(sec.rows[i + 1]) };
+  }
+  function buildPrompt(r, sec, ins) {
+    const ctx = contextOf(sec, r); const name = nameOf();
+    return `병원 내규 개정안 문구를 다듬어 주세요.
+
+[내규] ${name}
+[표기 기준] ${presetDesc()}
+- 문장은 "~한다"로 맺고, 법제처 「알기 쉬운 법령 정비 기준」의 쉬운 말을 씁니다(예: "당해"→"해당", "의 규정에 의한"→"에 따른", "기타"→"그 밖의").
+- 줄 앞 번호(1., 가., 1), 가), (1) …)와 줄바꿈은 그대로 둡니다. "<현행과 동일>", "(생 략)" 같은 생략 표시도 그대로 둡니다.
+- 지시받은 부분만 고치고, 나머지 뜻은 바꾸지 않습니다. 사실(기관명·날짜·금액)을 지어내지 않습니다. 모르면 "○○"처럼 비워 둡니다.
+
+[현행 문구]
+${sideText(r.old) || '(없음 — 신설)'}
+
+[지금 개정안 문구]
+${sideText(r.new) || '(없음 — 삭제 예정)'}
+${ctx.prev ? '\n[바로 앞 조문(개정안)] ' + ctx.prev : ''}${ctx.next ? '\n[바로 뒤 조문(개정안)] ' + ctx.next : ''}
+
+[지시]
+${ins || '알맞은 내규 문구로 다듬어 주세요.'}
+
+[답 형식] 다른 말 없이 아래 JSON만 답하세요. text에는 개정안 칸에 들어갈 문구 전체(번호 포함), note에는 비고에 적을 짧은 설명(20자 안팎)을 넣습니다. 후보는 2~3개.
+{"candidates":[{"text":"...","note":"..."},{"text":"...","note":"..."}]}`;
+  }
+  function parseAnswer(txt) {
+    txt = String(txt || '').trim(); if (!txt) return [];
+    const j = txt.match(/\{[\s\S]*\}/);
+    if (j) { try { const o = JSON.parse(j[0]); const c = (o.candidates || o.후보 || []).map(x => typeof x === 'string' ? { text: x } : { text: x.text || x.문구 || '', note: x.note || x.reason || x.비고 || '' }).filter(x => x.text); if (c.length) return c; } catch (e) { } }
+    const parts = ('\n' + txt).split(/\n\s*(?:\*\*)?(?:후보|대안|안)\s*\d+(?:\*\*)?\s*[:.)\]]?\s*|\n\s*[①②③]\s*/).map(s => s.trim()).filter(Boolean);
+    return (parts.length > 1 ? parts : [txt]).map(t => ({ text: t.replace(/^```\w*|```$/g, '').trim() }));
+  }
+  async function callClaude(prompt) {
+    const c = aiCfg(); if (!c.on || !c.key) throw new Error('AI 연결이 꺼져 있습니다. 「도구 → AI 문구 제안 설정」에서 켜 주세요.');
+    const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 60000);
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: ctl.signal, headers: { 'content-type': 'application/json', 'x-api-key': c.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ model: c.model || 'claude-sonnet-5-5', max_tokens: 2000, system: '당신은 병원 내규 개정 문안을 다듬는 행정·법제 전문가입니다. 요청한 JSON 형식으로만 답합니다.', messages: [{ role: 'user', content: prompt }] }) });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((d.error && d.error.message) || ('HTTP ' + res.status));
+      return (d.content || []).filter(x => x.type === 'text').map(x => x.text).join('\n');
+    } catch (e) { if (e.name === 'AbortError') throw new Error('응답이 60초 안에 오지 않았습니다.'); if (/Failed to fetch|NetworkError/i.test(e.message)) throw new Error('인터넷 연결 또는 병원 보안 프로그램이 Anthropic 접속(api.anthropic.com)을 막고 있습니다.'); throw e; }
+    finally { clearTimeout(tm); }
+  }
+  function aiSettingsDialog() {
+    const c = aiCfg();
+    modal(`<h3>AI 문구 제안 설정</h3>
+      <div class="warnbox"><b>켜기 전에 확인하세요.</b> AI 문구 제안을 누를 때만, 고른 행의 <b>현행·개정안 문구와 앞뒤 조문 일부, 지시 내용</b>이 Anthropic(Claude) 서버로 전송됩니다. 환자 정보 등 민감한 내용이 들어 있지 않은지 확인하고, 병원 정보보안 지침에서 허용하는지 먼저 확인해 주세요. 나머지 기능은 계속 인터넷 없이 동작합니다.</div>
+      <label style="display:block;margin:8px 0"><input type="checkbox" id="aiOn" ${c.on ? 'checked' : ''}> AI 문구 제안 켜기</label>
+      <div class="grid2"><label class="f">API 키 <span class="muted">(console.anthropic.com에서 발급)</span><input type="password" id="aiK" value="${esc(c.key || '')}" placeholder="sk-ant-..." autocomplete="off"></label>
+      <label class="f">모델<select id="aiM">${[['claude-sonnet-5-5', 'Claude Sonnet 5.5 (권장)'], ['claude-opus-5-5', 'Claude Opus 5.5 (가장 정교, 느림)'], ['claude-haiku-5-5', 'Claude Haiku 5.5 (빠름)']].map(([v, l]) => '<option value="' + v + '"' + (c.model === v ? ' selected' : '') + '>' + l + '</option>').join('')}</select></label></div>
+      <div class="muted" style="margin-top:6px">API 키는 이 PC의 이 브라우저에만 저장되고, 작업 파일·버전·내보내기 파일에는 들어가지 않습니다. 사용량에 따라 Anthropic 요금이 듭니다.</div>
+      <div class="row" style="margin-top:8px"><button class="btn sm" id="aiT">연결 시험</button><span class="muted" id="aiR"></span></div>
+      <div class="foot"><button class="btn" id="x">취소</button><button class="btn pri" id="ok">저장</button></div>`, m => {
+      const read = () => ({ on: $('#aiOn', m).checked, key: $('#aiK', m).value.trim(), model: $('#aiM', m).value });
+      $('#x', m).onclick = closeModal;
+      $('#aiT', m).onclick = async () => { const prev = aiCfg(); aiSave(Object.assign(read(), { on: true })); $('#aiR', m).textContent = '시험 중…'; try { const t = await callClaude('"연결됨"이라고만 답하세요.'); $('#aiR', m).textContent = '✅ 연결됨 (' + t.trim().slice(0, 20) + ')'; } catch (e) { $('#aiR', m).textContent = '❌ ' + e.message; } finally { aiSave(prev); } };
+      $('#ok', m).onclick = () => { const v = read(); if (v.on && !v.key) { toast('API 키를 넣어 주세요.'); return; } aiSave(v); closeModal(); toast(v.on ? 'AI 문구 제안을 켰습니다.' : 'AI 문구 제안을 껐습니다.'); LOG('AI 설정', v.on ? '켜기 · ' + v.model : '끄기'); };
+    });
+  }
+
+  /* --- 행 문구 제안 창 --- */
+  function diffHTML(a, b) { return RG.charDiff(a, b, {}).map(([op, s]) => op === 0 ? esc(s) : op > 0 ? '<ins>' + esc(s) + '</ins>' : '<del>' + esc(s) + '</del>').join('').replace(/\n/g, '<br>'); }
+  function suggestDialog(sec, r) {
+    flushCells();
+    if (!r) { const hit = rowOfCell(lastCell); if (!hit) { toast('먼저 본문 대조표에서 고칠 행의 칸을 누르세요.'); return; } sec = hit.sec; r = hit.r; }
+    const i = sec.rows.indexOf(r); const cur = sideText(r.new); const c = aiCfg();
+    let cands = [];
+    modal(`<h3>문구 제안 — ${i + 1}번째 행</h3>
+      <div class="grid2 sgcur"><div><div class="muted">현 행</div><div class="box">${esc(sideText(r.old) || '<신설>').replace(/\n/g, '<br>')}</div></div><div><div class="muted">지금 개정안</div><div class="box">${esc(cur || '<삭제>').replace(/\n/g, '<br>')}</div></div></div>
+      <label class="f" style="margin-top:8px">어떻게 고칠까요?<textarea id="sgI" style="height:62px" placeholder="예) 알기 쉽게 다듬어 줘 / 총무팀을 행정지원팀으로 바꿔 / 시행일을 2027. 1. 1.로 / 끝에 '다만, 응급 시에는 사후에 보고한다.'를 추가 / 보호자 동의 절차를 넣어 줘(AI)"></textarea></label>
+      <div class="row" style="margin-top:6px;flex-wrap:wrap">
+        <button class="btn" id="sgR" title="인터넷 없이 이 PC에서 처리">① 규칙으로 제안</button>
+        <button class="btn ${c.on && c.key ? 'pri' : ''}" id="sgA" title="${c.on && c.key ? 'Claude에게 요청(문장이 전송됨)' : '설정에서 켜야 씀'}">② AI에게 제안 받기${c.on && c.key ? '' : ' (꺼짐)'}</button>
+        <button class="btn" id="sgC" title="요청문을 복사해 claude.ai 등에 붙여 넣고 답을 받아 오기">③ 요청문 복사</button>
+        <select id="sgS" title="자주 쓰는 내규 표준 문구 덧붙이기"><option value="">+ 표준 문구 덧붙이기</option>${STD_PHRASES.map((p, k) => '<option value="' + k + '">' + esc(p[0]) + ': ' + esc(p[1].slice(0, 28)) + '…</option>').join('')}</select>
+      </div>
+      <div id="sgP" class="sgpaste" hidden><div class="muted">claude.ai 등에서 받은 답을 그대로 붙여 넣으세요(JSON이 아니어도 됩니다).</div><textarea id="sgPT" style="height:90px;width:100%"></textarea><button class="btn sm pri" id="sgPO">붙여 넣은 답 보기</button></div>
+      <div id="sgL" class="sglist"></div>
+      <label style="display:block;margin-top:6px"><input type="checkbox" id="sgN" checked> 고른 후보의 설명을 비고에 적기</label>
+      <div class="foot"><button class="btn" id="x">닫기</button></div>`, m => {
+      const show = (list, src) => {
+        cands = list; const L = $('#sgL', m);
+        if (!list.length && list.miss) { L.innerHTML = '<div class="warnbox">지금 개정안에 ‘' + esc(list.miss.join('’, ‘')) + '’이(가) 없습니다. 이미 바뀌었거나 띄어쓰기가 다를 수 있습니다.</div>'; return; }
+        if (!list.length) { L.innerHTML = '<div class="muted" style="padding:10px">' + (src === 'rule' ? '규칙으로 처리할 수 있는 지시가 아닙니다. ‘A를 B로 바꿔’, ‘A 삭제’, ‘끝에 … 추가’, ‘시행일을 2027. 1. 1.로’, ‘알기 쉽게 다듬어’ 형태로 적거나 ②·③을 이용하세요.' : '후보가 없습니다.') + '</div>'; return; }
+        L.innerHTML = list.map((x, k) => `<div class="sgc"><div class="h"><b>후보 ${k + 1}</b>${x.how ? ' <span class="muted">' + esc(x.how) + '</span>' : ''}${x.note ? ' <span class="pill">' + esc(x.note) + '</span>' : ''}<span style="flex:1"></span><button class="btn sm" data-ed="${k}">고쳐서 쓰기</button><button class="btn sm pri" data-use="${k}">이 문구로 바꾸기</button></div><div class="dx">${diffHTML(cur, withCtx(r, x.text))}</div><textarea data-t="${k}" hidden style="width:100%;height:80px">${esc(x.text)}</textarea></div>`).join('');
+        $$('[data-ed]', L).forEach(b => b.onclick = () => { const t = $('textarea[data-t="' + b.dataset.ed + '"]', L); t.hidden = !t.hidden; if (!t.hidden) t.focus(); });
+        $$('[data-use]', L).forEach(b => b.onclick = () => {
+          const k = +b.dataset.use; const t = $('textarea[data-t="' + k + '"]', L); const text = t && !t.hidden ? t.value : cands[k].text;
+          setRowNew(r, text, $('#sgN', m).checked && cands[k].note ? cands[k].note : '');
+          closeModal(); renderSections(); autosave(); LOG('문구 제안 적용', (src === 'ai' ? 'AI' : src === 'paste' ? '붙여 넣기' : '규칙') + ' · ' + (i + 1) + '행');
+          setTimeout(() => flash($('[data-rid="' + r.id + '"]')), 80); toast('바꿨습니다. 빨간 표시와 비고를 새로 매겼습니다. (Ctrl+Z 되돌리기)', 4000);
+        });
+      };
+      $('#x', m).onclick = closeModal;
+      $('#sgR', m).onclick = () => { const ins = $('#sgI', m).value; const list = ruleByInstruction(cur, ins); if (!ins.trim()) { const t = cur.split('\n').map(l => applyPlain(l)).join('\n'); show(t !== cur ? [{ text: t, note: '자구 정비(알기 쉬운 표현)', how: '알기 쉬운 표현으로 다듬기' }] : [], 'rule'); return; } show(list, 'rule'); };
+      $('#sgS', m).onchange = (e) => { const k = e.target.value; if (k === '') return; const p = STD_PHRASES[+k][1]; show([{ text: (cur ? cur.replace(/\s+$/, '') + '\n' : '') + p, note: '문구 추가', how: '표준 문구(' + STD_PHRASES[+k][0] + ') 덧붙이기 — 숫자·부서명은 고쳐서 쓰세요' }, { text: (cur ? cur.replace(/\s+$/, '') + ' ' : '') + p, note: '문구 추가', how: '같은 줄 끝에 이어 쓰기' }], 'rule'); e.target.value = ''; };
+      $('#sgA', m).onclick = async () => {
+        if (!(aiCfg().on && aiCfg().key)) { closeModal(); aiSettingsDialog(); return; }
+        const ins = $('#sgI', m).value.trim(); if (!ins) { toast('어떻게 고칠지 적어 주세요.'); return; }
+        $('#sgL', m).innerHTML = '<div class="muted" style="padding:10px">Claude에게 묻는 중… (10~30초)</div>';
+        try { const t = await callClaude(buildPrompt(r, sec, ins)); LOG('AI 문구 제안', (i + 1) + '행'); show(parseAnswer(t), 'ai'); } catch (e) { $('#sgL', m).innerHTML = '<div class="warnbox">' + esc(e.message) + '</div>'; }
+      };
+      $('#sgC', m).onclick = async () => {
+        const p = buildPrompt(r, sec, $('#sgI', m).value.trim());
+        let ok = false; try { await navigator.clipboard.writeText(p); ok = true; } catch (e) { const ta = document.createElement('textarea'); ta.value = p; document.body.appendChild(ta); ta.select(); try { ok = document.execCommand('copy'); } catch (e2) { } ta.remove(); }
+        $('#sgP', m).hidden = false; toast(ok ? '요청문을 복사했습니다. claude.ai 등에 붙여 넣고, 받은 답을 아래 칸에 붙여 넣으세요.' : '복사가 막혔습니다. 아래 칸의 요청문을 직접 복사하세요.', 5000);
+        if (!ok) $('#sgPT', m).value = p;
+      };
+      $('#sgPO', m).onclick = () => show(parseAnswer($('#sgPT', m).value), 'paste');
+      setTimeout(() => $('#sgI', m).focus(), 30);
+    });
+  }
+  (function mountSuggest() {
+    const after = $('#bSubmit');
+    if (after && !$('#bSug')) { after.insertAdjacentHTML('beforebegin', '<button class="btn sm" id="bSug" title="고른 행의 개정안 문구 제안 (Ctrl+Alt+K)">문구 제안</button><button class="btn sm" id="bPlain" title="개정안 전체에서 어려운 한자어·옛 표현을 알기 쉬운 말로">문구 다듬기</button>'); $('#bSug').onclick = () => suggestDialog(); $('#bPlain').onclick = plainDialog; }
+    document.addEventListener('keydown', (e) => { if (e.ctrlKey && e.altKey && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); suggestDialog(); } });
+    updFoot();
+  })();
+
+  window.__app = { suggestDialog, plainDialog, aiSettingsDialog, parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
   Object.defineProperty(window.__app, 'state', { get: () => state });
 })();
 
@@ -6523,7 +6799,7 @@ window.__authGate=true;
     ['대조 표시', ''], ['Alt+1', '바뀐 부분 (빨간 밑줄)'], ['Alt+2', '지운 부분 (빨간 취소선)'], ['Alt+3', '신설 (빨간 글씨)'], ['Alt+0', '대조 표시 없애기'], ['Alt+4 / 5 / 6', '「현행과 동일」 / 「신설」 / 「삭제」 넣기'],
     ['표', ''], ['Ctrl+Alt+T', '표 만들기 (한글의 Ctrl+N,T — 브라우저가 Ctrl+N을 막아 대신 씀)'], ['Ctrl+Enter', '표 안: 아래에 줄 추가'], ['Alt+Insert', '줄/칸 추가하기'], ['Alt+Delete', '줄/칸 지우기'],
     ['Tab / Shift+Tab', '표 안: 다음 / 이전 칸 (마지막 칸에서 Tab: 줄 추가)'], ['F5 → Shift+방향키', '셀 블록 고르기 (마우스로 끌어도 됨)'], ['셀 고른 뒤 M / S / C', '셀 합치기 / 셀 나누기 / 셀 배경색'], ['Alt+I', '그림 넣기'],
-    ['검토', ''], ['F3 / Shift+F3', '빨간 표시(바뀐 곳) 다음 / 이전으로'], ['Ctrl+Alt+G', '바뀐 곳 목록'], ['Ctrl+Alt+L', '형식 검사'],
+    ['검토', ''], ['F3 / Shift+F3', '빨간 표시(바뀐 곳) 다음 / 이전으로'], ['Ctrl+Alt+G', '바뀐 곳 목록'], ['Ctrl+Alt+L', '형식 검사'], ['Ctrl+Alt+K', '고른 행 문구 제안'],
     ['파일', ''], ['Alt+S · Ctrl+S', '작업 저장'], ['Alt+O · Ctrl+O', '작업 불러오기'], ['Alt+P · Ctrl+P', '미리보기 · 저장 · 인쇄'], ['F1', '이 단축키 안내']
   ];
   function keysDlg() {
@@ -7080,7 +7356,7 @@ window.__authGate=true;
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '2.4';
+  const APP_VERSION = '2.5';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
