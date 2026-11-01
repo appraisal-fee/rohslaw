@@ -14,7 +14,11 @@ input,select,textarea{font-family:inherit;font-size:13px}
 .top h1{font-size:18px;margin:0;font-weight:700;letter-spacing:-.3px}
 .top .sub{font-size:12px;opacity:.75}
 .top .sp{flex:1}
-.top button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:6px 11px}
+.top button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:6px 11px;white-space:nowrap;flex:0 0 auto}
+.top{gap:10px}.top>div:first-child{min-width:0;flex:0 1 auto}.top h1,.top .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.userchip{white-space:nowrap;flex:0 0 auto}
+@media (max-width:1480px){.top .sub{display:none}.top button{padding:6px 9px;font-size:13px}}
+@media (max-width:1250px){.top h1{font-size:16px}.top button{padding:5px 7px;font-size:12.5px}}
 .top button:hover{background:rgba(255,255,255,.22)}
 .top button.go{background:#f2c14e;color:#1c2b45;border-color:#f2c14e;font-weight:700}
 .steps{display:flex;gap:0;background:#fff;border-bottom:1px solid var(--line);padding:0 22px;position:sticky;top:50px;z-index:40}
@@ -71,6 +75,19 @@ input[type=text],input[type=number],select,textarea{border:1px solid var(--line)
 .muted{color:var(--sub);font-size:12px}
 .pill{display:inline-block;background:#eef1f6;border-radius:20px;padding:2px 9px;font-size:12px;margin:2px 4px 2px 0}
 .infobox{background:#eef4ff;border:1px solid #b9cdf3;color:#1f3559;border-radius:8px;padding:9px 12px;font-size:12.5px;margin:8px 0}.infobox .ok{color:#1a7f37;font-weight:600}.infobox .bad{color:#c0392b}
+.lintlist{max-height:52vh;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:8px}
+.lintlist .li{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-bottom:1px solid #eef0f4;cursor:pointer}.lintlist .li:last-child{border-bottom:0}
+.lintlist .li:hover{background:#f4f7fc}.lintlist .li.nohover{cursor:default}.lintlist .li.nohover:hover{background:none}
+.lintlist .sev{flex:0 0 auto;min-width:34px;text-align:center;color:#fff;border-radius:5px;font-size:11px;padding:2px 5px;margin-top:1px}
+.lintlist .t{font-size:13px}.lintlist .d{font-size:11.5px;color:#6b7486;margin-top:2px}.lintlist .memo{font-size:12px;color:#7a4b00;background:#fff6dd;border-radius:5px;padding:2px 6px;margin-top:3px;display:inline-block}
+.pm{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.toolgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.tool{display:flex;flex-direction:column;gap:3px;text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer}.tool:hover{border-color:#8aa4d6;background:#f5f8fe}.tool b{font-size:14px}.tool span{font-size:12px;color:#6b7486;line-height:1.45}
+.regt{width:100%;border-collapse:collapse;font-size:12.5px}.regt th{position:sticky;top:0;background:#eef2f8;padding:6px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:center}.regt td{padding:5px 6px;border-bottom:1px solid #eef0f4;text-align:center;vertical-align:middle}.regt td:first-child{text-align:left}.regt .bad{color:#c0392b;font-weight:600}.regt .warn{color:#b7791f;font-weight:600}
+.bdg{display:inline-block;min-width:17px;padding:0 5px;border-radius:9px;background:#e53935;color:#fff;font-size:11px;line-height:17px;margin-left:3px}
+.fixlist{max-height:56vh;overflow:auto;border:1px solid var(--line);border-radius:8px}.fx{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:8px;padding:7px 9px;border-bottom:1px solid #eef0f4;align-items:start}.fx.low{background:#fff8e1}.fx .src img{display:block;max-width:100%;border:1px solid #dde3ec;border-radius:4px;margin-bottom:3px;background:#fff}.fx textarea{width:100%;font-size:13px;line-height:1.5;resize:vertical}
+.flash{animation:flashk 1.8s ease-out}@keyframes flashk{0%,30%{box-shadow:0 0 0 3px #ff9800;background:#fff3cd}100%{box-shadow:0 0 0 0 rgba(255,152,0,0)}}
+.etab td.ctl.done{background:#e8f5e9}.etab td.ctl.done .rn{color:#2e7d32;font-weight:700}.etab td.ctl button.hasmemo{background:#fff6dd;border-color:#f1d58b}
+pre.rep{white-space:pre-wrap;font-size:12.5px;background:#f6f8fb;border:1px solid var(--line);border-radius:8px;padding:10px;max-height:50vh;overflow:auto}
 .warnbox{background:#fff8e6;border:1px solid #f1d58b;color:#6b4e00;border-radius:8px;padding:8px 11px;font-size:12.5px;margin:8px 0}
 .okbox{background:#effaf3;border:1px solid #bfe2cc;color:#1d5a35;border-radius:8px;padding:8px 11px;font-size:12.5px;margin:8px 0}
 /* 직접 고치기 */
@@ -352,7 +369,7 @@ input[type=text],input[type=number],select,textarea{border:1px solid var(--line)
     <button class="btn" id="bAddAnnex">+ 별첨 대조표 추가</button>
   </div>
 </section>
-<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.10.28. · 문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다 · <a href="#" id="updCheck">새 버전 확인</a></div>
+<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.01. · 문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다 · <a href="#" id="updCheck">새 버전 확인</a></div>
 </main>
 
 <!-- 설정 서랍 -->
@@ -1840,8 +1857,8 @@ window.__authGate=true;
       const l = lines[i], prev = i ? lines[i - 1] : null;
       const gap = prev ? (prev.y - l.y) : 0, lh = prev ? prev.h : l.h;
       const newPara = !cur || RG.splitNum(l.s).num !== '' || gap > lh * 1.9 || (prev && /[.다]$/.test(prev.s));
-      if (newPara) { cur = { raw: l.s, y: l.y }; out.push(cur); }
-      else cur.raw = joinTwo(cur.raw, l.s);
+      if (newPara) { cur = { raw: l.s, y: l.y, lines: [l] }; out.push(cur); }
+      else { cur.raw = joinTwo(cur.raw, l.s); cur.lines.push(l); }
     }
     return out;
   }
@@ -2319,7 +2336,7 @@ window.__authGate=true;
       entries.sort((a, b) => ((a.col || 0) - (b.col || 0)) || (b.y - a.y));
       // 줄 → 문단 (표·그림을 만나면 끊음)
       let run = [];
-      const flushRun = () => { if (!run.length) return; for (const p of linesToParas(run)) blocks.push({ type: 'p', raw: p.raw, page: pn, ocr: !!ocred }); run = []; };
+      const flushRun = () => { if (!run.length) return; for (const p of linesToParas(run)) { const b = { type: 'p', raw: p.raw, page: pn }; if (ocred) { const parts = p.lines.flatMap(l => l.parts); b.ocr = true; b.conf = Math.round(Math.min(...parts.map(it => it.conf == null ? 100 : it.conf))); b.box = [Math.min(...parts.map(it => it.x)), Math.min(...parts.map(it => it.y - it.h * 0.35)), Math.max(...parts.map(it => it.x + it.w)), Math.max(...parts.map(it => it.y + it.h * 1.15))].map(v => Math.round(v * 10) / 10); } blocks.push(b); } run = []; };
       for (const e of entries) { if (e.line) run.push(e.line); else { flushRun(); blocks.push(e.block); } }
       flushRun();
     }
@@ -3935,9 +3952,15 @@ window.__authGate=true;
       }
       return x || pXML([]);
     }
-    const secs = collectSections(project);
+    const secs = project.plainDoc ? [] : collectSections(project);
     const tmeta = measureTables(secs, S);
     let body = '';
+    if (project.plainDoc) { // 일반 문서(사유서·개정 전문)
+      const pd = project.plainDoc; const g = pageGeom(S, 'portrait'); const m = g.m;
+      if (pd.title) body += pXML([{ t: pd.title }], { align: 'center', rpr: { b: true, sz: Math.round((pd.titleSize || 16) * 2) }, line: 320 }) + pXML([], { line: 200 });
+      body += await cellItemsXML(pd.items || [], g.cw - 1, g.ch - 20);
+      body += '<w:sectPr><w:pgSz w:w="' + tw(g.W) + '" w:h="' + tw(g.H) + '"/><w:pgMar w:top="' + tw(pd.margin || 20) + '" w:right="' + tw(pd.margin || 20) + '" w:bottom="' + tw(pd.margin || 20) + '" w:left="' + tw(pd.margin || 20) + '" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr>';
+    }
     // 머리말·꼬리말 부분(세로/가로 너비가 달라 따로 만듦)
     const hfParts = {}; const hfFiles = [];
     function hfXML(which, land) {
@@ -4127,7 +4150,7 @@ window.__authGate=true;
       }
       return x || para([]);
     }
-    const secs = collectSections(project);
+    const secs = project.plainDoc ? [] : collectSections(project);
     const tmeta = measureTables(secs, S);
     const sectionFiles = [];
     function hfPara(text, align) {
@@ -4185,6 +4208,17 @@ window.__authGate=true;
       x += para([], { line: 100, inner: '<hp:run charPrIDRef="' + cp({}) + '">' + tbl(rx, nSub + 1, nc, totalW, { repeat: true, block: true }) + '<hp:t/></hp:run>' });
       sectionFiles.push('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?><hs:sec ' + NS + '>' + x + '</hs:sec>');
     }
+    if (project.plainDoc) { // 일반 문서(사유서·개정 전문): 한 구역
+      const pd = project.plainDoc; const g = pageGeom(S, 'portrait'); const mg = pd.margin || 20;
+      const secPr = '<hp:secPr id="" textDirection="HORIZONTAL" spaceColumns="1134" tabStop="8000" tabStopVal="4000" tabStopUnit="HWPUNIT" outlineShapeIDRef="1" memoShapeIDRef="0" textVerticalWidthHead="0" masterPageCnt="0"><hp:grid lineGrid="0" charGrid="0" wonggojiFormat="0"/><hp:startNum pageStartsOn="BOTH" page="0" pic="0" tbl="0" equation="0"/><hp:visibility hideFirstHeader="0" hideFirstFooter="0" hideFirstMasterPage="0" border="SHOW_ALL" fill="SHOW_ALL" hideFirstPageNum="0" hideFirstEmptyLine="0" showLineNumber="0"/><hp:lineNumberShape restartType="0" countBy="0" distance="0" startNumber="0"/><hp:pagePr landscape="WIDELY" width="59528" height="84186" gutterType="LEFT_ONLY"><hp:margin header="' + HU(10) + '" footer="' + HU(10) + '" gutter="0" left="' + HU(mg) + '" right="' + HU(mg) + '" top="' + HU(mg) + '" bottom="' + HU(mg) + '"/></hp:pagePr><hp:footNotePr><hp:autoNumFormat type="DIGIT" userChar="" prefixChar="" suffixChar=")" supscript="0"/><hp:noteLine length="-1" type="SOLID" width="0.12 mm" color="#000000"/><hp:noteSpacing betweenNotes="283" belowLine="567" aboveLine="850"/><hp:numbering type="CONTINUOUS" newNum="1"/><hp:placement place="EACH_COLUMN" beneathText="0"/></hp:footNotePr><hp:endNotePr><hp:autoNumFormat type="DIGIT" userChar="" prefixChar="" suffixChar=")" supscript="0"/><hp:noteLine length="14692344" type="SOLID" width="0.12 mm" color="#000000"/><hp:noteSpacing betweenNotes="0" belowLine="567" aboveLine="850"/><hp:numbering type="CONTINUOUS" newNum="1"/><hp:placement place="END_OF_DOCUMENT" beneathText="0"/></hp:endNotePr><hp:pageBorderFill type="BOTH" borderFillIDRef="1" textBorder="PAPER" headerInside="0" footerInside="0" fillArea="PAPER"><hp:offset left="1417" right="1417" top="1417" bottom="1417"/></hp:pageBorderFill><hp:pageBorderFill type="EVEN" borderFillIDRef="1" textBorder="PAPER" headerInside="0" footerInside="0" fillArea="PAPER"><hp:offset left="1417" right="1417" top="1417" bottom="1417"/></hp:pageBorderFill><hp:pageBorderFill type="ODD" borderFillIDRef="1" textBorder="PAPER" headerInside="0" footerInside="0" fillArea="PAPER"><hp:offset left="1417" right="1417" top="1417" bottom="1417"/></hp:pageBorderFill></hp:secPr>';
+      const ctrlCol = '<hp:ctrl><hp:colPr id="" type="NEWSPAPER" layout="LEFT" colCount="1" sameSz="1" sameGap="0"/></hp:ctrl>';
+      let x = para(pd.title ? [{ t: pd.title }] : [], { align: 'CENTER', line: 160, rpr: { b: true, size: pd.titleSize || 16 }, pre: '<hp:run charPrIDRef="' + cp({}) + '">' + secPr + ctrlCol + '</hp:run>' });
+      if (pd.title) x += para([], { line: 100 });
+      const cwmm = 210 - mg * 2;
+      x += await cellContent(pd.items || [], cwmm - 1, 297 - mg * 2 - 20);
+      sectionFiles.push('<?xml version="1.0" encoding="UTF-8" standalone="yes" ?><hs:sec ' + NS + '>' + x + '</hs:sec>');
+      secs.push({ title: pd.title || '' });
+    }
     // 머리 정보 완성
     header = header.replace(/(<hh:borderFills itemCnt=")(\d+)(">[\s\S]*?)(<\/hh:borderFills>)/, (m, a, n, b, c) => a + (+n + bfs.length) + b + bfs.join('') + c);
     header = header.replace(/(<hh:charProperties itemCnt=")(\d+)(">[\s\S]*?)(<\/hh:charProperties>)/, (m, a, n, b, c) => a + (+n + cps.length) + b + cps.join('') + c);
@@ -4207,6 +4241,213 @@ window.__authGate=true;
     return await zip.generateAsync({ type: 'blob', mimeType: 'application/hwp+zip', compression: 'DEFLATE' });
   };
 })(typeof window !== 'undefined' ? window : globalThis);
+
+/* ===== 고도화 도구: 형식 검사 · 개정 전문 · 사유서 · 일괄 처리용 순수 함수 ===== */
+(function (G) {
+  'use strict';
+  const RG = G.RG;
+  const HAN = '가나다라마바사아자차카타파하';
+  const norm = (s) => String(s || '').replace(/[\s 　]+/g, '');
+  const soft = (s) => String(s || '').replace(/[\s 　]+/g, ' ').trim();
+
+  /* ---------- 번호 → 종류·값 ---------- */
+  function numInfo(num) {
+    if (!num) return null;
+    let m;
+    if ((m = num.match(/^제(\d+)조(의\d+)?/))) return { k: '조', v: +m[1], sub: !!m[2] };
+    if ((m = num.match(/^(\d+)\.$/))) return { k: '1.', v: +m[1] };
+    if ((m = num.match(/^([가-하])\.$/))) return { k: '가.', v: HAN.indexOf(m[1]) + 1 };
+    if ((m = num.match(/^(\d+)\)$/))) return { k: '1)', v: +m[1] };
+    if ((m = num.match(/^([가-하])\)$/))) return { k: '가)', v: HAN.indexOf(m[1]) + 1 };
+    if ((m = num.match(/^\((\d+)\)$/))) return { k: '(1)', v: +m[1] };
+    if ((m = num.match(/^\(([가-하])\)$/))) return { k: '(가)', v: HAN.indexOf(m[1]) + 1 };
+    if ((m = num.match(/^([①-⑳])$/))) return { k: '①', v: m[1].charCodeAt(0) - 0x2460 + 1 };
+    return null;
+  }
+  const BUCHEON = ['1.', '가.', '1)', '가)', '(1)', '(가)'];
+  const fmtNum = (k, v) => ({ '조': '제' + v + '조', '1.': v + '.', '가.': (HAN[v - 1] || v) + '.', '1)': v + ')', '가)': (HAN[v - 1] || v) + ')', '(1)': '(' + v + ')', '(가)': '(' + (HAN[v - 1] || v) + ')', '①': String.fromCharCode(0x2460 + v - 1) })[k] || String(v);
+  const isHeading = (b) => b.type === 'p' && !b.num && soft(b.text).length <= 14 && !/[.。다:：]$/.test(soft(b.text)) && /[가-힣]/.test(b.text);
+  const isAddenda = (b) => b.type === 'p' && /^부칙$/.test(norm((b.num || '') + b.text));
+
+  /* ---------- 문서의 머리 정보표(내규번호·제정일 …) ---------- */
+  function toISO(s) { const m = String(s || '').match(/(\d{4})\s*[.\-년/]\s*(\d{1,2})\s*[.\-월/]\s*(\d{1,2})/); return m ? m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0') : ''; }
+  RG.toISO = toISO;
+  RG.docMeta = function (doc) {
+    const meta = {}; if (!doc) return meta;
+    const LAB = [['no', /내규\s*번호|문서\s*번호|규정\s*번호/], ['enacted', /제\s*정\s*일/], ['revised', /개\s*정\s*일/], ['reviewed', /검\s*토\s*일/], ['dept', /담당\s*부서|주관\s*부서|관리\s*부서/], ['cycle', /검토\s*주기/], ['owner', /검토\s*책임자|책임자/], ['basis', /관련\s*근거/]];
+    const blocks = doc.blocks.slice(0, 12);
+    for (const b of blocks) {
+      if (b.type !== 'table') continue;
+      b.rows.forEach(r => r.forEach((c, i) => {
+        const t = soft(c.text);
+        for (const [k, re] of LAB) if (re.test(t) && t.length < 14 && meta[k] == null) { const v = r[i + 1]; if (v) meta[k] = soft(v.text); }
+      }));
+    }
+    ['enacted', 'revised', 'reviewed'].forEach(k => { if (meta[k]) meta[k + 'ISO'] = toISO(meta[k]); });
+    if (meta.cycle) { const m = meta.cycle.match(/(\d+)\s*(년|개월)/); if (m) meta.cycleMonths = m[2] === '년' ? +m[1] * 12 : +m[1]; }
+    let t = RG.guessTitle ? RG.guessTitle(doc) : '';
+    if (!t || /^[(\[]?[\d.\-\s]+[)\]]?$/.test(t)) { const c = doc.blocks.slice(0, 8).find(b => b.type === 'p' && !b.num && /[가-힣]{2,}/.test(b.text) && soft(b.text).length <= 40 && !/^[(\[]?[\d.\-\s]+[)\]]?$/.test(soft(b.text))); t = c ? soft(c.text) : t; }
+    if (t) meta.name = t.replace(/^(가톨릭대학교\s*)?부천성모병원\s*/, '').trim() || t;
+    return meta;
+  };
+
+  /* ---------- 형식 검사 ---------- */
+  function textIssues(text, where, page, out, opt) {
+    const t = String(text || '');
+    if (opt.namesOnly) { (opt.renames || []).forEach(([o, n]) => { if (o && t.indexOf(o) >= 0) out.push({ sev: 'warn', cat: '옛 이름', msg: '‘' + o + '’ → ‘' + n + '’(으)로 바꿔야 할 수 있음', where, page, find: o }); }); return; }
+    if (t.replace(/\s/g, '').length > 6) { const mm = t.match(/[^\s ]+ {2,}[^\s ]+/); if (mm) out.push({ sev: 'info', cat: '띄어쓰기', msg: '띄어쓰기가 두 칸 이상인 곳', where, page, find: mm[0] }); }
+    const pairs = [['(', ')'], ['[', ']'], ['「', '」'], ['『', '』'], ['“', '”'], ['‘', '’'], ['<', '>']];
+    const tb = t.replace(/(^|[\s,·~])(\d{1,2}|[가나다라마바사아자차카타파하]|[a-z])\)/g, '$1').replace(/\[\s*\]/g, '');
+    for (const [a, b] of pairs) { const na = tb.split(a).length - 1, nb = tb.split(b).length - 1; if (na !== nb) out.push({ sev: 'warn', cat: '괄호', msg: '괄호 ' + a + b + ' 짝이 맞지 않음 (' + a + ' ' + na + '개, ' + b + ' ' + nb + '개)', where, page, find: where }); }
+    let m;
+    if ((m = t.match(/[가-힣)\]」]\.\.(?!\.)/))) out.push({ sev: 'info', cat: '문장부호', msg: '마침표가 두 번', where, page, find: m[0] });
+    if ((m = t.match(/[가-힣] +[,.](?!\d)/))) out.push({ sev: 'info', cat: '문장부호', msg: '문장부호 앞에 띄어쓰기', where, page, find: m[0] });
+    if ((m = t.match(/(^|\s)([가-힣]{2,})\s+\2(?=\s|$|[,.])/))) out.push({ sev: 'info', cat: '반복', msg: '같은 낱말이 잇달아 나옴: ' + m[2], where, page, find: m[2] + ' ' + m[2] });
+    (opt.renames || []).forEach(([o, n]) => { if (o && t.indexOf(o) >= 0 && (!n || t.indexOf(n) < 0 || t.split(o).length > t.split(n).length)) out.push({ sev: 'warn', cat: '옛 이름', msg: '‘' + o + '’ → ‘' + n + '’(으)로 바꿔야 할 수 있음', where, page, find: o }); });
+  }
+  RG.lintDoc = function (doc, opt) {
+    opt = opt || {}; const out = []; if (!doc) return out;
+    const preset = opt.preset || 'bucheon';
+    let stack = []; let region = 'body'; let lastNumWhere = '';
+    const mentions = new Map(); const annexIds = new Set(); let addenda = null; const addendaItems = [];
+    const whereOf = (b) => ((b.num ? b.num + ' ' : '') + soft(b.text)).slice(0, 40);
+    doc.blocks.forEach((b, idx) => {
+      const al = RG.annexLabel ? RG.annexLabel(b) : null;
+      if (al && (region !== 'body' || addenda)) { region = 'annex'; annexIds.add(al.id.replace(/\s+/g, '')); stack = []; return; }
+      if (al && region === 'body') { annexIds.add(al.id.replace(/\s+/g, '')); }
+      if (b.type === 'table') { b.rows.forEach(r => r.forEach(c => textIssues(c.text, '표 칸: ' + soft(c.text).slice(0, 24), b.page, out, Object.assign({}, opt, { namesOnly: true })))); return; }
+      if (b.type !== 'p') return;
+      const full = (b.num ? b.num + ' ' : '') + b.text; const where = whereOf(b);
+      // 본문 속 별첨 언급
+      if (region !== 'annex' && !addenda) { const re = /별첨\s*\[?\s*(\d+(?:\s*-\s*\d+)?)/g; let m; while ((m = re.exec(full))) { const id = m[1].replace(/\s+/g, ''); if (!mentions.has(id)) mentions.set(id, { where, page: b.page }); } }
+      if (region === 'annex') return;
+      textIssues(full, where, b.page, out, opt);
+      if (isAddenda(b)) { addenda = { where, page: b.page }; stack = []; return; }
+      if (addenda) addendaItems.push(b);
+      if (!b.num) { if (isHeading(b)) stack = []; return; }
+      const ni = numInfo(b.num); if (!ni) return;
+      if (ni.sub) return;
+      if (ni.k === '조') { const top = stack[0] && stack[0].k === '조' ? stack[0] : null; if (top && ni.v !== top.v + 1) out.push({ sev: ni.v === top.v ? 'err' : 'warn', cat: '번호', msg: ni.v === top.v ? '조 번호 중복: ' + b.num : '조 번호가 이어지지 않음: ' + fmtNum('조', top.v) + ' 다음 ' + fmtNum('조', ni.v), where, page: b.page, find: full.slice(0, 20) }); stack = [{ k: '조', v: ni.v }]; lastNumWhere = where; return; }
+      const i = stack.findIndex(s => s.k === ni.k);
+      if (i >= 0) {
+        const prev = stack[i].v; stack = stack.slice(0, i + 1);
+        if (ni.v !== prev + 1) out.push({ sev: ni.v === prev ? 'err' : 'warn', cat: '번호', msg: ni.v === prev ? '번호 중복: ' + b.num : (ni.v > prev ? '번호 건너뜀: ' + fmtNum(ni.k, prev) + ' 다음에 ' + b.num : '번호가 거꾸로: ' + fmtNum(ni.k, prev) + ' 다음에 ' + b.num), where, page: b.page, find: full.slice(0, 20) });
+        stack[i].v = ni.v;
+      } else {
+        if (ni.v !== 1) out.push({ sev: 'warn', cat: '번호', msg: '하위 번호가 ' + fmtNum(ni.k, 1) + '(으)로 시작하지 않음: ' + b.num, where, page: b.page, find: full.slice(0, 20) });
+        if (preset !== 'moleg') {
+          const top = stack.length ? stack[stack.length - 1] : null;
+          const rt = top ? BUCHEON.indexOf(top.k) : -1, rn = BUCHEON.indexOf(ni.k);
+          if (rn >= 0 && rt >= 0 && rn > rt + 1) out.push({ sev: 'warn', cat: '번호 단계', msg: '번호 단계를 건너뜀: ' + top.k.replace(/1|가/, m => m) + ' 아래에 바로 ' + b.num + ' (기준: 1.→가.→1)→가)→(1)→(가))', where, page: b.page, find: full.slice(0, 20) });
+          if (rn >= 0 && rt >= 0 && rn < rt) out.push({ sev: 'info', cat: '번호 단계', msg: '상위 번호 모양이 아래 단계에 쓰임: ' + b.num, where, page: b.page, find: full.slice(0, 20) });
+          if (rn > 0 && !top && stack.length === 0 && ni.k !== '①') out.push({ sev: 'info', cat: '번호 단계', msg: '첫 단계가 ‘1.’이 아닌 ' + b.num + '(으)로 시작', where, page: b.page, find: full.slice(0, 20) });
+        }
+        stack.push({ k: ni.k, v: ni.v });
+      }
+      lastNumWhere = where;
+    });
+    // 별첨 언급 ↔ 실제 별첨
+    mentions.forEach((v, id) => { if (!annexIds.has(id)) out.push({ sev: 'warn', cat: '별첨', msg: '본문에 ‘별첨 ' + id + '’이(가) 나오지만 그런 별첨이 없음', where: v.where, page: v.page, find: '별첨' }); });
+    { const un = Array.from(annexIds).filter(id => !mentions.has(id) && !/부속/.test(id)); if (un.length) out.push({ sev: 'info', cat: '별첨', msg: '본문에서 언급되지 않는 별첨: ' + un.join(', '), where: '', page: null, find: '별첨 ' + un[0] }); }
+    // 부칙·시행일
+    if (!addenda) out.push({ sev: 'warn', cat: '부칙', msg: '부칙(시행일)이 없음', where: '', page: null });
+    else {
+      const last = addendaItems.filter(b => /시행/.test(b.text)).pop();
+      if (!last) out.push({ sev: 'warn', cat: '부칙', msg: '부칙에 시행일 문구(“…부터 시행한다”)가 없음', where: addenda.where, page: addenda.page, find: '부' });
+      else if (!/\d{4}\s*[년.]\s*\d{1,2}\s*[월.]\s*\d{1,2}/.test(last.text) && !/공포한\s*날|승인한\s*날|결재한\s*날/.test(last.text)) out.push({ sev: 'warn', cat: '부칙', msg: '마지막 부칙에 시행 날짜가 없음', where: whereOf(last), page: last.page, find: soft(last.text).slice(0, 12) });
+      else if (opt.meta && opt.meta.revisedISO) {
+        const d = toISO(last.text); if (d && d !== opt.meta.revisedISO) out.push({ sev: 'info', cat: '부칙', msg: '머리 표의 개정일자(' + opt.meta.revised + ')와 마지막 부칙 시행일(' + d.replace(/-/g, '. ') + '.)이 다름', where: whereOf(last), page: last.page, find: soft(last.text).slice(0, 12) });
+      }
+    }
+    // 같은 종류는 하나로 묶음
+    const rank = { err: 0, warn: 1, info: 2 }; const grp = new Map(); const res = [];
+    out.forEach(x => { const key = x.sev + '|' + x.cat + '|' + (/^(번호 단계|띄어쓰기|옛 이름|괄호)/.test(x.cat) ? x.msg : x.msg + '|' + x.where); const g = grp.get(key); if (g) { g.more.push(x); } else { const y = Object.assign({ more: [] }, x); grp.set(key, y); res.push(y); } });
+    res.forEach(y => { if (y.more.length) { y.count = y.more.length + 1; y.msg += ' — ' + y.count + '곳'; } });
+    return res.sort((a, b) => rank[a.sev] - rank[b.sev]);
+  };
+  // 대조표 칸(개정안)만 있을 때의 간이 검사
+  RG.lintLines = function (lines, opt) { const out = []; lines.forEach(l => textIssues(l.text, (l.text || '').slice(0, 40), l.page, out, opt || {})); return out; };
+
+  /* ---------- 개정 전문(깨끗한 본) 항목 ---------- */
+  RG.docToItems = function (doc, opt) {
+    opt = opt || {}; const items = []; let stack = []; let lastInd = 0; let region = 'body';
+    for (const b of doc.blocks) {
+      if (opt.skipMeta && b.type === 'table' && items.length < 3 && b.rows.some(r => r.some(c => /내규\s*번호|제\s*정\s*일|개\s*정\s*일/.test(c.text)))) continue;
+      if (b.type === 'p') {
+        if (RG.annexLabel && RG.annexLabel(b) && region === 'body') { region = 'annex'; }
+        const ni = numInfo(b.num); let ind = 0, hang = 0;
+        if (ni && !ni.sub) {
+          if (ni.k === '조') stack = [{ k: '조' }];
+          else { const i = stack.findIndex(s => s.k === ni.k); if (i >= 0) stack = stack.slice(0, i + 1); else stack.push({ k: ni.k }); }
+          ind = Math.max(0, stack.length - 1 - (stack[0] && stack[0].k === '조' ? 0 : 0));
+          if (stack[0] && stack[0].k === '조') ind = Math.max(0, stack.length - 2);
+          hang = RG.visWidth ? RG.visWidth(b.num) + 1 : b.num.length + 1; lastInd = ind;
+        } else if (b.num) { hang = RG.visWidth ? RG.visWidth(b.num) + 1 : 2; ind = lastInd; }
+        else if (isHeading(b) || isAddenda(b)) { stack = []; lastInd = 0; ind = 0; }
+        else ind = lastInd;
+        const head = (isHeading(b) || isAddenda(b)) && !b.num;
+        const runs = [{ t: (b.num ? b.num + ' ' : '') + b.text, b: head || undefined }];
+        items.push({ k: 'line', runs, hang, ind, align: isAddenda(b) ? 'center' : undefined });
+      } else if (b.type === 'table') {
+        items.push({ k: 'table', rows: b.rows.map(r => r.map(c => ({ runs: [{ t: c.text || '' }], cs: c.cs || 1, rs: c.rs || 1, imgs: (c.imgs || []).filter(i => i.src).map(i => ({ src: i.src })) }))) });
+      } else if (b.type === 'img' && b.src) items.push({ k: 'img', src: b.src, nw: b.nw, nh: b.nh, wp: b.obj ? 50 : 70 });
+    }
+    return items;
+  };
+
+  /* ---------- 이름 일괄 바꾸기 ---------- */
+  RG.parseRenames = function (txt) {
+    return String(txt || '').split(/\n/).map(l => l.trim()).filter(Boolean).map(l => { const m = l.split(/\s*(?:→|->|=>|=|,|\t)\s*/); return m.length >= 2 ? [m[0].trim(), m.slice(1).join(' ').trim()] : null; }).filter(p => p && p[0] && p[0] !== p[1]);
+  };
+  function replAll(t, pairs, cnt) { let s = String(t || ''); for (const [o, n] of pairs) { if (!o) continue; const k = s.split(o).length - 1; if (k) { cnt.n += k; cnt.by[o] = (cnt.by[o] || 0) + k; s = s.split(o).join(n); } } return s; }
+  RG.applyRenames = function (doc, pairs) {
+    const cnt = { n: 0, by: {} };
+    const nd = Object.assign({}, doc, { blocks: doc.blocks.map(b => {
+      if (b.type === 'p') { const x = Object.assign({}, b, { text: replAll(b.text, pairs, cnt) }); return x; }
+      if (b.type === 'table') return Object.assign({}, b, { rows: b.rows.map(r => r.map(c => Object.assign({}, c, { text: replAll(c.text, pairs, cnt) }))) });
+      return b;
+    }) });
+    return { doc: nd, count: cnt.n, by: cnt.by };
+  };
+  // hwpx·docx 원본 서식을 살린 채 글자만 바꿈(한 글자 덩어리 안에 있는 경우)
+  RG.renameInPackage = async function (buf, kind, pairs) {
+    const zip = await G.JSZip.loadAsync(buf); const cnt = { n: 0, by: {} };
+    const files = Object.keys(zip.files).filter(p => kind === 'hwpx' ? /^Contents\/section\d+\.xml$/i.test(p) : /^word\/(document|header\d*|footer\d*)\.xml$/i.test(p));
+    const tagRe = kind === 'hwpx' ? /(<hp:t(?:\s[^>]*)?>)([\s\S]*?)(<\/hp:t>)/g : /(<w:t(?:\s[^>]*)?>)([\s\S]*?)(<\/w:t>)/g;
+    const unesc = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
+    const escx = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    for (const f of files) {
+      let x = await zip.file(f).async('string');
+      x = x.replace(tagRe, (m, a, inner, c) => {
+        if (/</.test(inner)) { // 안에 태그(탭 등)가 섞인 경우: 태그 밖 글자만
+          return a + inner.replace(/(^|>)([^<]+)(?=<|$)/g, (mm, p, txt) => p + escx(replAll(unesc(txt), pairs, cnt))) + c;
+        }
+        return a + escx(replAll(unesc(inner), pairs, cnt)) + c;
+      });
+      zip.file(f, x);
+    }
+    const mime = kind === 'hwpx' ? 'application/hwp+zip' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    if (kind === 'hwpx' && zip.file('mimetype')) zip.file('mimetype', 'application/hwp+zip', { compression: 'STORE' });
+    return { blob: await zip.generateAsync({ type: 'blob', mimeType: mime, compression: 'DEFLATE' }), count: cnt.n, by: cnt.by };
+  };
+
+  /* ---------- 파일 이름으로 현행·개정안 짝 찾기 ---------- */
+  function nameKey(n) {
+    return String(n || '').replace(/\.[^.]+$/, '').replace(/\(?\s*(현행|개정안|개정\s*전|개정\s*후|개정|구|신|최종|수정본?|원본|초안|old|new|before|after|v\d+(\.\d+)*)\s*\)?/gi, ' ')
+      .replace(/\d{4}[.\-_]?\d{1,2}[.\-_]?\d{1,2}\.?/g, ' ').replace(/[\s_\-\[\]().·]+/g, '');
+  }
+  function bg(s) { const m = new Map(); for (let i = 0; i < s.length - 1; i++) { const g = s.substr(i, 2); m.set(g, (m.get(g) || 0) + 1); } return m; }
+  function simName(a, b) { if (a === b) return 1; if (a.length < 2 || b.length < 2) return 0; const A = bg(a), B = bg(b); let x = 0; A.forEach((v, k) => x += Math.min(v, B.get(k) || 0)); return 2 * x / (a.length + b.length - 2); }
+  RG.pairFiles = function (olds, news) {
+    const ok = olds.map(nameKey), nk = news.map(nameKey); const used = new Set(); const pairs = [];
+    olds.forEach((o, i) => { let best = -1, bs = 0; nk.forEach((k, j) => { if (used.has(j)) return; const s = simName(ok[i], k); if (s > bs) { bs = s; best = j; } }); if (best >= 0 && bs >= 0.5) { used.add(best); pairs.push([i, best, bs]); } else pairs.push([i, -1, 0]); });
+    // 짝 못 찾은 것이 양쪽에 하나씩만 남으면 서로 짝
+    const lo = pairs.filter(p => p[1] < 0), ln = news.map((_, j) => j).filter(j => !used.has(j));
+    if (lo.length === 1 && ln.length === 1) { lo[0][1] = ln[0]; lo[0][2] = 0.1; }
+    return pairs;
+  };
+  RG._numInfo = numInfo;
+})(window);
 
 /* ===== 신·구조문 대조표 작성 도구 — 화면 동작 ===== */
 (function () {
@@ -4247,7 +4488,7 @@ window.__authGate=true;
   };
   window.__state = state; // 점검용
   const LOG = (action, memo) => { try { if (window.__auth) window.__auth.log(action, state.meta.title || '', memo || ''); } catch (e) { } };
-  const AKEY = () => AKEY() + (window.__auth && window.__auth.user ? '_' + window.__auth.user.id : '');
+  const AKEY = () => 'sinkujomun_autosave' + (window.__auth && window.__auth.user ? '_' + window.__auth.user.id : '');
 
   /* ---------- 공통 UI ---------- */
   function toast(msg, ms) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), ms || 2600); }
@@ -4345,31 +4586,36 @@ window.__authGate=true;
   async function loadFile(key, file, host) {
     busy(true, '파일을 읽는 중… (' + file.name + ')');
     try {
-      const buf = await readBuf(file);
-      const kind = RG.detectKind(file.name, buf);
-      state.files[key] = { name: file.name, kind, buf, size: file.size };
-      let doc;
-      if (kind === 'pdf') {
-        const pdf = await RG.readers.openPdf(buf); state.pdfs[key] = pdf;
-        const n = pdf.numPages; let from = +$('.pf', host).value || 1, to = +$('.pt', host).value || n;
-        from = Math.max(1, Math.min(n, from)); to = Math.max(from, Math.min(n, to));
-        const pages = []; for (let i = from; i <= to; i++) pages.push(i);
-        state.pdfPages[key] = new Set(pages);
-        doc = await RG.readers.parsePdfPages(pdf, pages, file.name, pdfProg, { ocr: state.settings.ocr || 'auto' });
-        pdfWarn(doc, pages);
-        showPdfBox(key, host);
-      } else if (kind === 'hwp') doc = RG.readers.parseHwp5(buf, file.name);
-      else if (kind === 'hwpx') doc = await RG.readers.parseHwpx(buf, file.name);
-      else if (kind === 'docx') doc = await RG.readers.parseDocx(buf, file.name);
-      else if (kind === 'txt') doc = RG.readers.parseText(new TextDecoder('utf-8').decode(buf), file.name);
-      else if (kind === 'doc') throw new Error('옛 워드(.doc) 형식은 읽을 수 없습니다. 워드에서 "다른 이름으로 저장 → .docx"로 바꾼 뒤 올려 주세요.');
-      else throw new Error('읽을 수 없는 파일 형식입니다. PDF, 한글(hwp/hwpx), 워드(docx), 텍스트(txt) 파일을 올려 주세요.');
-      await normalizeImages(doc);
-      setDoc(key, doc, host);
+      const pf = host ? (+$('.pf', host).value || 0) : 0, pt = host ? (+$('.pt', host).value || 0) : 0;
+      const r = await parseFile(file, { from: pf, to: pt });
+      state.files[key] = { name: file.name, kind: r.kind, buf: r.buf, size: file.size };
+      if (r.pdf) { state.pdfs[key] = r.pdf; state.pdfPages[key] = new Set(r.doc.pages); showPdfBox(key, host); }
+      setDoc(key, r.doc, host);
     } catch (err) {
       console.error(err); toast('읽기 실패: ' + (err.message || err), 6000);
       modal(`<h3>파일을 읽지 못했습니다</h3><div class="warnbox">${esc(err.message || String(err))}</div><div class="muted">한글 파일이 열리지 않으면 한글에서 PDF로 저장해 올리거나, 내용을 복사해 "글을 직접 붙여 넣기"를 이용해 주세요.</div><div class="foot"><button class="btn pri" onclick="document.getElementById('modal').classList.remove('on')">확인</button></div>`);
     } finally { busy(false); }
+  }
+  // 파일 하나를 읽어 문서로(일괄 처리에서도 씀)
+  async function parseFile(file, o) {
+    o = o || {};
+    const buf = file.buf || await readBuf(file); const name = file.name;
+    const kind = RG.detectKind(name, buf); let doc, pdf = null;
+    if (kind === 'pdf') {
+      pdf = await RG.readers.openPdf(buf);
+      const n = pdf.numPages; let from = o.from || 1, to = o.to || n;
+      from = Math.max(1, Math.min(n, from)); to = Math.max(from, Math.min(n, to));
+      const pages = []; for (let i = from; i <= to; i++) pages.push(i);
+      doc = await RG.readers.parsePdfPages(pdf, pages, name, o.onProg || pdfProg, { ocr: state.settings.ocr || 'auto' });
+      pdfWarn(doc, pages);
+    } else if (kind === 'hwp') doc = RG.readers.parseHwp5(buf, name);
+    else if (kind === 'hwpx') doc = await RG.readers.parseHwpx(buf, name);
+    else if (kind === 'docx') doc = await RG.readers.parseDocx(buf, name);
+    else if (kind === 'txt') doc = RG.readers.parseText(new TextDecoder('utf-8').decode(buf), name);
+    else if (kind === 'doc') throw new Error('옛 워드(.doc) 형식은 읽을 수 없습니다. 워드에서 "다른 이름으로 저장 → .docx"로 바꾼 뒤 올려 주세요.');
+    else throw new Error('읽을 수 없는 파일 형식입니다. PDF, 한글(hwp/hwpx), 워드(docx), 텍스트(txt) 파일을 올려 주세요.');
+    await normalizeImages(doc);
+    return { doc, pdf, kind, buf };
   }
   function pdfProg(k, t, msg) { $('#busytx').textContent = 'PDF 읽는 중… ' + k + '/' + t + '쪽' + (msg ? ' · ' + msg : ''); }
   function pdfWarn(doc, pages) {
@@ -4427,11 +4673,12 @@ window.__authGate=true;
     const ob = {}; allObjs(doc).forEach(o => { ob[o.label] = (ob[o.label] || 0) + 1; }); const obTxt = Object.keys(ob).map(k => ' · ' + k + ' ' + ob[k] + '개').join('');
     let annexN = 0; try { annexN = RG._prepare(doc, {}).filter(u => u.annexHead).length; } catch (e) { }
     const fi = $('.fileinfo', host);
-    fi.innerHTML = `<div class="row"><span class="nm">${esc(doc.name)}</span><span class="pill">${({ hwp: '한글', hwpx: '한글(hwpx)', docx: '워드', pdf: 'PDF', text: '붙여넣은 글' })[doc.kind] || doc.kind}</span><span style="flex:1"></span><button class="btn sm view">읽은 내용 보기</button><button class="btn sm red clr">지우기</button></div>
+    fi.innerHTML = `<div class="row"><span class="nm">${esc(doc.name)}</span><span class="pill">${({ hwp: '한글', hwpx: '한글(hwpx)', docx: '워드', pdf: 'PDF', text: '붙여넣은 글' })[doc.kind] || doc.kind}</span><span style="flex:1"></span><button class="btn sm view">읽은 내용 보기</button><button class="btn sm fix" title="비교 전에 잘못 읽힌 글자 바로잡기${doc.ocrPages && doc.ocrPages.length ? ' (스캔본: 원본 그림과 나란히)' : ''}">읽은 내용 고치기</button><button class="btn sm red clr">지우기</button></div>
       <div class="muted" style="margin-top:4px">문단 ${ps}개 · 표 ${ts}개 · 그림 ${is}개${obTxt}${doc.ocrPages && doc.ocrPages.length ? ' · 글자 인식 ' + doc.ocrPages.length + '쪽' : ''}${annexN ? ' · 별첨 ' + annexN + '개' : ''}${doc.pageCount ? ' · ' + (doc.pageEstimated ? '약 ' : '') + doc.pageCount + '쪽' : ''}${doc.kind === 'pdf' ? ' (읽은 쪽: ' + doc.pages.length + '쪽)' : ''}</div>
       ${doc.warn ? '<div class="warnbox">' + esc(doc.warn).replace(/\n/g, '<br>') + '</div>' : ''}${doc.pageEstimated && doc.kind !== 'text' ? '<div class="muted" style="margin-top:3px">※ 한글·워드 파일의 쪽 번호는 줄 위치로 추정한 값입니다. 비고의 쪽수는 다듬기 화면에서 고칠 수 있습니다.</div>' : ''}`;
     fi.classList.add('on');
     $('.view', fi).onclick = () => showDocText(doc);
+    $('.fix', fi).onclick = () => fixDocDialog(key, host);
     $('.clr', fi).onclick = () => { state.docs[key] = null; fi.classList.remove('on'); $('.pdfbox', host).classList.remove('on'); if (key === 'edit') $('#editList').style.display = 'none'; };
     if (key === 'edit') initEdit(doc);
   }
@@ -4492,49 +4739,61 @@ window.__authGate=true;
     if (!state.docs.old || !state.docs.new) { toast('현행 파일과 개정안 파일을 모두 올려 주세요.'); return; }
     await runCompare(state.docs.old, state.docs.new, {});
   });
+  // 비교 결과 → 대조표 구간들(화면 없이도 씀: 일괄 비교)
+  async function buildSections(A, B, extra, pdfs) {
+    extra = extra || {};
+    const res = RG.compare(A, B, cmpOpts());
+    const reasons = extra.reasons || {};
+    const S = state.settings;
+    const main = { id: uid(), type: 'main', orient: 'portrait', showTitle: true, titleSuffix: '', rows: [] };
+    res.rows.forEach(r => {
+      const note = S.autoNote !== false ? (r.autoNote || []).map(t => ({ k: 'line', runs: [{ t }], hang: 0 })) : [];
+      const rs = new Set(); (r.members || []).forEach(m => { if (m.b != null && reasons['n' + m.b]) rs.add(reasons['n' + m.b]); if (m.a != null && reasons['o' + m.a]) rs.add(reasons['o' + m.a]); });
+      rs.forEach(t => t.split('\n').forEach(x => note.push({ k: 'line', runs: [{ t: x }] })));
+      if (extra.addNote) note.push({ k: 'line', runs: [{ t: extra.addNote }] });
+      main.rows.push({ id: uid(), old: r.old, new: r.new, page: r.page, note, objs: [] });
+    });
+    // 그림·표가 있는 행 표시
+    main.rows.forEach(r => { r.hasObj = [].concat(r.old, r.new).some(it => it && ((it.k === 'img' && it.obj !== 'eq') || it.k === 'table')); });
+    const annexSecs = [];
+    for (const a of res.annexes) {
+      const sec = { id: uid(), type: 'annex', orient: 'landscape', showTitle: true, titleSuffix: '(' + a.label + ')', old: a.old, new: a.new, reason: S.autoNote !== false ? (a.autoNote || []).map(t => ({ k: 'line', runs: [{ t }], hang: 0 })) : [], page: a.page, annexId: a.id, titleOnly: a.titleOnly, kinds: a.kinds, desc: a.title };
+      if (extra.addNote) sec.reason.push({ k: 'line', runs: [{ t: extra.addNote }] });
+      annexSecs.push(sec);
+    }
+    // PDF 원본이면 별첨은 쪽 그림으로
+    if (S.pdfAnnexAsImage && pdfs) {
+      for (const sec of annexSecs) {
+        for (const side of ['old', 'new']) {
+          const doc = side === 'old' ? A : B; const pdf = pdfs[side];
+          if (doc.kind !== 'pdf' || !pdf) continue;
+          const pages = regionPages(doc, sec.annexId); if (!pages.length) continue;
+          const items = [];
+          for (const p of pages) { const cv = await RG.readers.renderPdfPage(pdf, p, 1.6); items.push({ k: 'img', src: cv.toDataURL('image/jpeg', 0.9), nw: cv.width, nh: cv.height }); }
+          sec[side] = items;
+        }
+      }
+    }
+    main.titleSuffix = annexSecs.length ? S.mainSuffix : '';
+    let sections = main.rows.length ? [main].concat(annexSecs) : annexSecs.slice();
+    if (!sections.length) sections = [main];
+    return { res, sections, main, annexSecs };
+  }
   async function runCompare(A, B, extra) {
     busy(true, '두 문서를 맞대어 비교하는 중…');
     await new Promise(r => setTimeout(r, 30));
     try {
-      const res = RG.compare(A, B, cmpOpts());
+      const pdfs = { old: A === state.docs.old ? state.pdfs.old : null, new: B === state.docs.new ? state.pdfs.new : null };
+      const { res, sections, main, annexSecs } = await buildSections(A, B, extra || {}, pdfs);
       state.lastResult = { A, B, extra };
-      const reasons = extra.reasons || {};
-      const S = state.settings;
-      const main = { id: uid(), type: 'main', orient: 'portrait', showTitle: true, titleSuffix: '', rows: [] };
-      res.rows.forEach(r => {
-        const note = S.autoNote !== false ? (r.autoNote || []).map(t => ({ k: 'line', runs: [{ t }], hang: 0 })) : [];
-        const rs = new Set(); (r.members || []).forEach(m => { if (m.b != null && reasons['n' + m.b]) rs.add(reasons['n' + m.b]); if (m.a != null && reasons['o' + m.a]) rs.add(reasons['o' + m.a]); });
-        rs.forEach(t => t.split('\n').forEach(x => note.push({ k: 'line', runs: [{ t: x }] })));
-        main.rows.push({ id: uid(), old: r.old, new: r.new, page: r.page, note, objs: [] });
-      });
-      // 그림·표가 있는 행 표시
-      main.rows.forEach(r => { r.hasObj = [].concat(r.old, r.new).some(it => it && ((it.k === 'img' && it.obj !== 'eq') || it.k === 'table')); });
-      const annexSecs = [];
-      for (const a of res.annexes) {
-        const sec = { id: uid(), type: 'annex', orient: 'landscape', showTitle: true, titleSuffix: '(' + a.label + ')', old: a.old, new: a.new, reason: S.autoNote !== false ? (a.autoNote || []).map(t => ({ k: 'line', runs: [{ t }], hang: 0 })) : [], page: a.page, annexId: a.id, titleOnly: a.titleOnly, kinds: a.kinds, desc: a.title };
-        annexSecs.push(sec);
-      }
-      // PDF 원본이면 별첨은 쪽 그림으로
-      if (S.pdfAnnexAsImage) {
-        for (const sec of annexSecs) {
-          for (const side of ['old', 'new']) {
-            const doc = side === 'old' ? A : B; const key = doc === state.docs.old ? 'old' : doc === state.docs.new ? 'new' : null;
-            if (doc.kind !== 'pdf' || !key || !state.pdfs[key]) continue;
-            const pages = regionPages(doc, sec.annexId); if (!pages.length) continue;
-            const items = [];
-            for (const p of pages) { const cv = await RG.readers.renderPdfPage(state.pdfs[key], p, 1.6); items.push({ k: 'img', src: cv.toDataURL('image/jpeg', 0.9), nw: cv.width, nh: cv.height }); }
-            sec[side] = items;
-          }
-        }
-      }
       state.objNotice = objSummary(A, B);
-      main.titleSuffix = annexSecs.length ? S.mainSuffix : '';
-      state.sections = main.rows.length ? [main].concat(annexSecs) : annexSecs.slice();
-      if (!state.sections.length) state.sections = [main];
+      state.lint = runLint(B); state.lintClosed = false;
+      state.sections = sections;
       busy(false);
       const st = res.stats;
-      toast(`비교 완료: 바뀜 ${st.mod} · 신설 ${st.ins} · 삭제 ${st.del} → 본문 ${main.rows.length}행, 별첨 ${annexSecs.length}개` + (state.objNotice && state.objNotice.short ? ' · ' + state.objNotice.short : ''), 5500);
+      toast(`비교 완료: 바뀜 ${st.mod} · 신설 ${st.ins} · 삭제 ${st.del} → 본문 ${main.rows.length}행, 별첨 ${annexSecs.length}개` + (state.objNotice && state.objNotice.short ? ' · ' + state.objNotice.short : '') + (state.lint && state.lint.length ? ' · 형식 확인 ' + state.lint.length + '곳' : ''), 5500);
       LOG('대조표 만들기', `바뀜 ${st.mod} · 신설 ${st.ins} · 삭제 ${st.del} / 본문 ${main.rows.length}행 · 별첨 ${annexSecs.length}개` + (A.name ? ' (' + A.name + ' → ' + (B.name || '') + ')' : ''));
+      try { registryUpsertFrom(A, B); } catch (e) { console.warn(e); }
       if (main.rows.some(r => r.hasObj) || annexSecs.length) askAnnex(true); else goStep(2);
       autosave();
     } catch (e) { busy(false); console.error(e); toast('비교 중 오류: ' + e.message, 6000); }
@@ -4764,7 +5023,7 @@ window.__authGate=true;
     const host = $('#secs'); host.innerHTML = '';
     if (!state.sections.length) { host.innerHTML = '<div class="empty">아직 대조표가 없습니다. 1단계에서 자료를 넣어 주세요.</div>'; return; }
     let mainNo = 0, annexNo = 0;
-    missingImgBanner(host); objNoticeBanner(host);
+    missingImgBanner(host); objNoticeBanner(host); lintBanner(host);
     state.sections.forEach((sec, si) => {
       const el = document.createElement('div'); el.className = 'sec'; el.dataset.sec = sec.id;
       const lbl = sec.type === 'main' ? '본문 구간 ' + (++mainNo) : '별첨 대조표 ' + (++annexNo);
@@ -4906,7 +5165,8 @@ window.__authGate=true;
         const tr = document.createElement('tr'); if (k > 0) tr.className = 'segrow'; trs.push(tr);
         if (k === 0) {
           const ctl = document.createElement('td'); ctl.className = 'ctl'; ctl.rowSpan = segs.length;
-          ctl.innerHTML = `<div class="rn">${ri + 1}</div><button data-r="up" title="위로">▲</button><button data-r="down" title="아래로">▼</button><button data-r="merge" title="위 행과 합치기">합침</button><button data-r="split" title="이 행부터 새 구간으로 나누기 (일부만 가로로 볼 때)">나눔</button><button data-r="pair" title="현행·개정안이 같은 줄에서 시작하는 칸을 아래에 하나 더 만듭니다">줄+</button><button data-r="del" title="행 지우기" style="color:#c0262d">✕</button>`;
+          ctl.dataset.rid = r.id; if (r.done) ctl.classList.add('done');
+          ctl.innerHTML = `<div class="rn">${r.done ? '✓' : ri + 1}</div><button data-r="memo" title="${r.memo ? esc('메모: ' + r.memo) : '검토 메모 · 검토 끝 표시'}" class="${r.memo ? 'hasmemo' : ''}">${r.memo ? '📝' : '메모'}</button><button data-r="up" title="위로">▲</button><button data-r="down" title="아래로">▼</button><button data-r="more" title="합치기 · 구간 나누기 · 줄 추가 · 짝 맞추기·다시 대조">⋯</button><button data-r="del" title="행 지우기" style="color:#c0262d">✕</button>`;
           tr.appendChild(ctl);
           ctl.addEventListener('click', (e) => rowCtl(e, sec, r, rebuild));
         }
@@ -4939,7 +5199,16 @@ window.__authGate=true;
   }
   const REASONS = ['상위법령 개정에 따른 변경', '같은 법 시행규칙 개정에 따른 변경', '가톨릭중앙의료원 규정 변경에 따른 변경', '외부 인증·평가 지침에 따른 용어 변경', '환자 및 내부 고객 안전 관련 변경', '정부조직 개편에 따른 기관명 변경', '부서명·직위 변경 반영', '업무 절차 현행화', '내규 누락 사항 보충', '단순 문구 변경·오탈자 수정(경미 사안)', '별첨 서식 변경'];
   function rowCtl(e, sec, r, rebuild) {
-    const b = e.target.closest('button'); if (!b) return; const a = b.dataset.r;
+    const b = e.target.closest('button'); if (!b) return; rowAct(b.dataset.r, sec, r);
+  }
+  function rowMore(sec, r) {
+    const i = sec.rows.indexOf(r);
+    modal(`<h3>${i + 1}번째 행</h3><div class="pm">
+      <button class="btn" data-r="merge" ${i === 0 ? 'disabled' : ''}>위 행과 합치기</button><button class="btn" data-r="split" ${i === 0 ? 'disabled' : ''}>여기서 구간 나누기<br><small class="muted">일부만 가로로 볼 때</small></button>
+      <button class="btn" data-r="pair">같은 줄 칸 하나 더(줄+)<br><small class="muted">현행·개정안 시작 줄 맞춤</small></button><button class="btn pri" data-r="pm">짝 맞추기 · 다시 대조</button></div>
+      <div class="foot"><button class="btn" id="x">닫기</button></div>`, m => { $('#x', m).onclick = closeModal; $$('[data-r]', m).forEach(b => b.onclick = () => { closeModal(); rowAct(b.dataset.r, sec, r); }); });
+  }
+  function rowAct(a, sec, r) {
     const rows = sec.rows; const i = rows.indexOf(r);
     if (a === 'up' && i > 0) { rows.splice(i - 1, 0, rows.splice(i, 1)[0]); }
     else if (a === 'down' && i < rows.length - 1) { rows.splice(i + 1, 0, rows.splice(i, 1)[0]); }
@@ -4947,6 +5216,9 @@ window.__authGate=true;
     else if (a === 'split') { if (i === 0) { toast('첫 행은 나눌 수 없습니다. 둘째 행부터 눌러 주세요.'); return; } const moved = rows.splice(i); const si = state.sections.indexOf(sec); state.sections.splice(si + 1, 0, { id: uid(), type: 'main', orient: sec.orient === 'landscape' ? 'portrait' : 'landscape', showTitle: false, titleSuffix: '', rows: moved }); toast('새 구간으로 나눴습니다. 나눈 구간은 가로/세로를 따로 정할 수 있습니다.', 4000); }
     else if (a === 'pair') { const ag = 'u_' + uid(); r.old.push({ k: 'line', runs: [], ag }); r.new.push({ k: 'line', runs: [], ag }); }
     else if (a === 'del') { if (!confirm((i + 1) + '번째 행을 지울까요?')) return; rows.splice(i, 1); }
+    else if (a === 'memo') { flushCells(); memoDialog(r, renderSections); return; }
+    else if (a === 'pm') { flushCells(); pairMenu(sec, r); return; }
+    else if (a === 'more') { flushCells(); rowMore(sec, r); return; }
     else return;
     renderSections(); autosave();
   }
@@ -5254,7 +5526,517 @@ window.__authGate=true;
   applyDocCSS(); buildSetForm();
   window.addEventListener('beforeunload', () => { try { flushCells(); localStorage.setItem(AKEY(), JSON.stringify({ app: 'sinkujomun', ver: 1, savedAt: new Date().toISOString(), meta: state.meta, settings: state.settings, sections: state.sections })); } catch (e) { } });
   if (!window.__authGate) setTimeout(offerRestore, 300);
-  window.__app = { runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
+  /* =========================================================
+     v2.4 고도화: 형식 검사 · 바뀐 곳 이동 · 검토 메모 · 행 짝 맞추기
+     · 사유서/상정 자료 · 개정 전문 · 일괄 비교 · 이름 일괄 변경 · 내규 대장
+     · 읽은 내용 고치기(스캔본 교정)
+     ========================================================= */
+  const renamesOf = () => RG.parseRenames(state.settings.renames || '');
+  function runLint(doc) {
+    try { return RG.lintDoc(doc, { preset: state.settings.preset, renames: renamesOf(), meta: RG.docMeta(doc) }); } catch (e) { console.warn(e); return []; }
+  }
+  const SEV = { err: ['오류', '#c0392b'], warn: ['주의', '#b7791f'], info: ['참고', '#5b6b85'] };
+  function lintBanner(host) {
+    const L = state.lint; if (!L || !L.length || state.lintClosed) return;
+    const c = { err: 0, warn: 0, info: 0 }; L.forEach(x => c[x.sev]++);
+    const b = document.createElement('div'); b.className = 'infobox lintnote'; b.style.marginBottom = '12px';
+    b.innerHTML = `<b>형식 검사</b> — 개정안에서 확인할 곳 <b>${L.length}</b>곳 (오류 ${c.err} · 주의 ${c.warn} · 참고 ${c.info}). 번호 체계·별첨 참조·부칙 시행일·괄호 짝·옛 부서명 등을 살폈습니다.
+      <div class="row" style="margin-top:6px"><button class="btn sm pri" id="lnOpen">목록 보기</button><button class="btn sm" id="lnX">닫기</button></div>`;
+    host.appendChild(b);
+    $('#lnOpen', b).onclick = () => lintDialog();
+    $('#lnX', b).onclick = () => { state.lintClosed = true; b.remove(); };
+  }
+  function cellsText(sec, side) {
+    const out = []; const take = (items, page) => (items || []).forEach(it => { if (it && it.k === 'line') out.push({ text: (it.runs || []).map(r => r.t).join(''), page }); else if (it && it.k === 'table') it.rows.forEach(r => r.forEach(c => out.push({ text: (c.runs || []).map(x => x.t).join(''), page }))); });
+    if (sec.type === 'main') sec.rows.forEach(r => take(r[side], r.page)); else take(sec[side], sec.page);
+    return out;
+  }
+  function lintDialog() {
+    flushCells();
+    const B = state.lastResult && state.lastResult.B;
+    let L, scope;
+    if (B) { L = runLint(B); scope = '개정안 전체(' + esc(B.name || '') + ')'; }
+    else { const lines = state.sections.flatMap(s => cellsText(s, 'new')); L = RG.lintLines(lines, { renames: renamesOf() }); scope = '대조표의 개정안 칸(번호 체계·별첨·부칙 검사는 개정안 파일로 비교했을 때만 됩니다)'; }
+    state.lint = L;
+    const rows = L.map((x, i) => `<div class="li" data-i="${i}"><span class="sev" style="background:${SEV[x.sev][1]}">${SEV[x.sev][0]}</span><div><div class="t">${esc(x.msg)}</div><div class="d">${x.page ? x.page + '쪽 · ' : ''}${esc(x.cat)}${x.where ? ' · ' + esc(x.where) : ''}</div></div></div>`).join('');
+    modal(`<h3>형식 검사</h3><div class="muted">검사 범위: ${scope}. 항목을 누르면 대조표의 그 자리로 갑니다(바뀌지 않은 조문은 대조표에 없을 수 있음).</div>
+      <div class="lintlist">${rows || '<div class="ok" style="padding:14px;text-align:center">확인할 곳이 없습니다. 👍</div>'}</div>
+      <div class="row" style="margin-top:8px"><button class="btn sm" id="lnRen">옛 이름 목록 고치기</button><span class="muted">옛 부서명·직위명을 적어 두면 개정안에 남아 있는지 찾아 줍니다.</span></div>
+      <div class="foot"><button class="btn pri" id="x">닫기</button></div>`, m => {
+      $('#x', m).onclick = closeModal;
+      $('#lnRen', m).onclick = () => renamesDialog(() => lintDialog());
+      $$('.li', m).forEach(el => el.onclick = () => { const x = L[+el.dataset.i]; closeModal(); goStep(2); setTimeout(() => jumpToText(x.find || x.where), 60); });
+    });
+  }
+  function renamesDialog(after) {
+    modal(`<h3>옛 이름 → 새 이름 목록</h3><div class="muted">한 줄에 하나씩 <b>옛 이름 → 새 이름</b> (또는 <b>옛 이름 = 새 이름</b>). 형식 검사와 「이름 일괄 변경」에서 씁니다.</div>
+      <textarea id="rnT" style="width:100%;height:220px;margin-top:8px" placeholder="예)\n총무팀 → 행정지원팀\n원무과 → 원무팀\n질병관리본부 → 질병관리청">${esc(state.settings.renames || '')}</textarea>
+      <div class="foot"><button class="btn" id="x">취소</button><button class="btn pri" id="ok">저장</button></div>`, m => {
+      $('#x', m).onclick = () => { closeModal(); if (after) after(); };
+      $('#ok', m).onclick = () => { state.settings.renames = $('#rnT', m).value; autosave(); closeModal(); toast('이름 목록 ' + renamesOf().length + '개를 저장했습니다.'); if (after) after(); };
+    });
+  }
+  function flash(el) { if (!el) return; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1800); }
+  function jumpToText(t) {
+    const key = String(t || '').replace(/[\s 　]+/g, ''); if (!key) return;
+    const cells = $$('#secs .cell'); const k2 = key.slice(0, 14);
+    const hit = cells.find(c => c.textContent.replace(/[\s 　]+/g, '').indexOf(key) >= 0) || cells.find(c => c.textContent.replace(/[\s 　]+/g, '').indexOf(k2) >= 0);
+    if (hit) flash(hit.closest('td') || hit); else toast('대조표에는 없는 부분입니다(바뀌지 않은 조문일 수 있음). 원본에서 확인해 주세요.', 4500);
+  }
+  /* --- 바뀐 곳 차례로 이동 (F3 / Shift+F3) --- */
+  let markIdx = -1;
+  function marks() { return $$('#secs .cell span[class^="m-"], #secs .cell span[class*=" m-"], #secs .cell img[data-chg]').filter(el => !el.closest('.notecell') && (el.textContent.trim() || el.tagName === 'IMG')); }
+  function nextMark(dir) {
+    if ($('#step2').style.display === 'none' || !$('#secs .cell')) return false;
+    const ms = marks(); if (!ms.length) { toast('빨간 표시(바뀐 곳)가 없습니다.'); return true; }
+    // 같은 줄에 잇닿은 표시는 하나로
+    markIdx = (markIdx + dir + ms.length) % ms.length;
+    const el = ms[markIdx]; flash(el); toast('바뀐 곳 ' + (markIdx + 1) + ' / ' + ms.length + ' (F3 다음 · Shift+F3 이전)', 1600);
+    return true;
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'F3') { if (nextMark(e.shiftKey ? -1 : 1)) e.preventDefault(); }
+    else if (e.ctrlKey && e.altKey && (e.key === 'l' || e.key === 'L')) { e.preventDefault(); lintDialog(); }
+    else if (e.ctrlKey && e.altKey && (e.key === 'g' || e.key === 'G')) { e.preventDefault(); changeListDialog(); }
+  });
+  /* --- 바뀐 곳 목록 --- */
+  function rowText(items) { const l = (items || []).find(it => it && it.k === 'line' && (it.runs || []).some(r => r.t.trim() && !/^<.*>$/.test(r.t.trim()))); return l ? l.runs.map(r => r.t).join('').slice(0, 70) : ((items || []).some(it => it && it.k === 'table') ? '[표]' : (items || []).some(it => it && it.k === 'img') ? '[그림]' : ''); }
+  function changeListDialog() {
+    flushCells(); const list = []; let n = 0;
+    state.sections.forEach(sec => {
+      if (sec.type === 'main') sec.rows.forEach((r, i) => { n++; list.push({ id: r.id, no: n, t: rowText(r.new) || rowText(r.old), note: (r.note || []).map(x => (x.runs || []).map(y => y.t).join('')).filter(Boolean).join(' / '), memo: r.memo, done: r.done, page: r.page }); });
+      else list.push({ id: sec.id, sec: true, no: '별첨', t: sec.desc || sec.titleSuffix, note: (sec.reason || []).map(x => (x.runs || []).map(y => y.t).join('')).join(' / '), memo: sec.memo, done: sec.done, hidden: sec.hidden });
+    });
+    const done = list.filter(x => x.done).length, memo = list.filter(x => x.memo).length;
+    modal(`<h3>바뀐 곳 목록</h3><div class="muted">${list.length}곳 · 검토 끝 ${done} · 메모 ${memo}. 누르면 그 행으로 갑니다. (단축키 Ctrl+Alt+G · 빨간 표시 차례로 이동은 F3)</div>
+      <div class="row" style="margin:6px 0"><label><input type="checkbox" id="clUn"> 검토 안 끝난 곳만</label><label><input type="checkbox" id="clMe"> 메모 있는 곳만</label></div>
+      <div class="lintlist" id="clL"></div><div class="foot"><button class="btn pri" id="x">닫기</button></div>`, m => {
+      const draw = () => {
+        const un = $('#clUn', m).checked, me = $('#clMe', m).checked;
+        $('#clL', m).innerHTML = list.filter(x => (!un || !x.done) && (!me || x.memo)).map(x => `<div class="li" data-id="${x.id}"><span class="sev" style="background:${x.done ? '#2e7d32' : x.sec ? '#6a4fb3' : '#1f3a68'}">${x.done ? '✓' : x.no}</span><div><div class="t">${esc(x.t || '(내용 없음)')}${x.hidden ? ' <span class="muted">(출력 제외)</span>' : ''}</div><div class="d">${x.page ? '(' + esc(x.page) + '면) ' : ''}${esc(x.note || '')}</div>${x.memo ? '<div class="memo">📝 ' + esc(x.memo) + '</div>' : ''}</div></div>`).join('') || '<div class="muted" style="padding:12px">해당하는 곳이 없습니다.</div>';
+        $$('.li', m).forEach(el => el.onclick = () => { closeModal(); goStep(2); setTimeout(() => flash($('[data-rid="' + el.dataset.id + '"]') || $('[data-sec="' + el.dataset.id + '"]')), 60); });
+      };
+      $('#clUn', m).onchange = draw; $('#clMe', m).onchange = draw; draw();
+      $('#x', m).onclick = closeModal;
+    });
+  }
+  /* --- 검토 메모 --- */
+  function memoDialog(r, after) {
+    modal(`<h3>검토 메모</h3><div class="muted">출력물에는 나오지 않는 나만의 메모입니다. 작업 저장·버전에 함께 남습니다.</div>
+      <textarea id="mmT" style="width:100%;height:140px;margin-top:8px" placeholder="예) 담당부서에 시행일 확인 요청">${esc(r.memo || '')}</textarea>
+      <label style="display:block;margin-top:6px"><input type="checkbox" id="mmD" ${r.done ? 'checked' : ''}> 이 행은 검토 끝</label>
+      <div class="foot"><button class="btn" id="x">취소</button><button class="btn pri" id="ok">저장</button></div>`, m => {
+      $('#x', m).onclick = closeModal; setTimeout(() => $('#mmT', m).focus(), 30);
+      $('#ok', m).onclick = () => { r.memo = $('#mmT', m).value.trim(); r.done = $('#mmD', m).checked; closeModal(); autosave(); if (after) after(); };
+    });
+  }
+  /* --- 행 짝 맞추기 --- */
+  const isPlaceholder = (items) => !(items || []).length || (items.length === 1 && items[0].k === 'line' && /^\s*<[^>]+>\s*$|^\s*$/.test((items[0].runs || []).map(r => r.t).join('')));
+  function textOfItems(items) { return (items || []).filter(it => it && it.k === 'line').map(it => (it.runs || []).map(r => r.t).join('')).join('\n'); }
+  function pairMenu(sec, r) {
+    const rows = sec.rows, i = rows.indexOf(r); const S = state.settings;
+    modal(`<h3>현행·개정안 짝 맞추기 (${i + 1}번째 행)</h3><div class="muted">자동 비교가 다른 조문끼리 짝지었을 때, 한쪽 칸만 위·아래 행으로 옮겨 바로잡습니다. 옮긴 뒤 <b>이 행 다시 대조</b>로 빨간 표시를 새로 매길 수 있습니다.</div>
+      <div class="pm">
+        <button class="btn" data-p="oldDown" ${i >= rows.length - 1 ? 'disabled' : ''}>현행 칸 → 아래 행으로</button><button class="btn" data-p="oldUp" ${i === 0 ? 'disabled' : ''}>현행 칸 → 위 행으로</button>
+        <button class="btn" data-p="newDown" ${i >= rows.length - 1 ? 'disabled' : ''}>개정안 칸 → 아래 행으로</button><button class="btn" data-p="newUp" ${i === 0 ? 'disabled' : ''}>개정안 칸 → 위 행으로</button>
+        <button class="btn" data-p="swap">이 행의 현행·개정안 맞바꾸기</button><button class="btn pri" data-p="redo">이 행 다시 대조(빨간 표시 새로)</button>
+      </div><div class="foot"><button class="btn" id="x">닫기</button></div>`, m => {
+      $('#x', m).onclick = closeModal;
+      $$('[data-p]', m).forEach(b => b.onclick = () => {
+        const p = b.dataset.p; const ph = (side) => [{ k: 'line', runs: [{ t: side === 'old' ? S.newText : S.delText }] }];
+        const move = (side, j) => { const t = rows[j]; if (!t) return; t[side] = isPlaceholder(t[side]) ? r[side] : (j > i ? r[side].concat(t[side]) : t[side].concat(r[side])); r[side] = ph(side); if (isPlaceholder(r.old) && isPlaceholder(r.new)) rows.splice(rows.indexOf(r), 1); };
+        if (p === 'oldDown') move('old', i + 1); else if (p === 'oldUp') move('old', i - 1);
+        else if (p === 'newDown') move('new', i + 1); else if (p === 'newUp') move('new', i - 1);
+        else if (p === 'swap') { const t = r.old; r.old = r.new; r.new = t; }
+        else if (p === 'redo') {
+          if ([].concat(r.old, r.new).some(it => it && it.k !== 'line')) { if (!confirm('이 행에는 표·그림이 있어 다시 대조하면 글만 남습니다. 계속할까요?')) return; }
+          const ot = isPlaceholder(r.old) ? '' : textOfItems(r.old), nt = isPlaceholder(r.new) ? '' : textOfItems(r.new);
+          const x = RG.compareSnippet(ot, nt, cmpOpts()); r.old = x.old; r.new = x.new;
+          if (state.settings.autoNote !== false && x.autoNote && x.autoNote.length) r.note = x.autoNote.map(t => ({ k: 'line', runs: [{ t }], hang: 0 })).concat((r.note || []).filter(l => REASONS.indexOf((l.runs || []).map(y => y.t).join('')) >= 0));
+        }
+        closeModal(); renderSections(); autosave(); toast('바꿨습니다. 잘못됐으면 Ctrl+Z로 되돌릴 수 있습니다.');
+      });
+    });
+  }
+
+  /* =========================================================
+     개정 전문 · 사유서 · 상정 자료
+     ========================================================= */
+  function plainProject(title, items, titleSize) { return { settings: Object.assign({}, state.settings, { hfOn: false }), meta: state.meta, plainDoc: { title, items, titleSize: titleSize || 16, margin: 20 } }; }
+  async function exportPlain(title, items, fmt) { const pj = plainProject(title, items); return fmt === 'docx' ? RG.exportDOCX(pj) : RG.exportHWPX(pj); }
+  const nameOf = () => (state.meta.title || (state.lastResult && RG.guessTitle(state.lastResult.B)) || '내규').replace(/\s*신[•·]?구조문\s*대조표.*$/, '').trim();
+  const safe = (s) => String(s || '').replace(/[\\/:*?"<>|]/g, '_');
+  function fullTextItems(skipMeta) {
+    const B = state.lastResult && state.lastResult.B; if (!B) return null;
+    return RG.docToItems(B, { skipMeta });
+  }
+  function fullTextDialog() {
+    if (!(state.lastResult && state.lastResult.B)) { toast('개정 전문은 대조표를 만든 직후(또는 「다시 비교」 뒤)에 만들 수 있습니다.', 5000); return; }
+    modal(`<h3>개정 전문(깨끗한 본) 저장</h3><div class="muted">비교에 쓴 개정안을 빨간 표시 없이 내규 전문으로 저장합니다. 번호 단계에 맞춰 들여쓰기합니다.<br>※ 다듬기 화면에서 고친 글자는 반영되지 않습니다. 원본 서식(글꼴·간격)은 단순화됩니다.</div>
+      <div class="row" style="margin-top:10px">형식 <label><input type="radio" name="ff" value="hwpx" checked> 한글(.hwpx)</label><label><input type="radio" name="ff" value="docx"> 워드(.docx)</label></div>
+      <label style="display:block;margin-top:6px"><input type="checkbox" id="ffM"> 첫머리 정보표(내규번호·제정일 등) 빼기</label>
+      <div class="foot"><button class="btn" id="x">취소</button><button class="btn pri" id="ok">저장</button></div>`, m => {
+      $('#x', m).onclick = closeModal;
+      $('#ok', m).onclick = async () => {
+        const fmt = $('input[name=ff]:checked', m).value; const skip = $('#ffM', m).checked; closeModal(); busy(true, '개정 전문 만드는 중…');
+        try { const blob = await exportPlain('', fullTextItems(skip), fmt); download(blob, safe(nameOf()) + ' (개정 전문).' + fmt); LOG('개정 전문 저장', fmt); }
+        catch (e) { console.error(e); toast('저장 실패: ' + e.message, 6000); } finally { busy(false); }
+      };
+    });
+  }
+  function noteLines() {
+    const out = []; let n = 0;
+    state.sections.filter(s => !s.hidden).forEach(sec => {
+      if (sec.type === 'main') sec.rows.forEach(r => { n++; const first = rowText(r.new) || rowText(r.old); const notes = (r.note || []).map(x => (x.runs || []).map(y => y.t).join('').trim()).filter(t => t && REASONS.indexOf(t) < 0); if (notes.length || first) out.push({ head: first, notes }); });
+      else out.push({ head: (sec.desc || sec.titleSuffix || '별첨').replace(/^\(|\)$/g, ''), notes: (sec.reason || []).map(x => (x.runs || []).map(y => y.t).join('').trim()).filter(t => t && REASONS.indexOf(t) < 0) });
+    });
+    return out;
+  }
+  function usedReasons() { const s = new Set(); state.sections.forEach(sec => { const ls = sec.type === 'main' ? sec.rows.flatMap(r => r.note || []) : (sec.reason || []); ls.forEach(l => { const t = (l.runs || []).map(y => y.t).join('').trim(); if (REASONS.indexOf(t) >= 0) s.add(t); }); }); return Array.from(s); }
+  function effDate() {
+    let d = '';
+    state.sections.forEach(sec => (sec.type === 'main' ? sec.rows : []).forEach(r => (r.new || []).forEach(it => { const t = it && it.k === 'line' ? (it.runs || []).map(x => x.t).join('') : ''; if (/시행/.test(t)) { const x = RG.toISO(t); if (x) d = x; } })));
+    return d;
+  }
+  function submitDialog() {
+    flushCells();
+    if (!state.sections.length || !state.sections.some(s => (s.rows && s.rows.length) || s.type === 'annex')) { toast('먼저 대조표를 만들어 주세요.'); return; }
+    const B = state.lastResult && state.lastResult.B; const meta = B ? RG.docMeta(B) : {};
+    const reasons = usedReasons(); const nl = noteLines(); const today = new Date().toISOString().slice(0, 10);
+    const minor = reasons.some(r => /경미/.test(r));
+    const main = nl.map((x, i) => '- ' + (x.head ? x.head.replace(/\s+/g, ' ').slice(0, 40) + (x.notes.length ? ': ' : '') : '') + x.notes.join(', ')).join('\n');
+    modal(`<h3>사유서 · 상정 자료 만들기</h3><div class="muted">대조표의 비고와 개정 사유로 <b>개정 사유서</b> 초안을 만들고, 대조표·개정 전문과 함께 한 번에 받습니다. 내용은 고친 뒤 만드세요.</div>
+      <div class="grid2" style="margin-top:8px">
+        <label class="f">내규명<input type="text" id="sbN" value="${esc(nameOf())}"></label>
+        <label class="f">내규번호<input type="text" id="sbNo" value="${esc(meta.no || '')}"></label>
+        <label class="f">주관(담당)부서<input type="text" id="sbD" value="${esc(meta.dept || (window.__auth && window.__auth.user ? window.__auth.user.dept || '' : ''))}"></label>
+        <label class="f">시행(예정)일<input type="date" id="sbE" value="${effDate()}"></label>
+        <label class="f">심의 구분<select id="sbK"><option ${minor ? '' : 'selected'}>내규검토위원회 심의</option><option ${minor ? 'selected' : ''}>서면 의결(경미·긴급 사안)</option><option>내부결재</option></select></label>
+        <label class="f">작성일<input type="date" id="sbW" value="${today}"></label>
+      </div>
+      <label class="f" style="margin-top:6px">개정 사유<textarea id="sbR" style="height:70px">${esc(reasons.length ? reasons.join('\n') : '업무 절차 현행화')}</textarea></label>
+      <label class="f" style="margin-top:6px">주요 개정 내용 <span class="muted">(비고에서 모음 — 줄마다 한 항목)</span><textarea id="sbM" style="height:140px">${esc(main)}</textarea></label>
+      <label class="f" style="margin-top:6px">관련 근거<input type="text" id="sbB" value="${esc(meta.basis || '')}" placeholder="예) 의료법 시행규칙 제00조, 인증기준 9.1"></label>
+      <div class="row" style="margin-top:10px"><b>받을 자료</b><label><input type="checkbox" id="oR" checked> 개정 사유서</label><label><input type="checkbox" id="oT" checked> 신·구조문 대조표</label><label><input type="checkbox" id="oF" ${B ? 'checked' : 'disabled'}> 개정 전문${B ? '' : '(비교 직후에만)'}</label></div>
+      <div class="row" style="margin-top:4px"><b>형식</b><label><input type="radio" name="sbf" value="hwpx" checked> 한글(.hwpx)</label><label><input type="radio" name="sbf" value="docx"> 워드(.docx)</label><span class="muted">여러 개면 압축 파일(.zip) 하나로 받습니다.</span></div>
+      <div class="foot"><button class="btn" id="x">취소</button><button class="btn pri" id="ok">만들기</button></div>`, m => {
+      $('#x', m).onclick = closeModal;
+      $('#ok', m).onclick = async () => {
+        const v = (id) => $(id, m).value.trim(); const fmt = $('input[name=sbf]:checked', m).value;
+        const info = { name: v('#sbN'), no: v('#sbNo'), dept: v('#sbD'), eff: v('#sbE'), kind: v('#sbK'), wrote: v('#sbW'), reasons: v('#sbR').split('\n').map(s => s.trim()).filter(Boolean), mains: v('#sbM').split('\n').map(s => s.replace(/^[-·•\s]+/, '').trim()).filter(Boolean), basis: v('#sbB') };
+        const want = { r: $('#oR', m).checked, t: $('#oT', m).checked, f: $('#oF', m).checked && !!B };
+        if (!want.r && !want.t && !want.f) { toast('받을 자료를 하나 이상 고르세요.'); return; }
+        closeModal(); busy(true, '상정 자료 만드는 중…');
+        try {
+          const files = []; const base = safe(info.name || '내규');
+          if (want.r) files.push([base + ' 개정 사유서.' + fmt, await exportPlain('「' + info.name + '」 개정 사유서', reasonItems(info), fmt)]);
+          if (want.t) files.push([fileBase() + '.' + fmt, fmt === 'docx' ? await RG.exportDOCX(state) : await RG.exportHWPX(state)]);
+          if (want.f) files.push([base + ' (개정 전문).' + fmt, await exportPlain('', fullTextItems(false), fmt)]);
+          if (files.length === 1) download(files[0][1], files[0][0]);
+          else { const z = new JSZip(); files.forEach(([n, b]) => z.file(n, b)); download(await z.generateAsync({ type: 'blob' }), base + ' 상정 자료.zip'); }
+          LOG('상정 자료 만들기', files.map(f => f[0]).join(', '));
+          toast('만들었습니다: ' + files.map(f => f[0]).join(', '), 5000);
+        } catch (e) { console.error(e); toast('만들기 실패: ' + e.message, 6000); } finally { busy(false); }
+      };
+    });
+  }
+  function reasonItems(info) {
+    const L = (t, o) => Object.assign({ k: 'line', runs: [{ t }] }, o || {});
+    const H = (t) => L(t, { runs: [{ t, b: true }] });
+    const dot = (iso) => iso ? iso.replace(/^(\d{4})-(\d{2})-(\d{2})$/, (m, y, mo, d) => y + '. ' + (+mo) + '. ' + (+d) + '.') : '';
+    const cell = (t, bg) => ({ runs: [{ t, b: !!bg }], cs: 1, rs: 1, bg: bg || undefined, al: bg ? undefined : 'left' });
+    const items = [];
+    items.push({ k: 'table', rows: [
+      [cell('내 규 명', '#e8ecf3'), Object.assign(cell(info.name), { cs: 3 })],
+      [cell('내규번호', '#e8ecf3'), cell(info.no || ''), cell('주관부서', '#e8ecf3'), cell(info.dept || '')],
+      [cell('시행(예정)일', '#e8ecf3'), cell(dot(info.eff)), cell('심의 구분', '#e8ecf3'), cell(info.kind || '')]
+    ] });
+    items.push(L(''));
+    const HAN = '가나다라마바사아자차카타파하';
+    items.push(H('1. 개정 사유'));
+    (info.reasons.length ? info.reasons : ['(사유를 적어 주세요)']).forEach((t, i) => items.push(L(HAN[i] + '. ' + t, { hang: 3, ind: 1 })));
+    items.push(L(''));
+    items.push(H('2. 주요 개정 내용'));
+    (info.mains.length ? info.mains : ['(신·구조문 대조표 참조)']).forEach((t, i) => items.push(L(HAN[i % 14] + '. ' + t, { hang: 3, ind: 1 })));
+    items.push(L(''));
+    items.push(H('3. 관련 근거'));
+    items.push(L('가. ' + (info.basis || '내규관리내규(9.1-4)'), { hang: 3, ind: 1 }));
+    items.push(L(''));
+    items.push(H('4. 시행일'));
+    items.push(L('가. ' + (dot(info.eff) ? dot(info.eff) + '부터 시행' : '승인 후 지정일부터 시행'), { hang: 3, ind: 1 }));
+    items.push(L(''));
+    items.push(L('붙임  1. 신·구조문 대조표 1부.', { hang: 5 }));
+    items.push(L('        2. 개정 내규 전문 1부.  끝.', { hang: 5 }));
+    items.push(L('')); items.push(L(''));
+    items.push(L(dot(info.wrote), { align: 'center' }));
+    items.push(L(''));
+    items.push(L((info.dept || '') + '  작성자 ' + ((window.__auth && window.__auth.user && window.__auth.user.name) || ''), { align: 'right' }));
+    return items;
+  }
+
+  /* =========================================================
+     일괄 비교 · 이름 일괄 변경
+     ========================================================= */
+  function pickFiles(multiple, accept) { return new Promise(res => { const f = document.createElement('input'); f.type = 'file'; f.multiple = !!multiple; f.accept = accept || '.pdf,.hwp,.hwpx,.docx,.txt'; f.onchange = () => res(Array.from(f.files || [])); f.click(); }); }
+  async function exportSet(sections, title, fmt) {
+    const pj = { settings: state.settings, meta: { title }, sections };
+    const out = [];
+    if (fmt === 'hwpx' || fmt === 'both') out.push(['hwpx', await RG.exportHWPX(pj)]);
+    if (fmt === 'docx' || fmt === 'both') out.push(['docx', await RG.exportDOCX(pj)]);
+    return out;
+  }
+  function batchDialog() {
+    const st = { olds: [], news: [], pairs: [] };
+    modal(`<h3>여러 내규 한꺼번에 비교</h3><div class="muted">현행 파일들과 개정안 파일들을 고르면 이름으로 짝을 지어 대조표를 한 번에 만들고 압축 파일(.zip)로 받습니다. 짝이 틀리면 고칠 수 있습니다. 별첨 그림·표는 본문에 그대로 둡니다.</div>
+      <div class="row" style="margin-top:10px"><button class="btn" id="bo">현행 파일 고르기</button><span id="bon" class="muted">0개</span><button class="btn" id="bn">개정안 파일 고르기</button><span id="bnn" class="muted">0개</span></div>
+      <div id="bp" class="lintlist" style="max-height:38vh"></div>
+      <div class="row" style="margin-top:8px"><b>형식</b><label><input type="radio" name="bf" value="hwpx" checked> 한글</label><label><input type="radio" name="bf" value="docx"> 워드</label><label><input type="radio" name="bf" value="both"> 둘 다</label>
+        <label><input type="checkbox" id="bF"> 개정 전문도</label><label><input type="checkbox" id="bL" checked> 형식 검사 결과 목록</label><label><input type="checkbox" id="bR" checked> 내규 대장에 올리기</label></div>
+      <div class="foot"><button class="btn" id="x">닫기</button><button class="btn pri" id="ok" disabled>대조표 만들기</button></div>`, m => {
+      const draw = () => {
+        $('#bon', m).textContent = st.olds.length + '개'; $('#bnn', m).textContent = st.news.length + '개';
+        st.pairs = RG.pairFiles(st.olds.map(f => f.name), st.news.map(f => f.name));
+        const opts = (sel) => '<option value="-1">(짝 없음 — 건너뜀)</option>' + st.news.map((f, j) => '<option value="' + j + '"' + (j === sel ? ' selected' : '') + '>' + esc(f.name) + '</option>').join('');
+        $('#bp', m).innerHTML = st.olds.map((f, i) => `<div class="li nohover"><span class="sev" style="background:#1f3a68">${i + 1}</span><div style="flex:1"><div class="t">${esc(f.name)}</div><div class="d">개정안: <select data-i="${i}" style="max-width:100%">${opts(st.pairs[i][1])}</select></div></div></div>`).join('') || '<div class="muted" style="padding:12px">파일을 골라 주세요.</div>';
+        $$('select[data-i]', m).forEach(s => s.onchange = () => { st.pairs[+s.dataset.i][1] = +s.value; });
+        $('#ok', m).disabled = !st.olds.length || !st.news.length;
+      };
+      $('#bo', m).onclick = async () => { st.olds = await pickFiles(true); draw(); };
+      $('#bn', m).onclick = async () => { st.news = await pickFiles(true); draw(); };
+      $('#x', m).onclick = closeModal; draw();
+      $('#ok', m).onclick = async () => {
+        const fmt = $('input[name=bf]:checked', m).value, full = $('#bF', m).checked, wantLint = $('#bL', m).checked, reg = $('#bR', m).checked;
+        const jobs = st.pairs.filter(p => p[1] >= 0).map(p => [st.olds[p[0]], st.news[p[1]]]);
+        if (!jobs.length) { toast('짝지은 파일이 없습니다.'); return; }
+        closeModal(); busy(true, '일괄 비교 준비…');
+        const zip = new JSZip(); const report = []; const lintTxt = [];
+        for (let k = 0; k < jobs.length; k++) {
+          const [fo, fn] = jobs[k]; const tag = (k + 1) + '/' + jobs.length;
+          try {
+            busy(true, tag + ' 읽는 중… ' + fo.name);
+            const prog = (a, b, msg) => $('#busytx').textContent = tag + ' PDF ' + a + '/' + b + '쪽' + (msg ? ' · ' + msg : '');
+            const A = (await parseFile(fo, { onProg: prog })), B = (await parseFile(fn, { onProg: prog }));
+            busy(true, tag + ' 비교하는 중… ' + fn.name);
+            const r = await buildSections(A.doc, B.doc, {}, { old: A.pdf, new: B.pdf });
+            const title = RG.guessTitle(B.doc) || RG.guessTitle(A.doc) || fn.name.replace(/\.[^.]+$/, '');
+            const base = safe(title); const st2 = r.res.stats;
+            for (const [ext, blob] of await exportSet(r.sections, title, fmt)) zip.file(base + ' 신구조문 대조표.' + ext, blob);
+            if (full) zip.file(base + ' (개정 전문).hwpx', await exportPlain('', RG.docToItems(B.doc, {}), 'hwpx'));
+            const L = wantLint ? runLint(B.doc) : [];
+            if (wantLint && L.length) lintTxt.push('■ ' + title + '\n' + L.map(x => '  [' + SEV[x.sev][0] + '] ' + x.msg + (x.where ? ' — ' + x.where : '') + (x.page ? ' (' + x.page + '쪽)' : '')).join('\n'));
+            if (reg) registryUpsertFrom(A.doc, B.doc);
+            report.push('○ ' + title + ': 바뀜 ' + st2.mod + ' · 신설 ' + st2.ins + ' · 삭제 ' + st2.del + ' → 본문 ' + (r.main.rows.length) + '행, 별첨 ' + r.annexSecs.length + '개' + (L.length ? ' · 형식 확인 ' + L.length + '곳' : '') + (B.doc.ocrPages && B.doc.ocrPages.length ? ' · 글자 인식 ' + B.doc.ocrPages.length + '쪽' : ''));
+          } catch (e) { console.error(e); report.push('✕ ' + fo.name + ' ↔ ' + fn.name + ': 실패 — ' + (e.message || e)); }
+        }
+        const head = '일괄 비교 결과 (' + new Date().toLocaleString('ko-KR') + ')\n\n';
+        zip.file('00 결과 요약.txt', head + report.join('\n') + (lintTxt.length ? '\n\n형식 검사\n' + lintTxt.join('\n\n') : ''));
+        busy(true, '압축 파일 만드는 중…');
+        download(await zip.generateAsync({ type: 'blob' }), '일괄 신구조문 대조표 ' + new Date().toISOString().slice(0, 10) + '.zip');
+        busy(false); LOG('일괄 비교', jobs.length + '건');
+        modal(`<h3>일괄 비교 끝</h3><div class="muted">압축 파일을 받았습니다. 각 대조표는 한글·워드에서 열어 다듬을 수 있습니다.</div><pre class="rep">${esc(report.join('\n'))}</pre><div class="foot"><button class="btn pri" id="x">닫기</button></div>`, mm => $('#x', mm).onclick = closeModal);
+      };
+    });
+  }
+  function renameBatchDialog() {
+    const st = { files: [] };
+    modal(`<h3>이름 일괄 변경 (조직 개편 반영)</h3><div class="muted">옛 부서명·직위명을 새 이름으로 여러 내규에서 한꺼번에 바꾸고, 내규마다 <b>신·구조문 대조표</b>와 <b>바뀐 내규 파일</b>을 만듭니다.<br>한글(.hwpx)·워드(.docx)는 원본 서식을 살린 채 글자만 바꿉니다. 옛 한글(.hwp)·PDF는 서식이 단순화된 .hwpx로 만듭니다.</div>
+      <label class="f" style="margin-top:8px">바꿀 이름 (한 줄에 하나: 옛 이름 → 새 이름)<textarea id="rbT" style="height:120px" placeholder="총무팀 → 행정지원팀">${esc(state.settings.renames || '')}</textarea></label>
+      <div class="row" style="margin-top:8px"><button class="btn" id="rbF">내규 파일 고르기</button><span id="rbN" class="muted">0개</span></div>
+      <div class="row" style="margin-top:6px"><b>대조표 형식</b><label><input type="radio" name="rbf" value="hwpx" checked> 한글</label><label><input type="radio" name="rbf" value="docx"> 워드</label><label><input type="radio" name="rbf" value="both"> 둘 다</label></div>
+      <div class="foot"><button class="btn" id="x">닫기</button><button class="btn pri" id="ok">바꾸고 대조표 만들기</button></div>`, m => {
+      $('#x', m).onclick = closeModal;
+      $('#rbF', m).onclick = async () => { st.files = await pickFiles(true); $('#rbN', m).textContent = st.files.length + '개: ' + st.files.map(f => f.name).join(', ').slice(0, 120); };
+      $('#ok', m).onclick = async () => {
+        const pairs = RG.parseRenames($('#rbT', m).value); const fmt = $('input[name=rbf]:checked', m).value;
+        if (!pairs.length) { toast('바꿀 이름을 적어 주세요.'); return; } if (!st.files.length) { toast('내규 파일을 골라 주세요.'); return; }
+        state.settings.renames = $('#rbT', m).value; autosave();
+        closeModal(); const zip = new JSZip(); const rep = [];
+        for (let k = 0; k < st.files.length; k++) {
+          const f = st.files[k]; busy(true, (k + 1) + '/' + st.files.length + ' ' + f.name);
+          try {
+            const A = await parseFile(f, {}); const R = RG.applyRenames(A.doc, pairs);
+            if (!R.count) { rep.push('－ ' + f.name + ': 바꿀 이름이 없어 건너뜀'); continue; }
+            const title = RG.guessTitle(A.doc) || f.name.replace(/\.[^.]+$/, ''); const base = safe(title);
+            const r = await buildSections(A.doc, R.doc, { addNote: '부서명·직위 변경 반영' }, { old: A.pdf, new: null });
+            for (const [ext, blob] of await exportSet(r.sections, title, fmt)) zip.file(base + ' 신구조문 대조표.' + ext, blob);
+            let note = '';
+            if (A.kind === 'hwpx' || A.kind === 'docx') {
+              const P = await RG.renameInPackage(A.buf, A.kind, pairs);
+              zip.file(base + ' (이름 변경).' + A.kind, P.blob);
+              if (P.count < R.count) note = ' ※ 원본 파일에서는 ' + P.count + '곳만 바뀜(글자 모양이 중간에 바뀐 곳 등은 한글에서 찾아 바꾸기로 확인)';
+            } else zip.file(base + ' (이름 변경, 서식 단순화).hwpx', await exportPlain('', RG.docToItems(R.doc, {}), 'hwpx'));
+            rep.push('○ ' + title + ': ' + R.count + '곳 (' + Object.entries(R.by).map(([o, n]) => o + ' ' + n).join(', ') + ')' + note);
+          } catch (e) { console.error(e); rep.push('✕ ' + f.name + ': 실패 — ' + (e.message || e)); }
+        }
+        zip.file('00 결과 요약.txt', '이름 일괄 변경 결과\n바꾼 이름: ' + pairs.map(p => p[0] + ' → ' + p[1]).join(', ') + '\n\n' + rep.join('\n'));
+        busy(true, '압축 파일 만드는 중…'); download(await zip.generateAsync({ type: 'blob' }), '이름 일괄 변경 ' + new Date().toISOString().slice(0, 10) + '.zip'); busy(false);
+        LOG('이름 일괄 변경', st.files.length + '건 · ' + pairs.map(p => p[0] + '→' + p[1]).join(', '));
+        modal(`<h3>이름 일괄 변경 끝</h3><pre class="rep">${esc(rep.join('\n'))}</pre><div class="foot"><button class="btn pri" id="x">닫기</button></div>`, mm => $('#x', mm).onclick = closeModal);
+      };
+    });
+  }
+
+  /* =========================================================
+     내규 대장 (검토 주기 · 보존 기한)
+     ========================================================= */
+  const REG_KEY = 'sinkujomun_registry';
+  const regAll = () => { try { return JSON.parse(localStorage.getItem(REG_KEY) || '[]'); } catch (e) { return []; } };
+  const regSave = (L) => { try { localStorage.setItem(REG_KEY, JSON.stringify(L)); } catch (e) { } updRegBadge(); };
+  const ymd = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const addMonths = (iso, n) => { if (!iso) return ''; const d = new Date(iso + 'T00:00:00'); if (isNaN(d)) return ''; d.setMonth(d.getMonth() + n); return ymd(d); };
+  const daysTo = (iso) => iso ? Math.round((new Date(iso + 'T00:00:00') - new Date(ymd(new Date()) + 'T00:00:00')) / 86400000) : null;
+  function regCalc(x) {
+    const base = x.reviewed || x.revised || x.enacted || '';
+    x.nextReview = x.nextReviewManual || (base ? addMonths(base, x.cycleMonths || 24) : '');
+    x.keepUntil = x.revised ? addMonths(x.revised, 60) : (x.keepUntil || '');
+    return x;
+  }
+  function registryUpsertFrom(A, B) {
+    const mb = RG.docMeta(B), ma = RG.docMeta(A); const name = (mb.name || ma.name || '').replace(/\s*신[•·]?구조문.*$/, '').trim(); if (!name) return;
+    const L = regAll(); let x = L.find(r => (mb.no && r.no === mb.no) || r.name === name);
+    const today = new Date().toISOString().slice(0, 10);
+    if (!x) { x = { id: uid(), name, createdAt: today }; L.push(x); }
+    x.name = name; x.no = mb.no || x.no || ''; x.dept = mb.dept || x.dept || ''; x.enacted = mb.enactedISO || x.enacted || '';
+    x.revised = mb.revisedISO || x.revised || ''; x.reviewed = mb.reviewedISO || x.reviewed || ''; if (mb.cycleMonths) x.cycleMonths = mb.cycleMonths;
+    x.lastTable = today; x.updatedAt = new Date().toISOString(); regCalc(x); regSave(L);
+  }
+  function updRegBadge() {
+    const b = $('#bReg'); if (!b) return; const n = regAll().map(regCalc).filter(x => { const d = daysTo(x.nextReview); return d != null && d <= 60; }).length;
+    b.innerHTML = '내규 대장' + (n ? ' <span class="bdg">' + n + '</span>' : ''); b.title = n ? '검토 기한이 60일 안에 오거나 지난 내규 ' + n + '건' : '내규별 검토 주기·보존 기한 관리';
+  }
+  function registryDialog() {
+    const st = { q: '', f: 'all' };
+    modal(`<h3>내규 대장</h3><div class="muted">대조표를 만들 때 내규의 머리 정보표(내규번호·개정일자·검토일자·검토주기·담당부서)를 읽어 자동으로 올립니다. 다음 검토일은 검토(개정)일 + 검토 주기, 보존 기한은 개정일 + 5년(내규관리내규: 대조표·개정 전 내규 5년 보존)입니다.</div>
+      <div class="row" style="margin:8px 0"><input type="text" id="rgQ" placeholder="내규명·번호·부서 찾기" style="flex:1"><select id="rgF"><option value="all">모두</option><option value="due">검토 60일 안·지남</option><option value="keep">보존 기한 지남</option></select><button class="btn sm" id="rgAdd">+ 직접 추가</button><button class="btn sm" id="rgCsv">엑셀(CSV)로 받기</button><button class="btn sm" id="rgImp">CSV 가져오기</button></div>
+      <div style="max-height:52vh;overflow:auto"><table class="regt"><thead><tr><th>내규명</th><th>번호</th><th>담당부서</th><th>개정일</th><th>검토일</th><th>주기</th><th>다음 검토</th><th>보존 기한</th><th></th></tr></thead><tbody id="rgB"></tbody></table></div>
+      <div class="foot"><button class="btn pri" id="x">닫기</button></div>`, m => {
+      const draw = () => {
+        const q = st.q.toLowerCase(); const L = regAll().map(regCalc).filter(x => (!q || [x.name, x.no, x.dept].join(' ').toLowerCase().indexOf(q) >= 0))
+          .filter(x => st.f === 'all' || (st.f === 'due' ? (daysTo(x.nextReview) != null && daysTo(x.nextReview) <= 60) : (daysTo(x.keepUntil) != null && daysTo(x.keepUntil) < 0)))
+          .sort((a, b) => (a.nextReview || '9999').localeCompare(b.nextReview || '9999'));
+        const dd = (iso) => { const d = daysTo(iso); if (d == null) return '<span class="muted">-</span>'; const c = d < 0 ? 'bad' : d <= 60 ? 'warn' : ''; return '<span class="' + c + '">' + iso.replace(/-/g, '.') + (d < 0 ? ' (' + (-d) + '일 지남)' : d <= 60 ? ' (' + d + '일 남음)' : '') + '</span>'; };
+        $('#rgB', m).innerHTML = L.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.no || '')}</td><td>${esc(x.dept || '')}</td><td>${(x.revised || '').replace(/-/g, '.')}</td><td>${(x.reviewed || '').replace(/-/g, '.')}</td><td>${x.cycleMonths ? (x.cycleMonths % 12 ? x.cycleMonths + '개월' : x.cycleMonths / 12 + '년') : '2년'}</td><td>${dd(x.nextReview)}</td><td>${dd(x.keepUntil)}</td><td style="white-space:nowrap"><button class="btn sm" data-e="${x.id}">고치기</button><button class="btn sm red" data-d="${x.id}">✕</button></td></tr>`).join('') || '<tr><td colspan="9" class="muted" style="padding:14px;text-align:center">올린 내규가 없습니다. 대조표를 만들면 자동으로 올라옵니다.</td></tr>';
+        $$('[data-e]', m).forEach(b => b.onclick = () => regEdit(regAll().find(x => x.id === b.dataset.e), registryDialog));
+        $$('[data-d]', m).forEach(b => b.onclick = () => { if (!confirm('대장에서 지울까요?')) return; regSave(regAll().filter(x => x.id !== b.dataset.d)); draw(); });
+      };
+      $('#rgQ', m).oninput = (e) => { st.q = e.target.value; draw(); }; $('#rgF', m).onchange = (e) => { st.f = e.target.value; draw(); };
+      $('#rgAdd', m).onclick = () => regEdit(null, registryDialog);
+      $('#rgCsv', m).onclick = () => {
+        const L = regAll().map(regCalc); const cols = [['name', '내규명'], ['no', '내규번호'], ['dept', '담당부서'], ['enacted', '제정일'], ['revised', '개정일'], ['reviewed', '검토일'], ['cycleMonths', '검토주기(개월)'], ['nextReview', '다음 검토일'], ['keepUntil', '보존 기한'], ['memo', '메모']];
+        const q = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+        const csv = '﻿' + cols.map(c => q(c[1])).join(',') + '\n' + L.map(x => cols.map(c => q(x[c[0]])).join(',')).join('\n');
+        download(new Blob([csv], { type: 'text/csv;charset=utf-8' }), '내규 대장 ' + new Date().toISOString().slice(0, 10) + '.csv');
+      };
+      $('#rgImp', m).onclick = async () => {
+        const [f] = await pickFiles(false, '.csv,text/csv'); if (!f) return;
+        const txt = (await f.text()).replace(/^﻿/, ''); const lines = txt.split(/\r?\n/).filter(Boolean);
+        const parse = (l) => { const out = []; let cur = '', q = false; for (let i = 0; i < l.length; i++) { const c = l[i]; if (q) { if (c === '"' && l[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; } else if (c === '"') q = true; else if (c === ',') { out.push(cur); cur = ''; } else cur += c; } out.push(cur); return out; };
+        const head = parse(lines[0]); const map = { '내규명': 'name', '내규번호': 'no', '담당부서': 'dept', '제정일': 'enacted', '개정일': 'revised', '검토일': 'reviewed', '검토주기(개월)': 'cycleMonths', '메모': 'memo' };
+        const L = regAll(); let n = 0;
+        lines.slice(1).forEach(l => { const v = parse(l); const o = {}; head.forEach((h, i) => { if (map[h.trim()]) o[map[h.trim()]] = (v[i] || '').trim(); }); if (!o.name) return; ['enacted', 'revised', 'reviewed'].forEach(k => o[k] = RG.toISO(o[k]) || o[k] || ''); if (o.cycleMonths) o.cycleMonths = +o.cycleMonths || 24; let x = L.find(r => (o.no && r.no === o.no) || r.name === o.name); if (!x) { x = { id: uid() }; L.push(x); } Object.assign(x, o); n++; });
+        regSave(L); draw(); toast(n + '건을 가져왔습니다.');
+      };
+      $('#x', m).onclick = closeModal; draw();
+    });
+  }
+  function regEdit(x, back) {
+    const isNew = !x; x = x || { id: uid(), cycleMonths: 24 };
+    modal(`<h3>${isNew ? '내규 추가' : '내규 정보 고치기'}</h3>
+      <div class="grid2"><label class="f">내규명<input type="text" id="eN" value="${esc(x.name || '')}"></label><label class="f">내규번호<input type="text" id="eNo" value="${esc(x.no || '')}"></label>
+      <label class="f">담당부서<input type="text" id="eD" value="${esc(x.dept || '')}"></label><label class="f">검토 주기(개월)<input type="number" id="eC" value="${x.cycleMonths || 24}"></label>
+      <label class="f">제정일<input type="date" id="eE" value="${x.enacted || ''}"></label><label class="f">개정일<input type="date" id="eR" value="${x.revised || ''}"></label>
+      <label class="f">검토일<input type="date" id="eV" value="${x.reviewed || ''}"></label><label class="f">다음 검토일(직접 정할 때)<input type="date" id="eX" value="${x.nextReviewManual || ''}"></label></div>
+      <label class="f" style="margin-top:6px">메모<input type="text" id="eM" value="${esc(x.memo || '')}"></label>
+      <div class="foot"><button class="btn" id="x">취소</button><button class="btn pri" id="ok">저장</button></div>`, m => {
+      $('#x', m).onclick = back;
+      $('#ok', m).onclick = () => {
+        const v = (id) => $(id, m).value.trim(); if (!v('#eN')) { toast('내규명을 적어 주세요.'); return; }
+        Object.assign(x, { name: v('#eN'), no: v('#eNo'), dept: v('#eD'), cycleMonths: +v('#eC') || 24, enacted: v('#eE'), revised: v('#eR'), reviewed: v('#eV'), nextReviewManual: v('#eX'), memo: v('#eM'), updatedAt: new Date().toISOString() });
+        const L = regAll().filter(r => r.id !== x.id); L.push(regCalc(x)); regSave(L); back();
+      };
+    });
+  }
+  window.__registry = { all: regAll, merge: (arr) => { if (!Array.isArray(arr)) return 0; const L = regAll(); let n = 0; arr.forEach(o => { const cur = L.find(r => r.id === o.id); if (!cur) { L.push(o); n++; } else if ((o.updatedAt || '') > (cur.updatedAt || '')) { Object.assign(cur, o); n++; } }); regSave(L); return n; } };
+  function registryReminder() {
+    const due = regAll().map(regCalc).filter(x => { const d = daysTo(x.nextReview); return d != null && d <= 30; });
+    if (due.length) toast('검토 기한이 30일 안에 오거나 지난 내규 ' + due.length + '건: ' + due.slice(0, 3).map(x => x.name).join(', ') + (due.length > 3 ? ' 외' : '') + ' — 「내규 대장」에서 확인', 7000);
+  }
+
+  /* =========================================================
+     읽은 내용 고치기 (스캔본 교정 도우미)
+     ========================================================= */
+  async function fixDocDialog(key, host) {
+    const doc = state.docs[key]; if (!doc) return;
+    const pdf = state.pdfs[key]; const pageCache = {};
+    const crop = async (b) => {
+      if (!pdf || !b.box) return '';
+      if (!pageCache[b.page]) { const pg = await pdf.getPage(b.page); const vp = pg.getViewport({ scale: 2 }); const cv = await RG.readers.renderPdfPage(pdf, b.page, 2); pageCache[b.page] = { cv, vp }; }
+      const { cv, vp } = pageCache[b.page]; const p1 = vp.convertToViewportPoint(b.box[0], b.box[1]), p2 = vp.convertToViewportPoint(b.box[2], b.box[3]);
+      const x = Math.max(0, Math.min(p1[0], p2[0]) - 6), y = Math.max(0, Math.min(p1[1], p2[1]) - 4), w = Math.min(cv.width - x, Math.abs(p2[0] - p1[0]) + 12), h = Math.min(cv.height - y, Math.abs(p2[1] - p1[1]) + 8);
+      if (w < 4 || h < 4) return '';
+      const c2 = document.createElement('canvas'); c2.width = w; c2.height = h; c2.getContext('2d').drawImage(cv, x, y, w, h, 0, 0, w, h); return c2.toDataURL('image/png');
+    };
+    const ps = doc.blocks.map((b, i) => ({ b, i })).filter(x => x.b.type === 'p');
+    const hasOcr = ps.some(x => x.b.ocr);
+    modal(`<h3>읽은 내용 고치기 — ${esc(doc.name)}</h3><div class="muted">비교하기 전에 잘못 읽힌 글자를 바로잡습니다.${hasOcr ? ' 글자 인식(OCR)으로 읽은 문단은 왼쪽에 원본 그림이 나오고, <b style="color:#b7791f">인식 신뢰도가 낮은 문단</b>은 노랗게 표시됩니다.' : ''} 번호(1., 가. …)는 앞에 그대로 적으면 됩니다.</div>
+      <div class="row" style="margin:6px 0">${hasOcr ? '<label><input type="checkbox" id="fxLow"' + (ps.some(x => x.b.ocr && (x.b.conf || 100) < 92) ? ' checked' : '') + '> 신뢰도 낮은 문단만 (92% 미만)</label>' : ''}<input type="text" id="fxQ" placeholder="찾기" style="width:180px"><span class="muted" id="fxN"></span></div>
+      <div id="fxL" class="fixlist"></div>
+      <div class="foot"><button class="btn" id="x">취소</button><button class="btn pri" id="ok">고친 내용 적용</button></div>`, m => {
+      const edits = {};
+      const draw = async () => {
+        const low = $('#fxLow', m) && $('#fxLow', m).checked; const q = $('#fxQ', m).value.trim();
+        const list = ps.filter(x => (!low || (x.b.ocr && (x.b.conf || 100) < 92)) && (!q || ((x.b.num || '') + ' ' + x.b.text).indexOf(q) >= 0)).slice(0, 300);
+        $('#fxN', m).textContent = list.length + '문단' + (list.length >= 300 ? ' (앞 300개)' : '');
+        $('#fxL', m).innerHTML = list.map(x => `<div class="fx ${x.b.ocr && (x.b.conf || 100) < 92 ? 'low' : ''}"><div class="src" data-i="${x.i}">${x.b.ocr ? '<span class="muted">' + x.b.page + '쪽 · ' + (x.b.conf || '?') + '%</span>' : '<span class="muted">' + (x.b.page ? x.b.page + '쪽' : '') + '</span>'}</div><textarea data-i="${x.i}" rows="2">${esc(edits[x.i] != null ? edits[x.i] : ((x.b.num ? x.b.num + ' ' : '') + x.b.text))}</textarea></div>`).join('') || '<div class="muted" style="padding:12px">해당 문단이 없습니다.</div>';
+        $$('textarea[data-i]', m).forEach(t => t.oninput = () => { edits[t.dataset.i] = t.value; });
+        for (const el of $$('.src[data-i]', m)) { const b = doc.blocks[+el.dataset.i]; if (b.ocr) { const src = await crop(b); if (src && el.isConnected) el.insertAdjacentHTML('afterbegin', '<img src="' + src + '">'); } }
+      };
+      if ($('#fxLow', m)) $('#fxLow', m).onchange = draw; $('#fxQ', m).oninput = () => { clearTimeout(m._h); m._h = setTimeout(draw, 300); };
+      $('#x', m).onclick = closeModal; draw();
+      $('#ok', m).onclick = () => {
+        let n = 0;
+        Object.keys(edits).forEach(i => { const b = doc.blocks[+i]; const v = edits[i].replace(/\s*\n\s*/g, ' ').trim(); const old = (b.num ? b.num + ' ' : '') + b.text; if (v === old) return; const s = RG.splitNum(v); b.num = s.num; b.text = s.text; b.fixed = true; if (b.ocr) b.conf = 100; n++; });
+        closeModal(); if (!n) return;
+        setDoc(key, doc, host); toast(n + '문단을 고쳤습니다.' + (state.sections.length && state.lastResult ? ' 대조표에 반영하려면 「다시 비교」를 누르세요.' : ''), 5000); LOG('읽은 내용 고치기', doc.name + ' ' + n + '문단');
+      };
+    });
+  }
+
+  /* =========================================================
+     도구 메뉴
+     ========================================================= */
+  function toolsMenu() {
+    const T = [
+      ['lint', '🔎 형식 검사', '번호 체계(1.→가.→1)…)·번호 건너뜀·별첨 참조·부칙 시행일·괄호 짝·옛 부서명 검사 (Ctrl+Alt+L)'],
+      ['list', '📋 바뀐 곳 목록', '바뀐 행을 한눈에 보고 눌러서 이동, 검토 끝·메모 확인 (Ctrl+Alt+G · 빨간 표시 차례로 F3)'],
+      ['submit', '📑 사유서 · 상정 자료', '비고로 개정 사유서 초안을 만들고 대조표·개정 전문과 함께 한 번에 받기'],
+      ['full', '📄 개정 전문 저장', '빨간 표시 없는 깨끗한 개정 내규 전문(.hwpx/.docx)'],
+      ['batch', '🗂 여러 내규 일괄 비교', '현행·개정안 파일 여러 쌍을 이름으로 짝지어 대조표를 한 번에(.zip)'],
+      ['rename', '🏷 이름 일괄 변경', '조직 개편 때 옛 부서명·직위명을 여러 내규에서 바꾸고 대조표까지'],
+      ['reg', '📅 내규 대장', '내규별 다음 검토일·5년 보존 기한 관리, 엑셀(CSV) 주고받기'],
+      ['ren', '✏️ 옛 이름 목록', '형식 검사·일괄 변경에 쓸 옛 이름 → 새 이름 목록']
+    ];
+    modal(`<h3>도구</h3><div class="toolgrid">${T.map(([k, t, d]) => `<button class="tool" data-t="${k}"><b>${t}</b><span>${d}</span></button>`).join('')}</div><div class="foot"><button class="btn" id="x">닫기</button></div>`, m => {
+      $('#x', m).onclick = closeModal;
+      $$('.tool', m).forEach(b => b.onclick = () => { const k = b.dataset.t; closeModal(); ({ lint: lintDialog, list: changeListDialog, submit: submitDialog, full: fullTextDialog, batch: batchDialog, rename: renameBatchDialog, reg: registryDialog, ren: () => renamesDialog() })[k](); });
+    });
+  }
+  (function mountTools() {
+    const top = $('.top'); const set = $('#bSet');
+    if (top && set && !$('#bTools')) {
+      const bt = document.createElement('button'); bt.id = 'bTools'; bt.textContent = '🧰 도구'; bt.title = '형식 검사 · 사유서 · 일괄 비교 · 내규 대장 등'; bt.onclick = toolsMenu;
+      const br = document.createElement('button'); br.id = 'bReg'; br.onclick = registryDialog;
+      top.insertBefore(br, set); top.insertBefore(bt, br); updRegBadge();
+    }
+    const rc = $('#bAnnexAsk');
+    if (rc && !$('#bLint')) {
+      rc.insertAdjacentHTML('afterend', '<button class="btn sm" id="bChg" title="바뀐 곳 목록 (Ctrl+Alt+G) · 빨간 표시 차례로 이동 F3">바뀐 곳</button><button class="btn sm" id="bLint" title="형식 검사 (Ctrl+Alt+L)">형식 검사</button><button class="btn sm" id="bSubmit" title="사유서·상정 자료">사유서</button>');
+      $('#bChg').onclick = changeListDialog; $('#bLint').onclick = lintDialog; $('#bSubmit').onclick = submitDialog;
+    }
+    setTimeout(registryReminder, 2500);
+  })();
+
+  window.__app = { parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
   Object.defineProperty(window.__app, 'state', { get: () => state });
 })();
 
@@ -5741,6 +6523,7 @@ window.__authGate=true;
     ['대조 표시', ''], ['Alt+1', '바뀐 부분 (빨간 밑줄)'], ['Alt+2', '지운 부분 (빨간 취소선)'], ['Alt+3', '신설 (빨간 글씨)'], ['Alt+0', '대조 표시 없애기'], ['Alt+4 / 5 / 6', '「현행과 동일」 / 「신설」 / 「삭제」 넣기'],
     ['표', ''], ['Ctrl+Alt+T', '표 만들기 (한글의 Ctrl+N,T — 브라우저가 Ctrl+N을 막아 대신 씀)'], ['Ctrl+Enter', '표 안: 아래에 줄 추가'], ['Alt+Insert', '줄/칸 추가하기'], ['Alt+Delete', '줄/칸 지우기'],
     ['Tab / Shift+Tab', '표 안: 다음 / 이전 칸 (마지막 칸에서 Tab: 줄 추가)'], ['F5 → Shift+방향키', '셀 블록 고르기 (마우스로 끌어도 됨)'], ['셀 고른 뒤 M / S / C', '셀 합치기 / 셀 나누기 / 셀 배경색'], ['Alt+I', '그림 넣기'],
+    ['검토', ''], ['F3 / Shift+F3', '빨간 표시(바뀐 곳) 다음 / 이전으로'], ['Ctrl+Alt+G', '바뀐 곳 목록'], ['Ctrl+Alt+L', '형식 검사'],
     ['파일', ''], ['Alt+S · Ctrl+S', '작업 저장'], ['Alt+O · Ctrl+O', '작업 불러오기'], ['Alt+P · Ctrl+P', '미리보기 · 저장 · 인쇄'], ['F1', '이 단축키 안내']
   ];
   function keysDlg() {
@@ -6247,7 +7030,7 @@ window.__authGate=true;
       <div class="card"><h2>가져오기</h2><div class="muted">다른 PC에서 내보낸 파일을 합칩니다. 같은 항목은 더 최근에 고친 쪽을 남기고, 지금 정보는 지우지 않습니다.${isAdmin() ? '' : ' <b>관리자만 가져올 수 있습니다.</b>'}</div>
         <button class="btn pri" id="iGo" style="margin-top:8px" ${isAdmin() ? '' : 'disabled'}>파일 가져오기</button></div></div>`;
     $('#xGo', body).onclick = async () => {
-      const data = { app: 'sinkujomun-users', ver: 1, exportedAt: now(), exportedBy: AU.user.name, users: await users(), logs: await all('logs'), versions: $('#xV', body).checked ? await all('versions') : [] };
+      const data = { app: 'sinkujomun-users', ver: 1, exportedAt: now(), exportedBy: AU.user.name, users: await users(), logs: await all('logs'), versions: $('#xV', body).checked ? await all('versions') : [], registry: window.__registry ? window.__registry.all() : [] };
       A().download(new Blob([JSON.stringify(data)], { type: 'application/json' }), '대조표 도구 사용자·이력 ' + new Date().toISOString().slice(0, 10) + '.json');
       await log('사용자·이력 내보내기', '', '사용자 ' + data.users.length + ' · 기록 ' + data.logs.length + ' · 버전 ' + data.versions.length);
     };
@@ -6265,7 +7048,8 @@ window.__authGate=true;
           const mine = await all(store); const map = {}; mine.forEach(x => map[x.id] = x);
           for (const x of (d[store] || [])) { const cur = map[x.id]; if (!cur || stamp(x) > stamp(cur)) { await put(store, x); n[store]++; } }
         }
-        const msg = `가져왔습니다: 사용자 ${n.users} · 기록 ${n.logs} · 버전 ${n.versions}`;
+        const nr = d.registry && window.__registry ? window.__registry.merge(d.registry) : 0;
+        const msg = `가져왔습니다: 사용자 ${n.users} · 기록 ${n.logs} · 버전 ${n.versions}` + (nr ? ` · 내규 대장 ${nr}` : '');
         if (AU.user) { await log('사용자·이력 가져오기', '', file.name + ' — ' + msg); A().toast(msg, 5000); }
         if (fromGate) showGate('login', msg); if (done) done();
       } catch (e) { A().toast('가져오기 실패: ' + e.message, 6000); }
@@ -6296,7 +7080,7 @@ window.__authGate=true;
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '2.3';
+  const APP_VERSION = '2.4';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
