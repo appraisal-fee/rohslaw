@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-10-28 -->
+<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-01 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -94,7 +94,20 @@ select,input[type=text]{font:inherit;width:100%;padding:7px 9px;border:1px solid
 .empty{color:var(--muted);text-align:center;padding:28px 12px;border:1px dashed var(--line);border-radius:8px}
 .tabbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px 12px;border-bottom:1px solid var(--line)}
 .tabs{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
-.reset{margin:0 0 6px auto;font-weight:700;white-space:nowrap}
+.tabbar .soBtn{margin-left:auto}
+@media (max-width:620px){
+  .tabbar{border-bottom:none}
+  .tabs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);flex-basis:100%;gap:6px}
+  .tabs .tab{border:1px solid var(--line);border-radius:8px;margin:0;padding:8px 6px;text-align:center}
+  .tabs .tab[aria-selected="true"]{background:var(--accent-soft);border-color:var(--accent)}
+  .tabbar .soBtn,.tabbar .reset{flex:1;margin:0}
+}
+.reset{margin:0 0 6px;font-weight:700;white-space:nowrap}
+.soBtn{margin-left:0;font-weight:400}
+.soBtn.on{border-color:var(--accent);color:var(--accent);font-weight:700}
+.soGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 18px;align-items:start}
+@media (max-width:720px){.soGrid{grid-template-columns:minmax(0,1fr)}}
+.tokrow{gap:4px}
 .reset.ask{background:var(--bad);border-color:var(--bad);color:var(--surface)}
 .tab{border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:transparent;color:var(--muted);padding:9px 14px;font-weight:700;margin-bottom:-1px}
 .tab[aria-selected="true"]{background:var(--surface);border-color:var(--line);color:var(--accent)}
@@ -244,6 +257,38 @@ select,input[type=text]{font:inherit;width:100%;padding:7px 9px;border:1px solid
 .tblbox.on .tb-bar{display:flex}
 .tblbox.on .ib-rs{display:block}
 .keepbox{display:grid;gap:4px;padding:8px 10px;border:1px dashed var(--line);border-radius:8px;background:var(--sunk)}
+.ctrow{display:grid;grid-template-columns:auto 8.6em minmax(0,1fr) auto auto auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);cursor:grab}
+.ctrow.sub{margin-left:22px;border-style:dashed}
+.ctrow .fno{font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);min-width:2ch;text-align:right}
+.ctrow .lab{font-weight:700;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums}
+.ctrow input[type=text]{padding:5px 8px}
+.ctrow .fmeta{color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;min-width:5.5em}
+.ctrow .fmeta.bad{color:var(--bad);white-space:normal}
+.ctrow .check{white-space:nowrap;margin:0}
+.ctrow .cbtn button{padding:3px 9px}
+.ctrow.dragging{opacity:.35}
+.ctrow.before{box-shadow:0 -3px 0 var(--accent)}
+.ctrow.after{box-shadow:0 3px 0 var(--accent)}
+@media (max-width:760px){.ctrow{grid-template-columns:auto minmax(0,1fr) auto}.ctrow .lab{grid-column:2}.ctrow input[type=text]{grid-column:1/-1}.ctrow .fmeta{text-align:left}}
+input.num{width:100%;font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)}
+.presetbar{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;padding:8px 10px;border:1px dashed var(--line);border-radius:8px;background:var(--sunk)}
+.presetbar select{flex:1 1 11em;width:auto;min-width:0}
+.presetbar input[type=text]{flex:1 1 7em;width:auto;min-width:0}
+.presetbar .note{flex-basis:100%}
+.presetbar .note:empty{display:none}
+.scb{position:absolute;z-index:1;left:10px;top:34px;font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px;border:none;cursor:pointer;line-height:1.4}
+.scb.blank{background:#c62f28;color:#fff}
+.scb.keep{background:var(--ok);color:#fff}
+.scb.rot{background:#1c5a87;color:#fff;cursor:default}
+.card.blankout .thumb{opacity:.35}
+.pgcard .thumb canvas{box-shadow:0 0 0 1px var(--line)}
+.pgcard .blankmark{position:absolute;z-index:1;right:10px;top:10px;background:#c62f28;color:#fff;font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px}
+.helpgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px;align-items:start}
+.help ul,.help ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.help li{line-height:1.6}
+.help .steps li::marker{font-weight:700;color:var(--accent)}
+.check.boxed{align-items:center;min-height:38px;padding:0 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+.check.boxed input{margin-top:0}
 .res .m.good{color:var(--ok);font-weight:700}
 footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -262,11 +307,38 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
     <button class="tab" role="tab" type="button" data-tab="img" aria-selected="true">이미지 → PDF</button>
     <button class="tab" role="tab" type="button" data-tab="merge" aria-selected="false">PDF 합치기</button>
     <button class="tab" role="tab" type="button" data-tab="split" aria-selected="false">PDF 나누기</button>
+    <button class="tab" role="tab" type="button" data-tab="pages" aria-selected="false">PDF 쪽 정리</button>
     <button class="tab" role="tab" type="button" data-tab="comp" aria-selected="false">PDF 용량 줄이기</button>
     <button class="tab" role="tab" type="button" data-tab="text" aria-selected="false">PDF 글자 넣기</button>
+    <button class="tab" role="tab" type="button" data-tab="court" aria-selected="false">법원 제출</button>
+    <button class="tab" role="tab" type="button" data-tab="help" aria-selected="false">사용 설명</button>
   </nav>
+ <button type="button" id="soBtn" class="reset soBtn" title="모든 탭에서 저장할 때 적용: 파일 이름 규칙 · 열람 비밀번호 · 파일 정보 지우기 · 가림 기록표">⚙ 저장 옵션</button>
   <button type="button" id="resetBtn" class="reset" title="지금 탭에 넣은 파일과 결과를 비웁니다. 설정은 그대로 둡니다.">↺ 새로 시작</button>
   </div>
+
+  <section class="panel" id="soPanel" hidden aria-label="저장 옵션">
+    <div class="toolbar"><div class="label">저장 옵션 · 모든 탭에서 PDF를 저장할 때 함께 적용됩니다</div><button type="button" id="soClose">닫기</button></div>
+    <div class="soGrid">
+      <div class="field">
+        <label for="soRule">파일 이름 규칙</label>
+        <input type="text" id="soRule" autocomplete="off" placeholder="{이름}">
+        <div class="row tokrow"><span class="note">넣기:</span><button type="button" class="mini" data-tok="{이름}">{이름}</button><button type="button" class="mini" data-tok="{날짜}">{날짜}</button><button type="button" class="mini" data-tok="{시간}">{시간}</button><button type="button" class="mini" data-tok="{사건번호}">{사건번호}</button></div>
+        <span class="note" id="soPreview"></span>
+      </div>
+      <div class="field">
+        <label for="soCase">사건번호 (이름 규칙의 {사건번호} 자리에 들어감)</label>
+        <input type="text" id="soCase" autocomplete="off" placeholder="예: 2026가단12345">
+      </div>
+      <label class="check"><input type="checkbox" id="soStrip"> 파일 정보 지우기 — 작성자·만든 프로그램·만든 날짜 같은 숨은 정보를 빼고 저장</label>
+      <label class="check"><input type="checkbox" id="soLog"> 개인정보를 가렸으면 가림 기록표(엑셀에서 열리는 CSV)도 함께 저장 — 가린 글자는 적지 않고 쪽·항목·위치만 남깁니다</label>
+      <div class="field">
+        <label class="check"><input type="checkbox" id="soPwOn"> 열람 비밀번호 걸기</label>
+        <div class="row" id="soPwRow" hidden><input type="password" id="soPw" autocomplete="new-password" placeholder="영문·숫자·기호" style="flex:1;min-width:160px"><button type="button" id="soPwShow">보기</button></div>
+        <span class="note warn" id="soPwMsg"></span>
+      </div>
+    </div>
+  </section>
 
   <div class="tabpane" id="tab-img" role="tabpanel">
   <div class="desk">
@@ -300,7 +372,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
       <div class="form">
         <div class="field">
           <label for="pageSel">용지</label>
-          <select id="pageSel">
+          <select id="pageSel" class="pset">
             <option value="a4-auto">A4 (210×297mm), 방향 자동</option>
             <option value="a4-p">A4 세로 고정</option>
             <option value="a4-l">A4 가로 고정</option>
@@ -309,7 +381,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         </div>
         <div class="field">
           <label for="marginSel">여백</label>
-          <select id="marginSel">
+          <select id="marginSel" class="pset">
             <option value="0">없음</option>
             <option value="5" selected>5mm</option>
             <option value="10">10mm</option>
@@ -318,7 +390,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         </div>
         <div class="field">
           <label for="qualSel">화질 · 용량</label>
-          <select id="qualSel">
+          <select id="qualSel" class="pset">
             <option value="orig">원본 화질 (가장 빠름)</option>
             <option value="std">표준 (A4 300dpi, 긴 변 3508px)</option>
             <option value="small">용량 절약 (A4 150dpi, 긴 변 1754px)</option>
@@ -327,7 +399,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         </div>
         <div class="field">
           <label for="splitSel">파일 나누기</label>
-          <select id="splitSel">
+          <select id="splitSel" class="pset">
             <option value="0">나누지 않음</option>
             <option value="10">10MB마다</option>
             <option value="20">20MB마다</option>
@@ -342,7 +414,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         </div>
       </div>
       <div class="stampbox pibox2" id="piBox">
-        <label class="check"><input type="checkbox" id="piOn"> <b>개인정보 가리기</b></label>
+        <label class="check"><input type="checkbox" id="piOn" class="pset"> <b>개인정보 가리기</b></label>
         <div id="piBody" hidden>
           <div class="pigrid">
             <label class="check"><input type="checkbox" id="piRrn"> 주민·외국인등록번호 (전체)</label>
@@ -363,6 +435,37 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
           <p class="note">이미지 속 글자를 읽어 찾기 때문에 손글씨·흐린 스캔·작은 글씨는 놓칠 수 있습니다. 쪽 목록 카드의 <b>▣</b> 단추로 크게 열어 확인하고, 끌어서 더 가리거나 잘못 가린 칸을 눌러 빼세요. 가린 부분은 그림 자체가 칠해져 PDF에 원래 글자가 남지 않습니다.</p>
         </div>
       </div>
+      <div class="stampbox" id="scBox">
+        <b>스캔 정리</b>
+        <div class="pigrid">
+          <label class="check"><input type="checkbox" id="scDeskew" class="pset"> 비뚤어진 장 반듯하게</label>
+          <label class="check"><input type="checkbox" id="scBorder" class="pset"> 검은 테두리 지우기</label>
+          <label class="check"><input type="checkbox" id="scOrient" class="pset"> 눕거나 거꾸로 된 장 돌리기</label>
+          <label class="check"><input type="checkbox" id="scBlank" class="pset"> 빈 장 빼기</label>
+          <label class="check"><input type="checkbox" id="scOcr" class="pset"> 검색되는 PDF (글자 인식)</label>
+        </div>
+        <div class="field">
+          <label for="scColor">색</label>
+          <select id="scColor" class="pset">
+            <option value="color">컬러 그대로</option>
+            <option value="gray">흑백 (회색조)</option>
+            <option value="clean">흑백 선명하게 (흐린 서류용)</option>
+            <option value="bw">순수 흑백 (글자 문서 · 용량 최소)</option>
+          </select>
+        </div>
+        <div class="row">
+          <button type="button" id="scCheck">방향·빈 장 점검하기</button>
+          <button type="button" id="scStop" hidden>멈추기</button>
+          <span class="ptext" id="scProg" aria-live="polite"></span>
+        </div>
+        <p class="note" id="scSum">돌리기·빈 장 빼기를 켜면 'PDF 만들기'를 누를 때 먼저 점검하고 결과를 쪽 목록에 표시합니다. 빈 장 표시를 누르면 빼지 않고 넣습니다. 검색되는 PDF는 1장에 몇 초씩 더 걸립니다.</p>
+        <div class="row" id="scFontRow" hidden>
+          <span class="note warn">검색되는 PDF를 만들려면 글꼴을 한 번 골라야 합니다.</span>
+          <button type="button" id="scFontLoad">PC 글꼴 불러오기</button>
+          <button type="button" id="scFontFile">글꼴 파일 선택</button>
+        </div>
+      </div>
+      <div class="presetbar" data-preset="img"></div>
       <div class="stampbox" id="isBox">
         <label class="check"><input type="checkbox" id="isOn"> <b>저장할 때 도장 넣기</b></label>
         <div class="isbody" id="isBody" hidden>
@@ -470,7 +573,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         <div class="form">
           <div class="field">
             <label for="mergeComp">합치면서 용량 줄이기</label>
-            <select id="mergeComp">
+            <select id="mergeComp" class="pset">
               <option value="">줄이지 않음</option>
               <option value="light">약하게</option>
               <option value="mid">보통</option>
@@ -482,6 +585,8 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
             <input type="text" id="mergeName" autocomplete="off">
           </div>
         </div>
+        <label class="check"><input type="checkbox" id="mergeMarks" class="pset" checked> 파일마다 책갈피(목차) 넣기 — PDF 뷰어 왼쪽 목차에서 파일 이름을 눌러 바로 이동</label>
+        <div class="presetbar" data-preset="merge"></div>
         <div class="row"><button type="button" id="mergeRun" class="primary" disabled>PDF 합치기</button></div>
         <div class="progress" id="mergeProg" hidden><div class="bar"><i></i></div><div class="ptext"></div></div>
         <div class="results" id="mergeRes"></div>
@@ -653,6 +758,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         <label><input type="checkbox" id="tbBorder"> 테두리</label>
         <label><input type="checkbox" id="tbBg"> 흰 바탕으로 가리기</label>
         <label><input type="checkbox" id="tbVert"> 세로로 쓰기</label>
+        <span class="undo"><button type="button" id="tbUndo" class="mini" title="되돌리기 (Ctrl+Z)">↶ 되돌리기</button><button type="button" id="tbRedo" class="mini" title="다시 하기 (Ctrl+Y)">↷ 다시</button></span>
         <label>보기 <select id="tbZoom"><option value="fit">화면 폭에 맞춤</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option></select></label>
         <span class="cnt" id="tbCount"></span>
         <div class="ibrow tblrow" id="tblRow" hidden>
@@ -699,6 +805,244 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
       <div class="pages" id="textPages"></div>
       <div class="empty" id="textEmpty">PDF를 불러오면 여기에 쪽이 나타납니다.</div>
     </section>
+  </div>
+
+  <!-- PDF 쪽 정리: 순서 · 돌리기 · 빼기 · 빈 쪽 · 그림으로 내보내기 · 검색되는 PDF -->
+  <div class="tabpane" id="tab-pages" role="tabpanel" hidden>
+    <div class="desk">
+      <section class="panel">
+        <div class="label">1. 정리할 PDF 불러오기</div>
+        <div class="drop">
+          <strong>PDF 파일 하나를 여기에 끌어다 놓으세요</strong>
+          <div class="row"><button type="button" id="pgPick">파일 선택</button></div>
+          <div class="hint">쪽을 끌어 순서를 바꾸고, 돌리거나 빼고, 원하는 쪽을 그림 파일로 꺼낼 수 있습니다</div>
+        </div>
+        <input type="file" id="pgIn" accept="application/pdf,.pdf" hidden>
+        <div class="fileinfo" id="pgInfo" hidden></div>
+        <div class="row">
+          <button type="button" id="pgBlank">빈 쪽 찾기</button>
+          <span class="ptext" id="pgBlankMsg"></span>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="label">2. 저장</div>
+        <div class="field"><label for="pgName">저장할 파일 이름</label><input type="text" id="pgName" autocomplete="off"></div>
+        <label class="check"><input type="checkbox" id="pgOcr" class="pset"> 검색되는 PDF로 만들기 — 스캔한 쪽의 글자를 읽어 보이지 않는 글자층을 넣습니다 (글자가 이미 있는 쪽은 건너뜀)</label>
+        <div class="row" id="pgFontRow" hidden>
+          <span class="note warn">검색되는 PDF를 만들려면 글꼴을 한 번 골라야 합니다.</span>
+          <button type="button" id="pgFontLoad">PC 글꼴 불러오기</button>
+          <button type="button" id="pgFontFile">글꼴 파일 선택</button>
+        </div>
+        <div class="row"><button type="button" id="pgRun" class="primary" disabled>정리한 PDF 저장</button></div>
+        <div class="row">
+          <span class="note">고른 쪽(없으면 모든 쪽)을 그림으로:</span>
+          <select id="pgImgFmt" class="pset" style="width:auto"><option value="jpg">JPG</option><option value="png">PNG</option></select>
+          <select id="pgImgDpi" class="pset" style="width:auto"><option value="150">150dpi (화면용)</option><option value="200" selected>200dpi (보통)</option><option value="300">300dpi (인쇄용)</option></select>
+          <button type="button" id="pgImg" disabled>그림 파일로 저장</button>
+        </div>
+        <div class="progress" id="pagesProg" hidden><div class="bar"><i></i></div><div class="ptext"></div></div>
+        <div class="results" id="pagesRes"></div>
+      </section>
+    </div>
+    <section class="panel">
+      <div class="toolbar">
+        <div class="label">3. 쪽 (<span id="pgCount">0</span>쪽)</div>
+        <div class="row">
+          <span class="tip">카드를 눌러 고르고(Shift·Ctrl로 여러 쪽) 아래 단추로 옮기거나, 끌어서 옮깁니다.</span>
+          <button type="button" id="pgSelAll">전체 선택</button>
+        </div>
+      </div>
+      <div class="selbar" id="pgSelBar" hidden>
+        <b id="pgSelN">0쪽 선택</b>
+        <button type="button" data-p="first">맨 앞으로</button>
+        <button type="button" data-p="last">맨 뒤로</button>
+        <span class="sep"></span>
+        <button type="button" data-p="l" aria-label="왼쪽으로 돌리기">↺</button>
+        <button type="button" data-p="r" aria-label="오른쪽으로 돌리기">↻</button>
+        <button type="button" data-p="x" class="danger">빼기</button>
+        <button type="button" data-p="none">선택 해제</button>
+      </div>
+      <div class="grid" id="pgGrid"></div>
+      <div class="empty" id="pgEmpty">PDF를 불러오면 여기에 쪽이 나타납니다.</div>
+    </section>
+  </div>
+
+  <!-- 법원 제출: 호증 번호 · 쪽 번호 · 증거목록 · 책갈피 -->
+  <div class="tabpane" id="tab-court" role="tabpanel" hidden>
+    <div class="desk">
+      <section class="panel">
+        <div class="label">1. 제출할 서증(PDF) 불러오기</div>
+        <div class="drop">
+          <strong>서증 PDF 파일을 여기에 끌어다 놓으세요</strong>
+          <div class="row"><button type="button" id="ctPick">파일 선택</button></div>
+          <div class="hint">아래 목록 순서대로 호증 번호를 매깁니다 · 이미지는 '이미지 → PDF' 탭에서 먼저 PDF로 만드세요</div>
+        </div>
+        <input type="file" id="ctIn" multiple accept="application/pdf,.pdf" hidden>
+        <div class="stats">
+          <div><b id="ctCount">0</b> <span>개 서증</span></div>
+          <div><b id="ctPages">0</b> <span>쪽</span></div>
+        </div>
+        <div class="row">
+          <div class="field" style="flex:1;min-width:180px">
+            <label for="ctSortSel">정렬 기준 (파일을 넣을 때 자동으로 적용)</label>
+            <select id="ctSortSel" class="sortsel"></select>
+          </div>
+          <button type="button" id="ctClear" class="danger" style="align-self:end">모두 지우기</button>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="label">2. 번호와 저장 설정</div>
+        <div class="form">
+          <div class="field">
+            <label for="ctSide">증거 구분</label>
+            <select id="ctSide" class="pset"><option value="갑">갑 (원고)</option><option value="을">을 (피고)</option><option value="병">병 (참가인 등)</option><option value="custom">직접 쓰기</option></select>
+            <input type="text" id="ctSideTxt" class="pset" placeholder="예: 을가" autocomplete="off" hidden>
+          </div>
+          <div class="field"><label for="ctStart">시작 번호</label><input type="number" id="ctStart" class="pset num" min="1" value="1"></div>
+          <div class="field">
+            <label for="ctPos">호증 표시 위치</label>
+            <select id="ctPos" class="pset"><option value="tr">위 오른쪽</option><option value="tc">위 가운데</option><option value="tl">위 왼쪽</option><option value="br">아래 오른쪽</option></select>
+          </div>
+          <div class="field">
+            <label for="ctWhere">호증을 찍을 쪽</label>
+            <select id="ctWhere" class="pset"><option value="first">서증마다 첫 쪽만</option><option value="all">모든 쪽</option></select>
+          </div>
+          <div class="field"><label for="ctSize">호증 글자 크기 (pt)</label><input type="number" id="ctSize" class="pset num" min="6" max="40" step="0.5" value="12"></div>
+          <div class="field">
+            <label for="ctColor">호증 글자 색</label>
+            <select id="ctColor" class="pset"><option value="#111111">검정</option><option value="#c8231d">빨강</option><option value="#1f45b5">파랑</option></select>
+          </div>
+          <div class="field">
+            <label>호증 모양</label>
+            <label class="check boxed"><input type="checkbox" id="ctBox" class="pset" checked> 네모 테두리 + 흰 바탕</label>
+          </div>
+          <div class="field"><label for="ctComp">용량 줄이기</label>
+            <select id="ctComp" class="pset"><option value="">줄이지 않음</option><option value="light">약하게</option><option value="mid">보통</option><option value="strong">강하게</option></select>
+          </div>
+          <div class="field">
+            <label for="ctPno">쪽 번호</label>
+            <select id="ctPno" class="pset"><option value="">넣지 않음</option><option value="dash" selected>- 1 -</option><option value="of">1 / 25</option><option value="num">1</option></select>
+          </div>
+          <div class="field">
+            <label for="ctPnoPos">쪽 번호 위치</label>
+            <select id="ctPnoPos" class="pset"><option value="bc">아래 가운데</option><option value="br">아래 오른쪽</option><option value="tc">위 가운데</option></select>
+          </div>
+          <div class="field">
+            <label for="ctPnoScope">쪽 번호 매기는 방법</label>
+            <select id="ctPnoScope" class="pset"><option value="each">서증마다 1쪽부터</option><option value="all">전체를 이어서</option></select>
+          </div>
+        </div>
+        <div class="modes">
+          <label class="mode"><input type="radio" name="ctMode" value="merge" class="pset" checked>
+            <span class="mt">하나의 PDF로 합치기</span>
+            <span class="md">서증마다 책갈피(목차)가 들어가고, 증거목록을 넣으면 맨 앞에 붙습니다.</span></label>
+          <label class="mode"><input type="radio" name="ctMode" value="each" class="pset">
+            <span class="mt">서증마다 따로 저장</span>
+            <span class="md">파일 이름이 '갑 제1호증_서증명.pdf'처럼 정해집니다. 4개 이상이면 ZIP 하나로 묶습니다.</span></label>
+        </div>
+        <label class="check"><input type="checkbox" id="ctMakeList" class="pset" checked> 증거목록(번호·서증명·쪽수 표)도 만들기 — 사건번호는 '⚙ 저장 옵션'에 적은 것을 씁니다</label>
+        <div class="field"><label for="ctName">저장할 파일 이름 (합칠 때)</label><input type="text" id="ctName" autocomplete="off"></div>
+        <div class="row" id="ctFontRow" hidden>
+          <span class="note warn">호증 번호를 쓰려면 글꼴을 한 번 골라야 합니다.</span>
+          <button type="button" id="ctFontLoad">PC 글꼴 불러오기</button>
+          <button type="button" id="ctFontFile">글꼴 파일 선택</button>
+        </div>
+        <div class="presetbar" data-preset="court"></div>
+        <div class="row"><button type="button" id="ctRun" class="primary" disabled>번호 넣어 저장</button></div>
+        <div class="progress" id="courtProg" hidden><div class="bar"><i></i></div><div class="ptext"></div></div>
+        <div class="results" id="courtRes"></div>
+      </section>
+    </div>
+    <section class="panel">
+      <div class="toolbar">
+        <div class="label">3. 서증 순서와 이름</div>
+        <div class="tip">서증명을 고쳐 쓸 수 있습니다. '가지'를 켜면 바로 위 서증과 같은 번호의 가지번호(갑 제1호증의 1, 2…)가 됩니다.</div>
+      </div>
+      <div class="flist" id="ctRows"></div>
+      <div class="empty" id="ctEmpty">아직 불러온 서증이 없습니다.</div>
+    </section>
+  </div>
+
+  <!-- 사용 설명 -->
+  <div class="tabpane" id="tab-help" role="tabpanel" hidden>
+    <section class="panel help">
+      <div class="label">처음 쓰는 분께</div>
+      <ol class="steps">
+        <li><b>위에서 탭을 고릅니다.</b> 하려는 일(이미지를 PDF로, 합치기, 법원 제출 등)마다 탭이 나뉘어 있습니다.</li>
+        <li><b>파일을 화면 아무 곳에나 끌어다 놓습니다.</b> 지금 열린 탭으로 들어갑니다. '파일 선택' 단추를 눌러도 됩니다.</li>
+        <li><b>설정을 고르고 파란 단추를 누릅니다.</b> 결과 파일은 내려받기 폴더에 저장되고, 아래 '다시 저장'으로 한 번 더 받을 수 있습니다.</li>
+        <li><b>다음 일을 할 때는 '↺ 새로 시작'을 누릅니다.</b> 지금 탭의 파일만 비우고 설정은 그대로 둡니다.</li>
+      </ol>
+      <p class="note">모든 작업은 이 PC 안에서만 처리됩니다. 인터넷이 없어도 되고, 파일이 밖으로 나가지 않습니다.</p>
+    </section>
+    <div class="helpgrid">
+      <section class="panel help">
+        <div class="label">이미지 → PDF</div>
+        <ul>
+          <li>사진·스캔 이미지를 수백 장씩 한 번에 PDF로 만듭니다. 폴더째 끌어 놓아도 됩니다.</li>
+          <li>쪽 순서는 카드를 끌거나, 골라서(Shift·Ctrl) '맨 앞으로'·'○번째로' 단추로 바꿉니다.</li>
+          <li><b>스캔 정리</b>: 비뚤어진 장 반듯하게, 검은 테두리 지우기, 옆으로 눕거나 거꾸로 된 장 바로 돌리기, 빈 장 빼기, 흑백 선명하게·순수 흑백(용량 최소).</li>
+          <li><b>검색되는 PDF</b>: 글자를 읽어 Ctrl+F로 찾을 수 있게 합니다. 1장에 몇 초씩 더 걸립니다.</li>
+          <li><b>개인정보 가리기</b>: 주민번호·전화·이름·주소 등을 찾아 칠합니다. 카드의 ▣ 단추로 확인·수정합니다.</li>
+          <li><b>저장할 때 도장 넣기</b>: 첫 장(또는 모든 장)에 도장과 날짜·시간을 찍습니다.</li>
+        </ul>
+      </section>
+      <section class="panel help">
+        <div class="label">PDF 합치기 · 나누기 · 용량 줄이기</div>
+        <ul>
+          <li><b>합치기</b>: 목록 순서대로 하나로 합칩니다. 파일마다 책갈피(목차)가 들어갑니다.</li>
+          <li><b>나누기</b>: 한 쪽씩, 정해진 쪽수마다, 또는 '1-3, 5, 8-10'처럼 원하는 쪽만 꺼냅니다.</li>
+          <li><b>용량 줄이기</b>: 글자·표는 그대로 두고 문서 속 사진·스캔 이미지만 다시 압축합니다.</li>
+        </ul>
+      </section>
+      <section class="panel help">
+        <div class="label">PDF 쪽 정리</div>
+        <ul>
+          <li>PDF 한 개의 쪽을 카드로 보여 줍니다. 끌어서 순서를 바꾸고 ↺ ↻로 돌리고 ✕로 뺍니다.</li>
+          <li><b>빈 쪽 찾기</b>를 누르면 백지를 찾아 골라 둡니다. 확인 후 '빼기'를 누르세요.</li>
+          <li>고른 쪽(없으면 모든 쪽)을 JPG·PNG 그림 파일로 꺼낼 수 있습니다.</li>
+          <li>'검색되는 PDF로 만들기'를 켜면 스캔한 쪽에 글자층을 넣습니다.</li>
+        </ul>
+      </section>
+      <section class="panel help">
+        <div class="label">PDF 글자 넣기</div>
+        <ul>
+          <li>쪽을 누르면 그 자리에 글자 상자가 생깁니다. 크기(가−/가+)·정렬·색·흰 바탕·테두리·세로쓰기를 고릅니다.</li>
+          <li>'누르면 넣을 것'에서 도장·이미지·표를 고르면 누른 자리에 들어갑니다. 표는 보일 선을 미리 고르고 보관함에 저장해 다시 씁니다.</li>
+          <li><b>일괄 문구</b>: 쪽번호, 갑/을 제○호증, 사본, 날짜 등을 여러 쪽에 한 번에 넣습니다.</li>
+          <li><b>개인정보 가리기</b>: 찾아서 가리고, 저장할 때 그 쪽을 그림으로 바꿔 원래 글자를 지웁니다.</li>
+          <li><b>되돌리기</b>: Ctrl+Z (다시 하기 Ctrl+Y), 또는 도구 줄의 ↶ ↷ 단추.</li>
+        </ul>
+      </section>
+      <section class="panel help">
+        <div class="label">법원 제출</div>
+        <ul>
+          <li>서증 PDF를 순서대로 넣으면 첫 쪽에 '갑 제1호증'처럼 번호를 찍습니다. 시작 번호·구분(갑·을·병·직접)·위치를 고릅니다.</li>
+          <li>'가지'를 켜면 바로 위 서증의 가지번호(갑 제1호증의 1, 2…)가 됩니다.</li>
+          <li>쪽 번호(- 1 -, 1/25)를 서증마다 또는 전체 이어서 넣습니다.</li>
+          <li>증거목록(번호·서증명·쪽수 표)을 만들어 맨 앞에 붙이거나 따로 저장합니다. 합치면 서증마다 책갈피가 들어갑니다.</li>
+        </ul>
+      </section>
+      <section class="panel help">
+        <div class="label">⚙ 저장 옵션 · 작업 묶음</div>
+        <ul>
+          <li><b>파일 이름 규칙</b>: {날짜}_{사건번호}_{이름}처럼 정해 두면 모든 탭의 저장 파일 이름에 적용됩니다.</li>
+          <li><b>열람 비밀번호</b>: 저장한 PDF를 열 때 비밀번호를 묻습니다. 프로그램을 닫으면 이 설정은 지워집니다.</li>
+          <li><b>파일 정보 지우기</b>: 작성자·만든 프로그램 같은 숨은 정보를 뺍니다.</li>
+          <li><b>가림 기록표</b>: 개인정보를 가린 쪽·항목·위치를 엑셀에서 열리는 표로 함께 저장합니다(가린 글자는 적지 않음).</li>
+          <li><b>작업 묶음</b>: 자주 쓰는 설정을 이름 붙여 저장해 두고 골라서 한 번에 적용합니다. '법원 제출용 스캔' 등 기본 묶음도 있습니다.</li>
+        </ul>
+      </section>
+      <section class="panel help">
+        <div class="label">자주 묻는 것</div>
+        <ul>
+          <li><b>글꼴을 고르라고 나와요.</b> 'PC 글꼴 불러오기'를 누르면 맑은 고딕이 선택되고, 다음부터는 묻지 않습니다.</li>
+          <li><b>HEIC(아이폰 사진)가 안 열려요.</b> 크롬·엣지에서 열리지 않으니 JPG로 저장해 넣어 주세요.</li>
+          <li><b>개인정보를 모두 찾나요?</b> 손글씨·흐린 글씨는 놓칠 수 있습니다. 저장 전에 꼭 눈으로 확인하세요.</li>
+          <li><b>새 버전은?</b> 새 버전이 나오면 위에 알림이 뜹니다. 아래 '새 버전 확인'으로 직접 확인할 수도 있습니다.</li>
+        </ul>
+      </section>
+    </div>
   </div>
 
   <!-- PDF 용량 줄이기 -->
@@ -764,7 +1108,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <footer>
     <span>개발자: 노상엽</span>
     <span>개발일자: 2026. 10. 16.</span>
-    <span>수정일자: 2026. 10. 29.</span>
+    <span>수정일자: 2026. 11. 1.</span>
     <span>버전 <b id="appVer"></b></span>
     <button type="button" class="linkbtn" id="updCheck">새 버전 확인</button>
     <span>HEIC(아이폰 사진)는 크롬·엣지에서 열리지 않으니 JPG로 저장해 올려 주세요.</span>
@@ -2380,8 +2724,8 @@ $("fileIn").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
 $("dirIn").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
 
 /* ---------- 파일 끌어 넣기: 화면 어디에 놓아도 지금 탭으로 들어간다 ---------- */
-const TAB_LABEL = {img:"이미지 → PDF", merge:"PDF 합치기", split:"PDF 나누기", comp:"PDF 용량 줄이기", text:"PDF 글자 넣기"};
-const TAB_WANTS = {img:"이미지 파일(폴더 가능)", merge:"PDF 파일", split:"PDF 파일 하나", comp:"PDF 파일", text:"PDF 파일 또는 도장·이미지"};
+const TAB_LABEL = {img:"이미지 → PDF", merge:"PDF 합치기", split:"PDF 나누기", pages:"PDF 쪽 정리", comp:"PDF 용량 줄이기", text:"PDF 글자 넣기", court:"법원 제출", help:"사용 설명"};
+const TAB_WANTS = {img:"이미지 파일(폴더 가능)", merge:"PDF 파일", split:"PDF 파일 하나", pages:"PDF 파일 하나", comp:"PDF 파일", text:"PDF 파일 또는 도장·이미지", court:"서증 PDF 파일", help:"먼저 작업할 탭을 고른 뒤 넣어 주세요"};
 let toastT;
 function toast(msg){ const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 4200); }
 const hasFiles = e => e.dataTransfer && [...(e.dataTransfer.types || [])].includes("Files");
@@ -2411,6 +2755,7 @@ window.addEventListener("drop", async e => {
   for(const d of dirs){ try{ await readEntry(d, files); }catch(_){} }
   if(!files.length){ toast("넣을 수 있는 파일을 찾지 못했습니다. '파일 선택' 단추를 이용해 주세요."); return; }
   // 이미지 탭에 PDF만 떨어뜨리면 합치기 탭으로 넘겨 준다
+  if(!dropHandlers[activeTab]){ toast("먼저 위에서 작업할 탭을 고른 뒤 파일을 넣어 주세요."); return; }
   if(activeTab === "img" && files.every(isPdf)){ showTab("merge"); toast("PDF 파일이라 'PDF 합치기' 탭으로 옮겼습니다."); }
   const want = activeTab === "img" ? isImage : activeTab === "text" ? (f => isPdf(f) || isImage(f)) : isPdf;
   const ok = files.filter(want), skip = files.length - ok.length;
@@ -2545,6 +2890,7 @@ function render(){
   paintSel();
   if(window.imgStamp) imgStamp.preview();
   if(window.PII) PII.afterRender();
+  if(window.SCAN) SCAN.paintAll();
 }
 
 /* 썸네일: 화면에 보이는 것부터 3개씩 만든다 */
@@ -2626,7 +2972,7 @@ function exifOrient(u, s, len){
 /* ---------- 한 장 처리 → PDF용 JPEG ---------- */
 const QUAL = { orig:{max:0, q:0.92}, std:{max:3508, q:0.85}, small:{max:1754, q:0.8}, tiny:{max:1240, q:0.72} };
 
-async function encodeSource(src, w, h, opt, masks){
+async function encodeSource(src, w, h, opt, masks, it){
   let tw = w, th = h;
   if(opt.max && Math.max(w,h) > opt.max){ const k = opt.max / Math.max(w,h); tw = Math.max(1, Math.round(w*k)); th = Math.max(1, Math.round(h*k)); }
   const c = new OffscreenCanvas(tw, th), g = c.getContext("2d");
@@ -2637,6 +2983,8 @@ async function encodeSource(src, w, h, opt, masks){
     g.fillStyle = PII.color(); const sx = tw/w, sy = th/h;
     for(const m of masks) g.fillRect(Math.floor(m.x*sx), Math.floor(m.y*sy), Math.ceil(m.w*sx) + 1, Math.ceil(m.h*sy) + 1);
   }
+  const pp = window.SCAN ? SCAN.prep(it) : null;
+  if(pp) return SCAN.finish(c, tw, th, opt, pp);   // 스캔 정리(기울기·테두리·색)·글자 인식
   const blob = await c.convertToBlob({type:"image/jpeg", quality:opt.q});
   c.width = c.height = 1;
   return {blob, w:tw, h:th, gray:false};
@@ -2648,13 +2996,13 @@ async function processItem(it, opt){
     const pages = decodeTiff(new Uint8Array(await it.file.arrayBuffer()));
     for(let pi = 0; pi < pages.length; pi++){
       const p = pages[pi], bmp = await createImageBitmap(p.imageData);
-      out.push(Object.assign(await encodeSource(bmp, bmp.width, bmp.height, opt, window.PII && PII.masksFor(it, pi)), {rot:it.rot}));
+      out.push(Object.assign(await encodeSource(bmp, bmp.width, bmp.height, opt, window.PII && PII.masksFor(it, pi), it), {rot:it.rot}));
       bmp.close();
     }
     return out;
   }
   const masks = window.PII ? PII.masksFor(it, 0) : null;
-  if(!masks && /jpe?g|jfif/i.test(it.file.type || it.name.split(".").pop())){
+  if(!masks && !(window.SCAN && SCAN.prep(it)) && /jpe?g|jfif/i.test(it.file.type || it.name.split(".").pop())){
     const head = new Uint8Array(await it.file.slice(0, 262144).arrayBuffer());
     const info = parseJpeg(head);
     // 손대지 않고 그대로 넣을 수 있는 JPEG: 기본/확장/점진 방식, 흑백·컬러, 회전 정보 없음, 크기 제한 이내
@@ -2663,7 +3011,7 @@ async function processItem(it, opt){
     }
   }
   const bmp = await createImageBitmap(it.file, {imageOrientation:"from-image"});
-  const r = await encodeSource(bmp, bmp.width, bmp.height, opt, masks);
+  const r = await encodeSource(bmp, bmp.width, bmp.height, opt, masks, it);
   bmp.close();
   return [Object.assign(r, {rot:it.rot})];
 }
@@ -2691,7 +3039,7 @@ function pageGeometry(p, set){
   const iw = side ? dh : dw, ih = side ? dw : dh;
   const c = Math.round(Math.cos(r*Math.PI/180)), s = Math.round(Math.sin(r*Math.PI/180));
   const ops = `1 0 0 1 ${f2(x+dw/2)} ${f2(y+dh/2)} cm\n${c} ${-s} ${s} ${c} 0 0 cm\n${f2(iw)} 0 0 ${f2(ih)} ${f2(-iw/2)} ${f2(-ih/2)} cm\n`;
-  return {PW, PH, ops};
+  return {PW, PH, ops, x, y, dw, dh, iw, ih, c, s};
 }
 
 function pdfString(str){
@@ -2719,7 +3067,9 @@ function buildPdf(pages, set, title){
     offs[cn] = pos;
     put(`${cn} 0 obj\n<< /Length ${enc.encode(content).length} >>\nstream\n${content}endstream\nendobj\n`);
     offs[inn] = pos;
-    put(`${inn} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /${p.gray ? "DeviceGray" : "DeviceRGB"} /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.blob.size} >>\nstream\n`);
+    put(p.bpc === 1
+      ? `${inn} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /DeviceGray /BitsPerComponent 1 /Filter /FlateDecode /Length ${p.blob.size} >>\nstream\n`
+      : `${inn} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /${p.gray ? "DeviceGray" : "DeviceRGB"} /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.blob.size} >>\nstream\n`);
     put(p.blob);
     put("\nendstream\nendobj\n");
   });
@@ -2741,6 +3091,16 @@ function safeName(s){ return (s.trim() || defaultName()).replace(/[\\/:*?"<>|]+/
 async function run(){
   if(running || !items.length) return;
   const stampProblem = window.imgStamp ? imgStamp.check() : "";
+  if(window.SCAN){
+    const sp = SCAN.problem();
+    if(sp){ $("prog").hidden = false; $("barI").style.width = "0"; $("pText").textContent = sp; $("scBox").scrollIntoView({block:"center", behavior:"smooth"}); return; }
+    if(SCAN.pending().length){
+      $("prog").hidden = false; $("barI").style.width = "0"; $("pText").textContent = "방향·빈 장을 먼저 점검합니다…";
+      const found = await SCAN.check(SCAN.pending());
+      if(found === null){ $("pText").textContent = "점검을 멈췄습니다. 다시 점검하거나 'PDF 만들기'를 누르세요."; return; }
+      if(found){ $("pText").textContent = "점검을 마쳤습니다. 쪽 목록에서 돌린 장과 빈 장 표시를 확인하고 'PDF 만들기'를 다시 누르세요."; $("scBox").scrollIntoView({block:"center", behavior:"smooth"}); return; }
+    }
+  }
   if(window.PII && PII.on){
     if(PII.busy()) return;
     const pend = PII.pending();
@@ -2761,7 +3121,7 @@ async function run(){
   const opt = QUAL[$("qualSel").value];
   const limit = +$("splitSel").value * 1048576;
   const base = safeName($("nameIn").value);
-  const list = items.slice(), N = list.length, t0 = performance.now();
+  const list = items.filter(it => !(window.SCAN && SCAN.skip(it))), N = list.length, t0 = performance.now();
   const errors = [];
 
   // 4개씩 동시에 처리하되, 쪽 순서는 그대로 유지
@@ -2815,6 +3175,10 @@ async function run(){
       const f = files[k];
       const name = files.length > 1 ? `${base}_${String(k+1).padStart(2,"0")}.pdf` : `${base}.pdf`;
       let blob = buildPdf(f.pages, set, name.replace(/\.pdf$/, ""));
+      if(window.SCAN && SCAN.ocrOn()){
+        $("pText").textContent = `글자층을 넣는 중… (${k + 1}/${files.length})`; await new Promise(r => setTimeout(r, 0));
+        try{ blob = await SCAN.textLayer(blob, f.pages, set); }catch(e){ console.error(e); errors.push(`글자층을 넣지 못했습니다 (${name})`); }
+      }
       const pick = window.imgStamp && imgStamp.enabled() ? imgStamp.target(k, files.length) : null;
       if(pick){
         $("pText").textContent = "도장을 찍는 중…"; await new Promise(r => setTimeout(r, 0));
@@ -2823,6 +3187,12 @@ async function run(){
       }
       pagesTotal += f.pages.length;
       outs.push({blob, name, meta:`${f.pages.length.toLocaleString("ko-KR")}쪽 · ${fmtMB(blob.size)}` + (pick ? " · 도장" : "")});
+    }
+    if(window.SaveOpt && SaveOpt.wantLog() && window.PII && PII.on){   // 가림 기록표
+      const rows = []; let pno = 0;
+      list.forEach(it => { const ms = it.masks || []; const n = Math.max(1, ms.length);
+        for(let pi = 0; pi < n; pi++){ pno++; (ms[pi] || []).forEach(m => rows.push({file:it.name, page:pno, kind:m.kind, auto:!!m.auto, x:m.x/(it.nw || 1), y:m.y/(it.nh || 1)})); } });
+      if(rows.length) outs.push(SaveOpt.logFile(rows, base));
     }
     await deliver($("results"), outs, base);
     const el = (performance.now() - t0)/1000;
@@ -3149,13 +3519,14 @@ $("mergeRun").onclick = async () => {
   const level = $("mergeComp").value, base = safeName($("mergeName").value), t0 = performance.now();
   const errs = [];
   try{
-    const out = await PDFDocument.create();
+    const out = await PDFDocument.create(), marks = [];
     for(let i = 0; i < list.length; i++){
       pg.set(i / list.length * (level ? 0.6 : 0.9), `${i+1} / ${list.length}번째 파일 합치는 중 · ${list[i].file.name}`);
       await sleep(0);
       try{
         const src = await openPdf(list[i].file);
         const pages = await out.copyPages(src, src.getPageIndices());
+        marks.push({title:stem(list[i].file.name), page:out.getPageCount()});
         pages.forEach(p => out.addPage(p));
       }catch(e){ errs.push(`${list[i].file.name}: ${errMsg(e)}`); }
     }
@@ -3163,6 +3534,7 @@ $("mergeRun").onclick = async () => {
     if(level) await compressDoc(out, level, (k, n) => pg.set(0.6 + k/n*0.3, `용량 줄이는 중 · 이미지 ${k} / ${n}`));
     pg.set(0.95, "PDF 파일을 쓰는 중…"); await sleep(0);
     out.setTitle(base); out.setProducer("Image to PDF");
+    if($("mergeMarks").checked && marks.length > 1) addOutline(out, marks);
     const bytes = await out.save({useObjectStreams:true});
     const blob = new Blob([bytes], {type:"application/pdf"});
     pg.set(1, `완료 · ${list.length - errs.length}개 파일, ${out.getPageCount().toLocaleString("ko-KR")}쪽 · ${fmtSec((performance.now()-t0)/1000)} 걸림`);
@@ -3364,7 +3736,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "1.5", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
+const APP_VERSION = "2.0", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -3581,6 +3953,7 @@ async function useFont(name, reg, bold, remember){
   $("fontNote").classList.remove("warn");
   renderAllOverlays();
   if(window.imgStamp) imgStamp.preview();
+  document.dispatchEvent(new Event("i2p-font"));
 }
 
 const KO_FAMILY = {"Malgun Gothic":"맑은 고딕","Gulim":"굴림","GulimChe":"굴림체","Dotum":"돋움","DotumChe":"돋움체","Batang":"바탕","BatangChe":"바탕체","Gungsuh":"궁서","GungsuhChe":"궁서체","NanumGothic":"나눔고딕","NanumMyeongjo":"나눔명조","NanumBarunGothic":"나눔바른고딕","NanumSquare":"나눔스퀘어","Noto Sans KR":"Noto Sans KR","Noto Serif KR":"Noto Serif KR","Noto Sans CJK KR":"Noto Sans CJK KR","Apple SD Gothic Neo":"애플 SD 산돌고딕 Neo","Pretendard":"프리텐다드"};
@@ -3806,7 +4179,7 @@ async function loadTextPdf(file){
   $("textEmpty").hidden = true;
   layoutPages();
   T.pages.forEach(pg => pio.observe(pg.el));
-  renderAllOverlays(); updateTextUI();
+  renderAllOverlays(); updateTextUI(); histReset();
 }
 dropHandlers.text = files => {
   const ims = files.filter(f => !isPdf(f) && isImage(f)), f = files.find(isPdf);
@@ -4468,7 +4841,13 @@ $("textRun").onclick = async () => {
     pg.set(0.8, "PDF 파일을 쓰는 중"); await sleep(0);
     const blob = new Blob([await doc.save({useObjectStreams:true})], {type:"application/pdf"});
     pg.set(1, `완료 · ${n.toLocaleString("ko-KR")}쪽 · ${fmtSec((performance.now()-t0)/1000)} 걸림`);
-    await deliver($("textRes"), [{blob, name:`${base}.pdf`, meta:`${n.toLocaleString("ko-KR")}쪽 · ${fmtMB(blob.size)}`}], base);
+    const outs = [{blob, name:`${base}.pdf`, meta:`${n.toLocaleString("ko-KR")}쪽 · ${fmtMB(blob.size)}`}];
+    if(window.SaveOpt && SaveOpt.wantLog() && redCount()){
+      const rows = [];
+      T.pages.forEach(P => (T.red[P.i] || []).forEach(m => rows.push({file:T.file.name, page:P.i + 1, kind:m.kind, auto:!!m.auto, x:m.x/P.W, y:m.y/P.H})));
+      outs.push(SaveOpt.logFile(rows, base));
+    }
+    await deliver($("textRes"), outs, base);
   }catch(e){ console.error(e); pg.set(1, "저장하지 못했습니다. 글꼴을 바꿔 다시 해 보세요."); }
   setBusy(false); updateTextUI();
 };
@@ -4852,7 +5231,7 @@ resetters.text = () => {
   $("ibRow").hidden = true;
   pagesEl.replaceChildren(); $("textEmpty").hidden = false;
   $("textInfo").hidden = true; $("textInfo").replaceChildren(); $("textName").value = "";
-  clearOutput("text"); updateTextUI();
+  clearOutput("text"); updateTextUI(); histReset();
 };
 hasWork.text = () => !!T.file && (T.boxes.some(b => b.text.trim()) || T.imgs.length > 0 || T.tables.length > 0 || T.red.some(p => p && p.length)) && !saved("text");
 $("stampClear").onclick = () => { if(running) return; T.stamps.length = 0; drawStamps(); scheduleOverlay(); updateTextUI(); };
@@ -5006,6 +5385,62 @@ window.imgStamp = {
   apply: isApply
 };
 isToUI();
+/* ---------- 되돌리기(Ctrl+Z)·다시 하기(Ctrl+Y) ---------- */
+const H = {stack:[], idx:-1, lock:false, t:null};
+const plain = o => { const c = Object.assign({}, o); delete c.el; delete c._lastTap; return c; };
+const snapState = () => JSON.stringify({b:T.boxes.map(plain), i:T.imgs.map(plain), t:T.tables.map(plain), r:T.red});
+function histReset(){ H.stack = T.file ? [snapState()] : []; H.idx = H.stack.length - 1; histUI(); }
+function commit(){
+  clearTimeout(H.t);
+  if(H.lock || !T.file) return;
+  const st = snapState(); if(st === H.stack[H.idx]) return;
+  H.stack = H.stack.slice(0, H.idx + 1); H.stack.push(st);
+  if(H.stack.length > 120) H.stack.shift();
+  H.idx = H.stack.length - 1; histUI();
+}
+const commitSoon = ms => { clearTimeout(H.t); H.t = setTimeout(commit, ms || 250); };
+function histUI(){ $("tbUndo").disabled = H.idx <= 0; $("tbRedo").disabled = H.idx >= H.stack.length - 1; }
+function restore(st){
+  H.lock = true;
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  [...T.boxes, ...T.imgs, ...T.tables].forEach(o => o.el && o.el.remove());
+  T.sel = null; T.isel = null; T.tsel = null; $("ibRow").hidden = true;
+  const d = JSON.parse(st);
+  T.boxes = d.b.map(o => Object.assign(o, {el:null})); T.imgs = d.i.map(o => Object.assign(o, {el:null})); T.tables = d.t.map(o => Object.assign(o, {el:null}));
+  T.red = d.r || [];
+  T.boxes.forEach(placeBox); T.imgs.forEach(placeImg); T.tables.forEach(placeTable); T.pages.forEach(renderRed);
+  tblRowShow(); redSummary(); updateTextUI();
+  H.lock = false; histUI();
+}
+function undo(){ commit(); if(H.idx <= 0) return; H.idx--; restore(H.stack[H.idx]); toast("되돌렸습니다."); }
+function redo(){ commit(); if(H.idx >= H.stack.length - 1) return; H.idx++; restore(H.stack[H.idx]); toast("다시 했습니다."); }
+$("tbUndo").onclick = undo; $("tbRedo").onclick = redo;
+["pointerup", "click", "change", "keyup"].forEach(ev => document.addEventListener(ev, () => { if(activeTab === "text" && T.file && !running) commitSoon(); }, true));
+pagesEl.addEventListener("input", () => commitSoon(700));
+document.addEventListener("keydown", e => {
+  if(activeTab !== "text" || !T.file || running || !(e.ctrlKey || e.metaKey) || e.altKey) return;
+  const k = e.key.toLowerCase(), typing = e.target.matches && e.target.matches("input,textarea,select,[contenteditable],[contenteditable] *");
+  if(typing) return;                        // 글자를 쓰는 중이면 그 칸 안에서 되돌린다
+  if(k === "z" && !e.shiftKey){ e.preventDefault(); undo(); }
+  else if(k === "y" || (k === "z" && e.shiftKey)){ e.preventDefault(); redo(); }
+});
+histUI();
+
+/* 다른 탭(법원 제출·쪽 정리 등)에서 함께 쓰는 도구 */
+window.TXT = {
+  font: () => T.font,
+  async embed(doc, text){
+    doc.registerFontkit(fontkit);
+    const shrink = u => trueTypeKeepSubset(u, " " + text) || u;
+    return {reg: await doc.embedFont(shrink(T.font.reg), {subset:false}), bold: T.font.bold ? await doc.embedFont(shrink(T.font.bold), {subset:false}) : null, asc:T.font.asc, desc:T.font.desc};
+  },
+  pageGeom(p){ const r = ((p.getRotation().angle % 360) + 360) % 360, cb = p.getCropBox(); return {W: r % 180 ? cb.height : cb.width, H: r % 180 ? cb.width : cb.height, rot:r, crop:cb}; },
+  drawBlock, toUser, LINE, PT_MM,
+  loadPc: () => loadLocalFonts(),
+  pickFile: () => $("fontFile").click(),
+  pdfjs: bytes => pdfjsLib.getDocument({data:bytes, CMapReaderFactory:LocalCMapFactory, cMapUrl:"local/", cMapPacked:true, useWorkerFetch:false, isEvalSupported:false}).promise,
+  renderForOcr, textWords
+};
 window.__T = T;
 })();
 
@@ -5261,7 +5696,7 @@ window.PII = (() => {
       const {data} = await w.recognize(c, {}, {blocks:true, text:false, hocr:false, tsv:false});
       const words = [];
       for(const b of data.blocks || []) for(const p of b.paragraphs || []) for(const l of p.lines || [])
-        for(const x of l.words || []) words.push({text:x.text, bbox:{x0:x.bbox.x0/k, y0:x.bbox.y0/k, x1:x.bbox.x1/k, y1:x.bbox.y1/k}});
+        for(const x of l.words || []) words.push({text:x.text, conf:x.confidence, bbox:{x0:x.bbox.x0/k, y0:x.bbox.y0/k, x1:x.bbox.x1/k, y1:x.bbox.y1/k}});
       passes.push(toRows(words));
     }
     return passes;
@@ -5549,6 +5984,977 @@ window.PII = (() => {
     engine, ocrCanvas, ocrScale, detect, detectAll, namePass, toRows
   };
 })();
+
+/* =========================================================
+   2.0 추가 기능
+   - 저장 옵션(모든 탭 공통): 파일 이름 규칙 · 파일 정보 지우기 · 열람 비밀번호 · 가림 기록표
+   - 책갈피(목차) 넣기
+   ========================================================= */
+const {PDFString, PDFHexString, PDFRef, PDFStream, PDFNull} = PDFLib;
+
+/* ---------- MD5 · RC4 (PDF 표준 암호화용) ---------- */
+function md5(u8){
+  const K = new Uint32Array(64), S = [7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+  for(let i = 0; i < 64; i++) K[i] = Math.floor(Math.abs(Math.sin(i + 1)) * 4294967296) >>> 0;
+  const n = u8.length, total = ((n + 8) >> 6) + 1, buf = new Uint8Array(total * 64);
+  buf.set(u8); buf[n] = 0x80;
+  const bits = n * 8, dv = new DataView(buf.buffer);
+  dv.setUint32(total*64 - 8, bits >>> 0, true); dv.setUint32(total*64 - 4, Math.floor(bits / 4294967296), true);
+  let a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+  const M = new Uint32Array(16);
+  for(let blk = 0; blk < total; blk++){
+    for(let j = 0; j < 16; j++) M[j] = dv.getUint32(blk*64 + j*4, true);
+    let A = a0, B = b0, C = c0, D = d0;
+    for(let i = 0; i < 64; i++){
+      let F, g;
+      if(i < 16){ F = (B & C) | (~B & D); g = i; }
+      else if(i < 32){ F = (D & B) | (~D & C); g = (5*i + 1) % 16; }
+      else if(i < 48){ F = B ^ C ^ D; g = (3*i + 5) % 16; }
+      else { F = C ^ (B | ~D); g = (7*i) % 16; }
+      F = (F + A + K[i] + M[g]) >>> 0;
+      A = D; D = C; C = B;
+      B = (B + ((F << S[i]) | (F >>> (32 - S[i])))) >>> 0;
+    }
+    a0 = (a0 + A) >>> 0; b0 = (b0 + B) >>> 0; c0 = (c0 + C) >>> 0; d0 = (d0 + D) >>> 0;
+  }
+  const out = new Uint8Array(16), ov = new DataView(out.buffer);
+  ov.setUint32(0, a0, true); ov.setUint32(4, b0, true); ov.setUint32(8, c0, true); ov.setUint32(12, d0, true);
+  return out;
+}
+function rc4(key, data){
+  const S = new Uint8Array(256); for(let i = 0; i < 256; i++) S[i] = i;
+  for(let i = 0, j = 0; i < 256; i++){ j = (j + S[i] + key[i % key.length]) & 255; const t = S[i]; S[i] = S[j]; S[j] = t; }
+  const out = new Uint8Array(data.length);
+  for(let k = 0, i = 0, j = 0; k < data.length; k++){
+    i = (i + 1) & 255; j = (j + S[i]) & 255; const t = S[i]; S[i] = S[j]; S[j] = t;
+    out[k] = data[k] ^ S[(S[i] + S[j]) & 255];
+  }
+  return out;
+}
+const cat = (...arrs) => { const n = arrs.reduce((s, a) => s + a.length, 0), o = new Uint8Array(n); let p = 0; for(const a of arrs){ o.set(a, p); p += a.length; } return o; };
+const toHex = u => [...u].map(b => b.toString(16).padStart(2, "0")).join("");
+const PW_PAD = new Uint8Array([0x28,0xBF,0x4E,0x5E,0x4E,0x75,0x8A,0x41,0x64,0x00,0x4E,0x56,0xFF,0xFA,0x01,0x08,0x2E,0x2E,0x00,0xB6,0xD0,0x68,0x3E,0x80,0x2F,0x0C,0xA9,0xFE,0x64,0x53,0x69,0x7A]);
+function padPw(pw){ const b = new TextEncoder().encode(pw).subarray(0, 32), o = new Uint8Array(32); o.set(b); o.set(PW_PAD.subarray(0, 32 - b.length), b.length); return o; }
+
+/* 열어 둔 문서에 열람 비밀번호를 건다 (RC4 128비트, PDF 1.4 표준 보안 · 모든 PDF 뷰어에서 열림)
+   저장할 때는 useObjectStreams:false 로 저장해야 한다 */
+function encryptDoc(doc, userPw){
+  const ctx = doc.context, P = -4;
+  const id0 = md5(new TextEncoder().encode(Date.now() + ":" + Math.random() + ":" + userPw));
+  const ownerPw = toHex(crypto.getRandomValues ? crypto.getRandomValues(new Uint8Array(12)) : md5(id0)).slice(0, 24);
+  // O
+  let h = md5(padPw(ownerPw)); for(let i = 0; i < 50; i++) h = md5(h);
+  let O = rc4(h, padPw(userPw)); for(let i = 1; i <= 19; i++) O = rc4(h.map(b => b ^ i), O);
+  // 암호화 키
+  const pb = new Uint8Array(4); new DataView(pb.buffer).setInt32(0, P, true);
+  let key = md5(cat(padPw(userPw), O, pb, id0)); for(let i = 0; i < 50; i++) key = md5(key);
+  // U
+  let U = rc4(key, md5(cat(PW_PAD, id0))); for(let i = 1; i <= 19; i++) U = rc4(key.map(b => b ^ i), U);
+  U = cat(U, new Uint8Array(16));
+  const objKey = (num, gen) => md5(cat(key, new Uint8Array([num & 255, (num >> 8) & 255, (num >> 16) & 255, gen & 255, (gen >> 8) & 255])));
+  const encStr = (o, k) => PDFHexString.of(toHex(rc4(k, o.asBytes())));
+  const walk = (o, k) => {
+    if(o instanceof PDFString || o instanceof PDFHexString) return encStr(o, k);
+    if(o instanceof PDFDict){ for(const [nm, v] of o.entries()){ const nv = walk(v, k); if(nv !== v) o.set(nm, nv); } return o; }
+    if(o instanceof PDFArray){ for(let i = 0; i < o.size(); i++){ const v = o.get(i), nv = walk(v, k); if(nv !== v) o.set(i, nv); } return o; }
+    return o;
+  };
+  for(const [ref, obj] of ctx.enumerateIndirectObjects()){
+    const k = objKey(ref.objectNumber, ref.generationNumber);
+    if(obj instanceof PDFStream){
+      walk(obj.dict, k);
+      const raw = obj instanceof PDFRawStream ? obj.contents : obj.getContents();
+      ctx.assign(ref, PDFRawStream.of(obj.dict, rc4(k, raw)));
+    } else {
+      const nv = walk(obj, k); if(nv !== obj) ctx.assign(ref, nv);
+    }
+  }
+  const enc = ctx.obj({Filter:"Standard", V:2, R:3, Length:128, P});
+  enc.set(PDFName.of("O"), PDFHexString.of(toHex(O))); enc.set(PDFName.of("U"), PDFHexString.of(toHex(U)));
+  ctx.trailerInfo.Encrypt = ctx.register(enc);
+  ctx.trailerInfo.ID = ctx.obj([PDFHexString.of(toHex(id0)), PDFHexString.of(toHex(id0))]);
+}
+/* 숨은 파일 정보(작성자·만든 프로그램·날짜·XMP) 지우기 */
+function stripDoc(doc){
+  const ctx = doc.context;
+  if(ctx.trailerInfo.Info){ const r = ctx.trailerInfo.Info; if(r instanceof PDFRef) ctx.delete(r); ctx.trailerInfo.Info = undefined; }
+  const md = doc.catalog.get(PDFName.of("Metadata"));
+  if(md){ if(md instanceof PDFRef) ctx.delete(md); doc.catalog.delete(PDFName.of("Metadata")); }
+  doc.catalog.delete(PDFName.of("PieceInfo"));
+}
+
+/* ---------- 책갈피(목차) ---------- */
+// marks: [{title, page}] page = 0부터 세는 쪽 번호
+function addOutline(doc, marks){
+  marks = marks.filter(m => m.title && m.page >= 0 && m.page < doc.getPageCount());
+  if(!marks.length) return;
+  const ctx = doc.context, pages = doc.getPages(), root = ctx.nextRef(), refs = marks.map(() => ctx.nextRef());
+  marks.forEach((m, i) => {
+    const d = ctx.obj({Parent:root, Dest:[pages[m.page].ref, "XYZ", null, null, null]});
+    d.set(PDFName.of("Title"), PDFHexString.fromText(m.title));
+    if(i > 0) d.set(PDFName.of("Prev"), refs[i - 1]);
+    if(i < marks.length - 1) d.set(PDFName.of("Next"), refs[i + 1]);
+    ctx.assign(refs[i], d);
+  });
+  ctx.assign(root, ctx.obj({Type:"Outlines", First:refs[0], Last:refs[refs.length - 1], Count:marks.length}));
+  doc.catalog.set(PDFName.of("Outlines"), root);
+  doc.catalog.set(PDFName.of("PageMode"), PDFName.of("UseOutlines"));
+}
+
+/* ---------- 저장 옵션 ---------- */
+const SO_KIND = {rrn:"주민·외국인등록번호", phone:"전화번호", name:"이름", addr:"주소", acct:"계좌번호", card:"카드번호", email:"이메일", pid:"병원 등록번호·환자 라벨", manual:"직접 그려 가림"};
+window.SaveOpt = (() => {
+  const S = {rule:"{이름}", caseNo:"", strip:false, log:false};
+  let pw = "";
+  try{ Object.assign(S, JSON.parse(localStorage.getItem("i2p.saveopt") || "{}")); }catch(_){}
+  const save = () => { try{ localStorage.setItem("i2p.saveopt", JSON.stringify(S)); }catch(_){} };
+  const p2 = n => String(n).padStart(2, "0");
+  function applyRule(stemName){
+    const d = new Date();
+    let s = (S.rule || "{이름}").replace(/\{이름\}/g, stemName).replace(/\{날짜\}/g, `${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}`)
+      .replace(/\{시간\}/g, `${p2(d.getHours())}${p2(d.getMinutes())}`).replace(/\{사건번호\}/g, S.caseNo.trim());
+    s = s.replace(/[\\/:*?"<>|]+/g, "_").replace(/([_\-\s])\1+/g, "$1").replace(/^[_\-\s]+|[_\-\s]+$/g, "");
+    return s || stemName;
+  }
+  function badge(){
+    const on = [];
+    if(S.rule.trim() && S.rule.trim() !== "{이름}") on.push("이름 규칙");
+    if(S.strip) on.push("정보 지움");
+    if(pw) on.push("🔒 비밀번호");
+    if(S.log) on.push("가림 기록표");
+    $("soBtn").textContent = "⚙ 저장 옵션" + (on.length ? ` · ${on.join(" · ")}` : "");
+    $("soBtn").classList.toggle("on", on.length > 0);
+    $("soPreview").textContent = `예: ${applyRule("합친문서")}.pdf`;
+  }
+  function toUI(){ $("soRule").value = S.rule; $("soCase").value = S.caseNo; $("soStrip").checked = S.strip; $("soLog").checked = S.log; $("soPwOn").checked = !!pw; $("soPw").value = pw; $("soPwRow").hidden = !pw && !$("soPwOn").checked; badge(); }
+  function fromUI(){
+    S.rule = $("soRule").value; S.caseNo = $("soCase").value; S.strip = $("soStrip").checked; S.log = $("soLog").checked;
+    $("soPwRow").hidden = !$("soPwOn").checked;
+    const v = $("soPw").value;
+    if($("soPwOn").checked && v && !/^[\x21-\x7e]{1,32}$/.test(v)){ $("soPwMsg").textContent = "비밀번호는 영문·숫자·기호로 32자까지 써 주세요 (한글·띄어쓰기는 PDF 뷰어에서 열리지 않을 수 있습니다)."; pw = ""; }
+    else { $("soPwMsg").textContent = $("soPwOn").checked && v ? "이 비밀번호를 알아야 저장한 PDF를 열 수 있습니다. 잊으면 열 수 없으니 따로 적어 두세요. (프로그램을 닫으면 비밀번호 설정은 지워집니다)" : ""; pw = $("soPwOn").checked ? v : ""; }
+    save(); badge();
+  }
+  ["soRule","soCase","soStrip","soLog","soPwOn","soPw"].forEach(id => { $(id).addEventListener("input", fromUI); $(id).addEventListener("change", fromUI); });
+  document.querySelectorAll("[data-tok]").forEach(b => b.onclick = () => {
+    const t = $("soRule"), a = t.selectionStart ?? t.value.length, z = t.selectionEnd ?? a, v = b.dataset.tok;
+    t.value = t.value.slice(0, a) + v + t.value.slice(z); t.focus(); t.setSelectionRange(a + v.length, a + v.length); fromUI();
+  });
+  $("soBtn").onclick = () => { const p = $("soPanel"); p.hidden = !p.hidden; if(!p.hidden) p.scrollIntoView({block:"nearest", behavior:"smooth"}); };
+  $("soClose").onclick = () => { $("soPanel").hidden = true; };
+  $("soPwShow").onclick = () => { const i = $("soPw"); i.type = i.type === "password" ? "text" : "password"; $("soPwShow").textContent = i.type === "password" ? "보기" : "숨기기"; };
+  toUI();
+
+  /* 결과 파일을 저장하기 전에 옵션을 적용한다 */
+  async function process(outs){
+    const res = [];
+    for(const o of outs){
+      if(!/\.pdf$/i.test(o.name)){ res.push(o); continue; }
+      const name = applyRule(o.name.replace(/\.pdf$/i, "")) + ".pdf";
+      let blob = o.blob, meta = o.meta || "";
+      if(S.strip || pw){
+        try{
+          const doc = await PDFDocument.load(new Uint8Array(await blob.arrayBuffer()), {updateMetadata:false});
+          if(S.strip) stripDoc(doc);
+          if(pw) encryptDoc(doc, pw);
+          const nb = new Blob([await doc.save({useObjectStreams:!pw, updateFieldAppearances:false})], {type:"application/pdf"});
+          meta = meta.replace(fmtMB(blob.size), fmtMB(nb.size)) + (pw ? " · 🔒 비밀번호" : "") + (S.strip ? " · 정보 지움" : "");
+          blob = nb;
+        }catch(e){ console.error(e); meta += " · 저장 옵션을 적용하지 못함"; }
+      }
+      res.push(Object.assign({}, o, {name, blob, meta}));
+    }
+    return res;
+  }
+  /* 가림 기록표 (CSV · 엑셀에서 열림). 가린 글자 자체는 적지 않는다 */
+  function logFile(rows, base){
+    const q = v => `"${String(v).replace(/"/g, '""')}"`;
+    const pos = (x, y) => `${y < 0.33 ? "위" : y < 0.66 ? "가운데" : "아래"} ${x < 0.33 ? "왼쪽" : x < 0.66 ? "가운데" : "오른쪽"}`;
+    const d = new Date();
+    let csv = "﻿" + [q("가림 기록표"), q(`만든 때 ${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}. ${p2(d.getHours())}:${p2(d.getMinutes())}`), q(`모두 ${rows.length}곳`)].join(",") + "\r\n";
+    csv += ["번호","파일","쪽","가린 항목","찾은 방법","쪽 안 위치"].map(q).join(",") + "\r\n";
+    rows.forEach((r, i) => { csv += [i + 1, r.file, r.page, SO_KIND[r.kind] || (r.auto ? "개인정보" : "직접 그려 가림"), r.auto ? "자동으로 찾음" : "직접 지정", pos(r.x, r.y)].map(q).join(",") + "\r\n"; });
+    const blob = new Blob([csv], {type:"text/csv"});
+    return {blob, name:`${base}_가림기록표.csv`, meta:`${rows.length}곳 기록 · 엑셀에서 열림`};
+  }
+  return {process, applyRule, wantLog:() => S.log, logFile, password:() => pw};
+})();
+{
+  const _deliver = deliver;
+  deliver = async (box, outs, base) => _deliver(box, await SaveOpt.process(outs), SaveOpt.applyRule(base));
+}
+
+
+/* =========================================================
+   법원 제출: 호증 번호 · 쪽 번호 · 증거목록 · 책갈피
+   ========================================================= */
+const ctItems = [];
+const ctTitle = name => { const s = stem(name), t = s.replace(/^\s*(갑|을|병)?\s*(제)?\s*\d+\s*(호증)?\s*(의\s*\d+)?[\s._\-)]*/, "").trim(); return t || s; };
+const ctSide = () => $("ctSide").value === "custom" ? ($("ctSideTxt").value.trim() || "갑") : $("ctSide").value;
+/* 호증 이름 매기기: 가지를 켠 서증은 바로 위 서증과 같은 번호의 가지번호 */
+function ctLabels(list){
+  const side = ctSide(), out = [];
+  let no = Math.max(1, Math.floor(+$("ctStart").value) || 1) - 1;
+  const groups = [];
+  list.forEach((it, i) => { if(i === 0 || !it.sub) groups.push([it]); else groups[groups.length - 1].push(it); });
+  for(const g of groups){
+    no++;
+    g.forEach((it, k) => out.push({it, label: g.length > 1 ? `${side} 제${no}호증의 ${k + 1}` : `${side} 제${no}호증`}));
+  }
+  return out;
+}
+function ctDraw(){
+  const box = $("ctRows"), labs = ctLabels(ctItems), f = document.createDocumentFragment();
+  let dragIt = null;
+  labs.forEach(({it, label}, i) => {
+    const r = document.createElement("div"); r.className = "ctrow" + (it.sub && i > 0 ? " sub" : ""); r.draggable = true;
+    r.innerHTML = `<span class="fno"></span><span class="lab"></span><input type="text" aria-label="서증명"><span class="fmeta"></span><label class="check" title="바로 위 서증의 가지번호로"><input type="checkbox"> 가지</label><span class="cbtn"><button type="button" aria-label="위로">↑</button><button type="button" aria-label="아래로">↓</button><button type="button" aria-label="빼기">✕</button></span>`;
+    r.querySelector(".fno").textContent = i + 1;
+    r.querySelector(".lab").textContent = label;
+    const inp = r.querySelector("input[type=text]"); inp.value = it.title; inp.title = it.file.name;
+    inp.addEventListener("input", () => { it.title = inp.value; });
+    inp.addEventListener("pointerdown", e => e.stopPropagation());
+    r.addEventListener("dragstart", e => { if(e.target === inp){ e.preventDefault(); return; } });
+    const m = r.querySelector(".fmeta");
+    if(it.err){ m.textContent = it.err; m.classList.add("bad"); } else m.textContent = it.pages == null ? "쪽수 확인 중" : `${it.pages.toLocaleString("ko-KR")}쪽`;
+    const cb = r.querySelector(".check input"); cb.checked = !!it.sub; cb.disabled = i === 0;
+    cb.onchange = () => { it.sub = cb.checked; ctRedraw(); };
+    const [up, dn, x] = r.querySelectorAll(".cbtn button");
+    const mv = to => { const j = ctItems.indexOf(it); if(to >= 0 && to < ctItems.length && to !== j){ ctItems.splice(to, 0, ctItems.splice(j, 1)[0]); $("ctSortSel").value = "manual"; ctRedraw(); } };
+    up.onclick = () => mv(i - 1); dn.onclick = () => mv(i + 1);
+    x.onclick = () => { if(running) return; ctItems.splice(ctItems.indexOf(it), 1); ctRedraw(); };
+    r.addEventListener("dragstart", e => { if(running){ e.preventDefault(); return; } dragIt = it; r.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "x"); box._drag = it; });
+    r.addEventListener("dragend", () => { r.classList.remove("dragging"); box._drag = null; box.querySelectorAll(".before,.after").forEach(y => y.classList.remove("before", "after")); });
+    r.addEventListener("dragover", e => { const d = box._drag; if(!d || d === it) return; e.preventDefault(); const b = r.getBoundingClientRect(), after = e.clientY > b.top + b.height/2; box.querySelectorAll(".before,.after").forEach(y => y.classList.remove("before", "after")); r.classList.add(after ? "after" : "before"); r._after = after; });
+    r.addEventListener("drop", e => { const d = box._drag; if(!d || d === it) return; e.preventDefault(); e.stopPropagation(); ctItems.splice(ctItems.indexOf(d), 1); ctItems.splice(ctItems.indexOf(it) + (r._after ? 1 : 0), 0, d); $("ctSortSel").value = "manual"; ctRedraw(); });
+    f.appendChild(r);
+  });
+  box.replaceChildren(f);
+}
+function ctRedraw(){
+  ctDraw();
+  $("ctEmpty").hidden = ctItems.length > 0;
+  $("ctCount").textContent = ctItems.length;
+  $("ctPages").textContent = ctItems.reduce((s, it) => s + (it.pages || 0), 0).toLocaleString("ko-KR");
+  $("ctRun").disabled = running || !ctItems.some(it => !it.err);
+  $("ctFontRow").hidden = !!TXT.font();
+}
+dropHandlers.court = files => {
+  const add = files.filter(isPdf); if(!add.length) return;
+  addSorted(ctItems, add.map(f => Object.assign(pdfItem(f), {title:ctTitle(f.name), sub:false})), $("ctSortSel").value);
+  if(!$("ctName").value) $("ctName").value = `서증_${stamp()}`;
+  ctRedraw(); probePages(ctItems, ctRedraw);
+};
+$("ctPick").onclick = () => $("ctIn").click();
+$("ctIn").onchange = e => { dropHandlers.court([...e.target.files]); e.target.value = ""; };
+setupSortSel("ctSortSel", mode => { if(running) return; sortList(ctItems, mode); ctRedraw(); });
+$("ctClear").onclick = () => { if(running) return; ctItems.length = 0; ctRedraw(); };
+$("ctSide").addEventListener("change", () => { $("ctSideTxt").hidden = $("ctSide").value !== "custom"; ctDraw(); });
+["ctSideTxt","ctStart"].forEach(id => $(id).addEventListener("input", ctDraw));
+$("ctFontLoad").onclick = () => TXT.loadPc();
+$("ctFontFile").onclick = () => TXT.pickFile();
+document.addEventListener("i2p-font", () => { $("ctFontRow").hidden = true; });
+resetters.court = () => { ctItems.length = 0; $("ctName").value = ""; clearOutput("court"); ctRedraw(); };
+hasWork.court = () => ctItems.length > 0 && !saved("court");
+
+const pnoText = (fmt, n, N) => fmt === "dash" ? `- ${n} -` : fmt === "of" ? `${n} / ${N}` : String(n);
+/* 한 쪽에 호증 번호와 쪽 번호를 쓴다 */
+function ctStampPage(page, fonts, label, pno){
+  const P = TXT.pageGeom(page), k = Math.max(0.6, Math.min(6, Math.max(P.W, P.H)/842)), mm = TXT.PT_MM*k, m = 12*mm;   // A4보다 크거나 작은 쪽은 크기에 맞춰 키운다
+  if(label){
+    const pos = $("ctPos").value, S = (+$("ctSize").value || 12)*k, box = $("ctBox").checked, pad = box ? S*0.35 : 0, lh = S*TXT.LINE + 2*pad;
+    const x = pos.endsWith("r") ? P.W - m : pos.endsWith("c") ? P.W/2 : m, y = pos.startsWith("b") ? P.H - m - lh - (pno ? 8*mm : 0) : m;
+    TXT.drawBlock(page, P, {x, y, pad, lines:[label], size:S, color:$("ctColor").value, bold:true, bg:box, border:box, align:pos.endsWith("r") ? "right" : pos.endsWith("c") ? "center" : "left"}, fonts);
+  }
+  if(pno){
+    const pp = $("ctPnoPos").value, S = 10*k, lh = S*TXT.LINE;
+    const x = pp === "br" ? P.W - m : P.W/2, y = pp === "tc" ? 8*mm : P.H - 8*mm - lh;
+    TXT.drawBlock(page, P, {x, y, pad:0, lines:[pno], size:S, color:"#111111", bold:false, align:pp === "br" ? "right" : "center"}, fonts);
+  }
+}
+/* 증거목록 쪽 만들기 */
+async function ctListPages(doc, fonts, rows){
+  const W = 595.28, H = 841.89, mm = TXT.PT_MM, L = 20*mm, R = W - 20*mm;
+  const cols = [{t:"번호", w:118}, {t:"서증명", w:0}, {t:"쪽수", w:48}, {t:"비고", w:70}];
+  cols[1].w = (R - L) - cols.reduce((s, c) => s + c.w, 0);
+  const rh = 24, top0 = 50*mm, perPage = Math.floor((H - top0 - 25*mm)/rh) - 1;
+  const caseNo = $("soCase").value.trim(), d = new Date();
+  const P = {W, H, rot:0, crop:{x:0, y:0, width:W, height:H}};
+  const fit = (t, w, S) => { const f = fonts.reg; let s = S; while(s > 7.5 && f.widthOfTextAtSize(t, s) > w) s -= 0.5; if(f.widthOfTextAtSize(t, s) <= w) return [t, s]; let u = t; while(u.length > 1 && f.widthOfTextAtSize(u + "…", s) > w) u = u.slice(0, -1); return [u + "…", s]; };
+  const line = (pg, x1, y1, x2, y2, th) => pg.drawLine({start:{x:x1, y:H - y1}, end:{x:x2, y:H - y2}, thickness:th || 0.7, color:PDFLib.rgb(0.1, 0.1, 0.1)});
+  const nPages = Math.max(1, Math.ceil(rows.length/perPage));
+  for(let pi = 0; pi < nPages; pi++){
+    const pg = doc.insertPage(pi, [W, H]);
+    TXT.drawBlock(pg, P, {x:W/2, y:22*mm, pad:0, lines:["증 거 목 록"], size:20, color:"#111111", bold:true, align:"center"}, fonts);
+    if(caseNo) TXT.drawBlock(pg, P, {x:L, y:36*mm, pad:0, lines:[`사건  ${caseNo}`], size:11, color:"#111111", bold:false}, fonts);
+    TXT.drawBlock(pg, P, {x:R, y:36*mm, pad:0, lines:[`${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.` + (nPages > 1 ? `  (${pi + 1}/${nPages})` : "")], size:11, color:"#111111", bold:false, align:"right"}, fonts);
+    const part = rows.slice(pi*perPage, (pi + 1)*perPage), nRows = part.length + 1, bottom = top0 + nRows*rh;
+    line(pg, L, top0, R, top0, 1.2); line(pg, L, bottom, R, bottom, 1.2); line(pg, L, top0 + rh, R, top0 + rh, 1);
+    for(let r = 2; r < nRows; r++) line(pg, L, top0 + r*rh, R, top0 + r*rh, 0.5);
+    let x = L; line(pg, x, top0, x, bottom, 1.2);
+    cols.forEach((c, ci) => { x += c.w; line(pg, x, top0, x, bottom, ci === cols.length - 1 ? 1.2 : 0.6); });
+    const cell = (text, ci, r, bold, align) => {
+      const x0 = L + cols.slice(0, ci).reduce((s, c) => s + c.w, 0), w = cols[ci].w - 10, [t, S] = fit(text, w, 10.5);
+      const y = top0 + r*rh + (rh - S*TXT.LINE)/2;
+      TXT.drawBlock(pg, P, {x: align === "center" ? x0 + cols[ci].w/2 : x0 + 5, y, pad:0, lines:[t], size:S, color:"#111111", bold, align: align || "left"}, fonts);
+    };
+    cols.forEach((c, ci) => cell(c.t, ci, 0, true, "center"));
+    part.forEach((row, k) => { cell(row.label, 0, k + 1, false, "center"); cell(row.title, 1, k + 1, false); cell(String(row.pages), 2, k + 1, false, "center"); });
+  }
+  return nPages;
+}
+$("ctRun").onclick = async () => {
+  if(running) return;
+  const list = ctItems.filter(it => !it.err); if(!list.length) return;
+  if(!TXT.font()){ $("ctFontRow").hidden = false; $("ctFontRow").scrollIntoView({block:"center", behavior:"smooth"}); toast("먼저 글꼴을 골라 주세요. 'PC 글꼴 불러오기'를 누르면 맑은 고딕이 선택됩니다."); return; }
+  setBusy(true); cancelReq = false; $("ctRun").disabled = true; $("courtRes").replaceChildren();
+  const pg = progress($("courtProg")); pg.show();
+  const t0 = performance.now(), errs = [], labs = ctLabels(list), mode = document.querySelector("input[name=ctMode]:checked").value;
+  const pnoFmt = $("ctPno").value, scope = $("ctPnoScope").value, where = $("ctWhere").value, level = $("ctComp").value, makeList = $("ctMakeList").checked;
+  const base = safeName($("ctName").value || `서증_${stamp()}`);
+  const allChars = labs.map(l => l.label + l.it.title).join("") + "0123456789-/ 증거목록사건번호서명쪽수비고()." + $("soCase").value;
+  try{
+    if(mode === "merge"){
+      const out = await PDFDocument.create(), marks = [], ranges = [];
+      for(let i = 0; i < labs.length; i++){
+        pg.set(i/labs.length*0.5, `${i + 1} / ${labs.length} · ${labs[i].it.file.name} 여는 중`); await sleep(0);
+        try{
+          const src = await openPdf(labs[i].it.file), at = out.getPageCount();
+          (await out.copyPages(src, src.getPageIndices())).forEach(p => out.addPage(p));
+          ranges.push({lab:labs[i], from:at, n:out.getPageCount() - at});
+        }catch(e){ errs.push(`${labs[i].it.file.name}: ${errMsg(e)}`); }
+      }
+      if(!ranges.length) throw new Error("번호를 넣을 수 있는 서증이 없습니다.");
+      const fonts = await TXT.embed(out, allChars), total = ranges.reduce((s, r) => s + r.n, 0), pages = out.getPages();
+      let run = 0;
+      ranges.forEach((r, k) => {
+        for(let j = 0; j < r.n; j++){
+          run++;
+          const label = (where === "all" || j === 0) ? r.lab.label : "";
+          const pno = pnoFmt ? (scope === "all" ? pnoText(pnoFmt, run, total) : pnoText(pnoFmt, j + 1, r.n)) : "";
+          ctStampPage(pages[r.from + j], fonts, label, pno);
+        }
+        marks.push({title:`${r.lab.label} ${r.lab.it.title}`.trim(), page:r.from});
+        pg.set(0.5 + (k + 1)/ranges.length*0.2, `${k + 1} / ${ranges.length} 번호 넣는 중`);
+      });
+      let shift = 0;
+      if(makeList){ shift = await ctListPages(out, fonts, ranges.map(r => ({label:r.lab.label, title:r.lab.it.title, pages:r.n}))); marks.forEach(m => m.page += shift); marks.unshift({title:"증거목록", page:0}); }
+      if(level) await compressDoc(out, level, (k, n) => pg.set(0.7 + k/n*0.2, `용량 줄이는 중 · 이미지 ${k} / ${n}`));
+      addOutline(out, marks);
+      out.setTitle(base); out.setProducer("Image to PDF");
+      pg.set(0.95, "PDF 파일을 쓰는 중…"); await sleep(0);
+      const blob = new Blob([await out.save({useObjectStreams:true})], {type:"application/pdf"});
+      pg.set(1, `완료 · 서증 ${ranges.length}개, ${out.getPageCount().toLocaleString("ko-KR")}쪽` + (shift ? ` (증거목록 ${shift}쪽 포함)` : "") + ` · ${fmtSec((performance.now() - t0)/1000)} 걸림`);
+      await deliver($("courtRes"), [{blob, name:`${base}.pdf`, meta:`${out.getPageCount().toLocaleString("ko-KR")}쪽 · ${fmtMB(blob.size)}`}], base);
+    } else {
+      const outs = [], rows = [];
+      let run = 0;
+      const total = list.reduce((s, it) => s + (it.pages || 0), 0);
+      for(let i = 0; i < labs.length; i++){
+        const {it, label} = labs[i];
+        pg.set(i/labs.length*0.9, `${i + 1} / ${labs.length} · ${label} 만드는 중`); await sleep(0);
+        try{
+          const doc = await openPdf(it.file), fonts = await TXT.embed(doc, allChars), pages = doc.getPages();
+          pages.forEach((p, j) => { run++; ctStampPage(p, fonts, (where === "all" || j === 0) ? label : "", pnoFmt ? (scope === "all" ? pnoText(pnoFmt, run, total) : pnoText(pnoFmt, j + 1, pages.length)) : ""); });
+          if(level) await compressDoc(doc, level);
+          doc.setTitle(`${label} ${it.title}`); doc.setProducer("Image to PDF");
+          const blob = new Blob([await doc.save({useObjectStreams:true})], {type:"application/pdf"});
+          outs.push({blob, name:`${safeName(label + "_" + it.title)}.pdf`, meta:`${pages.length.toLocaleString("ko-KR")}쪽 · ${fmtMB(blob.size)}`});
+          rows.push({label, title:it.title, pages:pages.length});
+        }catch(e){ errs.push(`${it.file.name}: ${errMsg(e)}`); }
+      }
+      if(!outs.length) throw new Error("번호를 넣을 수 있는 서증이 없습니다.");
+      if(makeList){
+        const ld = await PDFDocument.create(), fonts = await TXT.embed(ld, allChars);
+        await ctListPages(ld, fonts, rows); ld.setTitle("증거목록"); ld.setProducer("Image to PDF");
+        const blob = new Blob([await ld.save({useObjectStreams:true})], {type:"application/pdf"});
+        outs.unshift({blob, name:`${safeName("증거목록_" + ctSide())}.pdf`, meta:`${ld.getPageCount()}쪽 · ${fmtMB(blob.size)}`});
+      }
+      pg.set(1, `완료 · 파일 ${outs.length}개 · ${fmtSec((performance.now() - t0)/1000)} 걸림`);
+      await deliver($("courtRes"), outs, base);
+    }
+  }catch(e){ console.error(e); pg.set(1, /[가-힣]/.test(e.message || "") ? e.message : "저장하지 못했습니다. 글꼴을 바꿔 다시 해 보세요."); }
+  showErrs($("courtRes"), errs);
+  setBusy(false); ctRedraw();
+};
+ctRedraw();
+
+/* =========================================================
+   이미지 → PDF: 스캔 정리 (기울기 · 테두리 · 방향 · 빈 장 · 색) 와 검색되는 PDF
+   ========================================================= */
+/* 글자 인식 결과 거르기: 자신 없는 낱말은 빼고, 제대로 읽힌 낱말이 적은 쪽(옆으로 누운 쪽·그림)은 글자층을 넣지 않는다 */
+function goodWords(ws){
+  ws = ws.filter(x => x.text && x.text.trim() && !(x.conf < 45));
+  const real = ws.filter(x => /[가-힣]{2,}|[A-Za-z]{3,}|\d{3,}/.test(x.text)).length;
+  return real >= Math.max(3, ws.length*0.3) ? ws : [];
+}
+window.SCAN = (() => {
+  const O = {deskew:false, border:false, orient:false, blank:false, color:"color", ocr:false};
+  try{ Object.assign(O, JSON.parse(localStorage.getItem("i2p.scan") || "{}")); }catch(_){}
+  const ids = {deskew:"scDeskew", border:"scBorder", orient:"scOrient", blank:"scBlank", ocr:"scOcr"};
+  const toUI = () => { for(const k in ids) $(ids[k]).checked = !!O[k]; $("scColor").value = O.color; fontRow(); };
+  const fontRow = () => { $("scFontRow").hidden = !(O.ocr && !TXT.font()); };
+  const fromUI = () => {
+    for(const k in ids) O[k] = $(ids[k]).checked; O.color = $("scColor").value;
+    try{ localStorage.setItem("i2p.scan", JSON.stringify(O)); }catch(_){}
+    fontRow(); paintAll(); summary();
+  };
+  Object.values(ids).concat("scColor").forEach(id => $(id).addEventListener("change", fromUI));
+  $("scFontLoad").onclick = () => TXT.loadPc();
+  $("scFontFile").onclick = () => TXT.pickFile();
+  document.addEventListener("i2p-font", fontRow);
+
+  /* ---------- 그림 분석 도구 ---------- */
+  // 회색조 배열로 (긴 변 maxSide)
+  function grayOf(src, w, h, maxSide){
+    const k = Math.min(1, maxSide/Math.max(w, h)), gw = Math.max(1, Math.round(w*k)), gh = Math.max(1, Math.round(h*k));
+    const c = new OffscreenCanvas(gw, gh), g = c.getContext("2d", {willReadFrequently:true});
+    g.fillStyle = "#fff"; g.fillRect(0, 0, gw, gh); g.drawImage(src, 0, 0, gw, gh);
+    const d = g.getImageData(0, 0, gw, gh).data, a = new Uint8Array(gw*gh);
+    for(let i = 0, j = 0; j < a.length; i += 4, j++) a[j] = (d[i]*77 + d[i+1]*150 + d[i+2]*29) >> 8;
+    c.width = c.height = 1;
+    return {a, w:gw, h:gh, k};
+  }
+  // 바탕(종이) 밝기와 글자로 볼 문턱
+  function levels(a){
+    const hist = new Uint32Array(256); for(let i = 0; i < a.length; i++) hist[a[i]]++;
+    const pct = q => { let s = 0, t = a.length*q; for(let v = 0; v < 256; v++){ s += hist[v]; if(s >= t) return v; } return 255; };
+    const bg = pct(0.85), lo = pct(0.01);
+    return {bg, lo, ink: Math.max(40, Math.min(bg - 40, bg*0.62))};
+  }
+  // 검은 테두리 띠: 가장자리부터 안쪽으로, 줄의 60% 이상이 검은 동안
+  function borderOf(G){
+    const {a, w, h} = G, dark = 70, lim = 0.14;
+    const rowDark = y => { let n = 0; for(let x = 0; x < w; x++) if(a[y*w + x] < dark) n++; return n/w; };
+    const colDark = x => { let n = 0; for(let y = 0; y < h; y++) if(a[y*w + x] < dark) n++; return n/h; };
+    let t = 0; while(t < h*lim && rowDark(t) > 0.6) t++;
+    let b = 0; while(b < h*lim && rowDark(h - 1 - b) > 0.6) b++;
+    let l = 0; while(l < w*lim && colDark(l) > 0.6) l++;
+    let r = 0; while(r < w*lim && colDark(w - 1 - r) > 0.6) r++;
+    const pad = v => v ? v + 2 : 0;
+    return {t:pad(t)/h, b:pad(b)/h, l:pad(l)/w, r:pad(r)/w};
+  }
+  // 글자 점 좌표 (가장자리 4%는 빼고, 너무 많으면 고르게 덜어낸다)
+  function inkPoints(G, ink){
+    const {a, w, h} = G, mx = Math.round(w*0.04), my = Math.round(h*0.04), xs = [], ys = [];
+    let n = 0; for(let y = my; y < h - my; y++) for(let x = mx; x < w - mx; x++) if(a[y*w + x] < ink) n++;
+    const step = Math.max(1, Math.ceil(n/150000));
+    let c = 0;
+    for(let y = my; y < h - my; y++) for(let x = mx; x < w - mx; x++) if(a[y*w + x] < ink && (c++ % step) === 0){ xs.push(x); ys.push(y); }
+    return {xs, ys, ratio: n/Math.max(1, (w - 2*mx)*(h - 2*my))};
+  }
+  // 기울어진 각도를 바꿔 가며 가로줄 그림자가 가장 또렷한 각을 찾는다
+  function projScore(P, deg, H, W, vertical){
+    const t = deg*Math.PI/180, cs = Math.cos(t), sn = Math.sin(t), bins = new Float64Array((vertical ? W : H)*2 + 10), off = (vertical ? W : H)/2 + 5;
+    const {xs, ys} = P;
+    for(let i = 0; i < xs.length; i++){
+      const v = vertical ? xs[i]*cs + ys[i]*sn : ys[i]*cs - xs[i]*sn;
+      const b = Math.round(v + off); if(b >= 0 && b < bins.length) bins[b]++;
+    }
+    let s = 0; for(let i = 0; i < bins.length; i++) s += bins[i]*bins[i];
+    return s;
+  }
+  function skewOf(P, G, vertical){
+    if(P.xs.length < 300) return 0;
+    let best = 0, bs = -1;
+    for(let d = -6; d <= 6.001; d += 0.25){ const s = projScore(P, d, G.h, G.w, vertical); if(s > bs){ bs = s; best = d; } }
+    let fine = best;
+    for(let d = best - 0.25; d <= best + 0.25; d += 0.05){ const s = projScore(P, d, G.h, G.w, vertical); if(s > bs){ bs = s; fine = d; } }
+    const s0 = projScore(P, 0, G.h, G.w, vertical);
+    return (Math.abs(fine) >= 0.2 && bs > s0*1.03) ? fine : 0;
+  }
+
+  /* ---------- PDF 만들 때: 한 장 마무리 ---------- */
+  function prep(it){
+    if(!it) return null;
+    if(!(O.deskew || O.border || O.color !== "color" || O.ocr)) return null;
+    return {deskew:O.deskew, border:O.border, color:O.color, ocr:O.ocr && !!TXT.font()};
+  }
+  async function finish(c, w, h, opt, pp){
+    let g = c.getContext("2d");
+    if(pp.border || pp.deskew){
+      const G = grayOf(c, w, h, 1200);
+      if(pp.border){
+        const b = borderOf(G); g.fillStyle = "#fff";
+        if(b.t) g.fillRect(0, 0, w, Math.ceil(b.t*h)); if(b.b) g.fillRect(0, h - Math.ceil(b.b*h), w, Math.ceil(b.b*h));
+        if(b.l) g.fillRect(0, 0, Math.ceil(b.l*w), h); if(b.r) g.fillRect(w - Math.ceil(b.r*w), 0, Math.ceil(b.r*w), h);
+      }
+      if(pp.deskew){
+        const G2 = pp.border ? grayOf(c, w, h, 1200) : G, L = levels(G2.a), P = inkPoints(G2, L.ink);
+        const ang = P.ratio > 0.002 ? skewOf(P, G2, false) : 0;
+        if(ang){
+          const c2 = new OffscreenCanvas(w, h), g2 = c2.getContext("2d");
+          g2.fillStyle = "#fff"; g2.fillRect(0, 0, w, h); g2.imageSmoothingQuality = "high";
+          g2.translate(w/2, h/2); g2.rotate(-ang*Math.PI/180); g2.drawImage(c, -w/2, -h/2);
+          c.width = c.height = 1; c = c2; g = g2; g.setTransform(1, 0, 0, 1, 0, 0);
+        }
+      }
+    }
+    let gray = false;
+    if(pp.color !== "color"){
+      const id = g.getImageData(0, 0, w, h), d = id.data, n = w*h, Y = new Uint8Array(n);
+      for(let i = 0, j = 0; j < n; i += 4, j++) Y[j] = (d[i]*77 + d[i+1]*150 + d[i+2]*29) >> 8;
+      if(pp.color === "bw"){
+        const words = pp.ocr ? await ocrWords(c, w, h) : null;
+        const out = await bwEncode(Y, w, h);
+        c.width = c.height = 1;
+        return Object.assign(out, {words});
+      }
+      if(pp.color === "clean"){
+        const L = levels(Y), lo = Math.min(L.lo + 10, L.bg - 60), hi = Math.max(lo + 40, L.bg - 8), sc = 255/(hi - lo);
+        for(let j = 0; j < n; j++){ const v = (Y[j] - lo)*sc; Y[j] = v < 0 ? 0 : v > 255 ? 255 : v; }
+      }
+      for(let i = 0, j = 0; j < n; i += 4, j++){ d[i] = d[i+1] = d[i+2] = Y[j]; }
+      g.putImageData(id, 0, 0); gray = true;
+    }
+    const words = pp.ocr ? await ocrWords(c, w, h) : null;
+    const blob = await c.convertToBlob({type:"image/jpeg", quality:opt.q});
+    c.width = c.height = 1;
+    return {blob, w, h, gray:false, words, _gray:gray};
+  }
+  // 순수 흑백: 1비트 그림 + 압축 (글자 문서는 JPEG보다 훨씬 작고 또렷하다)
+  async function bwEncode(Y, w, h){
+    const hist = new Uint32Array(256); for(let i = 0; i < Y.length; i++) hist[Y[i]]++;
+    // 오츠 방법으로 문턱 고르기
+    let sum = 0; for(let v = 0; v < 256; v++) sum += v*hist[v];
+    let sB = 0, wB = 0, best = 0, th = 128;
+    for(let v = 0; v < 256; v++){ wB += hist[v]; if(!wB) continue; const wF = Y.length - wB; if(!wF) break; sB += v*hist[v]; const mB = sB/wB, mF = (sum - sB)/wF, b = wB*wF*(mB - mF)*(mB - mF); if(b > best){ best = b; th = v; } }
+    th = Math.min(th, 200);
+    const row = Math.ceil(w/8), bits = new Uint8Array(row*h);
+    for(let y = 0; y < h; y++){ const o = y*row, yo = y*w; for(let x = 0; x < w; x++) if(Y[yo + x] > th) bits[o + (x >> 3)] |= 0x80 >> (x & 7); }
+    const cs = new Blob([bits]).stream().pipeThrough(new CompressionStream("deflate"));
+    const blob = new Blob([await new Response(cs).arrayBuffer()]);
+    return {blob, w, h, bpc:1};
+  }
+  // 글자 인식: 낱말과 자리(그림 좌표)
+  let ocrW = null, ocrTurn = 0;
+  async function ocrWords(c, w, h){
+    try{
+      if(!ocrW) ocrW = await PII.engine();
+      const wk = ocrW[(ocrTurn++) % ocrW.length], k = PII.ocrScale(w, h);
+      const cw = Math.round(w*k), ch = Math.round(h*k), oc = new OffscreenCanvas(cw, ch), og = oc.getContext("2d");
+      og.fillStyle = "#fff"; og.fillRect(0, 0, cw, ch); og.imageSmoothingQuality = "high"; og.drawImage(c, 0, 0, cw, ch);
+      const rows = (await PII.ocrCanvas(oc, wk, k, ["6"]))[0];
+      oc.width = oc.height = 1;
+      return goodWords(rows.flatMap(r => r.words).filter(x => x.bbox.x1 > x.bbox.x0 && x.bbox.y1 > x.bbox.y0));
+    }catch(e){ console.error(e); return null; }
+  }
+  /* 만든 PDF에 보이지 않는 글자층을 넣는다 (그림은 그대로, Ctrl+F로 찾고 글자를 복사할 수 있음) */
+  async function textLayer(blob, pages, set){
+    const doc = await PDFDocument.load(new Uint8Array(await blob.arrayBuffer()), {updateMetadata:false});
+    const all = pages.map(p => (p.words || []).map(x => x.text).join(" ")).join(" ");
+    if(!all.trim()) return blob;
+    const fonts = await TXT.embed(doc, all), font = fonts.reg, P = PDFLib, dp = doc.getPages();
+    pages.forEach((p, i) => {
+      if(!p.words || !p.words.length || !dp[i]) return;
+      const G = pageGeometry(p, set), page = dp[i], key = page.node.newFontDictionary("OCR", font.ref);
+      const pt = (px, py) => { const X = (px/p.w - 0.5)*G.iw, Yv = (0.5 - py/p.h)*G.ih; return [G.c*X + G.s*Yv + G.x + G.dw/2, -G.s*X + G.c*Yv + G.y + G.dh/2]; };
+      const ops = [P.pushGraphicsState(), P.beginText(), P.setTextRenderingMode(P.TextRenderingMode.Invisible)];
+      for(const wd of p.words){
+        const t = wd.text.replace(/\s+/g, " ").trim(); if(!t) continue;
+        const b = wd.bbox, s0 = pt(b.x0, b.y1), s1 = pt(b.x1, b.y1), top = pt(b.x0, b.y0);
+        const dx = s1[0] - s0[0], dy = s1[1] - s0[1], len = Math.hypot(dx, dy), hh = Math.hypot(top[0] - s0[0], top[1] - s0[1]);
+        if(len < 0.5 || hh < 0.5) continue;
+        const cs = dx/len, sn = dy/len, size = hh*0.85;
+        let nw = 0; try{ nw = font.widthOfTextAtSize(t, size); }catch(_){ continue; }
+        if(!(nw > 0)) continue;
+        const sx = len/nw, e = s0[0] - sn*hh*0.18, f = s0[1] + cs*hh*0.18;
+        ops.push(P.setFontAndSize(key, size), P.setTextMatrix(sx*cs, sx*sn, -sn, cs, e, f), P.showText(font.encodeText(t)));
+      }
+      ops.push(P.endText(), P.popGraphicsState());
+      page.pushOperators(...ops);
+    });
+    return new Blob([await doc.save({useObjectStreams:true})], {type:"application/pdf"});
+  }
+
+  /* ---------- 점검: 방향 · 빈 장 ---------- */
+  let busy = false, stop = false;
+  const want = () => O.orient || O.blank;
+  async function analyze(it, wk){
+    let bmp;
+    if(isTiff(it.file)){ const pgs = decodeTiff(new Uint8Array(await it.file.arrayBuffer()), 1); bmp = await createImageBitmap(pgs[0].imageData); }
+    else bmp = await createImageBitmap(it.file, {imageOrientation:"from-image"});
+    const G = grayOf(bmp, bmp.width, bmp.height, 1000), L = levels(G.a), P = inkPoints(G, L.ink);
+    it.blank = P.ratio < 0.0015 && (L.bg - L.lo) < 200 ? true : P.ratio < 0.0008;
+    if(O.orient && !it.blank && P.xs.length > 400){
+      // 가운데 띠만 글자 인식해 보고 가장 잘 읽히는 방향을 고른다 (바로 → 거꾸로 → 옆으로 순서, 잘 읽히면 거기서 멈춤)
+      const conf = async rot => {
+        const side = rot % 180 !== 0, k = Math.min(1, 1300/Math.max(bmp.width, bmp.height));
+        const w = Math.round(bmp.width*k), h = Math.round(bmp.height*k), cw = side ? h : w, ch = side ? w : h;
+        const c = new OffscreenCanvas(cw, ch), g = c.getContext("2d");
+        g.fillStyle = "#fff"; g.fillRect(0, 0, cw, ch); g.translate(cw/2, ch/2); g.rotate(rot*Math.PI/180); g.drawImage(bmp, -w/2, -h/2, w, h);
+        const y0 = Math.round(ch*0.3), bh = Math.round(ch*0.4), x0 = Math.round(cw*0.06), bw = Math.round(cw*0.88);
+        const band = new OffscreenCanvas(bw, bh); band.getContext("2d").drawImage(c, x0, y0, bw, bh, 0, 0, bw, bh);
+        c.width = c.height = 1;
+        if(wk._psm !== "6"){ await wk.setParameters({tessedit_pageseg_mode:"6"}); wk._psm = "6"; }
+        const {data} = await wk.recognize(band, {}, {text:true, blocks:false, hocr:false, tsv:false});
+        band.width = band.height = 1;
+        const txt = (data.text || "").replace(/\s+/g, "");
+        return (data.confidence || 0) * Math.min(1, txt.length/25);
+      };
+      const cur = ((it.rot || 0) % 360 + 360) % 360, order = [cur, (cur + 180) % 360, (cur + 90) % 360, (cur + 270) % 360];
+      const sc = {};
+      let pick = null;
+      for(const r of order){
+        sc[r] = await conf(r);
+        if(sc[r] >= 70){ pick = r; break; }
+      }
+      if(pick == null){ const best = order.reduce((a, r) => sc[r] > sc[a] ? r : a, order[0]); if(sc[best] >= 35 && sc[best] > sc[cur] + 10) pick = best; }
+      if(pick != null && pick !== cur){ it.rot = pick; it.rotAuto = true; applyRot(it); }
+    }
+    bmp.close();
+    it.sc = 2;
+  }
+  // 돌려준 값: 확인할 것이 생겼으면 true, 없으면 false, 멈췄으면 null
+  async function check(list){
+    if(busy || !list.length) return false;
+    busy = true; stop = false; const wasRunning = running; running = true;
+    $("scCheck").disabled = true; $("scStop").hidden = false; $("runBtn").disabled = true;
+    const t0 = performance.now();
+    let ws = [null];
+    try{
+      if(O.orient){ $("scProg").textContent = "글자 인식 준비 중…"; ws = await PII.engine(); }
+      let next = 0, done = 0;
+      await Promise.all(ws.map(async wk => {
+        while(!stop){
+          const i = next++; if(i >= list.length) break;
+          try{ await analyze(list[i], wk); }catch(e){ console.error(e); list[i].sc = -1; }
+          done++; paint(list[i]);
+          $("scProg").textContent = `${done.toLocaleString("ko-KR")} / ${list.length.toLocaleString("ko-KR")}장 점검 · ${fmtSec((performance.now() - t0)/1000)}`;
+        }
+      }));
+    }catch(e){ console.error(e); $("scProg").textContent = "점검하지 못했습니다."; }
+    busy = false; running = wasRunning;
+    $("scCheck").disabled = false; $("scStop").hidden = true; $("runBtn").disabled = !items.length;
+    summary();
+    if(stop){ $("scProg").textContent = "점검을 멈췄습니다."; return null; }
+    $("scProg").textContent = `점검을 마쳤습니다 · ${fmtSec((performance.now() - t0)/1000)} 걸림`;
+    const blanks = O.blank && list.some(it => it.blank), rots = O.orient && list.some(it => it.rotAuto);
+    if(blanks || rots){
+      const first = list.find(it => (O.blank && it.blank) || (O.orient && it.rotAuto));
+      if(first && first.el) first.el.scrollIntoView({block:"center", behavior:"smooth"});
+    }
+    return !!(blanks || rots);
+  }
+  function paint(it){
+    if(!it.el) return;
+    let b = it.el.querySelector(".scb");
+    const blank = O.blank && it.blank, rot = O.orient && it.rotAuto && !blank;
+    if(!blank && !rot){ if(b) b.remove(); it.el.classList.remove("blankout"); return; }
+    if(!b){
+      b = document.createElement("button"); b.type = "button"; b.className = "scb"; it.el.appendChild(b);
+      b.addEventListener("click", e => { e.stopPropagation(); if(running || !(O.blank && it.blank)) return; it.keep = !it.keep; paint(it); summary(); });
+    }
+    if(blank){ b.className = "scb " + (it.keep ? "keep" : "blank"); b.textContent = it.keep ? "빈 장 · 넣음" : "빈 장 · 뺌"; b.title = "누르면 빼기/넣기를 바꿉니다"; }
+    else { b.className = "scb rot"; b.textContent = "자동으로 돌림"; b.title = "글자 방향을 보고 돌렸습니다. ↺ ↻ 단추로 고칠 수 있습니다"; }
+    it.el.classList.toggle("blankout", blank && !it.keep);
+  }
+  function paintAll(){ items.forEach(paint); }
+  function summary(){
+    const chk = items.filter(it => it.sc === 2).length;
+    if(!chk || !want()) return;
+    const bl = items.filter(it => it.blank), out = bl.filter(it => !it.keep).length, rt = items.filter(it => it.rotAuto).length;
+    $("scSum").textContent = `점검한 장 ${chk.toLocaleString("ko-KR")}장` + (O.blank ? ` · 빈 장 ${bl.length}장 (그중 ${out}장 뺌)` : "") + (O.orient ? ` · 방향을 바꾼 장 ${rt}장` : "") + ". 빈 장 표시를 누르면 빼지 않고 넣습니다.";
+  }
+  $("scCheck").onclick = () => { if(!want()){ toast("'바로 돌리기'나 '빈 장 빼기'를 먼저 켜 주세요."); return; } if(!running) check(items.slice()); };
+  $("scStop").onclick = () => { stop = true; };
+  toUI();
+  return {
+    prep, finish, textLayer, paint, paintAll, check,
+    pending: () => want() ? items.filter(it => it.sc !== 2 && it.sc !== -1) : [],
+    skip: it => O.blank && it.blank && !it.keep,
+    ocrOn: () => O.ocr && !!TXT.font(),
+    problem: () => O.ocr && !TXT.font() ? "검색되는 PDF를 만들려면 글꼴이 필요합니다. '스캔 정리'에서 'PC 글꼴 불러오기'를 눌러 주세요." : "",
+    _o: O
+  };
+})();
+
+/* =========================================================
+   PDF 쪽 정리: 순서 · 돌리기 · 빼기 · 빈 쪽 찾기 · 그림으로 저장 · 검색되는 PDF
+   ========================================================= */
+const PG = {file:null, bytes:null, js:null, list:[], sel:new Set(), last:null, drag:null};   // list: [{src, rot, el, blank, thumb}]
+const pgGrid = $("pgGrid");
+const pgIO = new IntersectionObserver(ents => { for(const e of ents) if(e.isIntersecting){ pgIO.unobserve(e.target); pgThumb(e.target._pp); } }, {rootMargin:"500px"});
+let pgThumbQ = Promise.resolve();
+function pgThumb(pp){
+  pgThumbQ = pgThumbQ.then(async () => {
+    if(!PG.js || pp.thumb) return;
+    try{
+      const page = await PG.js.getPage(pp.src + 1), vp1 = page.getViewport({scale:1}), sc = 220/Math.max(vp1.width, vp1.height), vp = page.getViewport({scale:sc});
+      const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+      const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+      await page.render({canvasContext:g, viewport:vp}).promise; page.cleanup();
+      pp.thumb = c; const t = pp.el.querySelector(".thumb"); t.textContent = ""; t.appendChild(c); pgRot(pp);
+    }catch(_){ pp.el.querySelector(".thumb").textContent = "미리보기 없음"; }
+  });
+}
+const pgRot = pp => { const c = pp.el && pp.el.querySelector("canvas"); if(c) c.style.transform = `rotate(${pp.rot}deg)`; };
+function pgCard(pp){
+  const el = document.createElement("div"); el.className = "card pgcard"; el.draggable = true; el._pp = pp;
+  el.innerHTML = `<span class="no"></span><div class="thumb">불러오는 중</div><div class="fname"></div><div class="cbtn"><button type="button" data-a="l" aria-label="왼쪽으로 돌리기">↺</button><button type="button" data-a="r" aria-label="오른쪽으로 돌리기">↻</button><button type="button" data-a="x" aria-label="빼기">✕</button></div>`;
+  el.querySelector(".fname").textContent = `원래 ${pp.src + 1}쪽`;
+  el.addEventListener("click", e => {
+    if(running) return;
+    const a = e.target.closest("button") && e.target.closest("button").dataset.a;
+    if(a === "x"){ PG.list.splice(PG.list.indexOf(pp), 1); PG.sel.delete(pp); pgRender(); return; }
+    if(a){ pp.rot = (pp.rot + (a === "r" ? 90 : 270)) % 360; pgRot(pp); return; }
+    if(e.shiftKey && PG.last && PG.list.includes(PG.last)){
+      const i = PG.list.indexOf(PG.last), j = PG.list.indexOf(pp);
+      if(!(e.ctrlKey || e.metaKey)) PG.sel.clear();
+      for(let k = Math.min(i, j); k <= Math.max(i, j); k++) PG.sel.add(PG.list[k]);
+    } else if(e.ctrlKey || e.metaKey){ PG.sel.has(pp) ? PG.sel.delete(pp) : PG.sel.add(pp); PG.last = pp; }
+    else { const only = PG.sel.size === 1 && PG.sel.has(pp); PG.sel.clear(); if(!only) PG.sel.add(pp); PG.last = pp; }
+    pgSel();
+  });
+  el.addEventListener("dragstart", e => { if(running){ e.preventDefault(); return; } PG.drag = PG.sel.has(pp) ? PG.list.filter(x => PG.sel.has(x)) : [pp]; PG.drag.forEach(x => x.el.classList.add("dragging")); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "p"); });
+  el.addEventListener("dragend", () => { (PG.drag || []).forEach(x => x.el.classList.remove("dragging")); PG.drag = null; pgGrid.querySelectorAll(".before,.after").forEach(c => c.classList.remove("before", "after")); });
+  el.addEventListener("dragover", e => { if(!PG.drag || PG.drag.includes(pp)) return; e.preventDefault(); const r = el.getBoundingClientRect(), after = e.clientX > r.left + r.width/2; pgGrid.querySelectorAll(".before,.after").forEach(c => c.classList.remove("before", "after")); el.classList.add(after ? "after" : "before"); el._after = after; });
+  el.addEventListener("drop", e => {
+    if(!PG.drag || PG.drag.includes(pp)) return; e.preventDefault(); e.stopPropagation();
+    const rest = PG.list.filter(x => !PG.drag.includes(x)); rest.splice(rest.indexOf(pp) + (el._after ? 1 : 0), 0, ...PG.drag);
+    PG.list.splice(0, PG.list.length, ...rest); pgRender();
+  });
+  pp.el = el; pgIO.observe(el);
+  return el;
+}
+function pgSel(){
+  PG.list.forEach(x => x.el && x.el.classList.toggle("sel", PG.sel.has(x)));
+  $("pgSelBar").hidden = PG.sel.size === 0; $("pgSelN").textContent = `${PG.sel.size.toLocaleString("ko-KR")}쪽 선택`;
+}
+function pgRender(){
+  const f = document.createDocumentFragment();
+  for(const x of [...PG.sel]) if(!PG.list.includes(x)) PG.sel.delete(x);
+  PG.list.forEach((pp, i) => {
+    const el = pp.el || pgCard(pp); el.querySelector(".no").textContent = i + 1;
+    let bm = el.querySelector(".blankmark"); if(pp.blank && !bm){ bm = document.createElement("span"); bm.className = "blankmark"; bm.textContent = "빈 쪽"; el.appendChild(bm); } else if(!pp.blank && bm) bm.remove();
+    f.appendChild(el);
+  });
+  pgGrid.replaceChildren(f);
+  $("pgEmpty").hidden = PG.list.length > 0; $("pgCount").textContent = PG.list.length.toLocaleString("ko-KR");
+  $("pgRun").disabled = running || !PG.list.length; $("pgImg").disabled = running || !PG.list.length;
+  pgSel();
+}
+$("pgSelBar").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b || running) return;
+  const a = b.dataset.p, G = PG.list.filter(x => PG.sel.has(x));
+  if(a === "none"){ PG.sel.clear(); pgSel(); return; }
+  if(a === "x"){ PG.list.splice(0, PG.list.length, ...PG.list.filter(x => !PG.sel.has(x))); PG.sel.clear(); pgRender(); return; }
+  if(a === "l" || a === "r"){ G.forEach(pp => { pp.rot = (pp.rot + (a === "r" ? 90 : 270)) % 360; pgRot(pp); }); return; }
+  const rest = PG.list.filter(x => !PG.sel.has(x));
+  PG.list.splice(0, PG.list.length, ...(a === "first" ? [...G, ...rest] : [...rest, ...G])); pgRender();
+});
+$("pgSelAll").onclick = () => { if(PG.sel.size === PG.list.length) PG.sel.clear(); else PG.list.forEach(x => PG.sel.add(x)); pgSel(); };
+dropHandlers.pages = async files => {
+  const f = files.find(isPdf); if(!f || running) return;
+  const info = $("pgInfo"); info.hidden = false; info.innerHTML = `<b></b><span>여는 중</span>`; info.querySelector("b").textContent = f.name;
+  $("pagesRes").replaceChildren(); $("pgBlankMsg").textContent = "";
+  try{
+    const bytes = new Uint8Array(await f.arrayBuffer()), d = await PDFDocument.load(bytes, {updateMetadata:false});
+    if(PG.js){ try{ PG.js.destroy(); }catch(_){} }
+    PG.file = f; PG.bytes = bytes; PG.js = await TXT.pdfjs(bytes.slice());
+    PG.list.forEach(pp => pp.el && pgIO.unobserve(pp.el));
+    PG.list = Array.from({length:d.getPageCount()}, (_, i) => ({src:i, rot:0, el:null, blank:false, thumb:null})); PG.sel.clear(); PG.last = null;
+    pgThumbQ = Promise.resolve();
+    info.querySelector("span").textContent = `${d.getPageCount().toLocaleString("ko-KR")}쪽 · ${fmtMB(f.size)}`;
+    $("pgName").value = `${stem(f.name)}_정리`;
+  }catch(e){ info.querySelector("span").textContent = /encrypt/i.test(String(e && e.message)) ? "암호가 걸린 PDF라 열 수 없음" : "손상됐거나 읽을 수 없는 PDF"; info.querySelector("span").style.color = "var(--bad)"; PG.list = []; }
+  pgRender();
+};
+$("pgPick").onclick = () => $("pgIn").click();
+$("pgIn").onchange = e => { dropHandlers.pages([...e.target.files]); e.target.value = ""; };
+const pgFontRow = () => { $("pgFontRow").hidden = !($("pgOcr").checked && !TXT.font()); };
+$("pgOcr").addEventListener("change", pgFontRow); document.addEventListener("i2p-font", pgFontRow);
+$("pgFontLoad").onclick = () => TXT.loadPc(); $("pgFontFile").onclick = () => TXT.pickFile();
+
+/* 빈 쪽: 작게 그려 글자·그림이 거의 없는 쪽 */
+$("pgBlank").onclick = async () => {
+  if(running || !PG.js) return;
+  setBusy(true); const msg = $("pgBlankMsg");
+  let n = 0;
+  const uniq = [...new Set(PG.list.map(pp => pp.src))];
+  for(let k = 0; k < uniq.length; k++){
+    const i = uniq[k]; msg.textContent = `${k + 1} / ${uniq.length}쪽 살펴보는 중`;
+    try{
+      const page = await PG.js.getPage(i + 1), vp1 = page.getViewport({scale:1}), vp = page.getViewport({scale:500/Math.max(vp1.width, vp1.height)});
+      const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+      const g = c.getContext("2d", {willReadFrequently:true}); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+      await page.render({canvasContext:g, viewport:vp}).promise; page.cleanup();
+      const d = g.getImageData(0, 0, c.width, c.height).data, W = c.width, H = c.height, mx = Math.round(W*0.05), my = Math.round(H*0.05);
+      let ink = 0, tot = 0;
+      for(let y = my; y < H - my; y++) for(let x = mx; x < W - mx; x++){ const o = (y*W + x)*4, v = (d[o]*77 + d[o+1]*150 + d[o+2]*29) >> 8; tot++; if(v < 150) ink++; }
+      const blank = ink/tot < 0.0012;
+      PG.list.forEach(pp => { if(pp.src === i) pp.blank = blank; });
+      if(blank) n++;
+    }catch(_){}
+  }
+  PG.sel.clear(); PG.list.forEach(pp => { if(pp.blank) PG.sel.add(pp); });
+  setBusy(false); pgRender();
+  msg.textContent = n ? `빈 쪽 ${n}쪽을 찾아 골라 두었습니다. 확인 후 위 '빼기'를 누르세요.` : "빈 쪽이 없습니다.";
+  const first = PG.list.find(pp => pp.blank); if(first) first.el.scrollIntoView({block:"center", behavior:"smooth"});
+};
+
+/* 스캔한 쪽에 보이지 않는 글자층 넣기 (원본 쪽에 넣은 뒤 순서대로 옮겨 담는다) */
+async function pgOcrLayer(src, pg, idxs){
+  const ws = await PII.engine(), pages = src.getPages(), per = [];
+  let all = "", done = 0, next = 0;
+  await Promise.all(ws.map(async wk => {
+    while(true){
+      const n = next++; if(n >= idxs.length) break;
+      const i = idxs[n], page = await PG.js.getPage(i + 1), vp = page.getViewport({scale:1});
+      const tc = await page.getTextContent();
+      if(tc.items.reduce((s, x) => s + (x.str || "").trim().length, 0) >= 20){ page.cleanup(); done++; continue; }
+      const k = PII.ocrScale(vp.width, vp.height), c = await TXT.renderForOcr(page, vp, k);
+      const rows = (await PII.ocrCanvas(c, wk, k, ["6"]))[0]; c.width = c.height = 1; page.cleanup();
+      const words = goodWords(rows.flatMap(r => r.words));
+      per[i] = words; all += words.map(x => x.text).join(" ");
+      done++; pg.set(done/idxs.length*0.7, `${done} / ${idxs.length}쪽 글자 읽는 중`);
+    }
+  }));
+  if(!all.trim()) return 0;
+  const fonts = await TXT.embed(src, all), font = fonts.reg, P = PDFLib;
+  let cnt = 0;
+  per.forEach((words, i) => {
+    if(!words || !words.length) return;
+    const page = pages[i], G = TXT.pageGeom(page), key = page.node.newFontDictionary("OCR", font.ref);
+    const ops = [P.pushGraphicsState(), P.beginText(), P.setTextRenderingMode(P.TextRenderingMode.Invisible)];
+    for(const wd of words){
+      const t = wd.text.replace(/\s+/g, " ").trim(), b = wd.bbox;
+      const s0 = TXT.toUser(G, b.x0, b.y1), s1 = TXT.toUser(G, b.x1, b.y1), top = TXT.toUser(G, b.x0, b.y0);
+      const dx = s1[0] - s0[0], dy = s1[1] - s0[1], len = Math.hypot(dx, dy), hh = Math.hypot(top[0] - s0[0], top[1] - s0[1]);
+      if(len < 0.5 || hh < 0.5) continue;
+      const cs = dx/len, sn = dy/len, size = hh*0.85;
+      let nw = 0; try{ nw = font.widthOfTextAtSize(t, size); }catch(_){ continue; }
+      if(!(nw > 0)) continue;
+      ops.push(P.setFontAndSize(key, size), P.setTextMatrix(len/nw*cs, len/nw*sn, -sn, cs, s0[0] - sn*hh*0.18, s0[1] + cs*hh*0.18), P.showText(font.encodeText(t)));
+    }
+    ops.push(P.endText(), P.popGraphicsState()); page.pushOperators(...ops); cnt++;
+  });
+  return cnt;
+}
+$("pgRun").onclick = async () => {
+  if(running || !PG.list.length) return;
+  const ocr = $("pgOcr").checked;
+  if(ocr && !TXT.font()){ $("pgFontRow").hidden = false; toast("검색되는 PDF를 만들려면 먼저 글꼴을 골라 주세요."); return; }
+  setBusy(true); $("pgRun").disabled = true; $("pagesRes").replaceChildren();
+  const pg = progress($("pagesProg")); pg.show();
+  const t0 = performance.now(), base = safeName($("pgName").value || stem(PG.file.name) + "_정리");
+  try{
+    const src = await PDFDocument.load(PG.bytes, {updateMetadata:false});
+    let ocrN = 0;
+    if(ocr) ocrN = await pgOcrLayer(src, pg, [...new Set(PG.list.map(pp => pp.src))]);
+    pg.set(0.8, "쪽을 정리하는 중"); await sleep(0);
+    const out = await PDFDocument.create();
+    const copied = await out.copyPages(src, PG.list.map(pp => pp.src));
+    copied.forEach((p, i) => { const r = PG.list[i].rot; if(r) p.setRotation(PDFLib.degrees((p.getRotation().angle + r) % 360)); out.addPage(p); });
+    out.setTitle(base); out.setProducer("Image to PDF");
+    pg.set(0.9, "PDF 파일을 쓰는 중…"); await sleep(0);
+    const blob = new Blob([await out.save({useObjectStreams:true})], {type:"application/pdf"});
+    pg.set(1, `완료 · ${out.getPageCount().toLocaleString("ko-KR")}쪽` + (ocr ? ` · 글자층 ${ocrN}쪽` : "") + ` · ${fmtSec((performance.now() - t0)/1000)} 걸림`);
+    await deliver($("pagesRes"), [{blob, name:`${base}.pdf`, meta:`${out.getPageCount().toLocaleString("ko-KR")}쪽 · ${fmtMB(blob.size)}`}], base);
+  }catch(e){ console.error(e); pg.set(1, "저장하지 못했습니다."); }
+  setBusy(false); pgRender();
+};
+/* 고른 쪽(없으면 모두)을 그림 파일로 */
+$("pgImg").onclick = async () => {
+  if(running || !PG.list.length) return;
+  const list = PG.sel.size ? PG.list.filter(x => PG.sel.has(x)) : PG.list.slice();
+  const fmt = $("pgImgFmt").value, dpi = +$("pgImgDpi").value, base = safeName($("pgName").value || stem(PG.file.name));
+  setBusy(true); $("pagesRes").replaceChildren(); const pg = progress($("pagesProg")); pg.show();
+  const outs = [], t0 = performance.now(), pad = String(PG.list.length).length;
+  try{
+    for(let k = 0; k < list.length; k++){
+      const pp = list[k], page = await PG.js.getPage(pp.src + 1), vp = page.getViewport({scale:dpi/72, rotation:(page.rotate + pp.rot) % 360});
+      if(vp.width*vp.height > 60e6){ page.cleanup(); continue; }
+      const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+      const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+      await page.render({canvasContext:g, viewport:vp}).promise; page.cleanup();
+      const blob = await new Promise(r => c.toBlob(r, fmt === "png" ? "image/png" : "image/jpeg", 0.9)); c.width = c.height = 1;
+      const no = PG.list.indexOf(pp) + 1;
+      outs.push({blob, name:`${base}_${String(no).padStart(pad, "0")}쪽.${fmt}`, meta:`${dpi}dpi · ${fmtMB(blob.size)}`});
+      pg.set((k + 1)/list.length, `${k + 1} / ${list.length}쪽 그림으로 만드는 중`);
+    }
+    pg.set(1, `완료 · 그림 ${outs.length}개 · ${fmtSec((performance.now() - t0)/1000)} 걸림`);
+    if(outs.length) await deliver($("pagesRes"), outs, `${base}_그림`);
+  }catch(e){ console.error(e); pg.set(1, "그림으로 저장하지 못했습니다."); }
+  setBusy(false); pgRender();
+};
+resetters.pages = () => {
+  if(PG.js){ try{ PG.js.destroy(); }catch(_){} }
+  PG.list.forEach(pp => pp.el && pgIO.unobserve(pp.el));
+  Object.assign(PG, {file:null, bytes:null, js:null, list:[], last:null}); PG.sel.clear();
+  $("pgInfo").hidden = true; $("pgInfo").replaceChildren(); $("pgName").value = ""; $("pgBlankMsg").textContent = "";
+  clearOutput("pages"); pgRender();
+};
+hasWork.pages = () => !!PG.file && !saved("pages");
+resetters.help = () => {};
+pgRender();
+
+/* =========================================================
+   작업 묶음(프리셋): 탭의 설정을 이름 붙여 저장했다가 한 번에 불러온다
+   ========================================================= */
+const BUILTIN = {
+  img: [
+    {name:"법원 제출용 스캔", v:{pageSel:"a4-auto", marginSel:"5", qualSel:"std", splitSel:"0", scDeskew:true, scBorder:true, scOrient:true, scBlank:true, scColor:"clean", scOcr:false}},
+    {name:"용량 최소(글자 문서)", v:{pageSel:"a4-auto", marginSel:"5", qualSel:"std", splitSel:"0", scDeskew:true, scBorder:true, scColor:"bw"}},
+    {name:"사진 그대로", v:{pageSel:"a4-auto", marginSel:"5", qualSel:"orig", scDeskew:false, scBorder:false, scOrient:false, scBlank:false, scColor:"color", scOcr:false}}
+  ],
+  court: [
+    {name:"합쳐서 제출(증거목록·쪽번호)", v:{ctMode:"merge", ctMakeList:true, ctPno:"dash", ctPnoScope:"each", ctWhere:"first", ctPos:"tr", ctBox:true}},
+    {name:"서증마다 따로", v:{ctMode:"each", ctMakeList:true, ctPno:"dash", ctPnoScope:"each", ctWhere:"first"}}
+  ]
+};
+function presetFields(tab){ return [...document.querySelectorAll(`#tab-${tab} .pset`)]; }
+function presetRead(tab){
+  const v = {};
+  for(const el of presetFields(tab)){
+    if(el.type === "radio"){ if(el.checked) v[el.name] = el.value; }
+    else if(el.type === "checkbox") v[el.id] = el.checked;
+    else v[el.id] = el.value;
+  }
+  return v;
+}
+function presetApply(tab, v){
+  for(const el of presetFields(tab)){
+    let changed = false;
+    if(el.type === "radio"){ if(el.name in v){ const on = v[el.name] === el.value; changed = el.checked !== on; el.checked = on; } }
+    else if(el.id in v){
+      if(el.type === "checkbox"){ changed = el.checked !== !!v[el.id]; el.checked = !!v[el.id]; }
+      else { changed = el.value !== String(v[el.id]); el.value = v[el.id]; }
+    }
+    if(changed){ el.dispatchEvent(new Event("input", {bubbles:true})); el.dispatchEvent(new Event("change", {bubbles:true})); }
+  }
+}
+document.querySelectorAll(".presetbar").forEach(bar => {
+  const tab = bar.dataset.preset, key = "i2p.preset." + tab;
+  let mine = []; try{ mine = JSON.parse(localStorage.getItem(key) || "[]") || []; }catch(_){}
+  const keep = () => { try{ localStorage.setItem(key, JSON.stringify(mine)); }catch(_){} };
+  bar.innerHTML = `<b>작업 묶음</b><select aria-label="작업 묶음 고르기"></select><input type="text" placeholder="새 묶음 이름" aria-label="새 작업 묶음 이름" autocomplete="off"><button type="button">지금 설정 저장</button><button type="button" class="danger">지우기</button><span class="note"></span>`;
+  const [sel, name, bSave, bDel, note] = [bar.querySelector("select"), bar.querySelector("input"), ...bar.querySelectorAll("button"), bar.querySelector(".note")];
+  const all = () => [...(BUILTIN[tab] || []).map(x => Object.assign({fixed:true}, x)), ...mine];
+  const draw = cur => {
+    sel.innerHTML = `<option value="">— 골라서 한 번에 설정 —</option>` + all().map((x, i) => `<option value="${i}">${esc2(x.name)}${x.fixed ? " (기본)" : ""}</option>`).join("");
+    sel.value = cur != null ? String(cur) : ""; bDel.disabled = !(all()[sel.value] && !all()[sel.value].fixed);
+  };
+  sel.onchange = () => {
+    const x = all()[sel.value]; bDel.disabled = !(x && !x.fixed);
+    if(!x) return;
+    presetApply(tab, x.v); name.value = x.fixed ? "" : x.name;
+    note.textContent = `'${x.name}' 설정을 불러왔습니다.`; toast(`'${x.name}' 작업 묶음을 적용했습니다.`);
+  };
+  bSave.onclick = () => {
+    const nm = name.value.trim(); if(!nm){ name.focus(); toast("작업 묶음 이름을 적어 주세요."); return; }
+    const i = mine.findIndex(x => x.name === nm), item = {name:nm, v:presetRead(tab)};
+    if(i >= 0) mine[i] = item; else mine.push(item);
+    keep(); draw((BUILTIN[tab] || []).length + (i >= 0 ? i : mine.length - 1));
+    note.textContent = `'${nm}'을(를) ${i >= 0 ? "고쳐 " : ""}저장했습니다. 다음에 열어도 남아 있습니다.`;
+  };
+  bDel.onclick = () => {
+    const x = all()[sel.value]; if(!x || x.fixed) return;
+    mine.splice(mine.indexOf(mine.find(y => y.name === x.name)), 1); keep(); draw(); note.textContent = `'${x.name}'을(를) 지웠습니다.`;
+  };
+  draw();
+});
+function esc2(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
 </script>
 </body>
