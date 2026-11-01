@@ -1,13 +1,11 @@
 {
- "version": "2.47",
- "date": "2026-11-01",
+ "version": "2.48",
+ "date": "2026-11-02",
  "notes": [
-  "칸 고정·남은 기간만 다시 생성",
-  "부족 이유 진단·만약에 계산",
-  "근무시간 정산표·인력 현황 보고서",
-  "연차 사용 촉진·확정 후 변경 알림",
-  "패턴 입력·줄 복사·글자 크게·색 구분 보조·A3 인쇄",
-  "오늘·내일 내 근무, 부서별 현황"
+  "경력(숙련도)별 Night 가감, 나이 축소 기본 끔",
+  "Night 가능 총량 표시와 모자란 달 축소 자동 해제",
+  "요일 선호 반영 강도(보통·강하게·신청처럼)",
+  "보건휴가는 근무를 먼저 짠 뒤 남는 OF·여유 있는 날에 넣기"
  ],
  "download": "https://appraisal-fee.github.io/rohslaw/duty/duty_pc.html",
  "manual": "https://appraisal-fee.github.io/rohslaw/duty/manual.pdf"
