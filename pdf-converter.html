@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-01 -->
+<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-02 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -289,6 +289,14 @@ input.num{width:100%;font:inherit;padding:7px 9px;border:1px solid var(--line);b
 .help .steps li::marker{font-weight:700;color:var(--accent)}
 .check.boxed{align-items:center;min-height:38px;padding:0 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
 .check.boxed input{margin-top:0}
+.spgrid .card{cursor:pointer}
+.spgrid .card .thumb canvas{box-shadow:0 0 0 1px var(--line)}
+.spgrid .card.sel .no{background:var(--accent)}
+.spgrid .grp{position:absolute;z-index:1;right:10px;top:10px;background:var(--accent);color:var(--on-accent);font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px}
+.spgrid .zoom{position:absolute;z-index:1;right:10px;bottom:40px;padding:2px 7px;font-size:13px;line-height:1.3}
+.spsum{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.spsum b{color:var(--ink)}
+#spCanvas{box-shadow:0 1px 6px rgba(0,0,0,.25);background:#fff;max-width:100%;height:auto}
 .res .m.good{color:var(--ok);font-weight:700}
 footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -638,6 +646,34 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         <div class="progress" id="splitProg" hidden><div class="bar"><i></i></div><div class="ptext"></div></div>
         <div class="results" id="splitRes"></div>
       </section>
+    </div>
+    <section class="panel" id="spPanel" hidden>
+      <div class="toolbar">
+        <div class="label">3. 쪽 미리보기 · 눌러서 고르기</div>
+        <div class="row">
+          <span class="tip">쪽을 누르면 골라지고 다시 누르면 빠집니다. Shift를 누른 채 누르면 사이의 쪽까지 한 번에 고릅니다. 🔍로 크게 봅니다.</span>
+          <button type="button" id="spAll">전체 선택</button>
+          <button type="button" id="spNone">선택 해제</button>
+        </div>
+      </div>
+      <div class="spsum" id="spSum"></div>
+      <div class="grid spgrid" id="spGrid"></div>
+    </section>
+  </div>
+
+  <div class="pimodal" id="spModal" hidden>
+    <div class="pipanel" role="dialog" aria-modal="true" aria-labelledby="spTitle">
+      <div class="pihead">
+        <b id="spTitle"></b>
+        <span class="note">←/→ 다른 쪽 · Space 고르기/빼기 · Esc 닫기</span>
+        <div class="row">
+          <button type="button" id="spPrev">◀ 이전</button>
+          <button type="button" id="spNext">다음 ▶</button>
+          <button type="button" id="spPick" class="primary"></button>
+          <button type="button" id="spClose">닫기</button>
+        </div>
+      </div>
+      <div class="pistage" id="spStage"><canvas id="spCanvas"></canvas></div>
     </div>
   </div>
 
@@ -1108,7 +1144,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <footer>
     <span>개발자: 노상엽</span>
     <span>개발일자: 2026. 10. 16.</span>
-    <span>수정일자: 2026. 11. 1.</span>
+    <span>수정일자: 2026. 11. 2.</span>
     <span>버전 <b id="appVer"></b></span>
     <button type="button" class="linkbtn" id="updCheck">새 버전 확인</button>
     <span>HEIC(아이폰 사진)는 크롬·엣지에서 열리지 않으니 JPG로 저장해 올려 주세요.</span>
@@ -3736,7 +3772,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "2.0", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
+const APP_VERSION = "2.1", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -6955,6 +6991,134 @@ document.querySelectorAll(".presetbar").forEach(bar => {
   draw();
 });
 function esc2(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* =========================================================
+   PDF 나누기: 쪽 미리보기에서 눌러 고르기 (쪽 범위 칸과 서로 맞춘다)
+   ========================================================= */
+const SP = {js:null, n:0, sel:new Set(), cards:[], last:null, zoom:-1, file:null};
+const spIO = new IntersectionObserver(ents => { for(const e of ents) if(e.isIntersecting){ spIO.unobserve(e.target); spThumb(+e.target.dataset.i); } }, {rootMargin:"500px"});
+let spQ = Promise.resolve();
+function spThumb(i){
+  spQ = spQ.then(async () => {
+    const js = SP.js; if(!js || !SP.cards[i] || SP.cards[i]._done) return;
+    try{
+      const page = await js.getPage(i + 1), v1 = page.getViewport({scale:1}), vp = page.getViewport({scale:220/Math.max(v1.width, v1.height)});
+      const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+      const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+      await page.render({canvasContext:g, viewport:vp}).promise; page.cleanup();
+      if(js !== SP.js) return;
+      const t = SP.cards[i].querySelector(".thumb"); t.textContent = ""; t.appendChild(c); SP.cards[i]._done = true;
+    }catch(_){ if(SP.cards[i]) SP.cards[i].querySelector(".thumb").textContent = "미리보기 없음"; }
+  });
+}
+// 고른 쪽 → '1, 3-5, 30' 꼴 글자
+function spText(){
+  const a = [...SP.sel].sort((x, y) => x - y), out = [];
+  for(let i = 0; i < a.length; i++){ let j = i; while(j + 1 < a.length && a[j + 1] === a[j] + 1) j++; out.push(j > i ? `${a[i] + 1}-${a[j] + 1}` : `${a[i] + 1}`); i = j; }
+  return out.join(", ");
+}
+// 쪽 범위 칸 → 고른 쪽 (잘못 쓴 부분은 건너뛴다)
+function spFromText(){
+  SP.sel.clear();
+  for(const raw of $("splitRange").value.split(/[,，;\s]+/).filter(Boolean)){
+    const m = raw.match(/^(\d*)\s*[-~]\s*(\d*)$/) || raw.match(/^(\d+)$/); if(!m) continue;
+    let a, b; if(m.length === 2){ a = b = +m[1]; } else { a = m[1] ? +m[1] : 1; b = m[2] ? +m[2] : SP.n; }
+    for(let p = Math.max(1, a); p <= Math.min(SP.n, b); p++) SP.sel.add(p - 1);
+  }
+}
+function spPaint(){
+  // 따로 저장이면 쉼표로 나뉜 묶음마다 파일 번호를 붙여 보여 준다
+  const sep = $("splitSep").checked, groups = [];
+  if(document.querySelector("input[name=smode]:checked").value === "range"){
+    try{ parseRanges($("splitRange").value, SP.n).forEach(g => groups.push(g.idx)); }catch(_){}
+  }
+  const fileOf = new Map(); groups.forEach((g, k) => g.forEach(i => { if(!fileOf.has(i)) fileOf.set(i, k + 1); }));
+  SP.cards.forEach((c, i) => {
+    c.classList.toggle("sel", SP.sel.has(i));
+    let b = c.querySelector(".grp");
+    const lab = SP.sel.has(i) ? (sep && groups.length > 1 ? `파일 ${fileOf.get(i) || "?"}` : "고름") : "";
+    if(lab){ if(!b){ b = document.createElement("span"); b.className = "grp"; c.appendChild(b); } b.textContent = lab; } else if(b) b.remove();
+  });
+  const n = SP.sel.size;
+  $("spSum").innerHTML = n ? `<b>${n.toLocaleString("ko-KR")}쪽</b> 고름 · ` + (sep && groups.length > 1 ? `<b>PDF ${groups.length}개</b>로 따로 저장 (쉼표로 나뉜 묶음마다 한 파일)` : `<b>PDF 1개</b>로 모아 저장`) + (sep && groups.length > 1 ? " · 한 파일로 모으려면 위에서 '따로 저장'을 끄세요" : "")
+                                : "고른 쪽이 없습니다. 쪽을 눌러 고르거나 위 '원하는 쪽만 골라내기' 칸에 1-3, 5처럼 적으세요.";
+}
+function spSync(fromCards){
+  if(fromCards){
+    $("splitRange").value = spText();
+    document.querySelector('input[name=smode][value=range]').checked = true;
+  } else spFromText();
+  spPaint(); spZoomUI();
+}
+function spToggle(i, e){
+  if(running) return;
+  if(e && e.shiftKey && SP.last != null){
+    const on = !SP.sel.has(i) || SP.sel.has(SP.last);
+    for(let k = Math.min(SP.last, i); k <= Math.max(SP.last, i); k++) on ? SP.sel.add(k) : SP.sel.delete(k);
+  } else SP.sel.has(i) ? SP.sel.delete(i) : SP.sel.add(i);
+  SP.last = i; spSync(true);
+}
+async function spLoad(f){
+  if(SP.js){ try{ SP.js.destroy(); }catch(_){} SP.js = null; }
+  SP.cards.forEach(c => spIO.unobserve(c)); SP.cards = []; SP.sel.clear(); SP.last = null; spQ = Promise.resolve();
+  $("spGrid").replaceChildren(); $("spPanel").hidden = true;
+  if(!f || !splitPages) return;
+  SP.file = f; SP.n = splitPages;
+  try{ SP.js = await TXT.pdfjs(new Uint8Array(await f.arrayBuffer())); }catch(_){ return; }
+  const frag = document.createDocumentFragment();
+  for(let i = 0; i < SP.n; i++){
+    const c = document.createElement("div"); c.className = "card"; c.dataset.i = i;
+    c.innerHTML = `<span class="no">${i + 1}</span><div class="thumb">불러오는 중</div><div class="fname">${i + 1}쪽</div><button type="button" class="zoom" aria-label="${i + 1}쪽 크게 보기" title="크게 보기">🔍</button>`;
+    c.addEventListener("click", e => { if(e.target.closest(".zoom")){ spOpen(i); return; } spToggle(i, e); });
+    c.addEventListener("dblclick", e => { e.preventDefault(); spOpen(i); });
+    SP.cards.push(c); frag.appendChild(c); spIO.observe(c);
+  }
+  $("spGrid").appendChild(frag); $("spPanel").hidden = false;
+  spFromText(); spPaint();
+}
+{
+  const orig = dropHandlers.split;
+  dropHandlers.split = async files => { await orig(files); if(splitFile) await spLoad(splitFile); };
+  const origReset = resetters.split;
+  resetters.split = () => { origReset(); spLoad(null); };
+}
+$("splitRange").addEventListener("input", () => { if(SP.n) spSync(false); });
+$("splitSep").addEventListener("change", spPaint);
+document.querySelectorAll("input[name=smode]").forEach(r => r.addEventListener("change", spPaint));
+$("spAll").onclick = () => { if(running) return; for(let i = 0; i < SP.n; i++) SP.sel.add(i); spSync(true); };
+$("spNone").onclick = () => { if(running) return; SP.sel.clear(); spSync(true); };
+
+/* 크게 보기 */
+async function spDraw(){
+  const i = SP.zoom, js = SP.js; if(i < 0 || !js) return;
+  const page = await js.getPage(i + 1), v1 = page.getViewport({scale:1});
+  const maxW = Math.min(1000, window.innerWidth - 80), maxH = window.innerHeight - 170;
+  const sc = Math.min(maxW/v1.width, maxH/v1.height), dpr = Math.min(2, window.devicePixelRatio || 1), vp = page.getViewport({scale:sc*dpr});
+  const c = $("spCanvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height); c.style.width = Math.round(vp.width/dpr) + "px";
+  const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+  await page.render({canvasContext:g, viewport:vp}).promise; page.cleanup();
+}
+function spZoomUI(){
+  if(SP.zoom < 0) return;
+  const on = SP.sel.has(SP.zoom);
+  $("spTitle").textContent = `${SP.zoom + 1} / ${SP.n}쪽` + (on ? " · 고름" : "");
+  $("spPick").textContent = on ? "이 쪽 빼기" : "이 쪽 고르기";
+  $("spPick").classList.toggle("primary", !on);
+  $("spPrev").disabled = SP.zoom <= 0; $("spNext").disabled = SP.zoom >= SP.n - 1;
+}
+function spOpen(i){ if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); SP.zoom = i; $("spModal").hidden = false; spZoomUI(); spDraw(); }
+const spGo = d => { const j = SP.zoom + d; if(j < 0 || j >= SP.n) return; SP.zoom = j; spZoomUI(); spDraw(); SP.cards[j].scrollIntoView({block:"nearest"}); };
+$("spPrev").onclick = () => spGo(-1); $("spNext").onclick = () => spGo(1);
+$("spPick").onclick = () => { spToggle(SP.zoom); };
+$("spClose").onclick = () => { $("spModal").hidden = true; SP.zoom = -1; };
+$("spModal").addEventListener("click", e => { if(e.target === $("spModal")) $("spClose").onclick(); });
+document.addEventListener("keydown", e => {
+  if($("spModal").hidden) return;
+  if(e.key === "ArrowLeft"){ e.preventDefault(); spGo(-1); }
+  else if(e.key === "ArrowRight"){ e.preventDefault(); spGo(1); }
+  else if((e.key === " " || e.key === "Enter") && !(e.target.closest && e.target.closest("button"))){ e.preventDefault(); spToggle(SP.zoom); }
+  else if(e.key === "Escape"){ e.preventDefault(); $("spClose").onclick(); }
+});
 
 </script>
 </body>
