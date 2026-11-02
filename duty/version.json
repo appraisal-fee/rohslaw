@@ -1,11 +1,11 @@
 {
- "version": "2.48",
- "date": "2026-11-02",
+ "version": "2.49",
+ "date": "2026-11-03",
  "notes": [
-  "경력(숙련도)별 Night 가감, 나이 축소 기본 끔",
-  "Night 가능 총량 표시와 모자란 달 축소 자동 해제",
-  "요일 선호 반영 강도(보통·강하게·신청처럼)",
-  "보건휴가는 근무를 먼저 짠 뒤 남는 OF·여유 있는 날에 넣기"
+  "요일별 근무 인원(6-6-4 등) 맞추기 강화",
+  "요일 선호 기본 ‘강하게’, 근무표 칸에 선호 ★ 표시",
+  "직원관리 가능·선호 색 이름표",
+  "기본 설정에 월별 Night 개수 카드"
  ],
  "download": "https://appraisal-fee.github.io/rohslaw/duty/duty_pc.html",
  "manual": "https://appraisal-fee.github.io/rohslaw/duty/manual.pdf"
