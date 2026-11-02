@@ -1,0 +1,15 @@
+{
+  "name": "민간구급차 비용 산정",
+  "short_name": "구급차 비용",
+  "description": "응급의료에 관한 법률 시행규칙 [별표 3] 기준 민간구급차 예상 비용 산정",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#1f2a5c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

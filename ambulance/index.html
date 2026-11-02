@@ -1,0 +1,2797 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>민간구급차 비용 산정</title>
+<meta name="theme-color" content="#1f2a5c">
+<meta name="description" content="응급의료에 관한 법률 시행규칙 [별표 3] 기준 민간구급차 예상 비용 산정">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="구급차 비용">
+<style>
+:root{--red:#d7263d;--navy:#1f2a5c;--bg:#f4f6fb;--card:#fff;--line:#e3e7f0;--text:#1c2233;--sub:#6b7489}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:560px;margin:0 auto;padding:16px}
+header{background:var(--navy);color:#fff;border-radius:16px;padding:18px 16px;text-align:center}
+header .hero-wc{background:#fbf6ec;border-radius:12px;overflow:hidden;margin:2px 0 4px;line-height:0}
+header .hero-wc svg{width:100%;height:auto;display:block}
+header h1{margin:6px 0 6px;font-size:22px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-size:12px;opacity:.92;margin:-4px -2px 8px;text-align:left;line-height:1.5}
+.topbar .dev{display:flex;flex-direction:column;white-space:nowrap}
+.topbar .dev a{color:#fff;text-decoration:none;opacity:.85;font-size:11.5px}
+.topbar .dates{display:flex;gap:0 10px;flex-wrap:wrap;justify-content:flex-end;text-align:right}
+.topbar .dates span{white-space:nowrap}
+.basis{text-align:right;font-size:11.5px;margin-top:14px;padding-top:10px;border-top:1px solid var(--line)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px}
+.card h2{font-size:16px;margin:0 0 4px;color:var(--navy)}
+.userbar{padding:12px 14px}
+.installbar{display:flex;align-items:center;gap:8px;padding:10px 12px;font-size:13px;background:#eef5ff;border-color:#c9dcf5}
+.installbar span{flex:1}
+.installbar.hidden{display:none}
+.installbar #installBtn{background:var(--navy);color:#fff;padding:8px 14px}
+.urow{display:flex;gap:6px;align-items:center}
+.urow + .urow{margin-top:8px}
+.ulab{font-size:13px;color:var(--navy);font-weight:700;white-space:nowrap}
+.urow select{flex:1;min-width:0;padding:7px 10px;font-size:15px}
+.urow input{flex:1;min-width:0;padding:8px 10px;font-size:15px}
+.userbar .note{margin-top:6px}
+.uform{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafbfe}
+.uform.hidden{display:none}
+.ugrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ugrid .full{grid-column:1 / -1}
+.ugrid label{display:block;font-size:11.5px;color:var(--sub);margin-bottom:3px}
+.ugrid input{padding:9px 10px;font-size:15px}
+.uform .urow{margin-top:8px}
+.uform .grow{flex:1}
+.uinfo{margin-top:8px;font-size:13px;color:var(--navy);font-weight:600}
+.uinfo:empty{display:none}
+.uinfo span{color:var(--sub);font-weight:400}
+.org{margin-top:14px;font-size:15px;font-weight:700;color:var(--navy);letter-spacing:.5px}
+.stdpick{display:flex;gap:6px}
+.stdpick select{flex:1;min-width:0;padding:6px 8px;font-size:14px}
+.stdpick button{padding:5px 10px}
+.stdinfo:empty{display:none}
+.stdinfo{background:#f3f5fb;border-radius:8px;padding:8px 10px}
+#stdLayer{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:60}
+#stdLayer .sheet{position:absolute;left:0;right:0;bottom:0;top:6%;background:#fff;border-radius:16px 16px 0 0;overflow:auto;padding:16px;max-width:560px;margin:0 auto}
+#stdLayer .sheet > .cardhead{position:sticky;top:-16px;background:#fff;margin:-16px -16px 0;padding:14px 16px 10px;border-bottom:1px solid var(--line);z-index:2}
+#stdLayer h2{font-size:17px;margin:0;color:var(--navy)}
+.stditem{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
+.stditem .txt{flex:1;min-width:0;font-size:13px}
+.stditem .txt b{display:block;font-size:14px;color:var(--navy)}
+.stditem .txt span{color:var(--sub);font-size:12px}
+.stditem button{padding:6px 10px;font-size:13px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;margin-top:6px}
+.fgrid .fh{grid-column:1 / -1;font-size:13.5px;font-weight:700;color:var(--navy);margin-top:12px;display:flex;align-items:center;gap:10px}
+.fgrid label{display:block;font-size:11.5px;color:var(--sub);margin:4px 0 3px}
+.fgrid input[type=number]{padding:9px 10px;font-size:15px}
+.fgrid .fchk{display:flex;flex-direction:column;justify-content:flex-end}
+.fgrid .fchk .chk{margin-top:4px;font-size:13px}
+.chk.inl{margin:0;font-weight:500;font-size:13px;color:var(--text)}
+.fgrid .fwide{grid-column:1 / -1;display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px}
+.fgrid .fwide select{width:auto;flex:1;min-width:0;padding:7px 8px;font-size:14px}
+.fgrid .fwide.hidden{display:none}
+.fgrid .fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+#fWaitTierBox{display:block}
+#fWaitTierBox.hidden{display:none}
+.tier{display:flex;align-items:center;gap:5px;margin-top:6px;font-size:12.5px;color:var(--sub)}
+.tier input{flex:1;min-width:0;padding:7px 8px;font-size:14px}
+.when .wnrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:13.5px}
+.when .wnrow .chk{margin:0}
+.when .wtbox{display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;padding:8px 10px;border-radius:10px;background:#f7f8fc}
+.when .wtbox .wtlab{font-size:13px;font-weight:600;color:var(--navy)}
+.when .wtbox.need{background:#fff4e5;border:1.5px solid #f0b45a}
+.when .wtbox.need .wtlab{color:#b45309}
+.when .wthint{flex-basis:100%;font-size:12.5px;color:#b45309}
+.when .walab{font-size:13px;font-weight:600;color:var(--navy)}
+.when .wt,.when .wa{width:auto;padding:7px 10px;font-size:15px}
+.when .whrow{grid-column:1 / -1;font-size:12.5px;margin:0}
+.when .wanote{flex-basis:100%;font-size:11.5px;color:var(--sub);line-height:1.5}
+.when .wthint:empty{display:none}
+.when .wtbox.on{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+.when .wcell{display:flex;flex-direction:column;gap:4px;min-width:0}
+.when .wcell input{width:100%}
+.when .wcell.solo{grid-column:1 / -1}
+.when .wthint,.when .wanote{grid-column:1 / -1}
+.when .wt{width:auto;padding:7px 10px;font-size:15px}
+.when .wd{font-size:16px}
+.when .dnote{font-size:12.5px;color:var(--sub);margin-top:6px;line-height:1.55}
+.when .dnote:empty{display:none}
+.when .dnote .up{color:var(--red)}
+.lockrow{font-size:12.5px;color:var(--sub);margin-top:8px}
+.seg label.locked{opacity:.55;cursor:not-allowed}
+.cardhead{display:flex;justify-content:space-between;align-items:center}
+.cardhead h2{margin:0}
+label.t{display:block;font-size:13px;color:var(--sub);margin:14px 0 6px}
+.opts{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;margin-top:12px}
+.opts .ol{font-size:12.5px;color:var(--sub);white-space:nowrap}
+.seg{display:flex;gap:6px}
+.seg input{display:none}
+.seg label{flex:1;text-align:center;padding:6px 4px;border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer;background:#fff}
+.seg input:checked+label{background:var(--navy);color:#fff;border-color:var(--navy)}
+input[type=text],input[type=number],input[type=datetime-local],input[type=date],input[type=time],select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:#fff;color:var(--text);font-family:inherit}
+.row{display:flex;gap:6px}
+.row input{flex:1;min-width:0}
+button{border:0;border-radius:10px;padding:11px 12px;font-size:14px;cursor:pointer;background:#e9ecf5;color:var(--navy);font-weight:600;white-space:nowrap;font-family:inherit}
+button:disabled{opacity:.6}
+button.primary{background:var(--red);color:#fff;width:100%;padding:15px;font-size:17px;margin-top:18px}
+button.ghost{background:none;border:1px solid var(--line);padding:6px 10px;font-size:13px}
+button.addbtn{width:100%;margin-top:10px;background:#fff;border:1.5px dashed #c5cbe0;color:var(--navy);padding:9px;font-size:13.5px}
+button.x{background:none;color:var(--sub);padding:2px 8px;font-size:18px;font-weight:400}
+.place{margin-top:2px}
+.place .lab{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--sub);margin:14px 0 6px}
+.place.way{border-left:3px solid #c5cbe0;padding-left:10px;margin-left:2px}
+.picked{margin-top:6px;font-size:13px;color:#0a7a3d;line-height:1.5}
+.picked:empty{display:none}
+.results{list-style:none;margin:6px 0 0;padding:0;border:1px solid var(--line);border-radius:10px;max-height:260px;overflow:auto;display:none}
+.results li{padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.results li:last-child{border-bottom:0}
+.results li:active{background:#f0f3fa}
+.results b{display:block;font-size:14px}
+.results span{font-size:12px;color:var(--sub)}
+.results li.hhead{display:flex;justify-content:space-between;align-items:center;background:#f7f8fc;cursor:default;font-size:12px;color:var(--sub);padding:8px 12px}
+.results li.hhead a{color:var(--red);cursor:pointer;text-decoration:underline}
+.results li.hist{display:flex;align-items:center;gap:8px}
+.results li.hist .txt{flex:1;min-width:0}
+.results li.hist .del{background:none;padding:4px 8px;color:var(--sub);font-size:16px;font-weight:400}
+.chips{display:none;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.chiplab{font-size:12px;color:var(--sub)}
+button.chip{padding:5px 10px;font-size:12.5px;font-weight:500;border-radius:999px;background:#eef1f8;border:1px solid var(--line);max-width:150px;overflow:hidden;text-overflow:ellipsis}
+button.chip.more{background:#fff;color:var(--sub)}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:12px}
+.chk input{width:18px;height:18px}
+.sect{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.sect h3{font-size:14.5px;margin:0;color:var(--navy)}
+.sect .sub{font-size:12px;color:var(--sub);margin-top:3px}
+.trow{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;background:#fafbfe}
+.trow .th{display:flex;gap:6px;align-items:center}
+.trow .th select{flex:1;padding:8px 10px;font-size:15px}
+.trow input{padding:9px 10px;font-size:15px;margin-top:6px}
+.trow .two{display:flex;gap:6px}
+.trow .two > div{flex:1;min-width:0}
+.trow .two label,.trow .tl{display:block;font-size:11.5px;color:var(--sub);margin-top:8px}
+.trow .tl + input{margin-top:3px}
+.trow .tseg{margin-top:8px}
+.trow .tround.hidden{display:none}
+button.linkbtn{display:none;width:100%;text-align:left;margin-top:8px;padding:8px 10px;font-size:12.5px;font-weight:500;background:#fff7e8;border:1px dashed #e9b85c;color:#7a5200;white-space:normal}
+button.linkbtn b{font-weight:700}
+button.linkbtn.done{background:#eaf7ef;border:1px solid #bfe5cc;color:#0a5e2f}
+.trow .place .lab{margin:10px 0 4px;font-size:12px}
+.trow .place .row input{margin-top:0}
+.trow .two input{margin-top:3px}
+.distgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;margin-top:8px}
+.distgrid .full{grid-column:1 / -1}
+.distgrid label{display:block;font-size:12px;color:var(--sub);margin-bottom:3px}
+.distgrid input{padding:9px 10px;font-size:15px}
+#mk2Box.hidden{display:none}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td{padding:7px 0;border-bottom:1px dashed var(--line);vertical-align:top}
+td:last-child{text-align:right;padding-left:8px}
+.leg td{font-weight:700;color:var(--navy);padding-top:14px;border-bottom:1px solid var(--line)}
+td.amt{white-space:nowrap}
+.tdet{font-size:12px;color:var(--sub);margin-top:2px}
+.summary td{font-size:13px}
+.summary td:first-child{color:var(--sub);white-space:nowrap;width:74px}
+.summary td:last-child{text-align:left}
+.total{font-size:24px;font-weight:800;color:var(--red);text-align:right;margin-top:14px}
+.subtotal{font-size:12.5px;color:var(--sub);text-align:right;margin-top:2px}
+.note{font-size:12px;color:var(--sub);line-height:1.6;margin-top:8px}
+.warn{background:#fff6e5;border:1px solid #f3d9a4;color:#7a5200;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:10px;line-height:1.55}
+.ok{background:#eaf7ef;border:1px solid #bfe5cc;color:#0a5e2f}
+.resbtns{display:flex;gap:8px;margin-top:10px}
+.resbtns button{flex:1;padding:13px 8px}
+.resbtns .reset{background:var(--navy);color:#fff}
+.resbtns .exp{background:#fff;border:1px solid var(--navy)}
+.exp-only{display:none}
+.report{width:794px;min-height:1123px;padding:44px 46px 40px;background:#fff;color:#1c2233;font-size:13px;line-height:1.5;display:flex;flex-direction:column;font-variant-numeric:tabular-nums}
+#report{position:fixed;left:-10000px;top:0}
+.report .rp-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--navy);padding-bottom:10px}
+.report .rp-head b{display:block;font-size:24px;color:var(--navy)}
+.report .rp-head span{font-size:12px;color:var(--sub)}
+.report .rp-meta{text-align:right;font-size:12px;color:var(--sub)}
+.report table{width:100%;border-collapse:collapse}
+.report td,.report th{padding:7px 10px;vertical-align:middle;text-align:left;font-size:13px}
+.report .rp-info{margin-top:14px;background:#f7f8fc;border-radius:8px;overflow:hidden}
+.report .rp-info td,.report .rp-info th{border-bottom:1px solid #e8ebf3}
+.report .rp-info tr:last-child td,.report .rp-info tr:last-child th{border-bottom:0}
+.report .rp-info th{width:84px;color:var(--sub);font-weight:600;white-space:nowrap;vertical-align:top}
+.report .legend{display:block;color:var(--sub);font-size:11.5px;margin-top:2px}
+.report .rp-fee{margin-top:18px}
+.report .rp-fee thead th{background:var(--navy);color:#fff;font-weight:600;font-size:12.5px;padding:8px 10px}
+.report .rp-fee thead th.c3{text-align:right}
+.report .c3{width:130px;text-align:right;white-space:nowrap}
+.report tr.grp td{background:#eef1f8;border-top:10px solid #fff;padding:9px 10px}
+.report tr.grp:first-child td{border-top:0}
+.report tr.grp .no{display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;font-weight:700;margin-right:8px}
+.report tr.grp .kd{font-weight:700;color:var(--navy);font-size:14px}
+.report tr.grp .rt{color:#1c2233;margin-left:10px}
+.report tr.grp .tg{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:#fff;border:1px solid #cfd5e6;color:var(--sub);margin-left:6px;vertical-align:1px}
+.report tr.grp .c3{font-size:15px;font-weight:800;color:var(--navy)}
+.report tr.det td{border-bottom:1px dashed #e3e7f0;padding:6px 10px}
+.report tr.det td:first-child{padding-left:40px}
+.report tr.det .lb{font-weight:600;color:#2c3550}
+.report tr.det .sb{display:block;font-size:11.5px;color:var(--sub);margin-top:1px}
+.report tr.det .c3{color:#2c3550;font-size:13px}
+.report small{font-size:.78em;font-weight:500;margin-left:1px}
+.report .chain{font-size:14px;line-height:1.9}
+.report .chain b{color:var(--navy)}
+.report .chain i{font-style:normal;color:var(--red);font-weight:700;margin:0 6px}
+.report .chain i.gap{color:var(--sub);margin:0 8px}
+.report .rp-total{margin-top:16px;border:2px solid var(--red);border-radius:10px;overflow:hidden}
+.report .rp-total .tt{display:flex;justify-content:space-between;align-items:center;padding:12px 18px}
+.report .rp-total .tt span{font-size:16px;color:var(--red);font-weight:700}
+.report .rp-total .tt b{font-size:30px;color:var(--red);font-weight:800;letter-spacing:-.5px}
+.report .rp-total .bk{display:flex;flex-wrap:wrap;gap:4px 16px;padding:8px 18px;background:#fff5f6;border-top:1px solid #f5c9cf;font-size:12px;color:#7a2530}
+.report .rp-note{margin-top:12px;font-size:11.5px;color:var(--sub)}
+.report .rp-contact{margin-top:14px;padding:10px 14px;background:#f3f5fb;border-radius:8px;font-size:14px}
+.report .rp-contact b{color:var(--navy)}
+.report .rp-foot{margin-top:18px;padding-top:10px;border-top:1px solid #e3e7f0;font-size:11.5px;color:var(--sub);line-height:1.7}
+.report .rp-foot strong{color:var(--red)}
+.report .rp-org{margin-top:auto;padding-top:22px;text-align:center;line-height:0}
+.report .rp-org{font-size:13px;font-weight:700;color:var(--navy);letter-spacing:.5px;line-height:1.5}
+#pvLayer{position:fixed;inset:0;background:rgba(20,24,40,.72);display:none;z-index:70;overflow:auto;-webkit-overflow-scrolling:touch}
+#pvBar{position:sticky;top:0;z-index:2;display:flex;gap:8px;padding:10px 12px;background:#1f2a5c}
+#pvBar button{flex:1;padding:10px 6px;font-size:13.5px}
+#pvBar .cls{flex:0 0 auto;background:#fff}
+#pvWrap{margin:14px auto 30px;box-shadow:0 6px 24px rgba(0,0,0,.35);background:#fff;overflow:hidden}
+#pvWrap .report{transform-origin:0 0}
+.exp-head{text-align:center;border-bottom:2px solid var(--navy);padding-bottom:10px;margin-bottom:12px}
+.exp-head b{display:block;font-size:19px;color:var(--navy)}
+.exp-head span{font-size:12px;color:var(--sub)}
+.exp-foot{margin-top:16px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;color:var(--sub);line-height:1.7}
+.exp-foot strong{color:var(--red)}
+footer{text-align:center;font-size:13px;color:var(--sub);padding:20px 8px 34px;line-height:1.7}
+footer strong{color:var(--red)}
+#pcLayer{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:50}
+#pcBox{position:absolute;left:0;right:0;bottom:0;top:8%;background:#fff;border-radius:16px 16px 0 0;overflow:hidden;padding-top:44px}
+#pcClose{position:absolute;right:10px;top:6px;z-index:2}
+#pcEmbed{width:100%;height:100%}
+details{margin-top:4px}
+details summary{cursor:pointer;font-size:14px;color:var(--navy);font-weight:600;padding:4px 0}
+.hidden{display:none}
+.rate td{font-size:13px}
+/* ===== 추가 기능 ===== */
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.tools button{padding:8px 4px;font-size:12.5px}
+.tools button.on{background:var(--navy);color:#fff}
+.bkwarn{margin-top:8px;font-size:12px;color:#7a5200;background:#fff6e5;border:1px solid #f3d9a4;border-radius:8px;padding:6px 10px}
+.bkwarn:empty{display:none}
+.tplrow{display:grid;grid-template-columns:1fr auto auto;gap:6px;margin-top:10px}
+.tplrow select{padding:7px 10px;font-size:14px}
+.tplrow button{padding:6px 10px;font-size:13px}
+button.chip.fav{background:#fff7e0;border-color:#f0d58a;color:#7a5200}
+.results li.hist .fav{background:none;padding:4px 6px;color:#d9a200;font-size:17px;font-weight:400}
+.results li.hsub{background:#fffbf0;cursor:default;font-size:12px;color:#7a5200;padding:6px 12px}
+.swrow{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;margin-top:8px}
+.swrow button{padding:8px 12px;font-size:13px}
+.swrow button.run{background:var(--red);color:#fff}
+.swrow #swTxt{font-size:12.5px;color:var(--sub);line-height:1.45}
+.swrow #swCancel{display:none}
+.swrow.running #swCancel{display:block}
+.xbox{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.xbox h3{font-size:14px;margin:0 0 8px;color:var(--navy);display:flex;justify-content:space-between;align-items:center}
+.xbox h3 small{font-size:11.5px;color:var(--sub);font-weight:400}
+.xbox .xin{display:grid;grid-template-columns:1fr auto;gap:6px}
+.xbox .xin2{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:end}
+.xbox .xin2 label{display:block;font-size:11.5px;color:var(--sub);margin-bottom:3px}
+.xbox input[type=number]{padding:9px 10px;font-size:15px}
+.xbox button{padding:9px 12px;font-size:13.5px}
+.xres{margin-top:8px;border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.55}
+.xres:empty{display:none}
+.xres.good{background:#eaf7ef;border:1px solid #bfe5cc;color:#0a5e2f}
+.xres.bad{background:#fdecee;border:1px solid #f5c2c8;color:#9b1c2c}
+.xres.info{background:#f3f5fb;border:1px solid var(--line);color:var(--text)}
+.xres b{font-size:15px}
+table.cmp{font-size:13.5px;table-layout:fixed}
+table.cmp th,table.cmp td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right}
+table.cmp th{font-size:12px;color:var(--sub);font-weight:600}
+table.cmp th:first-child,table.cmp td:first-child{text-align:left;width:34%}
+table.cmp td.cur{background:#fff0f2;color:var(--red);font-weight:800;border-radius:6px}
+.xbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.xbtns button{padding:12px 6px;background:#fff;border:1px solid var(--navy)}
+.qrchk{font-size:12.5px;color:var(--sub);margin-top:8px}
+.shared{display:flex;align-items:center;gap:8px;background:#eef5ff;border:1px solid #c9dcf5;border-radius:10px;padding:9px 12px;font-size:13px;margin-top:10px}
+.shared span{flex:1}
+.lawhist{margin-top:10px}
+.lawhist th,.lawhist td{font-size:12px;padding:6px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.lawhist th:first-child,.lawhist td:first-child{text-align:left;white-space:normal}
+.lawhist tr.cur td{color:var(--red);font-weight:700}
+/* 관리 화면 */
+.layer{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:65}
+.layer .sheet{position:absolute;left:0;right:0;bottom:0;top:5%;background:var(--card);border-radius:16px 16px 0 0;overflow:auto;padding:16px;max-width:560px;margin:0 auto}
+.layer .sheet > .cardhead{position:sticky;top:-16px;background:var(--card);margin:-16px -16px 0;padding:14px 16px 10px;border-bottom:1px solid var(--line);z-index:2}
+.layer h2{font-size:17px;margin:0;color:var(--navy)}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:12px 0 4px}
+.tabs button{padding:8px 2px;font-size:12.5px;background:#eef1f8}
+.tabs button.on{background:var(--navy);color:#fff}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.mrow button{padding:10px 6px;font-size:13px}
+.mrow select,.mrow input{padding:8px 10px;font-size:14px}
+.mrow3{display:grid;grid-template-columns:1fr 1fr 90px;gap:6px;margin-top:6px}
+.mrow3 input{padding:8px 10px;font-size:14px}
+.mitem{display:grid;grid-template-columns:1fr auto;gap:4px 8px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px}
+.mitem .t1{color:var(--sub);font-size:12px}
+.mitem .t2{font-weight:600;color:var(--text);line-height:1.45}
+.mitem .amt{text-align:right;font-weight:800;color:var(--navy);white-space:nowrap;align-self:center}
+.mitem .acts{grid-column:1 / -1;display:flex;gap:6px;justify-content:flex-end}
+.mitem .acts button{padding:5px 10px;font-size:12.5px}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;margin-left:4px;vertical-align:1px;background:#eef1f8;color:var(--sub);font-weight:600}
+.badge.bad{background:#fdecee;color:#9b1c2c}
+.badge.good{background:#eaf7ef;color:#0a5e2f}
+.badge.src{background:#eef5ff;color:#2a5aa8}
+table.stat{font-size:12.5px;margin-top:10px}
+table.stat th,table.stat td{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.stat th{color:var(--sub);font-weight:600;font-size:11.5px}
+table.stat th:first-child,table.stat td:first-child{text-align:left}
+table.stat .bar{display:block;height:5px;background:var(--red);border-radius:3px;margin-top:3px;opacity:.75}
+table.stat tfoot td{font-weight:800;color:var(--navy);border-bottom:0}
+.mnote{font-size:12px;color:var(--sub);line-height:1.6;margin-top:8px}
+.msec{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.msec h3{font-size:14px;margin:0 0 4px;color:var(--navy)}
+.empty{text-align:center;color:var(--sub);font-size:13px;padding:24px 0}
+/* 보호자 안내문 */
+#gdLayer .sheet{top:4%}
+.gcard{background:#fff;color:#1c2233;border:2px solid #1f2a5c;border-radius:14px;padding:20px 18px;font-size:18px;line-height:1.7}
+.gcard h3{margin:0 0 10px;font-size:21px;color:#1f2a5c;text-align:center}
+.gcard .gt{display:grid;grid-template-columns:5.2em 1fr;gap:2px 10px}
+.gcard .gt span{color:#6b7489}
+.gcard .gsum{margin:14px 0 6px;text-align:center;font-size:30px;font-weight:800;color:#d7263d}
+.gcard .gsum small{display:block;font-size:14px;color:#6b7489;font-weight:500}
+.gcard ul{margin:8px 0 0;padding-left:1.1em;font-size:16px}
+.gcard .gnote{margin-top:12px;font-size:14px;color:#6b7489;line-height:1.6}
+.gcard .gcall{margin-top:12px;padding:10px 12px;background:#f3f5fb;border-radius:10px;font-size:17px;text-align:center}
+.gbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.gbtns button{padding:11px 4px;font-size:13.5px}
+/* 출력물: 검증·QR */
+.report{--navy:#1f2a5c;--sub:#6b7489;--line:#e3e7f0;--red:#d7263d;--text:#1c2233}
+.report .rp-verify{margin-top:10px;border-radius:8px;padding:9px 14px;font-size:13px}
+.report .rp-verify.good{background:#eaf7ef;color:#0a5e2f}
+.report .rp-verify.bad{background:#fdecee;color:#9b1c2c}
+.report .rp-qrrow{display:flex;gap:16px;align-items:flex-end}
+.report .rp-qrrow .rp-foot{flex:1}
+.report .rp-qr{text-align:center;font-size:10.5px;color:#6b7489;line-height:1.3}
+.report .rp-qr img,.report .rp-qr canvas{width:96px;height:96px;display:block;margin:0 auto 3px}
+/* 큰 글씨 */
+html.big body{zoom:1.15}
+/* 다크 모드 */
+html.dark{--bg:#10131b;--card:#1a1f2c;--line:#2d3446;--text:#e5e8f0;--sub:#9aa3b8;--navy:#a9bcff;--red:#ff6b7d;color-scheme:dark}
+html.dark header{background:#25305e}
+html.dark input[type=text],html.dark input[type=number],html.dark input[type=date],html.dark input[type=time],html.dark input[type=tel],html.dark select{background:#141824;color:var(--text);border-color:var(--line)}
+html.dark button{background:#283048;color:var(--navy)}
+html.dark button.primary{background:#d7263d;color:#fff}
+html.dark button.ghost,html.dark button.x,html.dark .results li.hist .del,html.dark .results li.hist .fav{background:none}
+html.dark button.addbtn,html.dark .xbtns button,html.dark .resbtns .exp{background:var(--card);border-color:#46506a}
+html.dark .resbtns .reset,html.dark .tools button.on,html.dark .tabs button.on,html.dark .installbar #installBtn{background:#3a4a8c;color:#fff}
+html.dark .seg label{background:var(--card)}
+html.dark .seg input:checked+label{background:#3a4a8c;color:#fff;border-color:#3a4a8c}
+html.dark .trow,html.dark .uform,html.dark .stdinfo,html.dark .when .wtbox,html.dark .results li.hhead,html.dark .xres.info,html.dark .tabs button,html.dark .badge{background:#141824}
+html.dark .when .wtbox.need{background:#3a2c14;border-color:#8a6420}
+html.dark .when .wthint,html.dark .when .wtbox.need .wtlab{color:#f0b45a}
+html.dark .installbar,html.dark .shared{background:#18243a;border-color:#2c4266}
+html.dark .warn,html.dark .bkwarn,html.dark button.linkbtn{background:#30270f;border-color:#6b5320;color:#f3d48a}
+html.dark button.linkbtn.done,html.dark .xres.good,html.dark .badge.good{background:#11301f;border-color:#24603d;color:#8fe0b0}
+html.dark .xres.bad,html.dark .badge.bad{background:#3a1419;border-color:#7a2a35;color:#ffb3bd}
+html.dark .picked{color:#7fd8a3}
+html.dark table.cmp td.cur{background:#3a1419}
+html.dark button.chip{background:#232a3c;color:var(--text)}
+html.dark button.chip.fav{background:#3a2f12;border-color:#6b5320;color:#f3d48a}
+html.dark .results li.hsub{background:#2a2410;color:#f3d48a}
+html.dark .results li:active{background:#232a3c}
+html.dark #stdLayer .sheet,html.dark #stdLayer .sheet > .cardhead{background:var(--card)}
+html.dark .badge.src{background:#18243a;color:#9fc1ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="topbar">
+    <span class="dev"><span>개발자 : 그리움의 편지</span></span>
+    <span class="dates"><span id="devDate"></span><span id="modDate"></span></span>
+  </div>
+  <div class="hero-wc">
+  <svg viewBox="12 12 276 128" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="민간구급차 수채화 그림">
+    <defs>
+      <filter id="wcEdge" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="7" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G" result="d"/>
+        <feGaussianBlur in="d" stdDeviation="0.5"/>
+      </filter>
+      <filter id="wcWash" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="4" seed="3" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="16" xChannelSelector="R" yChannelSelector="G" result="d"/>
+        <feGaussianBlur in="d" stdDeviation="2.2"/>
+      </filter>
+      <filter id="wcLine" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="2" seed="11" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <filter id="paper" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="5" result="g"/>
+        <feColorMatrix in="g" type="matrix" values="0 0 0 0 0.45  0 0 0 0 0.38  0 0 0 0 0.3  0 0 0 0.09 0"/>
+      </filter>
+    </defs>
+
+    <!-- 종이 바탕 -->
+    <rect width="300" height="150" fill="#fbf6ec"/>
+    <!-- 배경 번짐 -->
+    <g filter="url(#wcWash)">
+      <ellipse cx="80" cy="42" rx="95" ry="34" fill="#bcd8ee" opacity=".55"/>
+      <ellipse cx="235" cy="36" rx="80" ry="28" fill="#cfe3f1" opacity=".5"/>
+      <ellipse cx="30" cy="112" rx="45" ry="22" fill="#b9d9a6" opacity=".55"/>
+      <ellipse cx="282" cy="108" rx="42" ry="24" fill="#a9cf94" opacity=".55"/>
+      <ellipse cx="150" cy="134" rx="150" ry="11" fill="#d8cdbb" opacity=".6"/>
+      <ellipse cx="148" cy="128" rx="96" ry="6" fill="#8d8a93" opacity=".45"/>
+    </g>
+
+    <g transform="translate(40,20)">
+      <!-- 채색 (번짐) -->
+      <g filter="url(#wcEdge)" opacity=".94">
+        <rect x="66" y="18" width="30" height="11" rx="3" fill="#e0484f"/>
+        <rect x="81" y="18" width="15" height="11" rx="3" fill="#4d8fd6"/>
+        <rect x="10" y="29" width="134" height="62" rx="7" fill="#fffdf8"/>
+        <path d="M144 43 h36 l28 24 v24 h-64z" fill="#fffdf8"/>
+        <rect x="10" y="29" width="134" height="62" rx="7" fill="#e9eef5" opacity=".45"/>
+        <path d="M150 49 h27 l20 17 h-47z" fill="#8fbde6" opacity=".9"/>
+        <rect x="20" y="38" width="24" height="19" rx="3" fill="#8fbde6" opacity=".9"/>
+        <rect x="80" y="36" width="11" height="29" rx="1.5" fill="#dc3a44" opacity=".9"/>
+        <rect x="71" y="45" width="29" height="11" rx="1.5" fill="#dc3a44" opacity=".9"/>
+        <rect x="10" y="70" width="198" height="8" fill="#e0454d" opacity=".85"/>
+        <rect x="200" y="80" width="8" height="6" rx="2" fill="#f5c542"/>
+        <circle cx="46" cy="92" r="14" fill="#3b3940" opacity=".9"/>
+        <circle cx="172" cy="92" r="14" fill="#3b3940" opacity=".9"/>
+        <circle cx="46" cy="92" r="6" fill="#c9ccd4"/>
+        <circle cx="172" cy="92" r="6" fill="#c9ccd4"/>
+      </g>
+      <!-- 물감 고임 (가장자리 진하게) -->
+      <g filter="url(#wcEdge)" fill="none" opacity=".35">
+        <path d="M150 49 h27 l20 17 h-47z" stroke="#3f7fc4" stroke-width="1.6"/>
+        <rect x="20" y="38" width="24" height="19" rx="3" stroke="#3f7fc4" stroke-width="1.6"/>
+        <rect x="10" y="70" width="198" height="8" stroke="#b3232e" stroke-width="1.4"/>
+        <rect x="71" y="45" width="29" height="11" stroke="#a81f2a" stroke-width="1.2"/>
+        <rect x="80" y="36" width="11" height="29" stroke="#a81f2a" stroke-width="1.2"/>
+      </g>
+      <!-- 연필 선 -->
+      <g filter="url(#wcLine)" fill="none" stroke="#5b4e48" stroke-width="1" opacity=".55" stroke-linejoin="round">
+        <rect x="10" y="29" width="134" height="62" rx="7"/>
+        <path d="M144 43 h36 l28 24 v24 h-64"/>
+        <rect x="66" y="18" width="30" height="11" rx="3"/>
+        <path d="M112 31 v58 M112 60 h6"/>
+        <circle cx="46" cy="92" r="14"/><circle cx="172" cy="92" r="14"/>
+      </g>
+      <!-- 하이라이트 -->
+      <path d="M24 41 l6 0 l-5 12 l-4 0z" fill="#fff" opacity=".55"/>
+      <path d="M155 51 l8 0 l-7 12 l-5 0z" fill="#fff" opacity=".5"/>
+    </g>
+
+    <!-- 물감 튄 자국 -->
+    <g opacity=".45">
+      <circle cx="28" cy="24" r="2.2" fill="#e0484f"/>
+      <circle cx="36" cy="30" r="1.2" fill="#e0484f"/>
+      <circle cx="270" cy="22" r="2" fill="#4d8fd6"/>
+      <circle cx="262" cy="30" r="1.1" fill="#4d8fd6"/>
+      <circle cx="252" cy="138" r="1.6" fill="#7fb36b"/>
+      <circle cx="18" cy="136" r="1.3" fill="#7fb36b"/>
+    </g>
+    <rect width="300" height="150" filter="url(#paper)"/>
+  </svg>
+</div>
+  <h1>민간구급차 비용 산정</h1>
+</header>
+
+<div class="card installbar hidden" id="installBar">
+  <span id="installTxt">홈 화면에 설치하면 앱처럼 바로 열 수 있습니다.</span>
+  <button id="installBtn" onclick="installApp()">설치</button>
+  <button class="x" onclick="this.parentElement.classList.add('hidden')" aria-label="닫기">×</button>
+</div>
+
+<div class="card userbar">
+  <div class="urow">
+    <span class="ulab">👤 사용자</span>
+    <select id="userSel" aria-label="사용자 선택" onchange="switchUser(this.value)"></select>
+    <button class="ghost" onclick="toggleUserAdd(true)">＋ 등록</button>
+    <button class="ghost" id="userEditBtn" onclick="toggleUserAdd(true, true)">수정</button>
+    <button class="ghost" id="userDelBtn" onclick="deleteUser()">삭제</button>
+  </div>
+  <div class="uform hidden" id="userAddRow">
+    <div class="ugrid">
+      <div><label>이름</label><input type="text" id="userName" maxlength="20" placeholder="예: 홍길동" autocomplete="off"></div>
+      <div><label>직책</label><input type="text" id="userTitle" maxlength="20" placeholder="예: 팀장, 간호사" autocomplete="off"></div>
+      <div class="full"><label>연락처</label><input type="tel" id="userPhone" maxlength="20" placeholder="예: 032-340-0000" autocomplete="off" inputmode="tel"></div>
+    </div>
+    <div class="urow">
+      <button class="grow" onclick="addUser()">저장</button>
+      <button class="ghost" onclick="toggleUserAdd(false)">취소</button>
+    </div>
+  </div>
+  <div class="uinfo" id="userInfo"></div>
+  <div class="note" id="userNote"></div>
+  <div class="tools"><button onclick="openMg()">📋 이력·관리</button><button id="vBig" onclick="toggleView('big')">가+ 큰 글씨</button><button id="vDark" onclick="toggleView('dark')">🌙 다크 모드</button></div>
+  <div class="bkwarn" id="bkWarn"></div>
+</div>
+
+<div class="card" id="formCard">
+  <div class="cardhead"><h2>이송 정보</h2><button class="ghost" onclick="resetForm()">↺ 초기화</button></div>
+  <div class="tplrow"><select id="tplSel" aria-label="자주 쓰는 조건" onchange="pickTpl(this.value)"></select><button class="ghost" onclick="saveTpl()">＋ 조건 저장</button><button class="ghost" id="tplDel" onclick="delTpl()">삭제</button></div>
+
+  <div class="opts">
+    <span class="ol hidden">적용 기준</span>
+    <div class="seg hidden">
+      <input type="radio" name="std" id="stdL" value="law" checked><label for="stdL">시행규칙</label>
+      <input type="radio" name="std" id="stdC" value="contract"><label for="stdC">계약(협약)</label>
+    </div>
+    <span class="ol oprow">운용자</span>
+    <div class="seg oprow">
+      <input type="radio" name="lawop" id="opM" value="med" checked><label for="opM">의료기관 등</label>
+      <input type="radio" name="lawop" id="opN" value="np"><label for="opN">비영리법인</label>
+    </div>
+    <span class="ol stdpl hidden">협약 기준</span>
+    <div class="stdpick hidden">
+      <select id="stdSel" aria-label="계약(협약) 기준 선택" onchange="selectStd(this.value)"></select>
+      <button class="ghost" onclick="openStdEditor()">관리</button>
+    </div>
+    <span class="ol">구급차</span>
+    <div class="seg">
+      <input type="radio" name="amb" id="ambS" value="special" checked><label for="ambS">특수구급차</label>
+      <input type="radio" name="amb" id="ambG" value="general"><label for="ambG">일반구급차</label>
+    </div>
+    <span class="ol">이송 유형</span>
+    <div class="seg">
+      <input type="radio" name="route" id="rH" value="home" checked><label for="rH">집 → 병원</label>
+      <input type="radio" name="route" id="rP" value="hosp"><label for="rP">병원 → 병원</label>
+    </div>
+    <span class="ol">편도/왕복</span>
+    <div class="seg">
+      <input type="radio" name="trip" id="tO" value="one" checked><label for="tO">편도</label>
+      <input type="radio" name="trip" id="tR" value="round"><label for="tR">왕복</label>
+    </div>
+  </div>
+
+  <div class="note stdinfo" id="stdInfo"></div>
+  <label class="chk lockrow hidden"><input type="checkbox" id="stdLock" onchange="toggleStdLock(this.checked)"> 🔒 <span id="stdLockLab">적용 기준 고정</span></label>
+  <label class="t">출발 일자 · 시간</label>
+  <div class="when" id="w1Box"></div>
+
+  <div id="retBox" class="hidden">
+    <label class="t">돌아오는 편 일자 · 도착 시간</label>
+    <div class="when" id="w2Box"></div>
+  </div>
+
+  <div id="sBox"></div>
+  <div id="wayList"></div>
+  <button class="addbtn" id="addWayBtn" onclick="addWay()">＋ 경유지 추가</button>
+  <div id="eBox"></div>
+
+
+  <div id="waitBox">
+    <label class="t">병원 도착 후 환자 인계까지 대기 예상 시간 (분)</label>
+    <input type="number" id="wait" min="0" step="5" value="0" inputmode="numeric">
+    <div class="swrow" id="swRow"><button id="swBtn" onclick="swToggle()">⏱ 대기 시작</button><span id="swTxt"></span><button class="ghost" id="swCancel" onclick="swCancel()">취소</button></div>
+  </div>
+
+
+  <details>
+    <summary>거리 보정 · 직접 입력</summary>
+    <div class="distgrid">
+      <div class="full"><label>자동 거리 보정률 (%)</label>
+        <input type="number" id="distAdj" step="1" min="-50" max="100" placeholder="0" inputmode="numeric">
+        <div class="note">자동 계산한 거리를 실제 운행거리에 맞게 늘리거나 줄입니다. 예) 자동 40km, 실제 운행 48km → 20 입력. 사용자별로 저장되고 추가 구간 구급차에도 적용됩니다.</div></div>
+      <div><label id="mk1Lab">실제 거리 직접 입력 km</label>
+        <input type="number" id="manualKm" min="0" step="0.1" placeholder="경유지 포함" inputmode="decimal"></div>
+      <div id="mk2Box" class="hidden"><label>오는 편 km</label>
+        <input type="number" id="manualKm2" min="0" step="0.1" placeholder="비우면 가는 편" inputmode="decimal"></div>
+    </div>
+    <div class="note">직접 입력한 거리는 보정률을 적용하지 않고 그대로 씁니다.</div>
+  </details>
+
+  <div class="sect">
+    <h3>추가 교통수단 (선택)</h3>
+    <div class="sub">KTX·비행기 등으로 함께 이동할 때 출발·도착, 실비(운임 등), 인건비(동승 인력)를 입력합니다. 도착 후 다시 구급차를 타면 '민간구급차'를 골라 추가 구간 요금을 계산합니다.</div>
+    <div id="transList"></div>
+    <datalist id="ttHist"></datalist>
+    <button class="addbtn" onclick="addTrans()">＋ 교통수단 추가</button>
+  </div>
+
+  <button class="primary" onclick="calc()">예상 요금 계산</button>
+</div>
+
+<div class="card hidden" id="resCard">
+  <h2>예상 요금</h2>
+  <table class="summary" id="sumTable"></table>
+  <div id="routeInfo" class="note"></div>
+  <table id="resTable"></table>
+  <div class="total" id="total"></div>
+  <div class="subtotal" id="subtotal"></div>
+  <div class="note" id="resNote"></div>
+  <div class="xbox" id="xCompare"></div>
+  <div class="xbox">
+    <h3>청구액 검증 <small id="vCap"></small></h3>
+    <div class="xin"><input type="number" id="vAmt" min="0" step="100" inputmode="numeric" placeholder="업체가 청구한 구급차 요금 (원)"><button onclick="runVerify()">검증</button></div>
+    <div class="note">구급차 요금과 대기요금(추가 구간 구급차·선박 승선료 포함)만 넣으세요. 의료진 동승료·통행료·실비는 빼고 비교합니다.</div>
+    <div class="xres" id="vRes"></div>
+  </div>
+  <div class="xbox" id="xActual">
+    <h3>실제 운행거리 기록 <small>구간 거리표 · 보정률 학습</small></h3>
+    <div class="xin2"><div><label>가는 편 실제 km</label><input type="number" id="aKm1" min="0" step="0.1" inputmode="decimal"></div><div id="aKm2Box"><label>오는 편 실제 km</label><input type="number" id="aKm2" min="0" step="0.1" inputmode="decimal"></div><button onclick="saveActual()">기록</button></div>
+    <label class="chk"><input type="checkbox" id="aSave" checked> 구간 거리표에 저장 (다음 계산부터 이 거리 사용)</label>
+    <div class="note" id="aNote"></div>
+    <div class="xres" id="aRes"></div>
+  </div>
+  <div id="shareBox" class="hidden">
+    <div class="xbtns"><button onclick="openGuide()">👪 보호자 안내문</button><button onclick="copyLink()">🔗 다시 계산 링크</button></div>
+    <label class="chk qrchk"><input type="checkbox" id="qrOn"> 저장·출력물에 "다시 계산" QR 넣기 (출발지·도착지 주소 포함)</label>
+  </div>
+  <div class="no-exp">
+    <div class="resbtns">
+      <button class="exp" id="btnPv" onclick="openPreview()">👁 미리보기</button>
+      <button class="exp" id="btnImg" onclick="exportResult('png')">🖼 이미지 저장</button>
+      <button class="exp" id="btnPdf" onclick="exportResult('pdf')">📄 PDF 저장</button>
+    </div>
+    <div class="resbtns">
+      <button onclick="editForm()">입력 수정</button>
+      <button class="reset" onclick="resetForm()">↺ 새로 계산 (초기화)</button>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <details>
+    <summary id="rateSum">요금 기준표 보기</summary>
+    <table class="rate" id="rateTable" style="margin-top:8px"></table>
+    <div id="lawHist"></div>
+    <div class="note">야간과 휴일이 겹쳐도 할증은 한 번만 적용합니다. 거리는 소수점 첫째 자리에서 반올림하여 km 단위로 계산합니다. 경유지가 있으면 출발지부터 도착지까지 이어지는 한 번의 운행으로 계산합니다. 할증은 기본요금과 추가요금에만 적용하고 대기요금에는 적용하지 않습니다. 추가 교통수단 비용은 입력한 금액을 그대로 더하고, 추가 구간 구급차는 같은 요금 기준으로 따로 계산합니다.</div>
+  </details>
+</div>
+
+<footer>
+  <strong>본 프로그램은 예상 금액 산정 자료이므로 참고만 하시기 바랍니다.</strong><br>
+  실제 요금은 운행 경로, 교통 상황, 업체 사정에 따라 달라질 수 있습니다.
+  <div class="basis">요금 기준 : 응급의료에 관한 법률 시행규칙 [별표 3] 이송처치료의 기준 (2026.7.13 개정 · 2026.8.14 시행)</div>
+</footer>
+</div>
+
+<div id="pvLayer">
+  <div id="pvBar">
+    <button class="exp" id="pvImg" onclick="exportResult('png', this)">🖼 이미지 저장</button>
+    <button class="exp" id="pvPdf" onclick="exportResult('pdf', this)">📄 PDF 저장</button>
+    <button class="cls" onclick="closePreview()">닫기 ✕</button>
+  </div>
+  <div id="pvWrap"></div>
+</div>
+
+<div id="stdLayer">
+  <div class="sheet">
+    <div class="cardhead"><h2>계약(협약) 요금 기준 관리</h2><button class="x" onclick="closeStdEditor()" aria-label="닫기">×</button></div>
+    <div class="note">장기이식 이송 등 별도 계약·협약 요금을 등록해 두고 골라 쓸 수 있습니다. 이 기기에 저장되며 모든 사용자가 함께 씁니다.</div>
+    <div id="stdListBox"></div>
+    <button class="addbtn" id="stdAddBtn" onclick="editStd()">＋ 새 기준 추가</button>
+    <div id="stdForm" class="hidden">
+      <label class="t">기준 이름</label>
+      <input type="text" id="fName" maxlength="40" placeholder="예: 장기이식 협약 (○○병원)">
+      <div class="fgrid">
+        <div class="fh">기본 거리</div>
+        <div><label>기본요금 적용 거리 (km)</label><input type="number" id="fBaseKm" min="0" step="1" inputmode="decimal"></div>
+        <div class="fh">특수구급차</div>
+        <div><label>기본요금 (원)</label><input type="number" id="fSpBase" min="0" step="100" inputmode="numeric"></div>
+        <div><label>추가요금 1km당 (원)</label><input type="number" id="fSpKm" min="0" step="10" inputmode="numeric"></div>
+        <div class="fh">일반구급차</div>
+        <div><label>기본요금 (원)</label><input type="number" id="fGnBase" min="0" step="100" inputmode="numeric"></div>
+        <div><label>추가요금 1km당 (원)</label><input type="number" id="fGnKm" min="0" step="10" inputmode="numeric"></div>
+        <div class="fh">할증</div>
+        <div><label>할증률 (%)</label><input type="number" id="fSur" min="0" max="200" step="1" inputmode="numeric"></div>
+        <div class="fchk"><label class="chk"><input type="checkbox" id="fHol"> 토·일·공휴일 할증</label></div>
+        <div class="fwide"><label class="chk inl"><input type="checkbox" id="fNight"> 야간 할증</label>
+          <select id="fNightS" aria-label="야간 시작"></select><span>부터</span><select id="fNightE" aria-label="야간 끝"></select><span>까지</span></div>
+        <div class="fh">대기요금 <label class="chk inl"><input type="checkbox" id="fWaitOn"> 적용</label></div>
+        <div class="fwide"><select id="fWaitMode" onchange="setWaitModeUI(this.value)"><option value="unit">단위 요금 (○분 초과 시 ○분당 ○원)</option><option value="tier">구간표 (○분까지 ○원)</option></select></div>
+        <div class="fwide fgrid3" id="fWaitUnitBox">
+          <div><label>무료 대기 (분)</label><input type="number" id="fWaitFree" min="0" step="5" inputmode="numeric"></div>
+          <div><label>부과 단위 (분)</label><input type="number" id="fWaitUnit" min="1" step="1" inputmode="numeric"></div>
+          <div><label>단위당 요금 (원)</label><input type="number" id="fWaitFee" min="0" step="100" inputmode="numeric"></div>
+        </div>
+        <div class="fwide hidden" id="fWaitTierBox">
+          <div class="note">대기 시간이 '분까지' 값 이하인 첫 구간의 요금을 적용합니다. 마지막 구간의 분을 비우면 '그 이상 전부'입니다.</div>
+          <div id="fTiers"></div>
+          <button class="addbtn" type="button" onclick="addTierRow()">＋ 구간 추가</button>
+        </div>
+      </div>
+      <label class="t">메모 (협약 기관, 적용 기간 등)</label>
+      <input type="text" id="fMemo" maxlength="80" placeholder="예: 2026.1~12 협약">
+      <div class="resbtns">
+        <button onclick="cancelStdForm()">취소</button>
+        <button class="reset" onclick="saveStd()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="mgLayer" class="layer">
+  <div class="sheet">
+    <div class="cardhead"><h2>관리 · 이력</h2><button class="x" onclick="closeMg()" aria-label="닫기">×</button></div>
+    <div class="tabs" id="mgTabs">
+      <button data-t="hist" onclick="renderMg('hist')">산정 이력</button>
+      <button data-t="stat" onclick="renderMg('stat')">월별 통계</button>
+      <button data-t="dist" onclick="renderMg('dist')">구간 거리</button>
+      <button data-t="hol" onclick="renderMg('hol')">공휴일</button>
+      <button data-t="bak" onclick="renderMg('bak')">백업</button>
+    </div>
+    <div id="mgBody"></div>
+    <input type="file" id="bakFile" accept=".json,application/json" class="hidden" onchange="restoreBackup(this)">
+  </div>
+</div>
+
+<div id="gdLayer" class="layer">
+  <div class="sheet">
+    <div class="cardhead"><h2>보호자 안내문</h2><button class="x" onclick="closeGuide()" aria-label="닫기">×</button></div>
+    <div class="mnote">보호자에게 보여 주거나 보낼 수 있도록 쉬운 말과 큰 글씨로 정리했습니다.</div>
+    <div id="gdCard" class="gcard" style="margin-top:10px"></div>
+    <div class="gbtns">
+      <button onclick="copyGuide()">📋 글 복사</button>
+      <button onclick="shareGuide()">💬 보내기</button>
+      <button onclick="saveGuideImg(this)">🖼 이미지</button>
+    </div>
+  </div>
+</div>
+
+<div id="pcLayer">
+  <div id="pcBox">
+    <button id="pcClose" onclick="closePostcode()">닫기</button>
+    <div id="pcEmbed"></div>
+  </div>
+</div>
+
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+/* ===== 설정 ===== */
+// 카카오 REST API 키: 장소·주소 검색과 자동차 길찾기 거리 계산에 사용 (지도는 표시하지 않음)
+const KAKAO_REST_KEY = 'c0dd5705f94a3199318f52f5af1d7352';
+// 시행규칙 요금표 (고시 변경 시 이 부분만 수정)
+const LAW = {
+  id: 'law', name: '응급의료에 관한 법률 시행규칙 [별표 3] 이송처치료의 기준', short: '시행규칙',
+  baseKm: 10,
+  special: { base: 95500, perKm: 2300 },
+  general: { base: 40000, perKm: 1500 },
+  sur: 20, night: true, nightStart: 18, nightEnd: 9, hol: true,
+  waitOn: true, waitMode: 'unit', waitFree: 30, waitUnit: 10, waitFee: 6000, tiers: []
+};
+const AMB_NAME = { special: '특수구급차', general: '일반구급차' };
+// 프로그램 정보 (수정할 때 수정일자만 바꾸면 화면·출력물에 함께 반영)
+const APP = { dev: '그리움의 편지', devDate: '2026-10-16', modDate: '2026-11-02' };
+// 시행규칙 [별표 3] 운용자별 요금 (2026.7.13 개정, 2026.8.14 시행)
+const LAW_OPS = {
+  med: { name: '의료기관 등', note: '법 제44조제1항제1호~제4호', special: { base: 95500, perKm: 2300 }, general: { base: 40000, perKm: 1500 } },
+  np:  { name: '비영리법인', note: '법 제44조제1항제5호',        special: { base: 63600, perKm: 1500 }, general: { base: 26600, perKm: 1000 } }
+};
+// 비고 4: 선박에 구급차가 승선해 이송하는 구간은 10분마다 6,000원 (도선료 등은 실비 별도)
+const SHIP_KIND = '선박 (구급차 승선)', SHIP_UNIT_MIN = 10, SHIP_UNIT_FEE = 6000;
+const MAX_WAYS = 3;
+const TRANS_KINDS = ['KTX·SRT', '일반열차', '비행기', '선박', '고속·시외버스', '택시', '민간구급차', '선박 (구급차 승선)', '기타'];
+const AMB_KIND = '민간구급차';
+
+// 공휴일 (대체공휴일 포함). 임시공휴일은 화면의 체크박스로 적용.
+const HOLIDAY_NAMES = {
+  '2024-01-01':'신정','2024-02-09':'설날 연휴','2024-02-10':'설날','2024-02-11':'설날 연휴','2024-02-12':'설날 대체공휴일',
+  '2024-03-01':'삼일절','2024-04-10':'국회의원선거일','2024-05-05':'어린이날','2024-05-06':'어린이날 대체공휴일','2024-05-15':'부처님오신날',
+  '2024-06-06':'현충일','2024-08-15':'광복절','2024-09-16':'추석 연휴','2024-09-17':'추석','2024-09-18':'추석 연휴',
+  '2024-10-01':'국군의날(임시공휴일)','2024-10-03':'개천절','2024-10-09':'한글날','2024-12-25':'성탄절',
+  '2025-01-01':'신정','2025-01-27':'임시공휴일','2025-01-28':'설날 연휴','2025-01-29':'설날','2025-01-30':'설날 연휴',
+  '2025-03-01':'삼일절','2025-03-03':'삼일절 대체공휴일','2025-05-05':'어린이날·부처님오신날','2025-05-06':'대체공휴일',
+  '2025-06-03':'대통령선거일','2025-06-06':'현충일','2025-08-15':'광복절','2025-10-03':'개천절',
+  '2025-10-05':'추석 연휴','2025-10-06':'추석','2025-10-07':'추석 연휴','2025-10-08':'추석 대체공휴일','2025-10-09':'한글날','2025-12-25':'성탄절',
+  '2026-01-01':'신정','2026-02-16':'설날 연휴','2026-02-17':'설날','2026-02-18':'설날 연휴','2026-03-01':'삼일절','2026-03-02':'삼일절 대체공휴일',
+  '2026-05-01':'노동절','2026-05-05':'어린이날','2026-05-24':'부처님오신날','2026-05-25':'부처님오신날 대체공휴일','2026-06-03':'지방선거일',
+  '2026-06-06':'현충일','2026-07-17':'제헌절','2026-08-15':'광복절','2026-08-17':'광복절 대체공휴일',
+  '2026-09-24':'추석 연휴','2026-09-25':'추석','2026-09-26':'추석 연휴','2026-10-03':'개천절','2026-10-05':'개천절 대체공휴일','2026-10-09':'한글날','2026-12-25':'성탄절',
+  '2027-01-01':'신정','2027-02-06':'설날 연휴','2027-02-07':'설날','2027-02-08':'설날 연휴','2027-02-09':'설날 대체공휴일','2027-03-01':'삼일절',
+  '2027-05-01':'노동절','2027-05-03':'노동절 대체공휴일','2027-05-05':'어린이날','2027-05-13':'부처님오신날','2027-06-06':'현충일',
+  '2027-07-17':'제헌절','2027-07-19':'제헌절 대체공휴일','2027-08-15':'광복절','2027-08-16':'광복절 대체공휴일',
+  '2027-09-14':'추석 연휴','2027-09-15':'추석','2027-09-16':'추석 연휴','2027-10-03':'개천절','2027-10-04':'개천절 대체공휴일',
+  '2027-10-09':'한글날','2027-10-11':'한글날 대체공휴일','2027-12-25':'성탄절','2027-12-27':'성탄절 대체공휴일'
+};
+const HOLIDAYS = Object.keys(HOLIDAY_NAMES);
+
+/* ===== 공통 ===== */
+const $ = id => document.getElementById(id);
+const won = n => Math.round(n).toLocaleString('ko-KR') + '원';
+const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const isRound = () => document.querySelector('input[name="trip"]:checked').value === 'round';
+const radio = name => document.querySelector('input[name="'+name+'"]:checked').value;
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const toLocalInput = d => ymd(d)+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+const fmtDT = d => ymd(d) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' (' + '일월화수목금토'[d.getDay()] + ')';
+const fmtD = d => ymd(d) + ' (' + '일월화수목금토'[d.getDay()] + ')';
+/* 출발 일자 + (선택) 시간: 편도는 출발·도착, 왕복은 가는 편 출발·오는 편 도착 */
+function whenHTML(){
+  return '<input type="date" class="wd">'
+    + '<div class="wnrow"><label class="chk"><input type="checkbox" class="wn"> <span class="wnlab">야간·공휴일 시간대에 걸림</span></label></div>'
+    + '<div class="wtbox"><div class="wcell wct"><label class="wtlab">출발 시간</label><input type="time" class="wt" step="600"></div>'
+    + '<div class="wcell wca"><label class="walab">도착 시간 (선택)</label><input type="time" class="wa" step="600" title="비우면 길찾기 예상 소요시간으로 계산"></div>'
+    + '<label class="chk whrow"><input type="checkbox" class="wh"> 목록에 없는 공휴일(임시공휴일 등)이면 체크</label>'
+    + '<span class="wthint"></span><span class="wanote"></span></div>'
+    + '<div class="dnote"></div>';
+}
+function isRoundBox(box){
+  if (box.id === 'w1Box' || box.id === 'w2Box') return isRound();
+  const r = box.closest('.trow'); return r ? legRound(r.id) : false;
+}
+function boxRole(box){
+  if (!isRoundBox(box)) return 'one';
+  return (box.id === 'w2Box' || box.classList.contains('tw2')) ? 'back' : 'go';
+}
+function holidayOf(v){            // 공휴일·주말이면 이름 반환
+  if (!v) return '';
+  const wd = new Date(v + 'T12:00').getDay();
+  return HOLIDAY_NAMES[v] || (wd === 0 ? '일요일' : wd === 6 ? '토요일' : '');
+}
+// 공휴일·야간이면 출발 시간을 먼저 받도록 시간 칸을 열고 강조
+function updateWhen(box, focus){
+  const v = box.querySelector('.wd').value, cb = box.querySelector('.wn'), t = box.querySelector('.wt'), a = box.querySelector('.wa');
+  const wh = box.querySelector('.wh'), role = boxRole(box);
+  const S = curStd(v || undefined), nOn = nightAvail(S), hOn = !!(S.hol && S.sur > 0);
+  box.querySelector('.wnrow').style.display = nOn || hOn ? '' : 'none';
+  if (!nOn && !hOn) cb.checked = false;
+  box.querySelector('.wnlab').textContent = [nOn ? '야간(' + nightText(S) + ')' : '', hOn ? '공휴일' : ''].filter(Boolean).join('·') + ' 조건 있음 — 출발 또는 운행 중';
+  if (wh) box.querySelector('.whrow').style.display = cb.checked && !holidayOf(v) && hOn ? '' : 'none';
+  const useT = role !== 'back', useA = role !== 'go';
+  const ct = box.querySelector('.wct'), ca = box.querySelector('.wca');
+  ct.style.display = useT ? '' : 'none'; ca.style.display = useA ? '' : 'none';
+  ct.classList.toggle('solo', !useA); ca.classList.toggle('solo', !useT);
+  const has = (useT && t.value) || (useA && a.value);
+  const show = cb.checked || !!has;
+  const tb = box.querySelector('.wtbox');
+  tb.classList.toggle('on', show);
+  tb.classList.toggle('need', cb.checked && !has);
+  box.querySelector('.wtlab').textContent = '출발 시간 (선택)';
+  box.querySelector('.walab').textContent = '도착 시간 (선택)';
+  box.querySelector('.wthint').textContent = cb.checked && !has
+    ? (role === 'back' ? '야간 할증을 확인하려면 도착 시간을 입력해 주세요.' : '야간 할증을 확인하려면 출발 시간을 입력해 주세요.') + ' 비워 두면 야간 할증 없이 계산합니다.'
+    : '';
+  box.querySelector('.wanote').textContent = role === 'go'
+    ? '출발 시간부터 길찾기 예상 소요시간 동안 야간·공휴일(자정 넘김)에 걸리면 할증이 적용됩니다.'
+    : role === 'back'
+    ? '도착 시간에서 길찾기 예상 소요시간만큼 거슬러 출발 시각을 잡고, 그 사이 야간·공휴일에 걸리면 할증이 적용됩니다.'
+    : '둘 중 하나만 넣으면 나머지는 길찾기 예상 소요시간으로 계산합니다. 운행 중 야간·공휴일(자정 넘김)에 걸리면 할증이 적용됩니다.';
+  if (focus && cb.checked && !has){ const el = useT ? t : a; el.focus(); try { el.showPicker && el.showPicker(); } catch(e){} }
+  dayNote(box);
+}
+// 왕복: 출발 일자를 넣으면 돌아오는 편 일자도 같은 날짜로 (필요하면 따로 바꿀 수 있음)
+function backBoxOf(box){
+  if (box.id === 'w1Box') return $('w2Box');
+  if (box.classList.contains('tw')){ const r = box.closest('.trow'); return r ? r.querySelector('.tw2') : null; }
+  return null;
+}
+function syncBackDate(box){
+  const b = backBoxOf(box); if (!b || !b.querySelector('.wd')) return;
+  const v = box.querySelector('.wd').value; if (!v) return;
+  b.querySelector('.wd').value = v; updateWhen(b, false);
+}
+function initWhen(box, dateStr){
+  box.innerHTML = whenHTML();
+  box.querySelector('.wd').value = dateStr || ymd(new Date());
+  const cb = box.querySelector('.wn'), t = box.querySelector('.wt');
+  box.querySelector('.wd').addEventListener('change', () => { updateWhen(box, true); syncBackDate(box); if (box.id === 'w1Box') renderRateTable(); });
+  cb.addEventListener('change', () => updateWhen(box, true));
+  t.addEventListener('input', () => updateWhen(box, false));
+  box.querySelector('.wa').addEventListener('input', () => updateWhen(box, false));
+  box.querySelector('.wh').addEventListener('change', () => updateWhen(box, false));
+  updateNightLabels();
+  updateWhen(box, false);
+}
+function dayNote(box){
+  const el = box.querySelector('.dnote'); if (!el) return;
+  const v = box.querySelector('.wd').value; if (!v){ el.innerHTML = ''; return; }
+  const S = curStd(v), why = holidayOf(v); let t = box.querySelector('.wt').value;
+  const msgs = [];
+  if (why){
+    msgs.push(S.hol && S.sur > 0
+      ? '<b class="up">' + esc(why) + '</b> · 휴일 할증 ' + S.sur + '% 적용'
+      : esc(why) + ' · 이 기준은 휴일 할증 없음');
+  }
+  const role = boxRole(box);
+  const a = role === 'go' ? '' : box.querySelector('.wa').value;
+  if (role === 'back') t = '';
+  if (!t && a && nightAvail(S) && isNightFor(S, parseInt(a, 10))) msgs.push('<b class="up">' + a + ' 도착</b> · 야간 할증 시간대(' + nightText(S) + ')');
+  if (t && nightAvail(S)){
+    if (isNightFor(S, parseInt(t, 10))) msgs.push('<b class="up">' + t + ' 출발</b> · 야간 할증 시간대(' + nightText(S) + ')');
+    else if (a){
+      const sp = spanOf({ date: new Date(v + 'T12:00'), time: t, arr: a });
+      for (let x = new Date(sp.dep); x <= sp.arr; x = new Date(x.getTime() + 5 * 60000)){
+        if (isNightFor(S, x.getHours())){ msgs.push('<b class="up">운행 중 ' + hm(x) + '부터 야간</b> · 야간 할증 적용'); break; }
+      }
+    }
+  }
+  if (t && a && S.hol && S.sur > 0){
+    const sp = spanOf({ date: new Date(v + 'T12:00'), time: t, arr: a });
+    if (ymd(sp.arr) !== ymd(sp.dep) && holidayOf(ymd(sp.arr)) && !why) msgs.push('<b class="up">자정 이후 ' + esc(holidayOf(ymd(sp.arr))) + '</b> · 운행 중 휴일 할증 적용');
+  }
+  if (!why && !box.querySelector('.wn').checked) msgs.push('평일 <b>주간 운행</b>(' + (isRoundBox(box) ? '왕복 모두 ' : '') + '야간·공휴일 할증 없음) 기준으로 계산합니다. 해당되면 위 항목에 체크해 주세요.');
+  if (v < ymd(new Date())) msgs.push('지난 날짜 · 거리는 실시간 교통이 아닌 <b>평균 교통 기준 추천 경로</b>로 계산');
+  el.innerHTML = msgs.join('<br>');
+}
+function resetWhen(box, dateStr){
+  box.querySelector('.wd').value = dateStr || ymd(new Date());
+  box.querySelector('.wn').checked = false; box.querySelector('.wh').checked = false; box.querySelector('.wt').value = ''; box.querySelector('.wa').value = '';
+  updateWhen(box, false);
+}
+function readWhen(box){
+  const v = box.querySelector('.wd').value;
+  const date = v ? new Date(v + 'T12:00') : null;
+  const on = box.querySelector('.wtbox').classList.contains('on'), role = boxRole(box);
+  const cb = box.querySelector('.wn').checked;
+  const time = on && role !== 'back' ? box.querySelector('.wt').value : '';
+  const arr = on && role !== 'go' ? box.querySelector('.wa').value : '';
+  const Sv = curStd(v || undefined), night = nightAvail(Sv) && !!time && isNightFor(Sv, parseInt(time, 10));   // 시간이 없으면 야간 할증 없음
+  const forceHol = cb && box.querySelector('.wh').checked;
+  return { date, night, time, arr, need: false, box, dur: 0, forceHol, role };
+}
+function whenErr(w, label){
+  if (!w.date || isNaN(w.date)) return label + ' 출발 일자를 입력해 주세요.';
+  return '';
+}
+const hm = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+const fmtWhen = w => {
+  const sp = (w.time || w.arr) ? spanOf(w) : null;
+  let t = fmtD(w.date);
+  if (sp && sp.fromArr){
+    if (sp.arr > sp.dep) t += ' · ' + (ymd(sp.dep) !== ymd(sp.arr) ? '전일 ' : '') + hm(sp.dep) + ' 출발(예상) →';
+    t += ' ' + w.arr + ' 도착';
+  } else if (sp){
+    t += ' · ' + w.time + ' 출발';
+    if (sp.arr > sp.dep) t += ' → ' + (ymd(sp.arr) !== ymd(sp.dep) ? '익일 ' : '') + hm(sp.arr) + ' 도착' + (w.arr ? '' : '(예상)');
+  }
+  const tags = w._tags || (w.night ? ['야간'] : []);
+  return t + (tags.length ? ' (' + tags.join('·') + ')' : '');
+};
+// 출발~도착 구간 (도착 시간이 없으면 길찾기 예상 소요시간 사용)
+function spanOf(w){
+  if (!w.date) return null;
+  if (!w.time && w.arr){
+    const [h2, m2] = w.arr.split(':').map(Number);
+    const arr = new Date(w.date); arr.setHours(h2, m2, 0, 0);
+    const dep = w.dur > 0 ? new Date(arr.getTime() - Math.round(w.dur) * 60000) : new Date(arr);
+    return { dep, arr, fromArr: true };
+  }
+  if (!w.time) return null;
+  const [h, m] = w.time.split(':').map(Number);
+  const dep = new Date(w.date); dep.setHours(h, m, 0, 0);
+  let arr = null;
+  if (w.arr){ const [h2, m2] = w.arr.split(':').map(Number); arr = new Date(dep); arr.setHours(h2, m2, 0, 0); if (arr < dep) arr.setDate(arr.getDate() + 1); }
+  else if (w.dur > 0) arr = new Date(dep.getTime() + Math.round(w.dur) * 60000);
+  return { dep, arr: arr || dep };
+}
+function nightAvail(S){ S = S || curStd(); return !!(S.night && S.sur > 0 && S.nightStart !== S.nightEnd); }
+function updateNightLabels(){
+  document.querySelectorAll('.when').forEach(b => { if (b.querySelector('.wtbox')) updateWhen(b, false); });
+}
+const points = {};            // id → 선택한 장소
+let wayIds = [], waySeq = 0, transSeq = 0;
+let kakaoReady = !!KAKAO_REST_KEY, lastRep = null;
+
+/* ===== 카카오 로컬(장소·주소) 검색 ===== */
+async function kakaoLocal(kind, query, size){
+  const url = 'https://dapi.kakao.com/v2/local/search/' + kind + '.json?size=' + (size || 15) + '&query=' + encodeURIComponent(query);
+  const r = await fetch(url, { headers: { Authorization: 'KakaoAK ' + KAKAO_REST_KEY } });
+  if (!r.ok) throw new Error('local ' + r.status);
+  return (await r.json()).documents || [];
+}
+async function geocodeAddr(addr){
+  try { const d = await kakaoLocal('address', addr, 1); return d[0] ? { lat: +d[0].y, lng: +d[0].x } : null; } catch(e){ return null; }
+}
+
+/* ===== 장소 입력 블록 (출발지·경유지·도착지 공통) ===== */
+function placeHTML(id, label, ph, removable){
+  return '<div class="lab"><span id="' + id + 'Label">' + label + '</span>'
+    + (removable ? '<button class="x" aria-label="경유지 삭제" onclick="removeWay(\'' + id + '\')">×</button>' : '') + '</div>'
+    + '<div class="row"><input type="text" id="' + id + 'Q" placeholder="' + ph + '" autocomplete="off">'
+    + '<button onclick="searchPlace(\'' + id + '\')">검색</button>'
+    + '<button onclick="openPostcode(\'' + id + '\')">주소찾기</button></div>'
+    + '<ul class="results" id="' + id + 'List"></ul>'
+    + '<div class="chips" id="' + id + 'Chips"></div>'
+    + '<div class="picked" id="' + id + 'Picked"></div>';
+}
+function bindPlace(id){
+  const inp = $(id+'Q');
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') searchPlace(id); });
+  inp.addEventListener('focus', () => { if (!inp.value.trim()) showHistory(id); });
+  inp.addEventListener('input', () => {
+    if (points[id] && inp.value !== points[id].name){ points[id] = null; $(id+'Picked').textContent = ''; }
+    if (!inp.value.trim()) showHistory(id); else $(id+'List').style.display = 'none';
+  });
+  renderChips(id);
+}
+function buildEnds(){
+  const s = document.createElement('div'); s.className = 'place';
+  s.innerHTML = placeHTML('s', '출발지 (집 주소)', '주소 또는 아파트·건물 이름', false);
+  $('sBox').appendChild(s); bindPlace('s');
+  const e = document.createElement('div'); e.className = 'place';
+  e.innerHTML = placeHTML('e', '도착지 (병원)', '병원 이름 (예: 서울대학교병원)', false);
+  $('eBox').appendChild(e); bindPlace('e');
+}
+function addWay(){
+  if (wayIds.length >= MAX_WAYS) return;
+  const id = 'w' + (++waySeq);
+  const d = document.createElement('div'); d.className = 'place way'; d.id = id + 'Wrap';
+  d.innerHTML = placeHTML(id, '경유지', '경유할 장소나 병원 이름', true);
+  $('wayList').appendChild(d);
+  wayIds.push(id); bindPlace(id); renumberWays();
+  $(id+'Q').focus();
+}
+function removeWay(id){
+  const w = $(id+'Wrap'); if (w) w.remove();
+  wayIds = wayIds.filter(x => x !== id); delete points[id];
+  renumberWays();
+}
+function renumberWays(){
+  wayIds.forEach((id, i) => { $(id+'Label').textContent = '경유지 ' + (i + 1); });
+  $('addWayBtn').style.display = wayIds.length >= MAX_WAYS ? 'none' : 'block';
+  $('addWayBtn').textContent = '＋ 경유지 추가' + (wayIds.length ? ' (' + wayIds.length + '/' + MAX_WAYS + ')' : '');
+}
+let transPlaceIds = [];
+const allPlaceIds = () => ['s', ...wayIds, 'e', ...transPlaceIds];
+
+/* ===== 장소 검색 ===== */
+function renderList(which, items){
+  const ul = $(which+'List');
+  ul.innerHTML = ''; ul.dataset.mode = 'search';
+  if (!items.length) ul.innerHTML = '<li><span>검색 결과가 없습니다. 다른 이름이나 주소로 검색해 보세요.</span></li>';
+  items.forEach(it => {
+    const li = document.createElement('li');
+    li.innerHTML = '<b></b><span></span>';
+    li.querySelector('b').textContent = it.name;
+    li.querySelector('span').textContent = it.addr;
+    li.onclick = () => { setPoint(which, it); ul.style.display = 'none'; };
+    ul.appendChild(li);
+  });
+  ul.style.display = 'block';
+}
+async function searchPlace(which){
+  const q = $(which+'Q').value.trim();
+  if (!q) return;
+  if (!kakaoReady){ alert('장소 검색을 사용할 수 없습니다. "주소찾기" 버튼으로 주소를 선택하거나 거리를 직접 입력해 주세요.'); return; }
+  try {
+    let data = await kakaoLocal('keyword', q, 15);
+    if (data.length){
+      data.sort((a,b) => (b.category_group_code==='HP8') - (a.category_group_code==='HP8'));   // 병원 우선
+      renderList(which, data.map(d => ({ name: d.place_name, addr: d.road_address_name || d.address_name, lat: +d.y, lng: +d.x })));
+      return;
+    }
+    data = await kakaoLocal('address', q, 15);
+    renderList(which, data.map(r => ({ name: r.address_name, addr: (r.road_address && r.road_address.address_name) || r.address_name, lat: +r.y, lng: +r.x })));
+  } catch(e){
+    alert('장소를 검색하지 못했습니다. 잠시 후 다시 시도하거나 "주소찾기"를 이용해 주세요.');
+  }
+}
+function setPoint(which, p){
+  points[which] = p;
+  $(which+'Q').value = p.name;
+  histAdd(which, p);
+  refreshPrevHints();
+  $(which+'Picked').textContent = '✓ ' + p.name + (p.addr && p.addr !== p.name ? ' · ' + p.addr : '')
+    + (p.lat ? '' : ' (좌표 없음 · 거리 직접 입력 필요)');
+}
+
+/* ===== 우편번호(주소찾기) ===== */
+function openPostcode(which){
+  $('pcLayer').style.display = 'block';
+  $('pcEmbed').innerHTML = '';
+  new daum.Postcode({
+    oncomplete: d => {
+      closePostcode();
+      const addr = d.roadAddress || d.jibunAddress || d.address;
+      const name = d.buildingName ? d.buildingName : addr;
+      if (kakaoReady){
+        geocodeAddr(addr).then(g => setPoint(which, g ? { name, addr, lat: g.lat, lng: g.lng } : { name, addr }));
+      } else setPoint(which, { name, addr });
+    },
+    width: '100%', height: '100%'
+  }).embed($('pcEmbed'));
+}
+function closePostcode(){ $('pcLayer').style.display = 'none'; }
+
+/* ===== 최근 기록 (이 기기·브라우저에 저장, 출발지·경유지·도착지 따로) ===== */
+const HIST_KEY = 'ambFareHistory', HIST_MAX = 12, CHIP_MAX = 4;
+const grp = id => id.charAt(0) === 'w' ? 'w' : /^t\d+S$/.test(id) ? 'x' : /^t\d+E$/.test(id) ? 'e' : id;
+const GRP_NAME = { s: '최근 출발지', w: '최근 경유지', e: '최근 도착지', x: '최근 추가 구간 출발지' };
+function lsGet(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
+function lsDel(k){ try { localStorage.removeItem(k); } catch(e){} }
+// 공용 기록 키 (사용자 등록 전)
+function sharedKey(g){ return HIST_KEY + '_' + g; }
+function sharedLoad(g){
+  let v = lsGet(sharedKey(g));
+  if (!v && (g === 's' || g === 'e')) v = lsGet(HIST_KEY);          // 초기 버전 기록
+  return Array.isArray(v) ? v : [];
+}
+function histKeyOf(g){ return curUser ? HIST_KEY + '_u_' + encodeURIComponent(curUser) + '_' + g : sharedKey(g); }
+function histLoad(g){
+  if (!curUser) return sharedLoad(g);
+  const v = lsGet(histKeyOf(g));
+  return Array.isArray(v) ? v : [];
+}
+function histSave(g, list){ lsSet(histKeyOf(g), list.slice(0, HIST_MAX)); }
+
+/* ===== 사용자 (이 기기 안에서 사람별로 기록 분리, 비밀번호 없음) ===== */
+const USER_KEY = 'ambFareUsers';
+let users = [], curUser = '';
+function loadUsers(){
+  const u = lsGet(USER_KEY) || {};
+  users = Array.isArray(u.list) ? u.list : [];
+  curUser = users.includes(u.current) ? u.current : (users[0] || '');
+}
+function saveUsers(){ lsSet(USER_KEY, { list: users, current: curUser }); }
+const USER_INFO_KEY = 'ambFareUserInfo';
+let userInfo = {}, editingUser = false;
+function loadUserInfo(){ const v = lsGet(USER_INFO_KEY); userInfo = v && typeof v === 'object' ? v : {}; }
+function saveUserInfo(){ lsSet(USER_INFO_KEY, userInfo); }
+function uInfo(n){ return userInfo[n] || { title: '', phone: '' }; }
+const userLabel = n => n + (uInfo(n).title ? ' ' + uInfo(n).title : '');
+function writerText(){           // 보고서·저장본용 "이름 직책 · 연락처"
+  if (!curUser) return '';
+  const i = uInfo(curUser);
+  return userLabel(curUser) + (i.phone ? ' · ' + i.phone : '');
+}
+function renderUsers(){
+  const sel = $('userSel');
+  sel.innerHTML = '';
+  if (!users.length){
+    const o = document.createElement('option'); o.value = ''; o.textContent = '공용 (사용자 미등록)'; sel.appendChild(o);
+  }
+  users.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = userLabel(n); sel.appendChild(o); });
+  sel.value = curUser;
+  $('userDelBtn').style.display = curUser ? '' : 'none';
+  $('userEditBtn').style.display = curUser ? '' : 'none';
+  const i = uInfo(curUser);
+  $('userInfo').innerHTML = curUser ? esc(userLabel(curUser)) + (i.phone ? ' <span>· ☎ ' + esc(i.phone) + '</span>' : ' <span>· 연락처 미등록</span>') : '';
+  $('userNote').textContent = users.length
+    ? '최근 기록은 사용자별로 이 기기에 저장됩니다.'
+    : '이름을 등록하면 최근 기록을 사람별로 따로 관리할 수 있습니다. (이 기기에만 저장)';
+}
+function refreshAllChips(){
+  renderTtList();
+  allPlaceIds().forEach(id => { renderChips(id); const ul = $(id+'List'); if (ul) ul.style.display = 'none'; });
+}
+function switchUser(name){
+  curUser = users.includes(name) ? name : '';
+  saveUsers(); renderUsers(); refreshAllChips(); loadStdSel(); renderStdUI(); loadAdj(); renderTpl(); updateBkWarn();
+}
+function toggleUserAdd(on, edit){
+  editingUser = !!(on && edit && curUser);
+  $('userAddRow').classList.toggle('hidden', !on);
+  if (!on) return;
+  const i = editingUser ? uInfo(curUser) : { title: '', phone: '' };
+  $('userName').value = editingUser ? curUser : '';
+  $('userName').disabled = editingUser;
+  $('userTitle').value = i.title || ''; $('userPhone').value = i.phone || '';
+  (editingUser ? $('userTitle') : $('userName')).focus();
+}
+function addUser(){
+  const title = $('userTitle').value.trim(), phone = $('userPhone').value.trim();
+  if (editingUser){
+    userInfo[curUser] = { title, phone }; saveUserInfo();
+    renderUsers(); toggleUserAdd(false); return;
+  }
+  const name = $('userName').value.trim().replace(/\s+/g, ' ');
+  if (!name) return alert('이름을 입력해 주세요.');
+  if (users.includes(name)) return alert('이미 등록된 이름입니다.');
+  userInfo[name] = { title, phone }; saveUserInfo();
+  const first = users.length === 0;
+  users.push(name); curUser = name;
+  if (first){
+    // 첫 사용자에게 공용 기록을 옮김
+    ['s','w','e','x','tt'].forEach(g => { const l = sharedLoad(g); if (l.length) lsSet(histKeyOf(g), l); lsDel(sharedKey(g)); });
+    lsDel(HIST_KEY);
+  }
+  if (first){ const sh = lsGet(STD_SEL_KEY); if (sh) lsSet(selKey(), sh); }
+  saveUsers(); renderUsers(); refreshAllChips(); toggleUserAdd(false); loadStdSel(); renderStdUI(); loadAdj(); renderTpl(); updateBkWarn();
+}
+function deleteUser(){
+  if (!curUser) return;
+  if (!confirm('"' + userLabel(curUser) + '" 사용자와 최근 기록을 삭제할까요?')) return;
+  ['s','w','e','x','tt'].forEach(g => lsDel(histKeyOf(g)));
+  lsDel(selKey());
+  delete userInfo[curUser]; saveUserInfo();
+  users = users.filter(n => n !== curUser);
+  curUser = users[0] || '';
+  saveUsers(); renderUsers(); refreshAllChips(); loadStdSel(); renderStdUI(); loadAdj(); renderTpl(); updateBkWarn();
+}
+function refreshChips(g){ allPlaceIds().filter(id => grp(id) === g).forEach(renderChips); }
+function histAdd(id, p){
+  if (!p || !p.name) return;
+  const g = grp(id);
+  const list = histLoad(g).filter(h => !(h.name === p.name && h.addr === p.addr));
+  list.unshift({ name: p.name, addr: p.addr || '', lat: p.lat || null, lng: p.lng || null });
+  histSave(g, list); refreshChips(g);
+}
+function renderChips(id){
+  const box = $(id+'Chips'); if (!box) return;
+  const favs = favLoad();
+  const list = histLoad(grp(id)).filter(h => !favs.some(f => samePlace(f, h) && normName(f.addr) === normName(h.addr)));
+  box.innerHTML = '';
+  if (!list.length && !favs.length){ box.style.display = 'none'; return; }
+  box.style.display = 'flex';
+  const chip = (h, fav) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip' + (fav ? ' fav' : ''); b.textContent = (fav ? '★ ' : '') + h.name; b.title = h.addr;
+    b.onclick = e => { e.stopPropagation(); setPoint(id, h); $(id+'List').style.display = 'none'; };
+    box.appendChild(b);
+  };
+  favs.slice(0, 3).forEach(h => chip(h, true));
+  if (list.length){
+    const lab = document.createElement('span'); lab.className = 'chiplab'; lab.textContent = '최근';
+    box.appendChild(lab);
+    list.slice(0, CHIP_MAX).forEach(h => chip(h, false));
+  }
+  const more = document.createElement('button');
+  more.type = 'button'; more.className = 'chip more';
+  more.textContent = list.length + favs.length > CHIP_MAX + 3 ? '전체 ' + (list.length + favs.length) + '개 ▾' : '관리 ▾';
+  more.onclick = e => {
+    e.stopPropagation();
+    const ul = $(id+'List');
+    if (ul.style.display === 'block' && ul.dataset.mode === 'hist') ul.style.display = 'none'; else showHistory(id);
+  };
+  box.appendChild(more);
+}
+function showHistory(id){
+  const g = grp(id), ul = $(id+'List'), favs = favLoad();
+  const list = histLoad(g).filter(h => !favs.some(f => samePlace(f, h) && normName(f.addr) === normName(h.addr)));
+  if (!list.length && !favs.length){ ul.style.display = 'none'; return; }
+  ul.innerHTML = ''; ul.dataset.mode = 'hist';
+  const item = (h, fav, onDel) => {
+    const li = document.createElement('li'); li.className = 'hist';
+    li.innerHTML = '<div class="txt"><b></b><span></span></div><button class="fav" aria-label="즐겨찾기">' + (fav ? '★' : '☆') + '</button>' + (onDel ? '<button class="del" aria-label="삭제">×</button>' : '');
+    li.querySelector('b').textContent = h.name;
+    li.querySelector('span').textContent = h.addr;
+    li.onclick = () => { setPoint(id, h); ul.style.display = 'none'; };
+    li.querySelector('.fav').onclick = e => { e.stopPropagation(); toggleFav(h); showHistory(id); };
+    if (onDel) li.querySelector('.del').onclick = e => { e.stopPropagation(); onDel(); };
+    ul.appendChild(li);
+  };
+  if (favs.length){
+    const sh = document.createElement('li'); sh.className = 'hsub'; sh.textContent = '★ 즐겨찾기 — 별을 누르면 해제';
+    ul.appendChild(sh);
+    favs.forEach(h => item(h, true, null));
+  }
+  if (list.length){
+    const head = document.createElement('li'); head.className = 'hhead';
+    head.innerHTML = '<span></span><a>최근 기록 삭제</a>';
+    head.querySelector('span').textContent = GRP_NAME[g] + ' — ☆ 누르면 즐겨찾기';
+    head.querySelector('a').onclick = e => { e.stopPropagation(); histSave(g, []); refreshChips(g); showHistory(id); };
+    ul.appendChild(head);
+    list.forEach(h => item(h, false, () => {
+      const l = histLoad(g).filter(x => !(x.name === h.name && x.addr === h.addr)); histSave(g, l); refreshChips(g); showHistory(id);
+    }));
+  }
+  ul.style.display = 'block';
+}
+document.addEventListener('click', e => {
+  allPlaceIds().forEach(id => {
+    const ul = $(id+'List'); if (!ul) return;
+    const wrap = ul.parentElement;
+    if (!wrap.contains(e.target)) ul.style.display = 'none';
+  });
+});
+
+/* ===== 추가 교통수단 ===== */
+// 역·공항 등 출발/도착 이름 기록 (입력 자동완성)
+function renderTtList(){
+  const dl = $('ttHist'); if (!dl) return;
+  dl.innerHTML = histLoad('tt').map(h => '<option value="' + esc(h.name) + '">').join('');
+}
+function ttAdd(name){
+  name = (name || '').trim(); if (!name) return;
+  const l = histLoad('tt').filter(h => h.name !== name); l.unshift({ name }); histSave('tt', l);
+}
+function addTrans(){
+  const id = 't' + (++transSeq);
+  const d = document.createElement('div'); d.className = 'trow'; d.id = id;
+  d.innerHTML = '<div class="th"><select aria-label="교통수단" onchange="setTransKind(\'' + id + '\', this.value)">'
+    + TRANS_KINDS.map(k => '<option>' + k + '</option>').join('') + '</select>'
+    + '<button class="x" aria-label="삭제" onclick="removeTrans(\'' + id + '\')">×</button></div>'
+    + '<div class="tbody" id="' + id + 'Body"></div>';
+  $('transList').appendChild(d);
+  setTransKind(id, TRANS_KINDS[0]);
+}
+function dropTransPlaces(id){
+  [id + 'S', id + 'E'].forEach(pid => { delete points[pid]; });
+  transPlaceIds = transPlaceIds.filter(x => x !== id + 'S' && x !== id + 'E');
+}
+function removeTrans(id){ dropTransPlaces(id); const r = $(id); if (r) r.remove(); refreshPrevHints(); }
+function numField(label, cls, step, ph, wrap){
+  return '<div' + (wrap ? ' class="' + wrap + '"' : '') + '><label>' + label + '</label><input type="number" class="' + cls + '" min="0" step="' + step + '" inputmode="numeric" placeholder="' + (ph || '0') + '"></div>';
+}
+function setTransKind(id, kind){
+  const row = $(id), body = $(id + 'Body');
+  const bt = k => k === AMB_KIND ? 'amb' : k === SHIP_KIND ? 'ship' : 'plain';
+  const was = bt(row.dataset.kind), now = bt(kind), isAmb = now === 'amb';
+  row.dataset.kind = kind;
+  if (body.innerHTML && was === now) return;          // 같은 입력 형식끼리 바꾸면 입력값 유지
+  dropTransPlaces(id);
+  if (now === 'ship'){
+    body.innerHTML = prevHintHTML(id) + '<div class="two">'
+      + '<div><label>승선 항구</label><input type="text" class="tfrom" list="ttHist" placeholder="예: 인천항" autocomplete="off"></div>'
+      + '<div><label>하선 항구</label><input type="text" class="tto" list="ttHist" placeholder="예: 백령도 용기포항" autocomplete="off"></div></div>'
+      + '<div class="two">' + numField('승선 이송 시간 (분)', 'tmin', 10) + numField('도선료·숙박비 등 실비', 'tcost', 100) + '</div>'
+      + '<div class="two">' + numField('인건비 (동승 인력 등)', 'tlabor', 1000) + '<div></div></div>'
+      + '<div class="note">구급차가 환자를 태운 채 선박에 승선한 구간은 거리 대신 시간으로 ' + SHIP_UNIT_MIN + '분마다 ' + won(SHIP_UNIT_FEE) + '을 계산합니다. (별표 3 비고 4)</div>'
+      + '<input type="text" class="tmemo" placeholder="메모 (선택)">';
+  } else if (!isAmb){
+    body.innerHTML = prevHintHTML(id) + '<div class="two">'
+      + '<div><label>출발</label><input type="text" class="tfrom" list="ttHist" placeholder="예: 서울역" autocomplete="off"></div>'
+      + '<div><label>도착</label><input type="text" class="tto" list="ttHist" placeholder="예: 부산역" autocomplete="off"></div></div>'
+      + '<div class="two">' + numField('실비 (운임·교통비 등)', 'tcost', 100) + numField('인건비 (동승 인력 등)', 'tlabor', 1000) + '</div>'
+      + '<input type="text" class="tmemo" placeholder="메모 (선택, 예: 환자+보호자 2인)">';
+  } else {
+    body.innerHTML = prevHintHTML(id) + '<div class="seg tseg">'
+      + '<input type="radio" name="' + id + 'amb" id="' + id + 'aS" value="special" checked><label for="' + id + 'aS">특수구급차</label>'
+      + '<input type="radio" name="' + id + 'amb" id="' + id + 'aG" value="general"><label for="' + id + 'aG">일반구급차</label></div>'
+      + '<div class="seg tseg">'
+      + '<input type="radio" name="' + id + 'trip" id="' + id + 'tO" value="one" checked><label for="' + id + 'tO">편도</label>'
+      + '<input type="radio" name="' + id + 'trip" id="' + id + 'tR" value="round"><label for="' + id + 'tR">왕복</label></div>'
+      + '<div class="place">' + placeHTML(id + 'S', '출발지 (역·공항 등)', '예: 부산역, 김해공항', false) + '</div>'
+      + '<div class="place">' + placeHTML(id + 'E', '도착지 (병원 등)', '병원 이름', false) + '</div>'
+      + '<label class="tl">출발 일자</label><div class="when tw"></div>'
+      + '<div class="tround hidden"><label class="tl">돌아오는 편 일자 · 도착 시간</label><div class="when tw2"></div></div>'
+      + '<div class="two">' + numField('도착 후 인계까지 대기 (분)', 'twait', 5) + numField('거리 직접 입력 km (편도)', 'tkm', 0.1, '자동 계산') + '</div>'
+      + '<div class="two">' + numField('인건비 (동승 인력 등)', 'tlabor', 1000) + '<div></div></div>'
+      + '<input type="text" class="tmemo" placeholder="메모 (선택)">';
+    transPlaceIds.push(id + 'S', id + 'E');
+    bindPlace(id + 'S'); bindPlace(id + 'E');
+    const d0 = $('w1Box').querySelector('.wd').value;
+    initWhen(body.querySelector('.tw'), d0); initWhen(body.querySelector('.tw2'), d0);
+    body.querySelectorAll('input[name="' + id + 'trip"]').forEach(x => x.addEventListener('change', () => {
+      body.querySelector('.tround').classList.toggle('hidden', !legRound(id));
+      updateWhen(body.querySelector('.tw'), false); updateWhen(body.querySelector('.tw2'), false);
+      if (legRound(id)) syncBackDate(body.querySelector('.tw'));
+      refreshPrevHints();
+    }));
+  }
+  usePrev(id, true);
+  refreshPrevHints();
+}
+/* 앞 구간 도착지 → 다음 구간 출발지 연계 */
+function prevHintHTML(id){
+  return '<button type="button" class="linkbtn" id="' + id + 'Prev" onclick="usePrev(\'' + id + '\')"></button>';
+}
+function prevArrival(id){
+  const rows = [...document.querySelectorAll('#transList .trow')];
+  const i = rows.findIndex(r => r.id === id);
+  if (i > 0){
+    const pr = rows[i - 1];
+    if (pr.dataset.kind === AMB_KIND){
+      const back = legRound(pr.id);                      // 왕복이면 출발지로 되돌아옴
+      const pt = points[pr.id + (back ? 'S' : 'E')];
+      return pt ? { text: pt.name, point: pt, back } : null;
+    }
+    const t = (pr.querySelector('.tto') || {}).value;
+    return t && t.trim() ? { text: t.trim() } : null;
+  }
+  // 첫 구간: 본 구급차의 최종 도착 지점 (왕복이면 출발지로 복귀)
+  if (isRound()) return points.s ? { text: points.s.name, point: points.s, back: true } : null;
+  return points.e ? { text: points.e.name, point: points.e } : null;
+}
+function startText(id){
+  const r = $(id);
+  if (r.dataset.kind === AMB_KIND) return points[id + 'S'] ? points[id + 'S'].name : $(id + 'SQ').value.trim();
+  return r.querySelector('.tfrom').value.trim();
+}
+function usePrev(id, onlyIfEmpty){
+  const r = $(id); if (!r) return;
+  const pv = prevArrival(id); if (!pv) return;
+  if (onlyIfEmpty && startText(id)) return;
+  if (r.dataset.kind === AMB_KIND){
+    if (pv.point && pv.point.lat) setPoint(id + 'S', pv.point);
+    else { $(id + 'SQ').value = pv.text; points[id + 'S'] = null; $(id + 'SPicked').textContent = ''; if (kakaoReady) searchPlace(id + 'S'); }
+  } else {
+    r.querySelector('.tfrom').value = pv.text;
+  }
+  refreshPrevHints();
+}
+function refreshPrevHints(){
+  document.querySelectorAll('#transList .trow').forEach(r => {
+    const b = $(r.id + 'Prev'); if (!b) return;
+    const pv = prevArrival(r.id);
+    if (!pv){ b.style.display = 'none'; return; }
+    const same = startText(r.id) === pv.text;
+    const needPick = same && r.dataset.kind === AMB_KIND && !points[r.id + 'S'];
+    b.style.display = 'block';
+    b.classList.toggle('done', same && !needPick);
+    const what = pv.back ? '앞 구간 최종 도착지(왕복 복귀)' : '앞 구간 도착지';
+    b.innerHTML = (needPick ? '↳ ' + what + ' : ' : same ? '✓ ' + what + '와 연결됨 : ' : '↳ ' + what + ' 불러오기 : ') + '<b></b>'
+      + (needPick ? ' — 검색 결과에서 위치를 골라 주세요' : '');
+    b.querySelector('b').textContent = pv.text;
+  });
+}
+function readTrans(){
+  const out = [];
+  for (const r of document.querySelectorAll('#transList .trow')){
+    const id = r.id, kind = r.dataset.kind;
+    const num = c => { const el = r.querySelector('.' + c); return el ? Math.max(0, parseFloat(el.value) || 0) : 0; };
+    const memo = (r.querySelector('.tmemo') || {}).value?.trim() || '';
+    if (kind === AMB_KIND){
+      out.push({ amb: true, id, kind, memo,
+        type: r.querySelector('input[name="' + id + 'amb"]:checked').value,
+        S: points[id + 'S'], E: points[id + 'E'],
+        round: legRound(id), when: readWhen(r.querySelector('.tw')), when2: readWhen(r.querySelector('.tw2')),
+        wait: num('twait'), km: num('tkm'), labor: num('tlabor') });
+    } else {
+      const t = { kind, memo, from: r.querySelector('.tfrom').value.trim(), to: r.querySelector('.tto').value.trim(), cost: num('tcost'), labor: num('tlabor') };
+      if (kind === SHIP_KIND){
+        t.ship = true; t.mins = num('tmin'); t.actual = t.cost;
+        t.shipFee = Math.ceil(t.mins / SHIP_UNIT_MIN) * SHIP_UNIT_FEE;
+        t.cost = t.shipFee + t.actual;
+      }
+      if (t.cost || t.labor || t.memo || t.from || t.to) out.push(t);
+    }
+  }
+  return out;
+}
+// 구급차 추가 구간: 거리·요금 계산 (실패 시 오류 메시지 반환)
+function legRound(id){ const x = document.querySelector('input[name="' + id + 'trip"]:checked'); return !!x && x.value === 'round'; }
+async function priceAmbLegs(list){
+  for (const t of list.filter(x => x.amb)){
+    const we = whenErr(t.when, '추가 구간 구급차의' + (t.round ? ' 가는 편' : '')); if (we) return we;
+    if (t.round){ const we2 = whenErr(t.when2, '추가 구간 구급차의 돌아오는 편'); if (we2) return we2; }
+    let km2 = t.km;
+    if (!(t.km > 0)){
+      if (!t.S || !t.E) return '추가 구간 구급차의 출발지와 도착지를 선택해 주세요.';
+      if (!t.S.lat || !t.E.lat) return '추가 구간 구급차의 위치를 찾지 못했습니다. 다시 선택하거나 거리를 직접 입력해 주세요.';
+      try {
+        const rr = await routeOrTable([t.S, t.E], t.when); t.when.dur = rr.min; t.km = rr.fixed ? rr.km : adjKm(rr.km); t.src = rr.fixed ? '구간 거리표' : adjSrc(rr.km); t.coords = rr.coords; t.auto = true;
+        if (t.round){ const rbr = await routeOrTable([t.E, t.S], t.when2); t.when2.dur = rbr.min; km2 = rbr.fixed ? rbr.km : adjKm(rbr.km); t.src2 = rbr.fixed ? '구간 거리표' : adjSrc(rbr.km); }
+      } catch(e){ return '추가 구간 구급차의 경로를 계산하지 못했습니다. 거리를 직접 입력해 주세요.'; }
+    }
+    t.f = Object.assign(fareLeg(t.type, t.km, t.when, false), { src: t.src || '직접 입력' });
+    t.f2 = t.round ? Object.assign(fareLeg(t.type, km2, t.when2, false), { src: t.src2 || '직접 입력' }) : null;
+    t.waitFee = waitFee(t.wait, t.when.date);
+    t.cost = t.f.sum + (t.f2 ? t.f2.sum : 0) + t.waitFee;
+  }
+  return '';
+}
+function legDesc(f, S){
+  return f.rawKm.toFixed(1) + 'km' + (f.src ? '(' + f.src + ')' : '') + ' → ' + f.km + 'km · 기본 ' + won(f.base) + (f.extraKm ? ' + 추가 ' + f.extraKm + 'km×' + won(f.per) : '')
+    + ' · 할증 ' + (f.reasons.length ? S.sur + '%(' + f.reasons.join('·') + ')' : '없음') + ' = ' + won(f.sum);
+}
+function ambLegDetail(t, S){
+  let d = (t.round ? '가는 편 ' + fmtWhen(t.when) + ' : ' : fmtWhen(t.when) + ' : ') + legDesc(t.f, S);
+  if (t.round) d += '<br>오는 편 ' + fmtWhen(t.when2) + ' : ' + legDesc(t.f2, S);
+  if (t.wait > 0) d += '<br>대기 ' + t.wait + '분 ' + won(t.waitFee);
+  if (t.labor) d += ' · 인건비 ' + won(t.labor);
+  if (t.memo) d += ' · ' + esc(t.memo);
+  return d;
+}
+
+/* ===== 거리 보정 (지도 거리 → 실제 운행거리, 사용자별 저장) ===== */
+const ADJ_KEY = 'ambFareDistAdj';
+function adjKey(){ return curUser ? ADJ_KEY + '_u_' + encodeURIComponent(curUser) : ADJ_KEY; }
+function loadAdj(){ const v = lsGet(adjKey()); $('distAdj').value = (typeof v === 'number' && v) ? v : ''; }
+function adjPct(){ const v = parseFloat($('distAdj').value); return isFinite(v) ? Math.max(-50, Math.min(100, v)) : 0; }
+function adjKm(km){ return km * (1 + adjPct() / 100); }
+function adjSrc(mapKm){
+  const a = adjPct(), nm = lastRouteLabel || (typeof map === 'undefined' ? '공개 경로 서비스' : '지도 경로');
+  return a ? nm + ' ' + mapKm.toFixed(1) + 'km ' + (a > 0 ? '+' : '') + a + '% 보정' : nm;
+}
+
+/* ===== 경로 (자동차 최적 경로) ===== */
+let lastRouteSrc = '지도';
+async function routeKakao(list){
+  const xy = p => p.lng + ',' + p.lat;
+  let url = 'https://apis-navi.kakaomobility.com/v1/directions?priority=RECOMMEND&origin=' + xy(list[0]) + '&destination=' + xy(list[list.length - 1]);
+  if (list.length > 2) url += '&waypoints=' + list.slice(1, -1).map(xy).join('%7C');
+  const r = await fetch(url, { headers: { Authorization: 'KakaoAK ' + KAKAO_REST_KEY } });
+  const j = await r.json();
+  const rt = j.routes && j.routes[0];
+  if (!rt || rt.result_code !== 0) throw new Error('kakao route');
+  const coords = [];
+  (rt.sections || []).forEach(sec => (sec.roads || []).forEach(rd => {
+    for (let i = 0; i + 1 < rd.vertexes.length; i += 2) coords.push([rd.vertexes[i], rd.vertexes[i + 1]]);
+  }));
+  return { km: rt.summary.distance / 1000, min: rt.summary.duration / 60, coords, src: '카카오' };
+}
+// 오늘이 아닌 날짜: 실시간 교통 대신 '미래 운행 정보 길찾기'(통계 교통)로 같은 요일 여러 시간대의 평균 거리
+function routeDepTimes(when){
+  if (!when || !when.date || isNaN(when.date)) return null;
+  const today = ymd(new Date()), d = ymd(when.date);
+  if (d === today) return null;                                   // 오늘은 실시간 교통
+  let base = new Date(when.date);
+  if (d < today){                                                 // 지난 날짜 → 다가오는 같은 요일
+    base = new Date(); base.setDate(base.getDate() + 1);
+    while (base.getDay() !== when.date.getDay()) base.setDate(base.getDate() + 1);
+  }
+  const times = when.time ? [when.time.replace(':', '')] : ['0900', '1300', '1700'];   // 출발 시간을 넣었으면 그 시간 기준
+  return times.map(t => ymd(base).replace(/-/g, '') + t);
+}
+async function routeKakaoFuture(list, dep){
+  const xy = p => p.lng + ',' + p.lat;
+  let url = 'https://apis-navi.kakaomobility.com/v1/future/directions?priority=RECOMMEND&departure_time=' + dep
+    + '&origin=' + xy(list[0]) + '&destination=' + xy(list[list.length - 1]);
+  if (list.length > 2) url += '&waypoints=' + list.slice(1, -1).map(xy).join('%7C');
+  const r = await fetch(url, { headers: { Authorization: 'KakaoAK ' + KAKAO_REST_KEY } });
+  const j = await r.json();
+  const rt = j.routes && j.routes[0];
+  if (!rt || rt.result_code !== 0) throw new Error('kakao future');
+  const coords = [];
+  (rt.sections || []).forEach(sec => (sec.roads || []).forEach(rd => {
+    for (let i = 0; i + 1 < rd.vertexes.length; i += 2) coords.push([rd.vertexes[i], rd.vertexes[i + 1]]);
+  }));
+  return { km: rt.summary.distance / 1000, min: rt.summary.duration / 60, coords };
+}
+let lastRouteLabel = '';
+async function routeMulti(list, when){
+  if (KAKAO_REST_KEY){
+    const deps = routeDepTimes(when);
+    if (deps){
+      const res = (await Promise.allSettled(deps.map(d => routeKakaoFuture(list, d)))).filter(x => x.status === 'fulfilled').map(x => x.value);
+      if (res.length){
+        lastRouteSrc = '카카오';
+        lastRouteLabel = '카카오 평균 교통' + (res.length > 1 ? ' ' + res.length + '개 시간대 평균' : '');
+        return { km: res.reduce((a, r) => a + r.km, 0) / res.length, min: res.reduce((a, r) => a + r.min, 0) / res.length, coords: res[0].coords, src: '카카오' };
+      }
+    }
+    try { const k = await routeKakao(list); lastRouteSrc = '카카오'; lastRouteLabel = '카카오 길찾기'; return k; }
+    catch(e){ /* 카카오 길찾기 실패 시 공개 경로 서비스로 대체 */ }
+  }
+  lastRouteLabel = '';
+  lastRouteSrc = '지도';
+  const url = 'https://router.project-osrm.org/route/v1/driving/'
+    + list.map(p => p.lng + ',' + p.lat).join(';') + '?overview=full&geometries=geojson';
+  const r = await fetch(url);
+  const j = await r.json();
+  if (j.code !== 'Ok' || !j.routes.length) throw new Error('route');
+  return { km: j.routes[0].distance / 1000, min: j.routes[0].duration / 60, coords: j.routes[0].geometry.coordinates, src: '지도' };
+}
+/* ===== 요금 계산 ===== */
+function isNightFor(S, h){
+  const a = S.nightStart, b = S.nightEnd;
+  if (a === b) return false;
+  return a < b ? (h >= a && h < b) : (h >= a || h < b);
+}
+function fareLeg(type, rawKm, when, forceHol){
+  forceHol = forceHol || !!when.forceHol;
+  const S = curStd(when.date), R = S[type];
+  const km = Math.round(rawKm);
+  const extraKm = Math.max(0, km - S.baseKm);
+  let reasons = [];
+  const dt = when.date;
+  const dayTag = (x, during) => {               // 그 날짜의 휴일 사유
+    const v = ymd(x), wd = x.getDay(), out = [];
+    if (wd === 6) out.push('토요일'); if (wd === 0) out.push('일요일');
+    if (HOLIDAY_NAMES[v]) out.push(HOLIDAY_NAMES[v]);   // 「관공서의 공휴일에 관한 규정」 공휴일
+    return out.map(t => during ? '운행 중 ' + t : t);
+  };
+  const sp = spanOf(when);
+  if (sp){
+    // 출발부터 도착까지 5분 간격으로 확인: 야간 시간대·공휴일에 걸리면 할증
+    let nightDep = false, nightRun = false; const hol = [];
+    for (let t = new Date(sp.dep); t <= sp.arr; t = new Date(t.getTime() + 5 * 60000)){
+      const first = t.getTime() === sp.dep.getTime();
+      if (S.night && isNightFor(S, t.getHours())){ if (first) nightDep = true; else nightRun = true; }
+      if (S.hol) dayTag(t, !first && ymd(t) !== ymd(sp.dep)).forEach(x => { if (!hol.includes(x)) hol.push(x); });
+      if (sp.arr - sp.dep > 24 * 3600000) break;
+    }
+    if (S.night && sp.arr > sp.dep && isNightFor(S, sp.arr.getHours())) nightRun = nightRun || !nightDep;
+    if (nightDep) reasons.push('야간'); else if (nightRun) reasons.push('운행 중 야간');
+    reasons.push(...hol);
+    if (S.hol && forceHol && !hol.length) reasons.push('공휴일');
+  } else {
+    if (S.night && when.night) reasons.push('야간');
+    if (S.hol){
+      reasons.push(...dayTag(dt, false));
+      if (forceHol && !reasons.some(r => r !== '야간')) reasons.push('공휴일');
+    }
+  }
+  when._tags = reasons.filter(r => r.includes('야간'));
+  if (!(S.sur > 0)) reasons = [];
+  const m = reasons.length ? 1 + S.sur / 100 : 1;   // 사유가 겹쳐도 1회만
+  const base = Math.round(R.base * m);
+  const per = Math.round(R.perKm * m);
+  const extra = extraKm * per;
+  return { rawKm, km, extraKm, base, per, extra, sum: base + extra, reasons };
+}
+function waitFee(min, d){
+  const S = curStd(d);
+  if (!S.waitOn || !(min > 0)) return 0;
+  if (S.waitMode === 'tier'){
+    // 구간표: "upto분까지 fee원", 마지막 구간(upto 없음)은 그 이상 전부
+    for (const t of S.tiers){ if (t.upto == null || min <= t.upto) return t.fee; }
+    return S.tiers.length ? S.tiers[S.tiers.length - 1].fee : 0;
+  }
+  if (!(min > S.waitFree)) return 0;
+  return Math.ceil((min - S.waitFree) / Math.max(1, S.waitUnit)) * S.waitFee;
+}
+
+/* ===== 요금 기준 (시행규칙 / 계약·협약) ===== */
+// 기본 제공 계약 기준 (수정·삭제 불가, 필요하면 복사해서 수정)
+const PRESETS = [];
+const STD_KEY = 'ambFareStds', STD_SEL_KEY = 'ambFareStdSel';
+let stds = [], stdSel = { mode: 'law', id: '', locked: false }, editingStd = null, formTiers = [];
+function normStd(S){
+  return Object.assign({ nightStart: 18, nightEnd: 9, waitMode: 'unit', tiers: [] }, S);
+}
+const allStds = () => [...PRESETS, ...stds].map(x => normStd(x.lawRates ? Object.assign({}, x, { special: LAW_OPS.med.special, general: LAW_OPS.med.general }) : x));
+function selKey(){ return curUser ? STD_SEL_KEY + '_u_' + encodeURIComponent(curUser) : STD_SEL_KEY; }
+function loadStdSel(){
+  const sel = lsGet(selKey()) || (curUser ? lsGet(STD_SEL_KEY) : null);
+  stdSel = Object.assign({ mode: 'law', id: '', locked: false }, sel || {}, { mode: 'law', locked: false });   // 시행규칙만 사용
+  const list = allStds();
+  if (stdSel.mode === 'contract' && !list.some(x => x.id === stdSel.id)) stdSel.id = list[0] ? list[0].id : '';
+}
+function loadStds(){
+  const v = lsGet(STD_KEY); stds = Array.isArray(v) ? v : [];
+  loadStdSel();
+}
+function saveStds(){ lsSet(STD_KEY, stds); lsSet(selKey(), stdSel); }
+function curStd(d){
+  const v = d ? (typeof d === 'string' ? d : (isNaN(d) ? mainDate() : ymd(d))) : mainDate();
+  const V = lawVerFor(v), op = V.ops[stdSel.op] || V.ops.med;
+  return normStd(Object.assign({}, LAW, V.rules, { name: LAW.name + (V.tag ? ' ' + V.tag : '') + ' · ' + op.name, special: op.special, general: op.general, verLabel: V.label }));
+}
+function setLawOp(op){ if (stdSel.locked) return renderStdUI(); stdSel.op = op; saveStds(); renderStdUI(); }
+function stdLabel(S){ return S.name; }   // 본문·출력물에는 기준 이름만 표기 (메모는 관리 화면에서만)
+function nightText(S){ return pad(S.nightStart) + ':00~' + (S.nightEnd <= S.nightStart ? '익일 ' : '') + pad(S.nightEnd) + ':00'; }
+function waitText(S){
+  if (!S.waitOn) return '대기요금 없음';
+  if (S.waitMode === 'tier'){
+    const free = S.tiers.find(t => t.fee === 0);
+    return '대기 구간표' + (free ? ' (' + free.upto + '분까지 없음, 최대 ' + won(Math.max(...S.tiers.map(t => t.fee))) + ')' : '');
+  }
+  return '대기 ' + S.waitFree + '분 초과 ' + S.waitUnit + '분당 ' + won(S.waitFee);
+}
+function stdBrief(S){
+  const p = [];
+  const same = S.special.base === S.general.base && S.special.perKm === S.general.perKm;
+  if (same) p.push('기본 ' + won(S.special.base) + ' (' + S.baseKm + 'km) + km당 ' + won(S.special.perKm) + ' (특수·일반 동일)');
+  else {
+    p.push('특수 ' + won(S.special.base) + ' (' + S.baseKm + 'km) + km당 ' + won(S.special.perKm));
+    p.push('일반 ' + won(S.general.base) + ' + km당 ' + won(S.general.perKm));
+  }
+  const sw = [S.night ? '야간 ' + nightText(S) : '', S.hol ? '휴일' : ''].filter(Boolean).join(', ');
+  p.push(S.sur > 0 && sw ? '할증 ' + S.sur + '% (' + sw + ')' : '할증 없음');
+  p.push(waitText(S));
+  return p.join(' · ');
+}
+function renderStdUI(){
+  const list = allStds(), isC = stdSel.mode === 'contract', locked = !!stdSel.locked;
+  $(isC ? 'stdC' : 'stdL').checked = true;
+  document.querySelector('.stdpl').classList.toggle('hidden', !isC);
+  document.querySelectorAll('.oprow').forEach(el => el.classList.toggle('hidden', isC));
+  $(stdSel.op === 'np' ? 'opN' : 'opM').checked = true;
+  ['opM','opN'].forEach(i => $(i).disabled = locked);
+  document.querySelector('.stdpick').classList.toggle('hidden', !isC);
+  const sel = $('stdSel'); sel.innerHTML = '';
+  list.forEach(x => { const o = document.createElement('option'); o.value = x.id; o.textContent = x.name; sel.appendChild(o); });
+  sel.value = stdSel.id || '';
+  ['stdL','stdC','stdSel'].forEach(i => $(i).disabled = locked);
+  document.querySelectorAll('input[name=lawop] + label').forEach(l => l.classList.toggle('locked', locked));
+  document.querySelectorAll('input[name=std] + label').forEach(l => l.classList.toggle('locked', locked));
+  $('stdLock').checked = locked;
+  $('stdLockLab').textContent = (curUser ? '"' + curUser + '" 사용자' : '이 기기') + '의 적용 기준으로 고정';
+  const S = curStd();
+  $('stdInfo').textContent = isC ? '적용 : ' + stdBrief(S) : '';
+  renderRateTable();
+  updateNightLabels();
+}
+function toggleStdLock(on){ stdSel.locked = !!on; saveStds(); renderStdUI(); }
+function renderRateTable(){
+  const S = curStd(), sw = [S.night ? '야간 ' + nightText(S) : '', S.hol ? '토·일·공휴일' : ''].filter(Boolean).join(', ');
+  $('rateSum').textContent = '요금 기준표 보기 (' + (S.id === 'law' ? '시행규칙' + (S.verLabel && S.verLabel.includes('개정 전') ? ' · 개정 전 요율' : '') : S.name) + ')';
+  let h = '<tr><td>특수구급차 기본요금 (' + S.baseKm + 'km 이내)</td><td>' + won(S.special.base) + '</td></tr>'
+    + '<tr><td>특수구급차 추가요금 (1km당)</td><td>' + won(S.special.perKm) + '</td></tr>'
+    + '<tr><td>일반구급차 기본요금 (' + S.baseKm + 'km 이내)</td><td>' + won(S.general.base) + '</td></tr>'
+    + '<tr><td>일반구급차 추가요금 (1km당)</td><td>' + won(S.general.perKm) + '</td></tr>'
+    + '<tr><td>할증' + (sw ? ' (' + sw + ')' : '') + '</td><td>' + (S.sur > 0 && sw ? S.sur + '%' : '없음') + '</td></tr>';
+  if (!S.waitOn) h += '<tr><td>대기요금</td><td>없음</td></tr>';
+  else if (S.waitMode === 'tier'){
+    let prev = 0;
+    S.tiers.forEach(t => {
+      h += '<tr><td>대기 ' + (t.upto == null ? prev + '분 초과' : (prev ? prev + '분 초과 ' : '') + t.upto + '분까지') + '</td><td>' + (t.fee ? won(t.fee) : '미발생') + '</td></tr>';
+      if (t.upto != null) prev = t.upto;
+    });
+  } else h += '<tr><td>대기요금 (도착 후 ' + S.waitFree + '분 초과)</td><td>' + S.waitUnit + '분당 ' + won(S.waitFee) + '</td></tr>';
+  $('rateTable').innerHTML = h;
+  if ($('lawHist')) $('lawHist').innerHTML = lawHistHTML();
+}
+function setStdMode(mode){
+  if (stdSel.locked){ renderStdUI(); return; }
+  stdSel.mode = mode;
+  if (mode === 'contract' && !stdSel.id){ const l = allStds(); if (l[0]) stdSel.id = l[0].id; }
+  saveStds(); renderStdUI();
+}
+function selectStd(id){ if (stdSel.locked) return renderStdUI(); stdSel.id = id; saveStds(); renderStdUI(); }
+/* 기준 관리 화면 */
+function openStdEditor(){ $('stdLayer').style.display = 'block'; renderStdList(); cancelStdForm(); }
+function closeStdEditor(){ $('stdLayer').style.display = 'none'; renderStdUI(); }
+function renderStdList(){
+  const box = $('stdListBox'); box.innerHTML = '';
+  allStds().forEach(x => {
+    const d = document.createElement('div'); d.className = 'stditem';
+    d.innerHTML = '<div class="txt"><b></b><span></span></div>' + (x.preset ? '<button>복사</button>' : '<button>수정</button><button>삭제</button>');
+    d.querySelector('b').textContent = x.name + (x.preset ? ' [기본 제공]' : '');
+    d.querySelector('span').textContent = stdBrief(x) + (x.memo ? ' · ' + x.memo : '');
+    const bs = d.querySelectorAll('button');
+    if (x.preset) bs[0].onclick = () => editStd(x.id, true);
+    else {
+      bs[0].onclick = () => editStd(x.id);
+      bs[1].onclick = () => {
+        if (!confirm('"' + x.name + '" 기준을 삭제할까요?')) return;
+        stds = stds.filter(y => y.id !== x.id);
+        if (stdSel.id === x.id){ stdSel.id = PRESETS[0].id; }
+        saveStds(); renderStdList(); renderStdUI();
+      };
+    }
+    box.appendChild(d);
+  });
+}
+function hourOpts(sel){ let o = ''; for (let i = 0; i < 24; i++) o += '<option value="' + i + '"' + (i === sel ? ' selected' : '') + '>' + pad(i) + ':00</option>'; return o; }
+function renderTierRows(){
+  const box = $('fTiers'); box.innerHTML = '';
+  formTiers.forEach((t, i) => {
+    const r = document.createElement('div'); r.className = 'tier';
+    r.innerHTML = '<input type="number" min="0" step="10" inputmode="numeric" placeholder="이상 전부"><span>분까지</span>'
+      + '<input type="number" min="0" step="1000" inputmode="numeric" placeholder="0"><span>원</span><button class="x" aria-label="삭제">×</button>';
+    const [a, b] = r.querySelectorAll('input');
+    a.value = t.upto == null ? '' : t.upto; b.value = t.fee;
+    a.oninput = () => { t.upto = a.value === '' ? null : Math.max(0, parseFloat(a.value) || 0); };
+    b.oninput = () => { t.fee = Math.max(0, parseFloat(b.value) || 0); };
+    r.querySelector('button').onclick = () => { formTiers.splice(i, 1); renderTierRows(); };
+    box.appendChild(r);
+  });
+}
+function addTierRow(){ formTiers.push({ upto: null, fee: 0 }); renderTierRows(); }
+function setWaitModeUI(mode){
+  $('fWaitMode').value = mode;
+  $('fWaitUnitBox').classList.toggle('hidden', mode === 'tier');
+  $('fWaitTierBox').classList.toggle('hidden', mode !== 'tier');
+}
+function editStd(id, copy){
+  const x = allStds().find(y => y.id === id);
+  editingStd = x && !copy ? x.id : null;
+  const src = normStd(x || LAW);
+  $('fName').value = x ? x.name + (copy ? ' (복사본)' : '') : '';
+  $('fBaseKm').value = src.baseKm;
+  $('fSpBase').value = src.special.base; $('fSpKm').value = src.special.perKm;
+  $('fGnBase').value = src.general.base; $('fGnKm').value = src.general.perKm;
+  $('fSur').value = src.sur; $('fNight').checked = src.night; $('fHol').checked = src.hol;
+  $('fNightS').innerHTML = hourOpts(src.nightStart); $('fNightE').innerHTML = hourOpts(src.nightEnd);
+  $('fWaitOn').checked = src.waitOn; $('fWaitFree').value = src.waitFree; $('fWaitUnit').value = src.waitUnit; $('fWaitFee').value = src.waitFee;
+  formTiers = (src.tiers || []).map(t => ({ upto: t.upto, fee: t.fee }));
+  if (!formTiers.length) formTiers = [{ upto: 30, fee: 0 }, { upto: null, fee: 0 }];
+  renderTierRows(); setWaitModeUI(src.waitMode);
+  $('fMemo').value = x ? (x.memo || '') : '';
+  $('stdForm').classList.remove('hidden'); $('stdAddBtn').style.display = 'none';
+  $('fName').focus();
+}
+function cancelStdForm(){ $('stdForm').classList.add('hidden'); $('stdAddBtn').style.display = ''; editingStd = null; }
+function saveStd(){
+  const n = id => Math.max(0, parseFloat($(id).value) || 0);
+  const name = $('fName').value.trim();
+  if (!name) return alert('기준 이름을 입력해 주세요.');
+  if (allStds().some(y => y.name === name && y.id !== editingStd)) return alert('같은 이름의 기준이 있습니다.');
+  const waitMode = $('fWaitMode').value;
+  let tiers = [];
+  if (waitMode === 'tier'){
+    const fixed = formTiers.filter(t => t.upto != null).sort((a, b) => a.upto - b.upto);
+    const open = formTiers.filter(t => t.upto == null);
+    tiers = [...fixed, ...(open.length ? [open[open.length - 1]] : [])];
+    if (!tiers.length) return alert('대기 구간을 하나 이상 입력해 주세요.');
+  }
+  const obj = {
+    id: editingStd || ('c' + Date.now()), name, memo: $('fMemo').value.trim(),
+    baseKm: n('fBaseKm'),
+    special: { base: n('fSpBase'), perKm: n('fSpKm') },
+    general: { base: n('fGnBase'), perKm: n('fGnKm') },
+    sur: n('fSur'), night: $('fNight').checked, nightStart: +$('fNightS').value, nightEnd: +$('fNightE').value, hol: $('fHol').checked,
+    waitOn: $('fWaitOn').checked, waitMode, tiers,
+    waitFree: n('fWaitFree'), waitUnit: Math.max(1, n('fWaitUnit')), waitFee: n('fWaitFee')
+  };
+  const i = stds.findIndex(y => y.id === obj.id);
+  if (i >= 0) stds[i] = obj; else stds.push(obj);
+  if (!stdSel.locked){ stdSel.id = obj.id; stdSel.mode = 'contract'; }
+  saveStds(); renderStdList(); cancelStdForm(); renderStdUI();
+}
+
+async function calc(){
+  const type = radio('amb'), round = radio('trip') === 'round';
+  const dt1 = readWhen($('w1Box')), dt2 = readWhen($('w2Box'));
+  const e1 = whenErr(dt1, round ? '가는 편' : ''); if (e1) return alert(e1.trim());
+  if (round){ const e2 = whenErr(dt2, '돌아오는 편'); if (e2) return alert(e2); }
+  for (const id of wayIds){
+    if ($(id+'Q').value.trim() && !points[id]) return alert($(id+'Label').textContent + '를 검색 결과나 최근 목록에서 선택해 주세요.');
+  }
+  const ways = wayIds.map(id => points[id]).filter(Boolean);
+  const manual = parseFloat($('manualKm').value);
+  const btn = document.querySelector('button.primary');
+  const s = points.s, e = points.e;
+
+  const manual2 = parseFloat($('manualKm2').value);
+  let mapKm1 = null, mapKm2 = null, km1, km2, r1 = null, info = '', src1 = '직접 입력', src2 = '직접 입력';
+  if (manual > 0){
+    km1 = manual; km2 = manual2 > 0 ? manual2 : manual;
+    info = '직접 입력한 거리로 계산했습니다.';
+  } else {
+    if (!s || !e) return alert('출발지와 도착지를 선택해 주세요.');
+    const stops = [s, ...ways, e];
+    if (stops.some(p => !p.lat)) return alert('위치를 찾지 못한 장소가 있습니다. 다시 선택하거나 거리를 직접 입력해 주세요.');
+    btn.disabled = true; btn.textContent = '경로 계산 중…';
+    try {
+      r1 = await routeOrTable(stops, dt1); dt1.dur = r1.min;
+      km1 = r1.fixed ? r1.km : adjKm(r1.km); src1 = r1.fixed ? '구간 거리표' : adjSrc(r1.km); mapKm1 = r1.fixed ? null : r1.km;
+      info = '자동차 경로 기준 · ' + (round ? '가는 편 ' : '') + km1.toFixed(1) + 'km (' + src1 + ')';
+      if (round){
+        if (manual2 > 0){ km2 = manual2; info += ' / 오는 편 ' + km2.toFixed(1) + 'km (직접 입력)'; }
+        else {
+          const r2 = await routeOrTable([e, s], dt2); dt2.dur = r2.min;
+          km2 = r2.fixed ? r2.km : adjKm(r2.km); src2 = r2.fixed ? '구간 거리표' : adjSrc(r2.km); mapKm2 = r2.fixed ? null : r2.km;
+          info += ' / 오는 편(도착지 → 출발지 직행) ' + km2.toFixed(1) + 'km (' + src2 + ')';
+        }
+      }
+    } catch(err){
+      alert('경로를 계산하지 못했습니다. 잠시 후 다시 시도하거나 거리를 직접 입력해 주세요.');
+      return;
+    } finally { btn.disabled = false; btn.textContent = '예상 요금 계산'; }
+  }
+
+  const forceHol = false;
+  const legs = [{ title: round ? '가는 편' : '편도', f: Object.assign(fareLeg(type, km1, dt1, forceHol), { src: src1 }) }];
+  if (round) legs.push({ title: '오는 편', f: Object.assign(fareLeg(type, km2, dt2, forceHol), { src: src2 }) });
+  const wMin = parseInt($('wait').value, 10) || 0;   // [별표 3] 비고 3: 의료기관 도착 후 환자 인계 전까지 대기 (편도·왕복 공통)
+  const wFee = waitFee(wMin, dt1.date);
+  const trans = readTrans();
+  btn.disabled = true; btn.textContent = '요금 계산 중…';
+  const tErr = await priceAmbLegs(trans);
+  btn.disabled = false; btn.textContent = '예상 요금 계산';
+  if (tErr) return alert(tErr);
+  trans.filter(t => !t.amb).forEach(t => { ttAdd(t.from); ttAdd(t.to); });
+  renderTtList();
+
+  // 이송 요약
+  const nm = p => p ? esc(p.name) : '-';
+  let sum = '<tr><td>적용 기준</td><td>' + esc(stdLabel(curStd())) + '</td></tr>';
+  sum += '<tr><td>구급차</td><td>' + AMB_NAME[type] + ' · ' + (round ? '왕복' : '편도') + ' · ' + (radio('route') === 'home' ? '집 → 병원' : '병원 → 병원') + '</td></tr>';
+  sum += '<tr><td>경로</td><td>' + [s, ...ways, e].map(nm).join(' → ') + (round ? ' → ' + nm(s) : '') + '</td></tr>';
+  sum += '<tr><td>출발 일자</td><td>' + fmtWhen(dt1) + '</td></tr>';
+  if (round) sum += '<tr><td>돌아오는 편</td><td>' + fmtWhen(dt2) + '</td></tr>';
+  if (trans.length){
+    sum += '<tr><td>추가 구간</td><td>' + trans.map(t => esc(t.kind) + ' ' + (t.amb
+      ? nm(t.S) + ' → ' + nm(t.E) + (t.round ? ' (왕복)' : '')
+      : (t.from || t.to ? esc(t.from || '-') + ' → ' + esc(t.to || '-') : ''))).join('<br>') + '</td></tr>';
+  }
+  $('sumTable').innerHTML = sum;
+
+  let html = '', ambTotal = 0, transTotal = 0;
+  legs.forEach(L => {
+    const f = L.f;
+    html += '<tr class="leg"><td>' + L.title + ' · ' + f.rawKm.toFixed(1) + 'km → ' + f.km + 'km</td><td class="amt">' + won(f.sum) + '</td></tr>';
+    html += '<tr><td>기본요금 (' + curStd().baseKm + 'km 이내)</td><td class="amt">' + won(f.base) + '</td></tr>';
+    html += '<tr><td>추가요금 ' + f.extraKm + 'km × ' + won(f.per) + '</td><td class="amt">' + won(f.extra) + '</td></tr>';
+    html += '<tr><td>할증</td><td>' + (f.reasons.length ? curStd().sur + '% (' + f.reasons.join('·') + ')' : '없음') + '</td></tr>';
+    ambTotal += f.sum;
+  });
+  if (wMin > 0 || round) html += '<tr class="leg"><td>대기요금 (' + wMin + '분)</td><td class="amt">' + won(wFee) + '</td></tr>';
+  ambTotal += wFee;
+
+  if (trans.length){
+    transTotal = trans.reduce((a, t) => a + t.cost + t.labor, 0);
+    html += '<tr class="leg"><td>추가 교통수단</td><td class="amt">' + won(transTotal) + '</td></tr>';
+    trans.forEach(t => {
+      if (t.amb){
+        const f = t.f;
+        html += '<tr><td>' + AMB_NAME[t.type] + ' · ' + (t.round ? '왕복' : '편도') + ' · ' + nm(t.S) + ' → ' + nm(t.E)
+          + '<div class="tdet">' + ambLegDetail(t, curStd()) + '</div></td>'
+          + '<td class="amt">' + won(t.cost + t.labor) + '</td></tr>';
+      } else {
+        const route = t.from || t.to ? ' · ' + esc(t.from || '-') + ' → ' + esc(t.to || '-') : '';
+        html += '<tr><td>' + esc(t.kind) + route
+          + '<div class="tdet">' + (t.ship ? '승선 ' + t.mins + '분 ' + won(t.shipFee) + ' · 도선료 등 실비 ' + won(t.actual) : '실비 ' + won(t.cost)) + ' · 인건비 ' + won(t.labor) + (t.memo ? ' · ' + esc(t.memo) : '') + '</div></td>'
+          + '<td class="amt">' + won(t.cost + t.labor) + '</td></tr>';
+      }
+    });
+  }
+
+  $('resTable').innerHTML = html;
+  $('total').textContent = '합계 ' + won(ambTotal + transTotal);
+  $('subtotal').textContent = trans.length ? '구급차 ' + won(ambTotal) + ' + 추가 교통수단 ' + won(transTotal) : '';
+  $('routeInfo').textContent = info;
+  const S0 = curStd();
+  const noteTxt = '할증은 각 편의 출발 시각 기준입니다. 경유지는 한 번의 연속 운행으로 계산합니다. '
+    + (S0.waitOn ? (S0.waitMode === 'tier' ? '대기요금은 의료기관 도착 후 환자 인계 전까지의 대기 시간에 대해 기준의 구간표에 따라 부과됩니다. ' : '대기요금은 의료기관 도착 후 환자 인계 전까지의 대기 시간에 대해 ' + S0.waitFree + '분 경과 후부터 ' + S0.waitUnit + '분 단위(미만 올림)로 부과됩니다. ') : '')
+    + '의료진 동승료, 통행료 등은 포함되지 않았으며, 추가 교통수단 비용은 입력한 금액입니다. 추가 구간 구급차는 별도 운행으로 계산합니다.';
+  $('resNote').textContent = noteTxt;
+  lastRep = { S: S0, mapKm1, mapKm2, type, round, routeType: radio('route'), stops: [s, ...ways, e], dt1, dt2, legs, wMin, wFee, trans, ambTotal, transTotal, info, note: noteTxt };
+  afterCalc();
+  $('resCard').classList.remove('hidden');
+  $('resCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ===== 이미지·PDF 저장 ===== */
+function loadScript(src){
+  return new Promise((ok, fail) => {
+    if (document.querySelector('script[src="' + src + '"]')) return ok();
+    const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail;
+    document.head.appendChild(s);
+  });
+}
+function fileStamp(){ const d = new Date(); return ymd(d).replace(/-/g,'') + '_' + pad(d.getHours()) + pad(d.getMinutes()); }
+/* 저장용 1페이지 보고서 (A4 비율, 내용이 많으면 한 장 안에 맞게 축소) */
+function buildReport(R){
+  const qrOn = !!($('qrOn') && $('qrOn').checked);
+  const nm = p => p ? esc(p.name) : '-';
+  const S = R.S, now = new Date();
+  const circ = i => String.fromCharCode(0x2460 + i);          // ① ② ③ …
+  const amt = n => Math.round(n).toLocaleString('ko-KR') + '<small>원</small>';
+  const det = (label, sub, n) => '<tr class="det"><td><span class="lb">' + label + '</span>' + (sub ? '<span class="sb">' + sub + '</span>' : '') + '</td><td class="c3">' + amt(n) + '</td></tr>';
+  const legSub = f => f.rawKm.toFixed(1) + 'km' + (f.src ? ' (' + f.src + ')' : '') + ' → ' + f.km + 'km 적용 · 기본 ' + won(f.base)
+    + (f.extraKm ? ' + 추가 ' + f.extraKm + 'km × ' + won(f.per) : '')
+    + ' · 할증 ' + (f.reasons.length ? S.sur + '% (' + f.reasons.join('·') + ')' : '없음');
+  const waitSub = () => S.waitOn ? (S.waitMode === 'tier' ? '대기 구간표 적용' : S.waitFree + '분 초과 ' + S.waitUnit + '분당 ' + won(S.waitFee)) : '대기요금 없음';
+
+  // 교통수단별 구간 (① 본 구급차, ② 이후 추가 교통수단)
+  const segs = [];
+  const nWays = R.stops.length - 2;
+  segs.push({
+    kind: AMB_NAME[R.type], round: R.round, from: nm(R.stops[0]), to: nm(R.stops[R.stops.length - 1]),
+    tags: nWays > 0 ? ['경유 ' + nWays + '곳'] : [], total: R.ambTotal,
+    rows: R.legs.map(L => det(L.title + (R.round ? ' · ' + fmtWhen(L.title === '오는 편' ? R.dt2 : R.dt1) : ''), legSub(L.f), L.f.sum))
+      .concat(R.wMin > 0 ? [det('대기 ' + R.wMin + '분', waitSub(), R.wFee)] : [])
+  });
+  R.trans.forEach(t => {
+    if (t.amb){
+      const rows = [det((t.round ? '가는 편 · ' : '') + fmtWhen(t.when), legSub(t.f), t.f.sum)];
+      if (t.round) rows.push(det('오는 편 · ' + fmtWhen(t.when2), legSub(t.f2), t.f2.sum));
+      if (t.wait > 0) rows.push(det('대기 ' + t.wait + '분', waitSub(), t.waitFee));
+      if (t.labor) rows.push(det('인건비', '동승 인력 등', t.labor));
+      segs.push({ kind: AMB_NAME[t.type], round: t.round, from: nm(t.S), to: nm(t.E), tags: t.memo ? [esc(t.memo)] : [], total: t.cost + t.labor, rows });
+    } else {
+      const rows = t.ship
+        ? [det('승선 이송 ' + t.mins + '분', SHIP_UNIT_MIN + '분마다 ' + won(SHIP_UNIT_FEE) + ' (별표 3 비고 4)', t.shipFee), det('실비', '도선료·숙박비 등', t.actual), det('인건비', '동승 인력 등', t.labor)]
+        : [det('실비', '운임·교통비 등', t.cost), det('인건비', '동승 인력 등', t.labor)];
+      segs.push({ kind: esc(t.kind), round: false, from: t.from ? esc(t.from) : '-', to: t.to ? esc(t.to) : '-', tags: t.memo ? [esc(t.memo)] : [], total: t.cost + t.labor, rows });
+    }
+  });
+
+  // 이송 경로: 주요 지점만, 구간 번호
+  let chain = '', last = null;
+  segs.forEach((g, i) => {
+    if (g.from !== last) chain += (chain ? '<i class="gap">·</i>' : '') + '<b>' + g.from + '</b>';
+    chain += '<i>' + circ(i) + (g.round ? ' ⇄ ' : ' → ') + '</i><b>' + g.to + '</b>';
+    last = g.to;
+  });
+  const legend = segs.map((g, i) => circ(i) + ' ' + g.kind + (g.round ? '(왕복)' : '')).join('   ');
+
+  let rows = '';
+  segs.forEach((g, i) => {
+    rows += '<tr class="grp"><td><span class="no">' + (i + 1) + '</span><span class="kd">' + g.kind + '</span>'
+      + '<span class="rt">' + g.from + (g.round ? ' ⇄ ' : ' → ') + g.to + '</span>'
+      + '<span class="tg">' + (g.round ? '왕복' : '편도') + '</span>' + g.tags.map(x => '<span class="tg">' + x + '</span>').join('')
+      + '</td><td class="c3">' + amt(g.total) + '</td></tr>' + g.rows.join('');
+  });
+  const breakdown = segs.length > 1 ? '<div class="bk">' + segs.map((g, i) => '<span>' + circ(i) + ' ' + g.kind + ' ' + won(g.total) + '</span>').join('') + '</div>' : '';
+
+  return '<div class="rp-head"><div><b>민간구급차 예상 비용 산정서</b><span>' + esc(stdLabel(S)) + '</span></div>'
+    + '<div class="rp-meta">산출 일시 ' + fmtDT(now) + (curUser ? '<br>안내 ' + esc(writerText()) : '') + '</div></div>'
+    + '<table class="rp-info">'
+    + '<tr><th>출발 일자</th><td>' + fmtWhen(R.dt1) + (R.round ? ' / 돌아오는 편 ' + fmtWhen(R.dt2) : '') + '</td></tr>'
+    + '<tr><th>이송 경로</th><td><div class="chain">' + chain + '</div><span class="legend">' + legend + '</span></td></tr>'
+    + '</table>'
+    + '<table class="rp-fee"><thead><tr><th>산출 내역</th><th class="c3">금액</th></tr></thead><tbody>' + rows + '</tbody></table>'
+    + '<div class="rp-total"><div class="tt"><span>예상 합계</span><b>' + amt(R.ambTotal + R.transTotal) + '</b></div>' + breakdown + '</div>'
+    + (R.verify ? '<div class="rp-verify ' + (R.verify.diff > 0 ? 'bad' : 'good') + '">청구액 검증 : 업체 청구 ' + won(R.verify.billed) + ' / 시행규칙 기준 상한 ' + won(R.verify.cap) + ' → <b>' + (R.verify.diff > 0 ? won(R.verify.diff) + ' 초과' : '적정') + '</b></div>' : '')
+    + '<div class="rp-note">' + esc(R.note) + '</div>'
+    + (curUser ? '<div class="rp-contact">문의 : <b>' + esc(userLabel(curUser)) + '</b>' + (uInfo(curUser).phone ? ' · ☎ ' + esc(uInfo(curUser).phone) : '') + '</div>' : '')
+    + (qrOn ? '<div class="rp-qrrow">' : '') + '<div class="rp-foot"><strong>본 자료는 예상 금액 안내 자료이므로 참고만 하시기 바랍니다.</strong><br>'
+    + '요금 기준 : ' + esc(stdLabel(S)) + '<br>'
+    + '개발자 : ' + APP.dev + ' · 개발일자 ' + APP.devDate + ' · 수정일자 ' + APP.modDate + '</div>' + (qrOn ? '<div class=\"rp-qr\">QR로 같은 조건<br>다시 계산</div></div>' : '')
+    + '<div class="rp-org">민간구급차 비용 산정 · 그리움의 편지</div>';
+}
+function makeReportEl(){
+  const el = document.createElement('div');
+  el.className = 'report'; el.innerHTML = buildReport(lastRep);
+  return el;
+}
+async function captureResult(){
+  if (!lastRep) throw new Error('no result');
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+  const box = makeReportEl(); box.id = 'report';
+  document.body.appendChild(box);
+  await addQR(box);
+  try {
+    return await html2canvas(box, { scale: 2, backgroundColor: '#ffffff', logging: false, windowWidth: 900 });
+  } finally { box.remove(); }
+}
+/* 미리보기: 저장될 A4 한 장을 화면 폭에 맞춰 축소해 보여줌 */
+function fitPreview(){
+  const wrap = $('pvWrap'), el = wrap.firstChild; if (!el) return;
+  const k = Math.min(1, (window.innerWidth - 24) / 794);
+  el.style.transform = 'scale(' + k + ')';
+  wrap.style.width = (794 * k) + 'px';
+  wrap.style.height = (el.offsetHeight * k) + 'px';
+}
+async function openPreview(){
+  if (!lastRep) return;
+  const wrap = $('pvWrap'); wrap.innerHTML = '';
+  const rpEl = makeReportEl(); wrap.appendChild(rpEl);
+  $('pvLayer').style.display = 'block'; $('pvLayer').scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+  fitPreview();
+  await addQR(rpEl); fitPreview();
+  const img = wrap.querySelector('img'); if (img && !img.complete) img.onload = fitPreview;
+}
+function closePreview(){ $('pvLayer').style.display = 'none'; document.body.style.overflow = ''; }
+window.addEventListener('resize', () => { if ($('pvLayer').style.display === 'block') fitPreview(); });
+function saveBlob(blob, name){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+async function shareOrSave(blob, name, type){
+  const file = new File([blob], name, { type });
+  if (navigator.canShare && /Android|iPhone|iPad/i.test(navigator.userAgent) && navigator.canShare({ files: [file] })){
+    try { await navigator.share({ files: [file], title: '민간구급차 예상 요금' }); return; } catch(e){ if (e.name === 'AbortError') return; }
+  }
+  saveBlob(blob, name);
+}
+async function exportResult(kind, btnEl){
+  const btn = btnEl || $(kind === 'pdf' ? 'btnPdf' : 'btnImg'), label = btn.textContent;
+  btn.disabled = true; btn.textContent = '만드는 중…';
+  try {
+    const canvas = await captureResult();
+    const name = '민간구급차_예상요금_' + fileStamp();
+    if (kind === 'png'){
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+      await shareOrSave(blob, name + '.png', 'image/png');
+    } else {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pw = 210, ph = 297, m = 10, maxW = pw - m * 2, maxH = ph - m * 2;
+      // 항상 A4 한 장: 가로에 맞추고, 길면 세로에 맞게 축소
+      const k = Math.min(maxW / canvas.width, maxH / canvas.height);
+      const w = canvas.width * k, h = canvas.height * k;
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', (pw - w) / 2, m, w, h);
+      await shareOrSave(pdf.output('blob'), name + '.pdf', 'application/pdf');
+    }
+  } catch(e){
+    alert('저장하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.');
+  } finally { btn.disabled = false; btn.textContent = label; }
+}
+
+/* ===== 초기화 ===== */
+function resetForm(){
+  [...wayIds].forEach(removeWay);
+  ['s','e'].forEach(w => { points[w] = null; $(w+'Q').value = ''; $(w+'Picked').textContent = ''; $(w+'List').style.display = 'none'; });
+  [...document.querySelectorAll('#transList .trow')].forEach(r => removeTrans(r.id));
+  $('ambS').checked = true; $('rH').checked = true; $('tO').checked = true;
+  $('wait').value = 0; $('manualKm').value = ''; $('manualKm2').value = '';
+  const now = new Date(); now.setSeconds(0, 0);
+  resetWhen($('w1Box')); resetWhen($('w2Box'));
+  $('resCard').classList.add('hidden');
+  ['resTable','sumTable'].forEach(i => $(i).innerHTML = '');
+  ['total','subtotal','routeInfo'].forEach(i => $(i).textContent = '');
+  updateLabels();
+  $('formCard').scrollIntoView({ behavior: 'smooth' });
+}
+function editForm(){ $('formCard').scrollIntoView({ behavior: 'smooth' }); }
+
+/* ===== 화면 동작 ===== */
+function updateLabels(){
+  const home = radio('route') === 'home';
+  $('sLabel').textContent = home ? '출발지 (집 주소)' : '출발지 (병원)';
+  $('sQ').placeholder = home ? '주소 또는 아파트·건물 이름' : '병원 이름 (예: 분당서울대학교병원)';
+  $('retBox').classList.toggle('hidden', !isRound());
+  ['w1Box', 'w2Box'].forEach(id => { const b = $(id); if (b && b.querySelector('.wtbox')) updateWhen(b, false); });
+  if (isRound() && $('w1Box').querySelector('.wd')) syncBackDate($('w1Box'));
+  $('mk2Box').classList.toggle('hidden', !isRound());
+  $('mk1Lab').textContent = isRound() ? '가는 편 km' : '실제 거리 직접 입력 km';
+  refreshPrevHints();
+}
+document.querySelectorAll('input[name=route], input[name=trip]').forEach(r => r.addEventListener('change', updateLabels));
+
+
+/* =====================================================================
+   추가 기능 (2026-11 고도화)
+   ① 청구액 검증 ② 이력 백업·복원·엑셀 ③ 구간 거리표 ④ 즐겨찾기·자주 쓰는 조건
+   ⑤ 비교 보기 ⑥ 보호자 안내문 ⑦ 대기 스톱워치 ⑧ 결과 링크·QR ⑨ 큰 글씨·다크 모드
+   ⑩ 요금 기준 시행일 이력 ⑪ 보정률 학습 ⑫ 월별 통계 ⑬ 공휴일 갱신
+   ===================================================================== */
+const uKey = base => curUser ? base + '_u_' + encodeURIComponent(curUser) : base;
+const r6 = x => x == null ? null : Math.round(x * 1e6) / 1e6;
+const ptOf = p => p ? { name: p.name, addr: p.addr || '', lat: r6(p.lat), lng: r6(p.lng) } : null;
+const normName = s => String(s || '').replace(/\s+/g, '').toLowerCase();
+function geoDist(a, b){            // m
+  if (!a || !b || !a.lat || !b.lat) return Infinity;
+  const R = 6371000, t = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * t, dLng = (b.lng - a.lng) * t;
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * t) * Math.cos(b.lat * t) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+const samePlace = (a, b) => !!a && !!b && (normName(a.name) === normName(b.name) || geoDist(a, b) < 300);
+function copyText(t){
+  if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t).then(() => true, () => fallbackCopy(t));
+  return Promise.resolve(fallbackCopy(t));
+}
+function fallbackCopy(t){
+  const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch(e){}
+  ta.remove(); return ok;
+}
+function csvDownload(rows, name){
+  const q = v => { const s = v == null ? '' : String(v); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const txt = '﻿' + rows.map(r => r.map(q).join(',')).join('\r\n');
+  saveBlob(new Blob([txt], { type: 'text/csv;charset=utf-8' }), name);
+}
+
+/* ---------- ⑩ 요금 기준 시행일 이력 ---------- */
+const LAW_VERSIONS = [
+  { from: '2026-08-14', label: '2026.7.13 개정 · 2026.8.14 시행', tag: '',
+    ops: LAW_OPS, rules: { sur: 20, night: true, nightStart: 18, nightEnd: 9, hol: true, waitOn: true } },
+  { from: '0000-01-01', label: '개정 전 (2026.8.13까지)', tag: '(개정 전 요율)',
+    ops: { med: { name: '의료기관 등', special: { base: 75000, perKm: 1300 }, general: { base: 30000, perKm: 1000 } },
+           np:  { name: '비영리법인', special: { base: 50000, perKm: 1000 }, general: { base: 20000, perKm: 800 } } },
+    rules: { sur: 20, night: true, nightStart: 0, nightEnd: 4, hol: false, waitOn: false } }
+];
+function lawVerFor(v){ return LAW_VERSIONS.find(x => v >= x.from) || LAW_VERSIONS[LAW_VERSIONS.length - 1]; }
+function mainDate(){ const b = $('w1Box'), d = b && b.querySelector('.wd'); return (d && d.value) || ymd(new Date()); }
+function lawHistHTML(){
+  const cur = lawVerFor(mainDate()), op = stdSel.op === 'np' ? 'np' : 'med';
+  let h = '<table class="lawhist"><tr><th>시행 구분</th><th>특수 기본·km</th><th>일반 기본·km</th><th>할증</th><th>대기</th></tr>';
+  LAW_VERSIONS.forEach(V => {
+    const o = V.ops[op], R = V.rules;
+    h += '<tr' + (V === cur ? ' class="cur"' : '') + '><td>' + V.label + (V === cur ? ' ◀ 적용' : '') + '</td>'
+      + '<td>' + won(o.special.base) + ' · ' + won(o.special.perKm) + '</td><td>' + won(o.general.base) + ' · ' + won(o.general.perKm) + '</td>'
+      + '<td>' + R.sur + '% ' + (R.nightStart === 18 ? '평일18~9시·토·공휴일' : '00~04시') + '</td><td>' + (R.waitOn ? '30분 초과 10분당 6,000원' : '없음') + '</td></tr>';
+  });
+  return h + '</table><div class="note">출발 일자에 맞는 요율을 자동으로 적용합니다. (' + (op === 'np' ? '비영리법인' : '의료기관 등') + ' 기준 표시)</div>';
+}
+
+/* ---------- ⑨ 큰 글씨 · 다크 모드 ---------- */
+const VIEW_KEY = 'ambFareView';
+function applyView(){
+  const v = lsGet(VIEW_KEY) || {};
+  document.documentElement.classList.toggle('big', !!v.big);
+  document.documentElement.classList.toggle('dark', !!v.dark);
+  if ($('vBig')) $('vBig').classList.toggle('on', !!v.big);
+  if ($('vDark')) $('vDark').classList.toggle('on', !!v.dark);
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = v.dark ? '#10131b' : '#1f2a5c';
+}
+function toggleView(k){ const v = lsGet(VIEW_KEY) || {}; v[k] = !v[k]; lsSet(VIEW_KEY, v); applyView(); }
+
+/* ---------- ⑬ 공휴일 (직접 추가 · 인터넷 갱신) ---------- */
+const HOL_KEY = 'ambFareHolidays';
+const HOL_BASE = Object.assign({}, HOLIDAY_NAMES);       // 프로그램에 들어 있는 공휴일
+function holStore(){ const v = lsGet(HOL_KEY); return Object.assign({ custom: {}, fetched: {}, fetchedAt: {}, auto: true, key: '' }, v && typeof v === 'object' ? v : {}); }
+function holSave(h){ lsSet(HOL_KEY, h); applyHolidays(); }
+function applyHolidays(){
+  const h = holStore();
+  Object.keys(HOLIDAY_NAMES).forEach(k => { if (!(k in HOL_BASE)) delete HOLIDAY_NAMES[k]; });
+  Object.values(h.fetched).forEach(y => Object.assign(HOLIDAY_NAMES, y));
+  Object.assign(HOLIDAY_NAMES, h.custom);
+}
+function holSource(d){
+  const h = holStore();
+  if (h.custom[d]) return '직접';
+  if (Object.values(h.fetched).some(y => y[d]) && !HOL_BASE[d]) return '갱신';
+  return '기본';
+}
+async function fetchHolidays(year, quiet){
+  const h = holStore(), out = {};
+  try {
+    if (h.key){
+      const url = 'https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?_type=json&numOfRows=100&solYear=' + year + '&ServiceKey=' + encodeURIComponent(h.key);
+      const j = await (await fetch(url)).json();
+      let it = j && j.response && j.response.body && j.response.body.items && j.response.body.items.item;
+      it = Array.isArray(it) ? it : it ? [it] : [];
+      it.filter(x => x.isHoliday === 'Y').forEach(x => { const s = String(x.locdate); out[s.slice(0,4) + '-' + s.slice(4,6) + '-' + s.slice(6,8)] = x.dateName; });
+    } else {
+      const j = await (await fetch('https://date.nager.at/api/v3/PublicHolidays/' + year + '/KR')).json();
+      (Array.isArray(j) ? j : []).forEach(x => { if (x.date) out[x.date] = x.localName || x.name; });
+    }
+  } catch(e){ if (!quiet) alert('공휴일 정보를 가져오지 못했습니다. 인터넷 연결을 확인하거나, 목록에 없는 날은 "직접 추가"로 넣어 주세요.'); return -1; }
+  if (!Object.keys(out).length){ if (!quiet) alert(year + '년 공휴일 정보를 받지 못했습니다. 직접 추가로 넣어 주세요.'); return -1; }
+  const h2 = holStore(); h2.fetched[year] = out; h2.fetchedAt[year] = Date.now(); holSave(h2);
+  return Object.keys(out).filter(d => !HOL_BASE[d]).length;
+}
+function autoHolidays(){
+  const h = holStore(); if (!h.auto || !navigator.onLine) return;
+  const y = new Date().getFullYear();
+  [y, y + 1].forEach(yy => { if (!h.fetchedAt[yy] || Date.now() - h.fetchedAt[yy] > 20 * 864e5) fetchHolidays(yy, true).then(() => { document.querySelectorAll('.when').forEach(b => { if (b.querySelector('.wtbox')) updateWhen(b, false); }); }); });
+}
+
+/* ---------- ④ 즐겨찾기 장소 ---------- */
+const FAV_KEY = 'ambFareFav';
+const favLoad = () => { const v = lsGet(uKey(FAV_KEY)); return Array.isArray(v) ? v : []; };
+const favSave = l => lsSet(uKey(FAV_KEY), l.slice(0, 30));
+const isFav = p => favLoad().some(f => samePlace(f, p) && normName(f.addr) === normName(p.addr));
+function toggleFav(p){
+  let l = favLoad();
+  if (l.some(f => samePlace(f, p) && normName(f.addr) === normName(p.addr))) l = l.filter(f => !(samePlace(f, p) && normName(f.addr) === normName(p.addr)));
+  else l.unshift(ptOf(p));
+  favSave(l); allPlaceIds().forEach(renderChips);
+}
+
+/* ---------- ④ 자주 쓰는 조건 (템플릿) · ⑧ 링크 공용 스냅샷 ---------- */
+function snapWhen(box){
+  if (!box || !box.querySelector('.wd')) return null;
+  const q = c => box.querySelector(c);
+  return { d: q('.wd').value, n: q('.wn').checked, h: q('.wh').checked, t: q('.wt').value, a: q('.wa').value };
+}
+function putWhen(box, w){
+  if (!box || !w || !box.querySelector('.wd')) return;
+  const q = c => box.querySelector(c);
+  if (w.d) q('.wd').value = w.d;
+  q('.wn').checked = !!w.n; q('.wh').checked = !!w.h; q('.wt').value = w.t || ''; q('.wa').value = w.a || '';
+  updateWhen(box, false);
+}
+function snapForm(withDates){
+  const trans = [...document.querySelectorAll('#transList .trow')].map(r => {
+    const v = c => { const el = r.querySelector('.' + c); return el ? el.value : ''; };
+    const t = { kind: r.dataset.kind, memo: v('tmemo'), labor: v('tlabor') };
+    if (r.dataset.kind === AMB_KIND){
+      Object.assign(t, { type: r.querySelector('input[name="' + r.id + 'amb"]:checked').value, round: legRound(r.id),
+        S: ptOf(points[r.id + 'S']), E: ptOf(points[r.id + 'E']), wait: v('twait'), km: v('tkm') });
+      if (withDates){ t.w1 = snapWhen(r.querySelector('.tw')); t.w2 = snapWhen(r.querySelector('.tw2')); }
+    } else Object.assign(t, { from: v('tfrom'), to: v('tto'), cost: v('tcost'), tmin: v('tmin') });
+    return t;
+  });
+  const o = { v: 1, amb: radio('amb'), route: radio('route'), trip: radio('trip'), op: stdSel.op || 'med',
+    s: ptOf(points.s), e: ptOf(points.e), ways: wayIds.map(id => ptOf(points[id])).filter(Boolean),
+    wait: $('wait').value, mk1: $('manualKm').value, mk2: $('manualKm2').value, trans };
+  if (withDates){ o.d1 = snapWhen($('w1Box')); o.d2 = snapWhen($('w2Box')); }
+  return o;
+}
+function applyForm(o){
+  if (!o) return;
+  resetForm();
+  const chk = id => { const el = $(id); if (el){ el.checked = true; } };
+  chk(o.amb === 'general' ? 'ambG' : 'ambS'); chk(o.route === 'hosp' ? 'rP' : 'rH'); chk(o.trip === 'round' ? 'tR' : 'tO');
+  if (o.op && !stdSel.locked && typeof setLawOp === 'function' && LAW_OPS[o.op]) setLawOp(o.op);
+  updateLabels();
+  if (o.s) setPoint('s', o.s);
+  (o.ways || []).forEach(p => { addWay(); setPoint(wayIds[wayIds.length - 1], p); });
+  if (o.e) setPoint('e', o.e);
+  $('wait').value = o.wait || 0; $('manualKm').value = o.mk1 || ''; $('manualKm2').value = o.mk2 || '';
+  if (o.d1) putWhen($('w1Box'), o.d1);
+  if (o.d2) putWhen($('w2Box'), o.d2);
+  (o.trans || []).forEach(t => {
+    addTrans();
+    const r = [...document.querySelectorAll('#transList .trow')].pop(), id = r.id;
+    r.querySelector('select').value = t.kind; setTransKind(id, t.kind);
+    const set = (c, v) => { const el = r.querySelector('.' + c); if (el && v != null) el.value = v; };
+    set('tmemo', t.memo); set('tlabor', t.labor);
+    if (t.kind === AMB_KIND){
+      const a = $(id + (t.type === 'general' ? 'aG' : 'aS')); if (a) a.checked = true;
+      const tr = $(id + (t.round ? 'tR' : 'tO')); if (tr){ tr.checked = true; tr.dispatchEvent(new Event('change')); }
+      if (t.S) setPoint(id + 'S', t.S); if (t.E) setPoint(id + 'E', t.E);
+      set('twait', t.wait); set('tkm', t.km);
+      if (t.w1) putWhen(r.querySelector('.tw'), t.w1);
+      if (t.w2) putWhen(r.querySelector('.tw2'), t.w2);
+    } else { set('tfrom', t.from); set('tto', t.to); set('tcost', t.cost); set('tmin', t.tmin); }
+  });
+  refreshPrevHints();
+}
+const TPL_KEY = 'ambFareTpl';
+const tplLoad = () => { const v = lsGet(uKey(TPL_KEY)); return Array.isArray(v) ? v : []; };
+function renderTpl(){
+  const sel = $('tplSel'); if (!sel) return;
+  const l = tplLoad();
+  sel.innerHTML = '<option value="">⭐ 자주 쓰는 조건 불러오기' + (l.length ? ' (' + l.length + ')' : '') + '</option>'
+    + l.map(t => '<option value="' + t.id + '">' + esc(t.name) + '</option>').join('');
+  $('tplDel').style.display = 'none';
+}
+function pickTpl(id){
+  $('tplDel').style.display = id ? '' : 'none';
+  const t = tplLoad().find(x => x.id === id); if (!t) return;
+  applyForm(t.snap);
+  $('tplSel').value = id; $('tplDel').style.display = '';
+}
+function saveTpl(){
+  const sn = snapForm(false);
+  const auto = (sn.s ? sn.s.name : '출발지') + ' → ' + (sn.e ? sn.e.name : '도착지') + ' · ' + AMB_NAME[sn.amb].replace('구급차', '') + ' · ' + (sn.trip === 'round' ? '왕복' : '편도');
+  const name = (prompt('저장할 조건 이름 (예: 장기이식 왕복)', auto) || '').trim();
+  if (!name) return;
+  const l = tplLoad().filter(t => t.name !== name);
+  l.unshift({ id: 't' + Date.now(), name, snap: sn });
+  lsSet(uKey(TPL_KEY), l.slice(0, 30)); renderTpl();
+  alert('"' + name + '" 조건을 저장했습니다. 날짜는 저장하지 않고, 불러올 때 오늘 날짜로 시작합니다.');
+}
+function delTpl(){
+  const id = $('tplSel').value; const t = tplLoad().find(x => x.id === id); if (!t) return;
+  if (!confirm('"' + t.name + '" 조건을 삭제할까요?')) return;
+  lsSet(uKey(TPL_KEY), tplLoad().filter(x => x.id !== id)); renderTpl();
+}
+
+/* ---------- ⑦ 대기 스톱워치 ---------- */
+const SW_KEY = 'ambFareSW';
+let swTimer = null;
+function swState(){ return lsGet(SW_KEY); }
+function swRender(){
+  const st = swState(), row = $('swRow'); if (!row) return;
+  row.classList.toggle('running', !!st);
+  $('swBtn').classList.toggle('run', !!st);
+  if (!st){ $('swBtn').textContent = '⏱ 대기 시작'; $('swTxt').textContent = '병원 도착 때 누르고, 환자 인계가 끝나면 다시 누르세요.'; return; }
+  const min = Math.max(0, Math.floor((Date.now() - st.start) / 60000));
+  $('swBtn').textContent = '■ 인계 완료';
+  $('swTxt').textContent = hm(new Date(st.start)) + ' 도착 · ' + min + '분 경과 · 대기요금 ' + won(waitFee(min, mainDate()));
+}
+function swToggle(){
+  const st = swState();
+  if (!st){ lsSet(SW_KEY, { start: Date.now() }); }
+  else {
+    const min = Math.max(0, Math.ceil((Date.now() - st.start) / 60000));
+    lsDel(SW_KEY); $('wait').value = min;
+    alert('대기 ' + min + '분을 입력했습니다. (' + hm(new Date(st.start)) + ' 도착 → ' + hm(new Date()) + ' 인계)');
+  }
+  swRender(); swTick();
+}
+function swCancel(){ if (confirm('측정 중인 대기 시간을 취소할까요?')){ lsDel(SW_KEY); swRender(); swTick(); } }
+function swTick(){ clearInterval(swTimer); if (swState()) swTimer = setInterval(swRender, 15000); }
+
+/* ---------- ③ 구간 거리표 · ⑪ 보정률 학습 ---------- */
+const RT_KEY = 'ambFareRouteTbl';
+const rtLoad = () => { const v = lsGet(RT_KEY); return Array.isArray(v) ? v : []; };
+const rtSave = l => lsSet(RT_KEY, l.slice(0, 200));
+function rtFind(a, b){
+  const l = rtLoad();
+  return l.find(x => samePlace(x.from, a) && samePlace(x.to, b)) || l.find(x => x.both && samePlace(x.from, b) && samePlace(x.to, a)) || null;
+}
+function rtUpsert(a, b, km, min, both, memo){
+  const l = rtLoad();
+  const i = l.findIndex(x => samePlace(x.from, a) && samePlace(x.to, b));
+  const it = { id: i >= 0 ? l[i].id : 'r' + Date.now() + Math.floor(Math.random() * 99), from: ptOf(a), to: ptOf(b), km: Math.round(km * 10) / 10,
+    min: min || (i >= 0 ? l[i].min : null), both: !!both, memo: memo != null ? memo : (i >= 0 ? l[i].memo : ''), ts: Date.now(), user: curUser || '' };
+  if (i >= 0) l.splice(i, 1);
+  l.unshift(it); rtSave(l);
+}
+async function routeOrTable(list, when){
+  if (list.length === 2){
+    const hit = rtFind(list[0], list[1]);
+    if (hit){ lastRouteLabel = '구간 거리표'; return { km: hit.km, min: hit.min || hit.km / 45 * 60, coords: null, fixed: true }; }
+  }
+  return routeMulti(list, when);
+}
+const SMP_KEY = 'ambFareAdjSamples';
+const smpLoad = () => { const v = lsGet(uKey(SMP_KEY)); return Array.isArray(v) ? v : []; };
+function smpAdd(map, actual, label){
+  if (!(map > 1) || !(actual > 0)) return;
+  const l = smpLoad(); l.unshift({ map: Math.round(map * 10) / 10, actual: Math.round(actual * 10) / 10, label, ts: Date.now() });
+  lsSet(uKey(SMP_KEY), l.slice(0, 50));
+}
+function adjSuggest(){
+  const l = smpLoad().slice(0, 20).map(s => (s.actual / s.map - 1) * 100).filter(x => isFinite(x) && x > -50 && x < 100).sort((a, b) => a - b);
+  if (l.length < 2) return { n: l.length, pct: null };
+  const m = l.length % 2 ? l[(l.length - 1) / 2] : (l[l.length / 2 - 1] + l[l.length / 2]) / 2;
+  return { n: l.length, pct: Math.round(m) };
+}
+function applyAdj(p){
+  $('distAdj').value = p || ''; lsSet(adjKey(), p || 0);
+  alert('거리 보정률을 ' + (p > 0 ? '+' : '') + p + '%로 바꿨습니다. 다음 계산부터 적용됩니다.');
+}
+
+/* ---------- 산정 이력 (② 백업·엑셀, ⑫ 통계의 바탕) ---------- */
+const REC_KEY = 'ambFareCalcs', REC_MAX = 500;
+const recLoad = () => { const v = lsGet(REC_KEY); return Array.isArray(v) ? v : []; };
+const recSave = l => lsSet(REC_KEY, l.slice(0, REC_MAX));
+function recUpdate(id, patch){ const l = recLoad(), r = l.find(x => x.id === id); if (r){ Object.assign(r, patch); recSave(l); } }
+function saveRecord(R){
+  const reasons = [...new Set([].concat(...R.legs.map(L => L.f.reasons), ...R.trans.filter(t => t.amb).map(t => [].concat(t.f.reasons, t.f2 ? t.f2.reasons : []))))];
+  const rec = {
+    id: 'c' + Date.now(), ts: Date.now(), user: curUser || '',
+    date: ymd(R.dt1.date), amb: R.type, round: R.round, route: R.routeType, op: stdSel.op || 'med',
+    from: R.stops[0] ? R.stops[0].name : '', to: R.stops[R.stops.length - 1] ? R.stops[R.stops.length - 1].name : '', ways: R.stops.length - 2,
+    km1: R.legs[0].f.km, km2: R.legs[1] ? R.legs[1].f.km : null, src: R.legs[0].f.src || '',
+    night: reasons.some(r => r.includes('야간')), hol: reasons.some(r => !r.includes('야간')), reasons,
+    wait: R.wMin, amt: R.ambTotal, trans: R.transTotal, total: R.ambTotal + R.transTotal, cap: R.cap,
+    snap: snapForm(true)
+  };
+  const l = recLoad(); l.unshift(rec); recSave(l);
+  return rec.id;
+}
+function recFilter(scope){ const l = recLoad(); return scope === 'all' || !curUser ? l : l.filter(r => r.user === curUser); }
+
+/* ---------- 계산 후 처리 ---------- */
+function capOf(R){        // 시행규칙상 이송처치료 상한 (구급차 요금 + 대기 + 추가 구간 구급차 + 선박 승선료)
+  let c = R.ambTotal;
+  R.trans.forEach(t => { if (t.amb) c += t.cost; else if (t.ship) c += t.shipFee; });
+  return c;
+}
+function afterCalc(){
+  const R = lastRep; if (!R) return;
+  R.cap = capOf(R);
+  R.verify = null;
+  R.snapLink = snapForm(true);
+  R.recId = saveRecord(R);
+  $('vAmt').value = '';
+  $('vRes').className = 'xres'; $('vRes').innerHTML = '';
+  $('vCap').textContent = '기준 상한 ' + won(R.cap);
+  renderCompare();
+  renderActual();
+  $('shareBox').classList.remove('hidden');
+  updateBkWarn();
+}
+/* ⑤ 비교 보기 */
+function withOp(op, fn){ const o = stdSel.op; stdSel.op = op; try { return fn(); } finally { stdSel.op = o; } }
+function cmpTotal(type, round, op){
+  const R = lastRep;
+  const k1 = R.legs[0].f.rawKm, k2 = R.legs[1] ? R.legs[1].f.rawKm : k1;
+  const w2 = R.round ? R.dt2 : Object.assign({}, R.dt1, { time: '', arr: '', night: false });
+  return withOp(op, () => {
+    let s = fareLeg(type, k1, Object.assign({}, R.dt1)).sum;
+    if (round) s += fareLeg(type, k2, Object.assign({}, w2)).sum;
+    return s + waitFee(R.wMin, R.dt1.date);
+  });
+}
+function renderCompare(){
+  const R = lastRep, op = stdSel.op === 'np' ? 'np' : 'med', other = op === 'np' ? 'med' : 'np';
+  const cell = (t, rd) => '<td' + (t === R.type && rd === R.round ? ' class="cur"' : '') + '>' + won(cmpTotal(t, rd, op)) + '</td>';
+  let h = '<h3>비교 보기 <small>' + LAW_OPS[op].name + ' · 대기 ' + R.wMin + '분 포함</small></h3>'
+    + '<table class="cmp"><tr><th>구급차</th><th>편도</th><th>왕복</th></tr>'
+    + '<tr><td>특수구급차</td>' + cell('special', false) + cell('special', true) + '</tr>'
+    + '<tr><td>일반구급차</td>' + cell('general', false) + cell('general', true) + '</tr></table>'
+    + '<div class="note">같은 거리·날짜 기준입니다. 붉은 칸이 지금 계산한 조건입니다. '
+    + (R.round ? '' : '왕복은 오는 편을 가는 편과 같은 거리·주간 운행으로 가정했습니다. ')
+    + LAW_OPS[other].name + ' 운용이면 지금 조건으로 <b>' + won(cmpTotal(R.type, R.round, other)) + '</b>입니다. 추가 교통수단은 빠져 있습니다.</div>';
+  $('xCompare').innerHTML = h;
+}
+/* ① 청구액 검증 */
+function runVerify(){
+  const R = lastRep; if (!R) return;
+  const billed = Math.round(parseFloat(String($('vAmt').value).replace(/,/g, '')) || 0);
+  const box = $('vRes');
+  if (!(billed > 0)){ box.className = 'xres'; box.innerHTML = ''; R.verify = null; return; }
+  const diff = billed - R.cap, pct = R.cap ? diff / R.cap * 100 : 0;
+  R.verify = { billed, cap: R.cap, diff };
+  if (diff > 0){
+    box.className = 'xres bad';
+    box.innerHTML = '<b>⚠ ' + won(diff) + ' 초과</b> (' + pct.toFixed(1) + '%)<br>청구 ' + won(billed) + ' / 시행규칙 기준 상한 ' + won(R.cap)
+      + '<br><span style="font-size:12px">거리·대기시간·할증 조건이 실제와 같은지 먼저 확인하세요. 같다면 「응급의료에 관한 법률 시행규칙」 [별표 3]을 넘는 청구입니다.</span>';
+  } else {
+    box.className = 'xres good';
+    box.innerHTML = '<b>✓ 적정</b> — 기준 상한 이내' + (diff < 0 ? ' (' + won(-diff) + ' 낮음)' : '') + '<br>청구 ' + won(billed) + ' / 시행규칙 기준 상한 ' + won(R.cap);
+  }
+  if (R.recId) recUpdate(R.recId, { verify: R.verify });
+}
+/* ⑪ 실제 운행거리 기록 → 구간 거리표 + 보정률 학습 */
+function renderActual(){
+  const R = lastRep, box = $('xActual');
+  const can = R.stops.length === 2 && R.stops[0] && R.stops[1];
+  box.classList.toggle('hidden', !can);
+  if (!can) return;
+  $('aKm1').value = R.legs[0].f.km; $('aKm2').value = R.legs[1] ? R.legs[1].f.km : '';
+  $('aKm2Box').style.visibility = R.round ? 'visible' : 'hidden';
+  $('aSave').checked = true;
+  const hit = rtFind(R.stops[0], R.stops[1]);
+  $('aNote').innerHTML = (hit ? '이 구간은 <b>구간 거리표(' + hit.km + 'km)</b>로 계산했습니다. ' : '')
+    + '실제 운행거리(운행기록·영수증)를 넣으면 다음부터 이 구간은 그 거리로 계산하고, 자동 거리 보정률도 학습합니다.';
+  $('aRes').className = 'xres'; $('aRes').innerHTML = '';
+}
+function saveActual(){
+  const R = lastRep; if (!R) return;
+  const a1 = parseFloat($('aKm1').value), a2 = R.round ? parseFloat($('aKm2').value) : NaN;
+  if (!(a1 > 0)) return alert('가는 편 실제 거리를 입력해 주세요.');
+  const s = R.stops[0], e = R.stops[1];
+  if ($('aSave').checked){
+    const back = a2 > 0 ? a2 : a1;
+    rtUpsert(s, e, a1, R.dt1.dur || null, Math.abs(back - a1) < 0.05);
+    if (R.round && a2 > 0 && Math.abs(a2 - a1) >= 0.05) rtUpsert(e, s, a2, R.dt2.dur || null, false);
+  }
+  if (R.mapKm1) smpAdd(R.mapKm1, a1, s.name + '→' + e.name);
+  if (R.round && R.mapKm2 && a2 > 0) smpAdd(R.mapKm2, a2, e.name + '→' + s.name);
+  if (R.recId) recUpdate(R.recId, { actual: { go: a1, back: a2 > 0 ? a2 : null } });
+  const sg = adjSuggest(), cur = adjPct();
+  let h = '✓ 기록했습니다.' + ($('aSave').checked ? ' 다음부터 이 구간은 ' + a1 + 'km로 계산합니다.' : '');
+  if (sg.pct != null && sg.pct !== cur) h += '<br>지금까지 ' + sg.n + '건 기준 추천 보정률은 <b>' + (sg.pct > 0 ? '+' : '') + sg.pct + '%</b>입니다 (현재 ' + cur + '%). <button type="button" class="ghost" onclick="applyAdj(' + sg.pct + ')">추천값 적용</button>';
+  $('aRes').className = 'xres info'; $('aRes').innerHTML = h;
+}
+
+/* ---------- ⑥ 보호자 안내문 ---------- */
+function guideData(){
+  const R = lastRep, nm = p => p ? p.name : '-';
+  const lines = [];
+  R.legs.forEach(L => lines.push(L.title + ' ' + L.f.km + 'km · ' + won(L.f.sum) + (L.f.reasons.length ? ' (할증 ' + R.S.sur + '%)' : '')));
+  if (R.wMin > 0) lines.push('병원 도착 후 대기 ' + R.wMin + '분 · ' + won(R.wFee));
+  R.trans.forEach(t => lines.push((t.amb ? '추가 구급차 ' + nm(t.S) + '→' + nm(t.E) : t.kind + (t.from || t.to ? ' ' + (t.from || '-') + '→' + (t.to || '-') : '')) + ' · ' + won(t.cost + t.labor)));
+  return {
+    date: fmtD(R.dt1.date) + (R.round && ymd(R.dt2.date) !== ymd(R.dt1.date) ? ' · 돌아오는 날 ' + fmtD(R.dt2.date) : ''),
+    route: [R.stops[0], ...R.stops.slice(1)].map(nm).join(' → ') + (R.round ? ' → ' + nm(R.stops[0]) : ''),
+    car: AMB_NAME[R.type] + ' · ' + (R.round ? '왕복' : '편도'),
+    total: R.ambTotal + R.transTotal, lines,
+    contact: curUser ? userLabel(curUser) + (uInfo(curUser).phone ? ' ☎ ' + uInfo(curUser).phone : '') : ''
+  };
+}
+const GUIDE_NOTE = '실제 운행 거리·시간과 병원 대기 시간에 따라 금액이 달라질 수 있습니다. 의료진 동승료·통행료 등은 따로 받을 수 있습니다.';
+function guideText(){
+  const g = guideData();
+  return '[민간구급차 예상 비용 안내]\n'
+    + '■ 날짜 : ' + g.date + '\n■ 구간 : ' + g.route + '\n■ 구급차 : ' + g.car + '\n'
+    + '■ 예상 금액 : 약 ' + won(g.total) + '\n' + g.lines.map(l => '  - ' + l).join('\n') + '\n'
+    + '※ ' + GUIDE_NOTE + (g.contact ? '\n문의 : ' + g.contact : '');
+}
+function openGuide(){
+  if (!lastRep) return;
+  const g = guideData();
+  $('gdCard').innerHTML = '<h3>민간구급차 예상 비용 안내</h3>'
+    + '<div class="gt"><span>날짜</span><div>' + esc(g.date) + '</div><span>구간</span><div>' + esc(g.route) + '</div><span>구급차</span><div>' + esc(g.car) + '</div></div>'
+    + '<div class="gsum"><small>예상 금액</small>약 ' + won(g.total) + '</div>'
+    + '<ul>' + g.lines.map(l => '<li>' + esc(l) + '</li>').join('') + '</ul>'
+    + '<div class="gnote">※ ' + GUIDE_NOTE + '</div>'
+    + (g.contact ? '<div class="gcall">문의 : <b>' + esc(g.contact) + '</b></div>' : '');
+  $('gdLayer').style.display = 'block'; document.body.style.overflow = 'hidden';
+}
+function closeGuide(){ $('gdLayer').style.display = 'none'; document.body.style.overflow = ''; }
+async function copyGuide(){ const ok = await copyText(guideText()); alert(ok ? '안내문을 복사했습니다. 카카오톡·문자에 붙여 넣으세요.' : '복사하지 못했습니다.'); }
+async function shareGuide(){
+  const t = guideText();
+  if (navigator.share){ try { await navigator.share({ title: '민간구급차 예상 비용 안내', text: t }); return; } catch(e){ if (e.name === 'AbortError') return; } }
+  const ok = await copyText(t); alert(ok ? '이 기기에서는 바로 보내기가 되지 않아 글을 복사했습니다. 메신저에 붙여 넣으세요.' : '보내지 못했습니다.');
+}
+async function saveGuideImg(btn){
+  const label = btn.textContent; btn.disabled = true; btn.textContent = '만드는 중…';
+  try {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    const c = await html2canvas($('gdCard'), { scale: 2, backgroundColor: '#ffffff', logging: false });
+    const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+    await shareOrSave(blob, '구급차_보호자안내_' + fileStamp() + '.png', 'image/png');
+  } catch(e){ alert('이미지를 만들지 못했습니다. 인터넷 연결을 확인해 주세요.'); }
+  finally { btn.disabled = false; btn.textContent = label; }
+}
+
+/* ---------- ⑧ 결과 링크 · QR ---------- */
+function b64urlEnc(s){ const b = new TextEncoder().encode(s); let bin = ''; b.forEach(x => bin += String.fromCharCode(x)); return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function b64urlDec(s){ const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/')); return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))); }
+function shareLink(){
+  const o = lastRep && lastRep.snapLink ? lastRep.snapLink : snapForm(true);
+  return location.href.split('#')[0] + '#c=' + b64urlEnc(JSON.stringify(o));
+}
+async function copyLink(){
+  if (!/^https?:$/.test(location.protocol)) alert('링크는 인터넷 주소(웹)에 올린 앱에서 열 때만 동작합니다. 지금은 파일로 열려 있어 다른 기기에서 열 수 없습니다.');
+  const ok = await copyText(shareLink());
+  alert(ok ? '다시 계산 링크를 복사했습니다. 링크를 열면 같은 조건이 채워지고 바로 계산됩니다.\n(출발지·도착지 주소가 링크에 들어갑니다)' : '복사하지 못했습니다.');
+}
+function loadFromHash(){
+  const m = location.hash.match(/^#c=([A-Za-z0-9_-]+)/); if (!m) return;
+  let o = null; try { o = JSON.parse(b64urlDec(m[1])); } catch(e){}
+  history.replaceState(null, '', location.href.split('#')[0]);
+  if (!o) return;
+  applyForm(o);
+  const n = document.createElement('div'); n.className = 'shared';
+  n.innerHTML = '<span>🔗 공유받은 조건을 불러왔습니다.</span><button class="x" aria-label="닫기">×</button>';
+  n.querySelector('button').onclick = () => n.remove();
+  $('formCard').insertBefore(n, $('formCard').children[1]);
+  setTimeout(() => calc(), 300);
+}
+async function addQR(el){
+  if (!$('qrOn') || !$('qrOn').checked || !lastRep) return;
+  const box = el.querySelector('.rp-qr'); if (!box) return;
+  try {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js');
+    const holder = document.createElement('div');
+    new QRCode(holder, { text: shareLink(), width: 192, height: 192, correctLevel: QRCode.CorrectLevel.L });
+    const cv = holder.querySelector('canvas');
+    const img = document.createElement('img'); img.src = cv.toDataURL('image/png');
+    box.insertBefore(img, box.firstChild);
+    await new Promise(r => { if (img.complete) r(); else img.onload = r; });
+  } catch(e){ box.remove(); }
+}
+
+/* ---------- 관리 화면 ---------- */
+let mgTab = 'hist', mgScope = 'me';
+function openMg(tab){ $('mgLayer').style.display = 'block'; document.body.style.overflow = 'hidden'; renderMg(tab || mgTab); }
+function closeMg(){ $('mgLayer').style.display = 'none'; document.body.style.overflow = ''; }
+function scopeSel(){
+  return curUser ? '<select onchange="mgScope=this.value;renderMg()"><option value="me"' + (mgScope === 'me' ? ' selected' : '') + '>' + esc(userLabel(curUser)) + '</option><option value="all"' + (mgScope === 'all' ? ' selected' : '') + '>전체 사용자</option></select>' : '<select disabled><option>이 기기 전체</option></select>';
+}
+function renderMg(tab){
+  if (tab) mgTab = tab;
+  document.querySelectorAll('#mgTabs button').forEach(b => b.classList.toggle('on', b.dataset.t === mgTab));
+  const B = $('mgBody');
+  if (mgTab === 'hist'){
+    const l = recFilter(mgScope);
+    let h = '<div class="mrow">' + scopeSel() + '<button onclick="exportRecCSV()">⬇ 엑셀(CSV)</button></div>';
+    if (!l.length) h += '<div class="empty">아직 산정 이력이 없습니다.<br>요금을 계산하면 자동으로 쌓입니다.</div>';
+    l.slice(0, 100).forEach(r => {
+      const v = r.verify ? (r.verify.diff > 0 ? '<span class="badge bad">청구 ' + won(r.verify.diff) + ' 초과</span>' : '<span class="badge good">청구 적정</span>') : '';
+      const tags = (r.night ? '<span class="badge">야간</span>' : '') + (r.hol ? '<span class="badge">휴일</span>' : '') + (r.actual ? '<span class="badge src">실측</span>' : '');
+      h += '<div class="mitem"><div><div class="t1">' + esc(r.date) + ' 출발 · ' + AMB_NAME[r.amb] + ' · ' + (r.round ? '왕복' : '편도') + (mgScope === 'all' && r.user ? ' · ' + esc(r.user) : '') + '</div>'
+        + '<div class="t2">' + esc(r.from) + ' → ' + esc(r.to) + (r.ways ? ' (경유 ' + r.ways + ')' : '') + ' · ' + r.km1 + 'km' + tags + v + '</div></div>'
+        + '<div class="amt">' + won(r.total) + '</div>'
+        + '<div class="acts"><button class="ghost" onclick="loadRec(\'' + r.id + '\')">불러오기</button><button class="ghost" onclick="delRec(\'' + r.id + '\')">삭제</button></div></div>';
+    });
+    if (l.length > 100) h += '<div class="mnote">최근 100건만 보입니다. 전체는 엑셀(CSV)로 내려받으세요.</div>';
+    if (l.length) h += '<div class="mrow"><span></span><button class="ghost" onclick="clearRec()">목록 전체 삭제</button></div>';
+    B.innerHTML = h;
+  } else if (mgTab === 'stat'){
+    const l = recFilter(mgScope), by = {};
+    l.forEach(r => { const m = (r.date || '').slice(0, 7); if (!m) return; (by[m] = by[m] || []).push(r); });
+    const ms = Object.keys(by).sort().reverse();
+    let h = '<div class="mrow">' + scopeSel() + '<button onclick="exportStatCSV()">⬇ 통계 CSV</button></div>';
+    if (!ms.length){ B.innerHTML = h + '<div class="empty">통계를 낼 이력이 없습니다.</div>'; return; }
+    const max = Math.max(...ms.map(m => by[m].length));
+    let T = { n: 0, sum: 0, nh: 0, km: 0, over: 0, ver: 0 };
+    h += '<table class="stat"><thead><tr><th>출발 월</th><th>건수</th><th>합계</th><th>평균</th><th>야간·휴일</th><th>평균 거리</th></tr></thead><tbody>';
+    ms.forEach(m => {
+      const a = by[m], st = statOf(a);
+      T.n += st.n; T.sum += st.sum; T.nh += st.nh; T.km += st.kmSum; T.over += st.over; T.ver += st.ver;
+      h += '<tr><td>' + m + '<span class="bar" style="width:' + Math.max(6, st.n / max * 100) + '%"></span></td><td>' + st.n + '</td><td>' + won(st.sum) + '</td><td>' + won(st.sum / st.n) + '</td><td>' + Math.round(st.nh / st.n * 100) + '%</td><td>' + (st.kmSum / st.n).toFixed(1) + 'km</td></tr>';
+    });
+    h += '</tbody><tfoot><tr><td>전체</td><td>' + T.n + '</td><td>' + won(T.sum) + '</td><td>' + won(T.sum / T.n) + '</td><td>' + Math.round(T.nh / T.n * 100) + '%</td><td>' + (T.km / T.n).toFixed(1) + 'km</td></tr></tfoot></table>';
+    h += '<div class="mnote">출발 일자 기준 · 금액은 추가 교통수단을 포함한 예상 합계입니다.' + (T.ver ? ' 청구액 검증 ' + T.ver + '건 중 초과 ' + T.over + '건.' : '') + '</div>';
+    B.innerHTML = h;
+  } else if (mgTab === 'dist'){
+    const l = rtLoad();
+    let h = '<div class="mnote">자주 가는 구간의 실제 운행거리를 저장해 두면 카카오 길찾기 대신 이 거리로 계산합니다 (경유지 없는 구간). 결과 화면의 "실제 운행거리 기록"으로도 저장됩니다.</div>';
+    h += '<div class="mrow3"><input type="text" id="rtA" placeholder="출발 (이름 그대로)"><input type="text" id="rtB" placeholder="도착 (이름 그대로)"><input type="number" id="rtK" placeholder="km" step="0.1" inputmode="decimal"></div>'
+      + '<div class="mrow"><label class="chk" style="margin:0"><input type="checkbox" id="rtBoth" checked> 돌아오는 길도 같은 거리</label><button onclick="addRt()">＋ 구간 추가</button></div>';
+    if (!l.length) h += '<div class="empty">저장된 구간이 없습니다.</div>';
+    l.forEach(x => {
+      h += '<div class="mitem"><div><div class="t2">' + esc(x.from.name) + (x.both ? ' ⇄ ' : ' → ') + esc(x.to.name) + '</div>'
+        + '<div class="t1">' + (x.both ? '양방향' : '한 방향') + (x.from.lat ? ' · 위치 일치로도 찾음' : ' · 이름이 같을 때만 적용') + (x.memo ? ' · ' + esc(x.memo) : '') + '</div></div>'
+        + '<div class="amt">' + x.km + 'km</div><div class="acts"><button class="ghost" onclick="editRt(\'' + x.id + '\')">거리 수정</button><button class="ghost" onclick="delRt(\'' + x.id + '\')">삭제</button></div></div>';
+    });
+    const sg = adjSuggest(), cur = adjPct();
+    h += '<div class="msec"><h3>자동 거리 보정률 학습</h3><div class="mnote">실제 운행거리를 기록할 때마다 지도 거리와 비교해 보정률을 추천합니다. (사용자별, 최근 20건의 중앙값)</div>'
+      + '<div class="mnote">현재 보정률 <b>' + (cur > 0 ? '+' : '') + cur + '%</b> · 학습 ' + sg.n + '건' + (sg.pct != null ? ' · 추천 <b>' + (sg.pct > 0 ? '+' : '') + sg.pct + '%</b>' : ' · 2건 이상이면 추천합니다') + '</div>'
+      + '<div class="mrow"><button ' + (sg.pct == null ? 'disabled' : 'onclick="applyAdj(' + sg.pct + ');renderMg()"') + '>추천값 적용</button><button class="ghost" onclick="if(confirm(\'학습 기록을 지울까요?\')){lsDel(uKey(SMP_KEY));renderMg()}">학습 기록 지우기</button></div></div>';
+    B.innerHTML = h;
+  } else if (mgTab === 'hol'){
+    const hs = holStore(), y0 = new Date().getFullYear();
+    const yr = +(B.dataset.year || y0);
+    const days = Object.keys(HOLIDAY_NAMES).filter(d => d.startsWith(yr + '-')).sort();
+    let h = '<div class="mrow"><select onchange="$(\'mgBody\').dataset.year=this.value;renderMg()">'
+      + [y0 - 1, y0, y0 + 1].map(y => '<option' + (y === yr ? ' selected' : '') + '>' + y + '</option>').join('') + '</select>'
+      + '<button onclick="refreshHol(' + yr + ', this)">🌐 인터넷에서 갱신</button></div>'
+      + '<div class="mnote">' + (hs.fetchedAt[yr] ? '마지막 갱신 ' + fmtDT(new Date(hs.fetchedAt[yr])) : '아직 갱신하지 않았습니다') + ' · 토·일요일은 따로 넣지 않아도 자동으로 휴일 할증이 적용됩니다.</div>'
+      + '<div class="mrow3"><input type="date" id="holD"><input type="text" id="holN" placeholder="이름 (예: 임시공휴일)"><button onclick="addHol()">＋ 추가</button></div>';
+    if (!days.length) h += '<div class="empty">' + yr + '년 공휴일 정보가 없습니다. 갱신하거나 직접 추가해 주세요.</div>';
+    days.forEach(d => {
+      const src = holSource(d);
+      h += '<div class="mitem"><div><div class="t2">' + fmtD(new Date(d + 'T12:00')) + ' · ' + esc(HOLIDAY_NAMES[d]) + ' <span class="badge' + (src === '기본' ? '' : ' src') + '">' + src + '</span></div></div>'
+        + (src === '직접' ? '<div class="acts" style="grid-column:auto"><button class="ghost" onclick="delHol(\'' + d + '\')">삭제</button></div>' : '<div></div>') + '</div>';
+    });
+    h += '<div class="msec"><h3>갱신 설정</h3>'
+      + '<label class="chk"><input type="checkbox" ' + (hs.auto ? 'checked' : '') + ' onchange="const h=holStore();h.auto=this.checked;holSave(h)"> 앱을 열 때 올해·내년 공휴일 자동 갱신 (20일마다)</label>'
+      + '<div class="mnote">기본은 공개 공휴일 서비스(Nager.Date)를 씁니다. 공공데이터포털 「특일 정보」 인증키가 있으면 넣어 주세요. 인증키가 있으면 그 서비스로 갱신합니다. 임시공휴일은 발표가 늦게 반영될 수 있으니 직접 추가로 넣는 것이 가장 확실합니다.</div>'
+      + '<div class="mrow"><input type="text" id="holKey" placeholder="공공데이터포털 인증키 (선택)" value="' + esc(hs.key) + '"><button onclick="const h=holStore();h.key=$(\'holKey\').value.trim();holSave(h);alert(\'저장했습니다.\')">인증키 저장</button></div></div>';
+    B.innerHTML = h; B.dataset.year = yr;
+  } else if (mgTab === 'bak'){
+    const last = lsGet('ambFareLastBackup');
+    const n = Object.keys(localStorage).filter(k => k.startsWith('ambFare')).length;
+    B.innerHTML = '<div class="mnote">사용자·최근 장소·즐겨찾기·자주 쓰는 조건·산정 이력·구간 거리표·공휴일·보정률을 한 파일로 저장합니다. 이 자료는 이 기기의 브라우저에만 있으므로, 브라우저 기록을 지우거나 기기를 바꾸면 사라집니다.</div>'
+      + '<div class="mrow"><button onclick="backupAll()">⬇ 백업 파일 저장</button><button onclick="$(\'bakFile\').click()">⬆ 백업 불러오기</button></div>'
+      + '<div class="mnote">저장 항목 ' + n + '개 · 산정 이력 ' + recLoad().length + '건 · 마지막 백업 ' + (last ? fmtDT(new Date(last)) : '없음') + '</div>'
+      + '<div class="mnote">다른 기기로 옮길 때: 이 기기에서 백업 파일을 저장해 옮긴 뒤, 새 기기에서 "백업 불러오기"를 누르세요. 불러오면 같은 항목은 백업 파일 내용으로 바뀝니다.</div>';
+  }
+}
+function statOf(a){
+  return { n: a.length, sum: a.reduce((s, r) => s + (r.total || 0), 0), nh: a.filter(r => r.night || r.hol).length,
+    kmSum: a.reduce((s, r) => s + (r.km1 || 0), 0), over: a.filter(r => r.verify && r.verify.diff > 0).length, ver: a.filter(r => r.verify).length };
+}
+function loadRec(id){ const r = recLoad().find(x => x.id === id); if (!r) return; closeMg(); applyForm(r.snap); }
+function delRec(id){ recSave(recLoad().filter(x => x.id !== id)); renderMg(); }
+function clearRec(){
+  if (!confirm((mgScope === 'all' || !curUser ? '이 기기의 모든' : '"' + curUser + '" 사용자의') + ' 산정 이력을 삭제할까요? (되돌릴 수 없습니다)')) return;
+  recSave(mgScope === 'all' || !curUser ? [] : recLoad().filter(r => r.user !== curUser)); renderMg();
+}
+function exportRecCSV(){
+  const l = recFilter(mgScope); if (!l.length) return alert('내보낼 이력이 없습니다.');
+  const rows = [['산정 일시','사용자','출발 일자','운용자','구급차','편도/왕복','이송 유형','출발지','도착지','경유지 수','가는 편 km','오는 편 km','거리 기준','할증 사유','대기(분)','구급차 합계','추가 교통수단','예상 합계','기준 상한','업체 청구액','청구 차액','실측 km(가는 편)','실측 km(오는 편)']];
+  l.forEach(r => rows.push([fmtDT(new Date(r.ts)), r.user, r.date, r.op === 'np' ? '비영리법인' : '의료기관 등', AMB_NAME[r.amb], r.round ? '왕복' : '편도', r.route === 'hosp' ? '병원→병원' : '집→병원',
+    r.from, r.to, r.ways, r.km1, r.km2 == null ? '' : r.km2, r.src, (r.reasons || []).join('·'), r.wait, r.amt, r.trans, r.total, r.cap == null ? '' : r.cap,
+    r.verify ? r.verify.billed : '', r.verify ? r.verify.diff : '', r.actual ? r.actual.go : '', r.actual && r.actual.back ? r.actual.back : '']));
+  csvDownload(rows, '민간구급차_산정이력_' + fileStamp() + '.csv');
+}
+function exportStatCSV(){
+  const l = recFilter(mgScope), by = {};
+  l.forEach(r => { const m = (r.date || '').slice(0, 7); if (m) (by[m] = by[m] || []).push(r); });
+  const rows = [['출발 월','건수','예상 합계','평균','야간·휴일 건수','야간·휴일 비율(%)','평균 거리(km)','청구 검증 건수','청구 초과 건수']];
+  Object.keys(by).sort().forEach(m => { const s = statOf(by[m]); rows.push([m, s.n, s.sum, Math.round(s.sum / s.n), s.nh, Math.round(s.nh / s.n * 100), (s.kmSum / s.n).toFixed(1), s.ver, s.over]); });
+  if (rows.length < 2) return alert('내보낼 통계가 없습니다.');
+  csvDownload(rows, '민간구급차_월별통계_' + fileStamp() + '.csv');
+}
+function addRt(){
+  const a = $('rtA').value.trim(), b = $('rtB').value.trim(), k = parseFloat($('rtK').value);
+  if (!a || !b || !(k > 0)) return alert('출발·도착 이름과 거리를 입력해 주세요.');
+  const known = n => { const all = [].concat(...['s','w','e','x'].map(histLoad), favLoad()); return all.find(p => normName(p.name) === normName(n)) || { name: n }; };
+  rtUpsert(known(a), known(b), k, null, $('rtBoth').checked); renderMg();
+}
+function editRt(id){
+  const l = rtLoad(), x = l.find(y => y.id === id); if (!x) return;
+  const v = parseFloat(prompt(x.from.name + (x.both ? ' ⇄ ' : ' → ') + x.to.name + ' 거리 (km)', x.km));
+  if (!(v > 0)) return;
+  x.km = Math.round(v * 10) / 10; x.ts = Date.now(); rtSave(l); renderMg();
+}
+function delRt(id){ rtSave(rtLoad().filter(x => x.id !== id)); renderMg(); }
+async function refreshHol(y, btn){
+  btn.disabled = true; btn.textContent = '가져오는 중…';
+  const n = await fetchHolidays(y, false);
+  btn.disabled = false;
+  if (n >= 0){ renderMg(); document.querySelectorAll('.when').forEach(b => { if (b.querySelector('.wtbox')) updateWhen(b, false); }); alert(y + '년 공휴일을 갱신했습니다.' + (n ? ' 새로 추가된 날 ' + n + '일.' : ' 새로 추가된 날은 없습니다.')); }
+  else btn.textContent = '🌐 인터넷에서 갱신';
+}
+function addHol(){
+  const d = $('holD').value, n = $('holN').value.trim() || '공휴일';
+  if (!d) return alert('날짜를 고르세요.');
+  const h = holStore(); h.custom[d] = n; holSave(h);
+  $('mgBody').dataset.year = d.slice(0, 4); renderMg();
+  document.querySelectorAll('.when').forEach(b => { if (b.querySelector('.wtbox')) updateWhen(b, false); });
+}
+function delHol(d){ const h = holStore(); delete h.custom[d]; holSave(h); renderMg(); document.querySelectorAll('.when').forEach(b => { if (b.querySelector('.wtbox')) updateWhen(b, false); }); }
+function backupAll(){
+  const data = {};
+  Object.keys(localStorage).filter(k => k.startsWith('ambFare') && k !== SW_KEY).forEach(k => { data[k] = localStorage.getItem(k); });
+  const blob = new Blob([JSON.stringify({ app: 'ambFare', saved: fmtDT(new Date()), data }, null, 1)], { type: 'application/json' });
+  saveBlob(blob, '민간구급차_백업_' + fileStamp() + '.json');
+  lsSet('ambFareLastBackup', Date.now()); renderMg(); updateBkWarn();
+}
+function restoreBackup(inp){
+  const f = inp.files && inp.files[0]; inp.value = ''; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    let j = null; try { j = JSON.parse(rd.result); } catch(e){}
+    if (!j || j.app !== 'ambFare' || !j.data) return alert('이 앱의 백업 파일이 아닙니다.');
+    const ks = Object.keys(j.data).filter(k => k.startsWith('ambFare'));
+    if (!confirm(ks.length + '개 항목을 불러옵니다. 같은 항목은 백업 내용으로 바뀝니다.\n(백업 일시 ' + (j.saved || '-') + ')')) return;
+    ks.forEach(k => { try { localStorage.setItem(k, j.data[k]); } catch(e){} });
+    alert('불러왔습니다. 화면을 새로 고칩니다.'); location.reload();
+  };
+  rd.readAsText(f);
+}
+function updateBkWarn(){
+  const el = $('bkWarn'); if (!el) return;
+  const last = lsGet('ambFareLastBackup'), n = recLoad().length;
+  const old = n >= 10 && (!last || Date.now() - last > 30 * 864e5);
+  el.innerHTML = old ? '💾 산정 이력 ' + n + '건이 이 기기에만 있습니다. <a href="#" onclick="openMg(\'bak\');return false">백업하기</a>' : '';
+}
+
+function initExtras(){
+  applyView(); applyHolidays(); renderTpl(); swRender(); swTick(); updateBkWarn();
+  $('vAmt').addEventListener('keydown', e => { if (e.key === 'Enter') runVerify(); });
+  window.addEventListener('focus', swRender);
+  setTimeout(autoHolidays, 1500);
+  loadFromHash();
+}
+
+(function init(){
+  applyView(); applyHolidays();
+  $('devDate').textContent = '개발일자 ' + APP.devDate; $('modDate').textContent = '수정일자 ' + APP.modDate;
+  loadUserInfo(); loadUsers(); renderUsers(); renderTtList();
+  loadStds(); renderStdUI(); loadAdj();
+  $('distAdj').addEventListener('change', () => { const v = adjPct(); lsSet(adjKey(), v); $('distAdj').value = v || ''; });
+  document.querySelectorAll('input[name=std]').forEach(r => r.addEventListener('change', () => setStdMode(radio('std'))));
+  document.querySelectorAll('input[name=lawop]').forEach(r => r.addEventListener('change', () => setLawOp(radio('lawop'))));
+  $('formCard').addEventListener('input', refreshPrevHints);
+  ['userName','userTitle','userPhone'].forEach(i => $(i).addEventListener('keydown', e => { if (e.key === 'Enter') addUser(); }));
+  buildEnds();
+  renumberWays();
+  const now = new Date(); now.setSeconds(0, 0);
+  initWhen($('w1Box')); initWhen($('w2Box'));
+  updateLabels();
+  setupPWA();
+  initExtras();
+})();
+
+/* ===== 웹앱(PWA): 홈 화면 설치 + 오프라인 ===== */
+let deferredInstall = null;
+function setupPWA(){
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (standalone) return;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; $('installBar').classList.remove('hidden'); });
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)){
+    $('installBar').classList.remove('hidden');
+    $('installTxt').textContent = 'Safari 공유 버튼 → "홈 화면에 추가"를 누르면 앱처럼 쓸 수 있습니다.';
+    $('installBtn').style.display = 'none';
+  }
+}
+async function installApp(){
+  if (!deferredInstall) return;
+  deferredInstall.prompt(); await deferredInstall.userChoice; deferredInstall = null;
+  $('installBar').classList.add('hidden');
+}
+</script>
+</body>
+</html>
