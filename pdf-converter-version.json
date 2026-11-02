@@ -1,8 +1,10 @@
 {
-  "version": "2.1",
+  "version": "2.2",
   "date": "2026-11-02",
   "notes": [
-    "PDF 나누기 — 쪽 미리보기에서 눌러 고르기(Shift로 여러 쪽), 🔍로 크게 보며 고르기, 고른 쪽이 몇 개 파일로 나뉘는지 미리 표시"
+    "PDF → 이미지 탭 — PDF 여러 개를 한꺼번에 쪽마다 JPG·PNG 그림으로 (모든 쪽·첫 쪽만·원하는 쪽, 흑백, PDF마다 폴더로 묶은 ZIP)",
+    "PDF 나누기 — 쪽 미리보기에서 눌러 고르기",
+    "탭 이름을 짧게 정리해 한 줄에 보이도록"
   ],
   "download": "https://appraisal-fee.github.io/rohslaw/pdf-converter.html"
 }

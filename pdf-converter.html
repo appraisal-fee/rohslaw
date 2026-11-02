@@ -95,9 +95,13 @@ select,input[type=text]{font:inherit;width:100%;padding:7px 9px;border:1px solid
 .tabbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px 12px;border-bottom:1px solid var(--line)}
 .tabs{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0}
 .tabbar .soBtn{margin-left:auto}
-@media (max-width:620px){
+@media (min-width:901px) and (max-width:1180px){
+  .tabs{order:2;flex-basis:100%}
+  .tabbar .soBtn,.tabbar .reset{order:1;margin-bottom:0}
+}
+@media (max-width:900px){
   .tabbar{border-bottom:none}
-  .tabs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);flex-basis:100%;gap:6px}
+  .tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));flex-basis:100%;gap:6px}
   .tabs .tab{border:1px solid var(--line);border-radius:8px;margin:0;padding:8px 6px;text-align:center}
   .tabs .tab[aria-selected="true"]{background:var(--accent-soft);border-color:var(--accent)}
   .tabbar .soBtn,.tabbar .reset{flex:1;margin:0}
@@ -109,7 +113,7 @@ select,input[type=text]{font:inherit;width:100%;padding:7px 9px;border:1px solid
 @media (max-width:720px){.soGrid{grid-template-columns:minmax(0,1fr)}}
 .tokrow{gap:4px}
 .reset.ask{background:var(--bad);border-color:var(--bad);color:var(--surface)}
-.tab{border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:transparent;color:var(--muted);padding:9px 14px;font-weight:700;margin-bottom:-1px}
+.tab{border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:transparent;color:var(--muted);padding:9px 13px;white-space:nowrap;font-weight:700;margin-bottom:-1px}
 .tab[aria-selected="true"]{background:var(--surface);border-color:var(--line);color:var(--accent)}
 .tabpane{display:grid;gap:16px}
 .flist{display:grid;gap:6px}
@@ -313,11 +317,12 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <div class="tabbar">
   <nav class="tabs" role="tablist" aria-label="작업 고르기">
     <button class="tab" role="tab" type="button" data-tab="img" aria-selected="true">이미지 → PDF</button>
-    <button class="tab" role="tab" type="button" data-tab="merge" aria-selected="false">PDF 합치기</button>
-    <button class="tab" role="tab" type="button" data-tab="split" aria-selected="false">PDF 나누기</button>
-    <button class="tab" role="tab" type="button" data-tab="pages" aria-selected="false">PDF 쪽 정리</button>
-    <button class="tab" role="tab" type="button" data-tab="comp" aria-selected="false">PDF 용량 줄이기</button>
-    <button class="tab" role="tab" type="button" data-tab="text" aria-selected="false">PDF 글자 넣기</button>
+    <button class="tab" role="tab" type="button" data-tab="merge" aria-selected="false" title="PDF 합치기">합치기</button>
+    <button class="tab" role="tab" type="button" data-tab="split" aria-selected="false" title="PDF 나누기">나누기</button>
+    <button class="tab" role="tab" type="button" data-tab="pages" aria-selected="false" title="PDF 쪽 정리">쪽 정리</button>
+    <button class="tab" role="tab" type="button" data-tab="toimg" aria-selected="false">PDF → 이미지</button>
+    <button class="tab" role="tab" type="button" data-tab="comp" aria-selected="false" title="PDF 용량 줄이기">용량 줄이기</button>
+    <button class="tab" role="tab" type="button" data-tab="text" aria-selected="false" title="PDF 글자 넣기">글자 넣기</button>
     <button class="tab" role="tab" type="button" data-tab="court" aria-selected="false">법원 제출</button>
     <button class="tab" role="tab" type="button" data-tab="help" aria-selected="false">사용 설명</button>
   </nav>
@@ -903,6 +908,68 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
     </section>
   </div>
 
+  <!-- PDF → 이미지 (여러 파일 한꺼번에) -->
+  <div class="tabpane" id="tab-toimg" role="tabpanel" hidden>
+    <div class="desk">
+      <section class="panel">
+        <div class="label">1. 이미지로 바꿀 PDF 불러오기</div>
+        <div class="drop">
+          <strong>PDF 파일을 여기에 끌어다 놓으세요</strong>
+          <div class="row"><button type="button" id="tiPick">파일 선택</button></div>
+          <div class="hint">여러 개를 한꺼번에 넣을 수 있습니다 · 쪽마다 그림 파일 한 장이 됩니다</div>
+        </div>
+        <input type="file" id="tiIn" multiple accept="application/pdf,.pdf" hidden>
+        <div class="stats">
+          <div><b id="tiCount">0</b> <span>개 파일</span></div>
+          <div><b id="tiPages">0</b> <span>쪽</span></div>
+        </div>
+        <div class="row">
+          <div class="field" style="flex:1;min-width:180px">
+            <label for="tiSortSel">정렬 기준</label>
+            <select id="tiSortSel" class="sortsel"></select>
+          </div>
+          <button type="button" id="tiClear" class="danger" style="align-self:end">모두 지우기</button>
+        </div>
+        <div class="flist" id="tiList"></div>
+      </section>
+      <section class="panel">
+        <div class="label">2. 그림 설정</div>
+        <div class="form">
+          <div class="field">
+            <label for="tiFmt">형식</label>
+            <select id="tiFmt" class="pset"><option value="jpg">JPG (용량 작음)</option><option value="png">PNG (글자가 더 깨끗함)</option></select>
+          </div>
+          <div class="field">
+            <label for="tiDpi">화질</label>
+            <select id="tiDpi" class="pset"><option value="150">150dpi (화면용)</option><option value="200" selected>200dpi (보통)</option><option value="300">300dpi (인쇄용)</option></select>
+          </div>
+          <div class="field">
+            <label for="tiWhich">바꿀 쪽</label>
+            <select id="tiWhich" class="pset"><option value="all">모든 쪽</option><option value="first">첫 쪽만</option><option value="range">원하는 쪽만</option></select>
+          </div>
+          <div class="field">
+            <label for="tiRange">원하는 쪽 (파일마다 같은 쪽)</label>
+            <input type="text" id="tiRange" class="pset" placeholder="예: 1-3, 5" autocomplete="off" disabled>
+          </div>
+          <div class="field">
+            <label for="tiColor">색</label>
+            <select id="tiColor" class="pset"><option value="color">컬러 그대로</option><option value="gray">흑백 (회색조)</option></select>
+          </div>
+          <div class="field">
+            <label for="tiName">묶음 파일 이름 (ZIP)</label>
+            <input type="text" id="tiName" autocomplete="off">
+          </div>
+        </div>
+        <label class="check"><input type="checkbox" id="tiFolder" class="pset" checked> PDF마다 폴더로 나누기 (ZIP 안에 'PDF 이름' 폴더가 생기고 그 안에 01쪽, 02쪽…)</label>
+        <p class="note">그림 이름은 'PDF이름_01쪽.jpg'처럼 정해집니다. 그림이 4장 이상이면 ZIP 파일 하나로 묶어 저장합니다.</p>
+        <div class="presetbar" data-preset="toimg"></div>
+        <div class="row"><button type="button" id="tiRun" class="primary" disabled>이미지로 바꾸기</button><button type="button" id="tiStop" hidden>멈추기</button></div>
+        <div class="progress" id="toimgProg" hidden><div class="bar"><i></i></div><div class="ptext"></div></div>
+        <div class="results" id="toimgRes"></div>
+      </section>
+    </div>
+  </div>
+
   <!-- 법원 제출: 호증 번호 · 쪽 번호 · 증거목록 · 책갈피 -->
   <div class="tabpane" id="tab-court" role="tabpanel" hidden>
     <div class="desk">
@@ -1024,10 +1091,11 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         </ul>
       </section>
       <section class="panel help">
-        <div class="label">PDF 합치기 · 나누기 · 용량 줄이기</div>
+        <div class="label">PDF 합치기 · 나누기 · 이미지로 · 용량 줄이기</div>
         <ul>
           <li><b>합치기</b>: 목록 순서대로 하나로 합칩니다. 파일마다 책갈피(목차)가 들어갑니다.</li>
           <li><b>나누기</b>: 한 쪽씩, 정해진 쪽수마다, 또는 '1-3, 5, 8-10'처럼 원하는 쪽만 꺼냅니다.</li>
+          <li><b>PDF → 이미지</b>: PDF 여러 개를 한꺼번에 쪽마다 JPG·PNG 그림으로 바꿉니다. 모든 쪽·첫 쪽만·원하는 쪽을 고르고, ZIP 안에 PDF마다 폴더로 나눠 담습니다.</li>
           <li><b>용량 줄이기</b>: 글자·표는 그대로 두고 문서 속 사진·스캔 이미지만 다시 압축합니다.</li>
         </ul>
       </section>
@@ -1036,7 +1104,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         <ul>
           <li>PDF 한 개의 쪽을 카드로 보여 줍니다. 끌어서 순서를 바꾸고 ↺ ↻로 돌리고 ✕로 뺍니다.</li>
           <li><b>빈 쪽 찾기</b>를 누르면 백지를 찾아 골라 둡니다. 확인 후 '빼기'를 누르세요.</li>
-          <li>고른 쪽(없으면 모든 쪽)을 JPG·PNG 그림 파일로 꺼낼 수 있습니다.</li>
+          <li>고른 쪽(없으면 모든 쪽)을 JPG·PNG 그림 파일로 꺼낼 수 있습니다. PDF 여러 개를 한꺼번에 바꿀 때는 'PDF → 이미지' 탭을 쓰세요.</li>
           <li>'검색되는 PDF로 만들기'를 켜면 스캔한 쪽에 글자층을 넣습니다.</li>
         </ul>
       </section>
@@ -2760,8 +2828,8 @@ $("fileIn").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
 $("dirIn").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
 
 /* ---------- 파일 끌어 넣기: 화면 어디에 놓아도 지금 탭으로 들어간다 ---------- */
-const TAB_LABEL = {img:"이미지 → PDF", merge:"PDF 합치기", split:"PDF 나누기", pages:"PDF 쪽 정리", comp:"PDF 용량 줄이기", text:"PDF 글자 넣기", court:"법원 제출", help:"사용 설명"};
-const TAB_WANTS = {img:"이미지 파일(폴더 가능)", merge:"PDF 파일", split:"PDF 파일 하나", pages:"PDF 파일 하나", comp:"PDF 파일", text:"PDF 파일 또는 도장·이미지", court:"서증 PDF 파일", help:"먼저 작업할 탭을 고른 뒤 넣어 주세요"};
+const TAB_LABEL = {img:"이미지 → PDF", merge:"PDF 합치기", split:"PDF 나누기", pages:"PDF 쪽 정리", toimg:"PDF → 이미지", comp:"PDF 용량 줄이기", text:"PDF 글자 넣기", court:"법원 제출", help:"사용 설명"};
+const TAB_WANTS = {img:"이미지 파일(폴더 가능)", merge:"PDF 파일", split:"PDF 파일 하나", pages:"PDF 파일 하나", toimg:"PDF 파일", comp:"PDF 파일", text:"PDF 파일 또는 도장·이미지", court:"서증 PDF 파일", help:"먼저 작업할 탭을 고른 뒤 넣어 주세요"};
 let toastT;
 function toast(msg){ const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 4200); }
 const hasFiles = e => e.dataTransfer && [...(e.dataTransfer.types || [])].includes("Files");
@@ -3295,17 +3363,18 @@ async function deliver(box, outs, base){
     return row;
   });
   if(outs.length > 3){
+    const kind = outs.every(o => /\.pdf$/i.test(o.name)) ? "PDF" : outs.every(o => /\.(jpe?g|png)$/i.test(o.name)) ? "그림" : "파일";
     const zip = await makeZip(outs);
     const zname = `${base}.zip`;
     saveBlob(zip, zname);
     const zr = document.createElement("div"); zr.className = "res";
     zr.innerHTML = `<span class="n"></span><span class="m"></span><a>ZIP 다시 저장</a>`;
     zr.querySelector(".n").textContent = zname;
-    zr.querySelector(".m").textContent = `PDF ${outs.length.toLocaleString("ko-KR")}개 · ${fmtMB(zip.size)}`;
+    zr.querySelector(".m").textContent = `${kind} ${outs.length.toLocaleString("ko-KR")}개 · ${fmtMB(zip.size)}`;
     const a = zr.querySelector("a"); a.href = URL.createObjectURL(zip); a.download = zname; outUrls.push(a.href);
     box.appendChild(zr);
     if(outs.length <= 30) rows.forEach(r => box.appendChild(r));
-    else { const p = document.createElement("p"); p.className = "note"; p.textContent = `ZIP 안에 PDF ${outs.length}개가 들어 있습니다.`; box.appendChild(p); }
+    else { const p = document.createElement("p"); p.className = "note"; p.textContent = `ZIP 안에 ${kind} ${outs.length.toLocaleString("ko-KR")}개가 들어 있습니다.`; box.appendChild(p); }
   } else {
     rows.forEach(r => box.appendChild(r));
     for(let k = 0; k < outs.length; k++){ if(k) await sleep(400); saveBlob(outs[k].blob, outs[k].name); }
@@ -3772,7 +3841,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "2.1", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
+const APP_VERSION = "2.2", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -7119,6 +7188,85 @@ document.addEventListener("keydown", e => {
   else if((e.key === " " || e.key === "Enter") && !(e.target.closest && e.target.closest("button"))){ e.preventDefault(); spToggle(SP.zoom); }
   else if(e.key === "Escape"){ e.preventDefault(); $("spClose").onclick(); }
 });
+
+/* =========================================================
+   PDF → 이미지: 여러 PDF를 한꺼번에 쪽마다 그림으로
+   ========================================================= */
+const tiItems = [];
+const tiRedraw = manual => {
+  if(manual === true) $("tiSortSel").value = "manual";
+  drawTi();
+  $("tiCount").textContent = tiItems.length;
+  $("tiPages").textContent = tiItems.reduce((s, it) => s + (it.pages || 0), 0).toLocaleString("ko-KR");
+  $("tiRun").disabled = running || !tiItems.some(it => !it.err);
+};
+const drawTi = makeFileList($("tiList"), tiItems, {sortable:true, onChange:m => tiRedraw(m)});
+dropHandlers.toimg = files => {
+  const add = files.filter(isPdf); if(!add.length) return;
+  addSorted(tiItems, add.map(pdfItem), $("tiSortSel").value);
+  if(!$("tiName").value) $("tiName").value = tiItems.length === 1 ? `${stem(tiItems[0].file.name)}_그림` : `PDF그림_${stamp()}`;
+  tiRedraw(); probePages(tiItems, tiRedraw);
+};
+$("tiPick").onclick = () => $("tiIn").click();
+$("tiIn").onchange = e => { dropHandlers.toimg([...e.target.files]); e.target.value = ""; };
+setupSortSel("tiSortSel", mode => { if(running) return; sortList(tiItems, mode); tiRedraw(); });
+$("tiClear").onclick = () => { if(running) return; tiItems.length = 0; $("tiName").value = ""; tiRedraw(); };
+const tiWhichUI = () => { $("tiRange").disabled = $("tiWhich").value !== "range"; };
+$("tiWhich").addEventListener("change", () => { tiWhichUI(); if($("tiWhich").value === "range") $("tiRange").focus(); });
+tiWhichUI();
+resetters.toimg = () => { tiItems.length = 0; $("tiName").value = ""; clearOutput("toimg"); tiRedraw(); };
+hasWork.toimg = () => tiItems.length > 0 && !saved("toimg");
+$("tiStop").onclick = () => { cancelReq = true; };
+$("tiRun").onclick = async () => {
+  if(running) return;
+  const list = tiItems.filter(it => !it.err); if(!list.length) return;
+  const fmt = $("tiFmt").value, dpi = +$("tiDpi").value, which = $("tiWhich").value, gray = $("tiColor").value === "gray", folder = $("tiFolder").checked;
+  if(which === "range" && !$("tiRange").value.trim()){ $("tiRange").focus(); toast("바꿀 쪽을 적어 주세요. 예: 1-3, 5"); return; }
+  setBusy(true); cancelReq = false; $("tiRun").disabled = true; $("tiStop").hidden = false; $("toimgRes").replaceChildren();
+  const pg = progress($("toimgProg")); pg.show();
+  const t0 = performance.now(), outs = [], errs = [], base = safeName($("tiName").value || `PDF그림_${stamp()}`);
+  const total = list.reduce((s, it) => s + (which === "first" ? 1 : (it.pages || 1)), 0);
+  let done = 0;
+  const multi = list.length > 1, usedDir = new Set();
+  for(const it of list){
+    if(cancelReq) break;
+    let js = null;
+    try{
+      js = await TXT.pdfjs(new Uint8Array(await it.file.arrayBuffer()));
+      const n = js.numPages, pad = Math.max(2, String(n).length);
+      let idx;
+      if(which === "first") idx = [0];
+      else if(which === "range"){
+        try{ idx = [...new Set(parseRanges($("tiRange").value, n).flatMap(g => g.idx))]; }
+        catch(e){ errs.push(`${it.file.name}: ${e.message}`); continue; }
+      } else idx = Array.from({length:n}, (_, i) => i);
+      let dir = "";
+      if(folder && multi){ dir = safeName(stem(it.file.name)); let k = 2; while(usedDir.has(dir)) dir = `${safeName(stem(it.file.name))}_${k++}`; usedDir.add(dir); dir += "/"; }
+      for(const i of idx){
+        if(cancelReq) break;
+        const page = await js.getPage(i + 1);
+        let sc = dpi/72; const v1 = page.getViewport({scale:1});
+        if(v1.width*sc*v1.height*sc > 60e6) sc = Math.sqrt(60e6/(v1.width*v1.height));       // 아주 큰 쪽은 줄여서
+        const vp = page.getViewport({scale:sc});
+        const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+        const g = c.getContext("2d", {willReadFrequently:gray}); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+        await page.render({canvasContext:g, viewport:vp}).promise; page.cleanup();
+        if(gray){ const d = g.getImageData(0, 0, c.width, c.height), a = d.data; for(let k = 0; k < a.length; k += 4){ const y = (a[k]*77 + a[k+1]*150 + a[k+2]*29) >> 8; a[k] = a[k+1] = a[k+2] = y; } g.putImageData(d, 0, 0); }
+        const blob = await new Promise(r => c.toBlob(r, fmt === "png" ? "image/png" : "image/jpeg", 0.9)); c.width = c.height = 1;
+        outs.push({blob, name:`${dir}${safeName(stem(it.file.name))}_${String(i + 1).padStart(pad, "0")}쪽.${fmt}`, meta:`${Math.round(sc*72)}dpi · ${fmtMB(blob.size)}`});
+        done++; pg.set(done/total, `${done.toLocaleString("ko-KR")} / ${total.toLocaleString("ko-KR")}장 · ${it.file.name}`);
+        if(done % 4 === 0) await sleep(0);
+      }
+    }catch(e){ console.error(e); errs.push(`${it.file.name}: ${errMsg(e)}`); }
+    finally{ if(js){ try{ js.destroy(); }catch(_){} } }
+  }
+  if(cancelReq) pg.set(done/Math.max(1, total), outs.length ? `멈췄습니다 · 그때까지 만든 그림 ${outs.length}장을 저장합니다` : "멈췄습니다.");
+  else pg.set(1, outs.length ? `완료 · PDF ${list.length - errs.length}개 → 그림 ${outs.length.toLocaleString("ko-KR")}장 · ${fmtSec((performance.now() - t0)/1000)} 걸림` : "만든 그림이 없습니다.");
+  if(outs.length) await deliver($("toimgRes"), outs, base);
+  showErrs($("toimgRes"), errs);
+  setBusy(false); $("tiStop").hidden = true; tiRedraw();
+};
+tiRedraw();
 
 </script>
 </body>
