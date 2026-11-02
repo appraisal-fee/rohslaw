@@ -301,6 +301,10 @@ input.num{width:100%;font:inherit;padding:7px 9px;border:1px solid var(--line);b
 .spsum{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .spsum b{color:var(--ink)}
 #spCanvas{box-shadow:0 1px 6px rgba(0,0,0,.25);background:#fff;max-width:100%;height:auto}
+.ispick .libitem img{width:38px;height:38px}
+.ispick .libitem.none span{max-width:none}
+.libitem .ren{padding:2px 6px}
+.libitem input.rn{width:9em;font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--accent);border-radius:5px}
 .res .m.good{color:var(--ok);font-weight:700}
 footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -485,9 +489,11 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
           <div class="isgrid">
             <figure class="isprev"><canvas id="isCanvas" aria-label="도장 넣은 모습 미리보기"></canvas><figcaption id="isCap">첫 장 미리보기</figcaption></figure>
             <div class="form">
-              <div class="field">
-                <label for="isImg">도장</label>
-                <select id="isImg"></select>
+              <div class="field full">
+                <label>도장 고르기 <span class="note">(눌러서 고르기 · ✎ 이름 바꾸기)</span></label>
+                <select id="isImg" hidden></select>
+                <div class="liblist ispick" id="isPick"></div>
+                <div class="row"><button type="button" id="isAdd">+ 도장 추가</button></div>
               </div>
               <div class="field">
                 <label for="isPages">넣을 쪽</label>
@@ -500,7 +506,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
               <div class="field full">
                 <label for="isText">도장 위에 쓸 글자</label>
                 <textarea id="isText" rows="2" placeholder="예: {날짜} (Enter) {시간}"></textarea>
-                <div class="row"><button type="button" id="isDate">{날짜} 넣기</button><button type="button" id="isTime">{시간} 넣기</button><button type="button" id="isAdd">도장 추가</button></div>
+                <div class="row"><button type="button" id="isDate">{날짜} 넣기</button><button type="button" id="isTime">{시간} 넣기</button></div>
               </div>
               <div class="field"><label for="isSize">글자 크기 (pt)</label><input type="number" id="isSize" min="4" max="72" step="0.5"></div>
               <div class="field"><label for="isColor">글자 색</label><select id="isColor"></select></div>
@@ -3841,7 +3847,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "2.2", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
+const APP_VERSION = "2.3", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -4561,10 +4567,11 @@ function drawLib(){
   T.lib.forEach(im => {
     const r = document.createElement("div"); r.className = "libitem" + (put.value === im.id ? " on" : "");
     r.title = "누른 뒤 쪽을 누르면 이 이미지가 들어갑니다";
-    r.innerHTML = `<img alt=""><span></span><button type="button" aria-label="보관함에서 지우기">✕</button>`;
+    r.innerHTML = `<img alt=""><span></span><button type="button" class="ren" aria-label="이름 바꾸기" title="이름 바꾸기">✎</button><button type="button" class="del" aria-label="보관함에서 지우기">✕</button>`;
     r.querySelector("img").src = libUrl(im); r.querySelector("span").textContent = im.name;
-    r.addEventListener("click", e => { if(e.target.closest("button")) return; put.value = put.value === im.id ? "text" : im.id; onPutChange(); });
-    r.querySelector("button").onclick = () => removeLib(im);
+    r.addEventListener("click", e => { if(e.target.closest("button,input")) return; put.value = put.value === im.id ? "text" : im.id; onPutChange(); });
+    r.querySelector(".del").onclick = () => removeLib(im);
+    r.querySelector(".ren").onclick = () => renameLib(im, r);
     box.appendChild(r);
   });
   $("imgLibEmpty").hidden = T.lib.length > 0;
@@ -4579,6 +4586,23 @@ function onPutChange(){
   else if($("tbPut").value !== "text" && activeTab === "text"){ const im = libGet($("tbPut").value); toast(`쪽을 누르면 '${im.name}' 이미지가 그 자리에 들어갑니다.`); }
 }
 $("tbPut").addEventListener("change", onPutChange);
+/* 도장 이름 바꾸기: 이름 자리에 입력 칸을 띄워 Enter로 저장 */
+function renameLib(im, row){
+  if(running) return;
+  const sp = row.querySelector("span"), inp = document.createElement("input");
+  inp.type = "text"; inp.className = "rn"; inp.value = im.name; inp.maxLength = 30; inp.setAttribute("aria-label", "도장 이름");
+  sp.replaceWith(inp); inp.focus(); inp.select();
+  let done = false;
+  const fin = ok => {
+    if(done) return; done = true;
+    const v = inp.value.trim();
+    if(ok && v && v !== im.name){ im.name = v; saveLib(); toast(`도장 이름을 '${v}'(으)로 바꿨습니다.`); }
+    drawLib();
+  };
+  inp.addEventListener("keydown", e => { e.stopPropagation(); if(e.key === "Enter"){ e.preventDefault(); fin(true); } else if(e.key === "Escape"){ e.preventDefault(); fin(false); } });
+  inp.addEventListener("blur", () => fin(true));
+  inp.addEventListener("click", e => e.stopPropagation());
+}
 function removeLib(im){
   if(running) return;
   if(T.imgs.some(b => b.imgId === im.id) || T.stamps.some(st => st.img === im.id)){ toast("이 이미지를 쓰는 곳이 있어 지울 수 없습니다. 쪽에 놓은 이미지나 일괄 문구에서 먼저 빼 주세요."); return; }
@@ -5355,6 +5379,23 @@ function isFillImgSel(){
   if(isPickNew && T.lib.length){ IS.img = T.lib[T.lib.length - 1].id; isPickNew = false; isLoadShape(); }
   sel.innerHTML = `<option value="">도장 없이 글자만</option>` + T.lib.map(im => `<option value="${im.id}">${esc(im.name)}</option>`).join("");
   sel.value = IS.img;
+  isDrawPick();
+}
+/* 이미지 → PDF 탭: 등록한 도장을 그림으로 늘어놓고 눌러서 고른다 */
+function isDrawPick(){
+  const box = $("isPick"); if(!box) return;
+  box.replaceChildren();
+  const pick = id => { if(running) return; const sel = $("isImg"); sel.value = id; sel.dispatchEvent(new Event("change", {bubbles:true})); isDrawPick(); };
+  const none = document.createElement("div"); none.className = "libitem none" + (IS.img ? "" : " on"); none.innerHTML = `<span>도장 없이 글자만</span>`;
+  none.addEventListener("click", () => pick("")); box.appendChild(none);
+  T.lib.forEach(im => {
+    const r = document.createElement("div"); r.className = "libitem" + (IS.img === im.id ? " on" : ""); r.title = "눌러서 이 도장 쓰기";
+    r.innerHTML = `<img alt=""><span></span><button type="button" class="ren" aria-label="이름 바꾸기" title="이름 바꾸기">✎</button>`;
+    r.querySelector("img").src = libUrl(im); r.querySelector("span").textContent = im.name;
+    r.addEventListener("click", e => { if(e.target.closest("button,input")) return; pick(im.id); });
+    r.querySelector(".ren").onclick = () => renameLib(im, r);
+    box.appendChild(r);
+  });
 }
 function isToUI(){
   isFillImgSel();
