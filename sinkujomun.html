@@ -92,6 +92,7 @@ pre.rep{white-space:pre-wrap;font-size:12.5px;background:#f6f8fb;border:1px soli
 .sglist{margin-top:8px;max-height:40vh;overflow:auto}.sgc{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin-bottom:8px}.sgc .h{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:13px}.sgc .dx{font-size:13px;line-height:1.6}.sgc ins{color:#c0392b;text-decoration:underline;background:#fff1f0}.sgc del{color:#999}.sgc .pill{font-size:11px}
 .sgpaste{margin-top:8px;border:1px dashed #9fb2d6;border-radius:8px;padding:8px}
 .revrow{align-items:flex-end;gap:12px}.revrow .chk{display:flex;align-items:center;gap:5px;font-size:12.5px;cursor:pointer;padding-bottom:8px}.revrow #mRevPrev{padding-bottom:9px}
+input.dtin{font-variant-numeric:tabular-nums;letter-spacing:.3px}input.dtin.bad{border-color:#e53935!important;background:#fff5f5}
 .warnbox{background:#fff8e6;border:1px solid #f1d58b;color:#6b4e00;border-radius:8px;padding:8px 11px;font-size:12.5px;margin:8px 0}
 .okbox{background:#effaf3;border:1px solid #bfe2cc;color:#1d5a35;border-radius:8px;padding:8px 11px;font-size:12.5px;margin:8px 0}
 /* 직접 고치기 */
@@ -380,7 +381,7 @@ pre.rep{white-space:pre-wrap;font-size:12.5px;background:#f6f8fb;border:1px soli
     <button class="btn" id="bAddAnnex">+ 별첨 대조표 추가</button>
   </div>
 </section>
-<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.03. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
+<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.04. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
 </main>
 
 <!-- 설정 서랍 -->
@@ -4636,6 +4637,24 @@ window.__authGate=true;
   const LOG = (action, memo) => { try { if (window.__auth) window.__auth.log(action, state.meta.title || '', memo || ''); } catch (e) { } };
   const AKEY = () => 'sinkujomun_autosave' + (window.__auth && window.__auth.user ? '_' + window.__auth.user.id : '');
 
+  /* ---------- 날짜 칸: 숫자만 눌러도(예: 20261201) 날짜가 들어가게 ---------- */
+  function fmtDateTyped(v) {
+    const d = String(v || '').replace(/\D/g, '').slice(0, 8);
+    if (d.length <= 4) return d; if (d.length <= 6) return d.slice(0, 4) + '-' + d.slice(4); return d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6);
+  }
+  function validISO(v) { const m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); if (!m) return false; const t = new Date(+m[1], +m[2] - 1, +m[3]); return t.getFullYear() === +m[1] && t.getMonth() === +m[2] - 1 && t.getDate() === +m[3]; }
+  function upgradeDate(el) {
+    if (el.dataset.dt) return; el.dataset.dt = '1';
+    const v = el.value; el.type = 'text'; el.value = v; el.inputMode = 'numeric'; el.maxLength = 10; el.placeholder = el.placeholder || '예) 20261201'; el.autocomplete = 'off'; el.classList.add('dtin');
+    el.title = (el.title ? el.title + ' · ' : '') + '숫자 8자리(연월일)만 눌러도 됩니다. 예) 20261201 → 2026-12-01';
+    el.addEventListener('input', () => { const pos = el.selectionStart, before = el.value; const f = fmtDateTyped(before); if (f !== before) { el.value = f; try { const p2 = pos + (f.length - before.length); el.setSelectionRange(p2, p2); } catch (e) { } } el.classList.toggle('bad', el.value.length === 10 && !validISO(el.value)); if (el.value.length === 10 && validISO(el.value)) el.dispatchEvent(new Event('change', { bubbles: true })); });
+    el.addEventListener('paste', (e) => { const t = (e.clipboardData && e.clipboardData.getData('text')) || ''; const iso = RG.toISO ? RG.toISO(t) : ''; if (iso) { e.preventDefault(); el.value = iso; el.dispatchEvent(new Event('input', { bubbles: true })); } });
+    el.addEventListener('blur', () => { const iso = RG.toISO ? RG.toISO(el.value.replace(/-/g, '.')) : ''; if (iso && iso !== el.value) { el.value = iso; el.dispatchEvent(new Event('change', { bubbles: true })); } el.classList.toggle('bad', !!el.value && !validISO(el.value)); });
+  }
+  function upgradeDates(root) { (root || document).querySelectorAll('input[type=date]').forEach(upgradeDate); }
+  upgradeDates(document);
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType !== 1) return; if (n.matches && n.matches('input[type=date]')) upgradeDate(n); else if (n.querySelectorAll) upgradeDates(n); }))).observe(document.documentElement, { childList: true, subtree: true });
+
   /* ---------- 공통 UI ---------- */
   function toast(msg, ms) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), ms || 2600); }
   function busy(on, tx) { $('#busy').classList.toggle('on', !!on); if (tx) $('#busytx').textContent = tx; }
@@ -7144,7 +7163,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
   function openDB() {
     return new Promise((res) => {
       try {
-        const rq = indexedDB.open('sinkujomun_users', 1);
+        const rq = indexedDB.open(window.__demo ? 'sinkujomun_demo_users' : 'sinkujomun_users', 1);
         rq.onupgradeneeded = () => { const d = rq.result; ['users', 'logs', 'versions'].forEach(n => { if (!d.objectStoreNames.contains(n)) d.createObjectStore(n, { keyPath: 'id' }); }); };
         rq.onsuccess = () => { DB.db = rq.result; res(true); };
         rq.onerror = () => { res(false); };
@@ -7564,7 +7583,12 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     await openDB();
     let sid = null; try { sid = sessionStorage.getItem('sinkujomun_session'); } catch (e) { }
     const list = await users();
-    const u = sid && list.find(x => x.id === sid && !x.disabled);
+    let u = sid && list.find(x => x.id === sid && !x.disabled);
+    if (!u && window.__demo) { // 체험판: 가상 사용자로 바로 시작
+      u = list.find(x => x.demo);
+      if (!u) { const salt = uid(); u = { id: uid(), name: '체험 사용자', dept: '기획팀', role: 'admin', salt, pw: hashPw('0000', salt), createdAt: now(), lastLogin: null, demo: true }; await put('users', u); }
+      AU.user = u; await afterLogin(false); return;
+    }
     if (u) { AU.user = u; renderChip(); setTimeout(() => A().offerRestore(), 200); }
     else showGate(list.length ? 'login' : 'first');
   })();
@@ -7575,7 +7599,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '2.6';
+  const APP_VERSION = '2.7';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
