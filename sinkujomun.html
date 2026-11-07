@@ -306,6 +306,12 @@ body.withSrc main{margin-right:min(44vw,760px)}
 .tagm.ai{background:#eaf2fd;color:#2f6db5}
 .nside{display:grid;gap:6px;margin-top:8px;font-size:12.5px}
 .nside>div{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.nside>div>b{width:110px;flex:0 0 110px}
+
+/* v3.1 */
+.lawlist{padding:6px 0}
+.lawrow{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
+.lawbtn{border:1px solid #c9d7ec;background:#f3f7fd;color:#1f3a68;border-radius:14px;padding:3px 10px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.lawbtn:hover{background:#1f3a68;color:#fff;border-color:#1f3a68}
 </style>
 <style id="doccss"></style>
 <style id="printpage">@page{size:A4 portrait;margin:0}@page land{size:A4 landscape;margin:0}</style>
@@ -6372,12 +6378,13 @@ window.__authGate=true;
       ['newreg', '📝 새 내규 만들기', '원하는 내용을 적으면 병원 내규 주제 목록에서 목차·문구를 추천하고 초안(.hwpx)으로'],
       ['link', '🔗 내규 연계 검사', '빠진 항목 · 다른 내규와의 용어·기간·담당·위임 충돌과 공백 · 조문 연결'],
       ['review', '🧑‍⚖️ 검토 요청', '빠진 부분·뜻이 부딪히는 곳을 AI(켠 경우만) 또는 요청문 복사로 검토받기'],
+      ['law', '⚖️ 관련 법령', '내규에 적힌 법령과 주제별 확인할 법령의 현행 원문(국가법령정보센터) 바로 열기'],
       ['lib', '📚 내규 서고', '연계 검사·인용 검사에 쓸 다른 내규 올리기'],
       ['ai', '🤖 AI 문구 제안 설정', 'Claude 연결 켜기·끄기, API 키 (켤 때만 요청한 문장이 전송됨)']
     ];
     modal(`<h3>도구</h3><div class="toolgrid">${T.map(([k, t, d]) => `<button class="tool" data-t="${k}"><b>${t}</b><span>${d}</span></button>`).join('')}</div><div class="foot"><button class="btn" id="x">닫기</button></div>`, m => {
       $('#x', m).onclick = closeModal;
-      $$('.tool', m).forEach(b => b.onclick = () => { const k = b.dataset.t; closeModal(); ({ lint: lintDialog, list: changeListDialog, submit: submitDialog, full: fullTextDialog, batch: batchDialog, rename: renameBatchDialog, reg: registryDialog, ren: () => renamesDialog(), sug: () => suggestDialog(), plain: plainDialog, ai: aiSettingsDialog, newreg: () => newRegDialog(), link: () => linkCheckDialog(), review: () => reviewDialog(), lib: () => libraryDialog() })[k](); });
+      $$('.tool', m).forEach(b => b.onclick = () => { const k = b.dataset.t; closeModal(); ({ lint: lintDialog, list: changeListDialog, submit: submitDialog, full: fullTextDialog, batch: batchDialog, rename: renameBatchDialog, reg: registryDialog, ren: () => renamesDialog(), sug: () => suggestDialog(), plain: plainDialog, ai: aiSettingsDialog, newreg: () => newRegDialog(), link: () => linkCheckDialog(), review: () => reviewDialog(), lib: () => libraryDialog(), law: () => lawDialog() })[k](); });
     });
   }
   (function mountTools() {
@@ -6783,6 +6790,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     add('새 내규 만들기(메모로 추천)', () => newRegDialog(), '원하는 내용을 적으면 목차·문구 추천 → 초안', '신규 제정 추천');
     add('내규 연계 검사', () => linkCheckDialog(), '빠진 항목 · 다른 내규와 충돌·공백 · 조문 연결', '충돌 공백 연결');
     add('검토 요청(AI·요청문)', () => reviewDialog(), '빠진 부분·뜻 충돌 검토');
+    add('관련 법령(현행 원문 보기)', () => lawDialog(), '국가법령정보센터 바로가기', '법령 법률 조문 근거');
     add('여러 내규 일괄 비교', () => batchDialog());
     add('이름 일괄 변경', () => renameBatchDialog(), '조직 개편');
     add('내규 대장', () => registryDialog(), '검토 주기·보존 기한');
@@ -7104,7 +7112,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     drawRecents();
     // 다듬기 화면: 원본 보기 · 인용 검사 · 회차 비교
     const after = $('#bSubmit');
-    if (after && !$('#bSrc')) { after.insertAdjacentHTML('afterend', '<button class="btn sm" id="bSrc" title="고른 행의 원본 쪽을 옆에 띄움 (Ctrl+Alt+O)">원본 보기</button><button class="btn sm" id="bCite" title="번호가 바뀐 조문을 인용한 곳 찾기">인용 검사</button>'); $('#bSrc').onclick = () => { srcRow = rowOfEl(lastCell); srcPanel(true); }; $('#bCite').onclick = citeDialog; }
+    if (after && !$('#bSrc')) { after.insertAdjacentHTML('afterend', '<button class="btn sm" id="bSrc" title="고른 행의 원본 쪽을 옆에 띄움 (Ctrl+Alt+O)">원본 보기</button><button class="btn sm" id="bCite" title="번호가 바뀐 조문을 인용한 곳 찾기">인용 검사</button><button class="btn sm" id="bLaw" title="내규에 적힌 법령·주제별 법령의 현행 원문(국가법령정보센터) 열기">관련 법령</button>'); $('#bLaw').onclick = () => lawDialog(); $('#bSrc').onclick = () => { srcRow = rowOfEl(lastCell); srcPanel(true); }; $('#bCite').onclick = citeDialog; }
     // 위쪽: 기능 찾기
     const tools = $('#bTools');
     if (tools && !$('#bPal')) { tools.insertAdjacentHTML('beforebegin', '<button id="bPal" title="기능 찾기 (Ctrl+K) — 초성으로도 찾음">🔍<span class="pt"> 찾기</span><kbd>Ctrl K</kbd></button>'); $('#bPal').onclick = palette; }
@@ -7239,7 +7247,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     const tl = new Set(); T.forEach(c => c.laws.forEach(l => tl.add(l.replace(/\s/g, ''))));
     const relDocs = new Map(); T.forEach(c => c.rel.forEach(r => relDocs.set(r.o.doc, (relDocs.get(r.o.doc) || 0) + 1)));
     const lawCnt = new Map(); O.filter(o => (relDocs.get(o.doc) || 0) >= 1).forEach(o => o.laws.forEach(l => { const k = l.replace(/\s/g, ''); if (!tl.has(k)) { const v = lawCnt.get(k) || { l, docs: new Set(), o }; v.docs.add(o.doc); lawCnt.set(k, v); } }));
-    lawCnt.forEach(v => out.push({ cat: '근거', sev: 'info', msg: '관련 내규(' + Array.from(v.docs).join(', ') + ')가 근거로 드는 「' + v.l + '」이(가) 이 내규에는 없음', a: null, b: v.o }));
+    lawCnt.forEach(v => out.push({ cat: '근거', sev: 'info', law: v.l, msg: '관련 내규(' + Array.from(v.docs).join(', ') + ')가 근거로 드는 「' + v.l + '」이(가) 이 내규에는 없음', a: null, b: v.o }));
     // 중복 제거
     const seen = new Set(); return out.filter(x => { const k = x.cat + x.msg + (x.a ? x.a.bi : '') + (x.b ? x.b.doc + x.b.bi : ''); if (seen.has(k)) return false; seen.add(k); return true; });
   }
@@ -7488,9 +7496,10 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
         if (mc.durs.length) rel.forEach(d => clausesOfLib(d).forEach(c => { analyze(c); c.durs.forEach(e => mc.durs.forEach(x => { if (x.key === e.key && Math.abs(x.v - e.v) > 1e-6 && jacc(c.tok, mc.tok) > 0.08) warns.push('메모의 ‘' + x.key + ' ' + x.raw + '’ ↔ 「' + d.name + '」 ' + (c.num || '') + ' ' + e.raw); })); }));
         sd.style.display = ''; sd.className = 'nside';
         sd.innerHTML = `<div><b>관련 내규</b>${rel.length ? rel.slice(0, 8).map(d => `<label class="chip"><input type="checkbox" class="rel" checked value="${esc(d.name)}"> ${esc(d.name)}</label>`).join('') : '<span class="muted">내규 서고에 관련 내규 없음</span>'}</div>
-          <div><b>확인할 근거 법령</b>${laws.length ? laws.map(l => `<span class="chip">「${esc(l)}」</span>`).join('') : '<span class="muted">없음</span>'}<span class="muted">조문 번호는 국가법령정보센터에서 확인</span></div>
+          <div><b>확인할 근거 법령</b>${laws.length ? laws.map(l => lawChip(l)).join('') : '<span class="muted">없음</span>'}<span class="muted">누르면 현행 원문이 열립니다</span></div>
           ${warns.length ? `<div><b style="color:#b7791f">숫자 확인</b>${Array.from(new Set(warns)).slice(0, 5).map(w => `<div class="muted">${esc(w)}</div>`).join('')}</div>` : ''}`;
       };
+      const sideBind = () => bindLawChips($('#nSide', m));
       $('#go', m).onclick = async () => {
         const nm = $('#nN', m).value.trim(), memo = $('#nM', m).value.trim();
         if (!nm && !memo) { toast('내규명이나 원하는 내용을 적어 주세요.'); return; }
@@ -7502,7 +7511,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
         tps.forEach((tp, ti) => tp.items.forEach(it => { const f = fillItem(it, M, dept); if (!REC.some(r => r.text === f.text)) REC.push(Object.assign(f, { on: ti === 0 || f.memo, src: tp.k })); }));
         // 메모에만 있고 목록에 없는 문장도 살림
         M.sents.forEach(s => { if (s.length < 6) return; if (REC.some(r => r.near === s)) return; REC.push({ sec: 'C', title: '메모에 적은 내용', text: s.replace(/[.\s]*$/, '') + (/[다]$/.test(s) ? '.' : ' — (문장으로 다듬어 주세요)'), memo: true, on: true, src: 'memo', near: s }); });
-        draw(); await side(); LOG('새 내규 추천', nm + ' · ' + tps.map(t => t.t).join(','));
+        draw(); await side(); sideBind(); LOG('새 내규 추천', nm + ' · ' + tps.map(t => t.t).join(','));
       };
       $('#ai', m).onclick = async () => {
         const nm = $('#nN', m).value.trim(), memo = $('#nM', m).value.trim(); if (!memo && !nm) { toast('먼저 내규명이나 원하는 내용을 적어 주세요.'); return; }
@@ -7596,10 +7605,11 @@ ${relTxt.slice(0, 60).join('\n') || '- 없음'}
           body.innerHTML = `<div class="lkh">기본 골격 (내규관리내규)</div>` + SC.sk.map(x => `<div class="li nohover"><span class="sev" style="background:${x.ok ? '#2e7d32' : '#c0392b'}">${x.ok ? '있음' : '없음'}</span><div class="t">${esc(x.t)}</div></div>`).join('') +
             (SC.topic.length ? SC.topic.map(tp => `<div class="lkh">주제별 점검 — ${esc(tp.t)}</div>` + tp.items.map(x => `<div class="li nohover"><span class="sev" style="background:${x.ok ? '#2e7d32' : '#b7791f'}">${x.ok ? '있음' : '확인'}</span><div class="t">${esc(x.t)}</div></div>`).join('')).join('') : `<div class="lkh">주제별 점검</div><div class="muted" style="padding:8px 10px">내규명·본문에서 병원 내규 주제 목록(${TOPICS2.length}개)의 주제를 찾지 못했습니다.</div>`);
         } else if (k === 'b') {
-          body.innerHTML = CF.length ? CF.map((x, i) => `<div class="li" data-i="${i}"><span class="sev" style="background:${SEVC[x.sev][1]}">${esc(x.cat)}</span><div style="flex:1"><div class="t">${esc(x.msg)}</div>
+          body.innerHTML = CF.length ? CF.map((x, i) => `<div class="li" data-i="${i}"><span class="sev" style="background:${SEVC[x.sev][1]}">${esc(x.cat)}</span><div style="flex:1"><div class="t">${esc(x.msg)}${x.law ? ' ' + lawChip(x.law) : ''}</div>
             ${x.a ? `<div class="d"><b>이 내규</b> ${esc(cref(x.a))}${esc(clip(x.a.text, 90))}</div>` : ''}${x.b ? `<div class="d"><b>${esc(x.b.doc || '')}</b> ${esc((x.b.sec ? x.b.sec + ' ' : '') + (x.b.num ? x.b.num + ' ' : ''))}${esc(clip(x.b.text, 90))}</div>` : ''}</div></div>`).join('')
             : `<div class="ok" style="padding:10px">${L.others.length ? '규칙으로 찾은 충돌·공백이 없습니다. 뜻이 같은데 말이 다른 경우는 「검토 요청」으로 AI 비교를 해 보세요.' : '내규 서고에 다른 내규가 없습니다. 「내규 서고」에 관련 내규(예: 응급환자 이송 내규)를 올리면 함께 검사합니다.'}</div>`;
-          $$('.li[data-i]', body).forEach(el => el.onclick = () => { const x = CF[+el.dataset.i]; if (x.a && target === (state.lastResult && state.lastResult.B)) { closeModal(); goStep(2); setTimeout(() => jumpToText(clip(x.a.text, 20).replace(/…$/, '')), 60); } });
+          bindLawChips(body);
+          $$('.li[data-i]', body).forEach(el => el.onclick = (ev) => { if (ev.target.closest('.lawbtn')) return; const x = CF[+el.dataset.i]; if (x.a && target === (state.lastResult && state.lastResult.B)) { closeModal(); goStep(2); setTimeout(() => jumpToText(clip(x.a.text, 20).replace(/…$/, '')), 60); } });
         } else {
           const rows = L.T.filter(c => c.rel.length && !c.table);
           body.innerHTML = rows.length ? rows.map((c, i) => `<div class="lkc"><div class="lkt">${esc(cref(c))}${esc(clip(c.text, 120))}</div>${c.rel.map(r => `<div class="lko"><span class="lkd">${esc(r.o.doc)}</span> ${esc((r.o.sec ? r.o.sec + ' ' : '') + (r.o.num ? r.o.num + ' ' : ''))}${esc(clip(r.o.text, 110))}<span class="lkw">${esc(r.sh.slice(0, 5).join(' · '))}</span></div>`).join('')}</div>`).join('')
@@ -7683,7 +7693,58 @@ ${body}
     window.__v29tools = T29;
   })();
 
-  window.__app = { newRegDialog, linkCheckDialog, reviewDialog, linkData, skeletonCheck, conflictCheck, chooseTarget, palette, quickFinish, roundsDialog, citeDialog, citeCheck, libraryDialog, libraryAdd, srcPanel, saveMyDefaults, applyMyDefaults, recentDialog, clearReadCache, cAll, numberMaps, suggestDialog, plainDialog, aiSettingsDialog, parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
+
+  /* =========================================================
+     v3.1: 관련 법령 바로가기 (국가법령정보센터 현행 원문 화면으로 연결)
+     ========================================================= */
+  const LAW_ALIAS = {
+    '응급의료법': '응급의료에 관한 법률', '연명의료결정법': '호스피스·완화의료 및 임종과정에 있는 환자의 연명의료결정에 관한 법률',
+    '의료분쟁조정법': '의료사고 피해구제 및 의료분쟁 조정 등에 관한 법률', '마약류관리법': '마약류 관리에 관한 법률',
+    '감염병예방법': '감염병의 예방 및 관리에 관한 법률', '개인정보보호법': '개인정보 보호법', '소방시설법': '소방시설 설치 및 관리에 관한 법률',
+    '재난안전법': '재난 및 안전관리 기본법', '산안법': '산업안전보건법'
+  };
+  const lawFull = (n) => { const k = String(n || '').replace(/[「」『』\s]/g, ''); return LAW_ALIAS[k] || String(n || '').replace(/[「」『』]/g, '').trim(); };
+  const lawURL = (name, art) => 'https://www.law.go.kr/법령/' + encodeURIComponent(lawFull(name)) + (art ? '/' + encodeURIComponent(art.replace(/\s+/g, '')) : '');
+  const LAWART_RE = /「([^」]{2,60}?)」\s*(제\s*\d+\s*조(?:의\s*\d+)?)?|((?:[가-힣·]{2,30}\s?){0,4}(?:법률|시행규칙|시행령|법|규칙))\s*(제\s*\d+\s*조(?:의\s*\d+)?)/g;
+  function lawRefs(text) {
+    const out = []; let m; LAWART_RE.lastIndex = 0;
+    while ((m = LAWART_RE.exec(String(text || '')))) {
+      const name = (m[1] || m[3] || '').replace(/\s+/g, ' ').trim(); const art = (m[2] || m[4] || '').replace(/\s+/g, '');
+      if (!name || /내규|규정|지침|매뉴얼|이\s*법$/.test(name) || name.length < 3) continue;
+      if (!/(법|법률|령|규칙)$/.test(name.replace(/\s/g, ''))) continue;
+      out.push({ name: lawFull(name), art });
+    }
+    return out;
+  }
+  function lawsOfDoc(doc) { const map = new Map(); (doc && doc.blocks || []).forEach(b => { const t = b.type === 'p' ? b.text : b.type === 'table' ? b.rows.map(r => r.map(c => c.text).join(' ')).join(' ') : ''; lawRefs(t).forEach(r => { const k = r.name; if (!map.has(k)) map.set(k, new Set()); if (r.art) map.get(k).add(r.art); }); }); return map; }
+  const openLaw = (name, art) => { const w = window.open(lawURL(name, art), '_blank', 'noopener'); if (!w) toast('새 창이 막혔습니다. 브라우저 주소창 오른쪽의 팝업 차단을 풀어 주세요.', 5000); };
+  function lawChip(name, art) { return `<button class="lawbtn" data-n="${esc(name)}" data-a="${esc(art || '')}" title="국가법령정보센터에서 현행 원문 열기">⚖ ${esc('「' + name + '」' + (art ? ' ' + art : ''))}</button>`; }
+  function bindLawChips(root) { $$('.lawbtn', root).forEach(b => b.onclick = (e) => { e.preventDefault(); openLaw(b.dataset.n, b.dataset.a); }); }
+  function lawDialog() {
+    const R = state.lastResult; const docs = [];
+    if (R && R.B) docs.push(['개정안', R.B]); else if (state.docs.new) docs.push(['개정안', state.docs.new]);
+    if (R && R.A) docs.push(['현행', R.A]); else if (state.docs.old) docs.push(['현행', state.docs.old]);
+    const found = new Map(); docs.forEach(([w, d]) => lawsOfDoc(d).forEach((arts, n) => { if (!found.has(n)) found.set(n, new Set()); arts.forEach(a => found.get(n).add(a)); }));
+    const all = docs.map(([, d]) => d.blocks.map(b => b.text || '').join(' ')).join(' ') + ' ' + (state.meta.title || '');
+    const tops = TOPICS2.map(tp => ({ tp, n: (all.match(new RegExp(tp.kw.source, 'g')) || []).length + (tp.kw.test(state.meta.title || '') ? 4 : 0) })).filter(x => x.n >= 3).sort((a, b) => b.n - a.n).slice(0, 4).map(x => x.tp);
+    const rec = Array.from(new Set([].concat(...tops.map(tp => tp.laws)))).filter(n => !found.has(lawFull(n)));
+    modal(`<h3>관련 법령 — 현행 원문 보기</h3><div class="muted">단추를 누르면 국가법령정보센터의 <b>현행</b> 법령·조문 화면이 새 창으로 열립니다(인터넷 필요). 내규 내용은 보내지 않습니다.</div>
+      <div class="lkh" style="margin-top:8px">내규에 적힌 법령 ${found.size ? '(' + found.size + ')' : ''}</div>
+      <div class="lawlist">${found.size ? Array.from(found).map(([n, arts]) => `<div class="lawrow">${lawChip(n)}${Array.from(arts).sort((a, b) => parseInt(a.replace(/\D/g, '')) - parseInt(b.replace(/\D/g, ''))).map(a => lawChip(n, a)).join('')}</div>`).join('') : '<div class="muted" style="padding:8px">내규 본문에서 「법령명」 또는 「법령명」 제○조 형태를 찾지 못했습니다.</div>'}</div>
+      <div class="lkh">주제로 본 확인할 법령 ${tops.length ? '— ' + esc(tops.map(t => t.t).join(' · ')) : ''}</div>
+      <div class="lawlist">${rec.length ? `<div class="lawrow">${rec.map(n => lawChip(n)).join('')}</div>` : '<div class="muted" style="padding:8px">추가로 권할 법령이 없습니다.</div>'}</div>
+      <div class="lkh">직접 열기</div>
+      <div class="row" style="padding:8px 0;gap:6px"><input type="text" id="lwN" placeholder="법령명 (예: 의료법, 응급의료법)" style="flex:1"><input type="text" id="lwA" placeholder="조문 (예: 21 또는 21의2)" style="width:170px"><button class="btn pri" id="lwGo">열기</button></div>
+      <div class="muted">법령 시행일·개정 이력도 같은 화면에서 확인할 수 있습니다. 앱 안에서 원문을 나란히 보는 기능은 국가법령정보 Open API 사용 승인 뒤 추가됩니다.</div>
+      <div class="foot"><button class="btn pri" id="x">닫기</button></div>`, m => {
+      $('#x', m).onclick = closeModal; bindLawChips(m);
+      $('#lwGo', m).onclick = () => { const n = $('#lwN', m).value.trim(); if (!n) { toast('법령명을 적어 주세요.'); return; } let a = $('#lwA', m).value.trim().replace(/\s/g, ''); if (a && /^\d/.test(a)) a = '제' + a.replace(/^(\d+)(?:조)?(?:의(\d+))?$/, (x, p, q) => p + '조' + (q ? '의' + q : '')); openLaw(n, a); };
+      $('#lwA', m).addEventListener('keydown', e => { if (e.key === 'Enter') $('#lwGo', m).click(); });
+    });
+    LOG('관련 법령 보기', Array.from(found.keys()).join(', '));
+  }
+
+  window.__app = { lawDialog, lawRefs, lawURL, newRegDialog, linkCheckDialog, reviewDialog, linkData, skeletonCheck, conflictCheck, chooseTarget, palette, quickFinish, roundsDialog, citeDialog, citeCheck, libraryDialog, libraryAdd, srcPanel, saveMyDefaults, applyMyDefaults, recentDialog, clearReadCache, cAll, numberMaps, suggestDialog, plainDialog, aiSettingsDialog, parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
   Object.defineProperty(window.__app, 'state', { get: () => state });
 })();
 
@@ -8732,7 +8793,7 @@ ${body}
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '3.0';
+  const APP_VERSION = '3.1';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
