@@ -1,11 +1,10 @@
 {
- "version": "2.49",
- "date": "2026-11-03",
+ "version": "2.50",
+ "date": "2026-11-07",
  "notes": [
-  "요일별 근무 인원(6-6-4 등) 맞추기 강화",
-  "요일 선호 기본 ‘강하게’, 근무표 칸에 선호 ★ 표시",
-  "직원관리 가능·선호 색 이름표",
-  "기본 설정에 월별 Night 개수 카드"
+  "자동 생성이 고른 “최대 생성 시간” 안에 끝남 (10초 설정 약 9~10초)",
+  "위배 점검을 바뀐 칸만 다시 계산해 다듬기 3~5배 빨라짐",
+  "같은 시간에 더 많은 안을 시도해 결과는 같거나 나음"
  ],
  "download": "https://appraisal-fee.github.io/rohslaw/duty/duty_pc.html",
  "manual": "https://appraisal-fee.github.io/rohslaw/duty/manual.pdf"
