@@ -1,10 +1,10 @@
 {
- "version": "2.50",
+ "version": "2.51",
  "date": "2026-11-07",
  "notes": [
-  "자동 생성이 고른 “최대 생성 시간” 안에 끝남 (10초 설정 약 9~10초)",
-  "위배 점검을 바뀐 칸만 다시 계산해 다듬기 3~5배 빨라짐",
-  "같은 시간에 더 많은 안을 시도해 결과는 같거나 나음"
+  "자동 생성 전에 근무 인원이 부족할 날을 미리 알림 (날짜·부족 수·빠지는 사람과 이유)",
+  "조치는 작성자가 선택: 신청 현황 조정·임시 운영 변경·그대로 생성",
+  "준비 점검에 “근무 인원 부족 예상” 항목 추가"
  ],
  "download": "https://appraisal-fee.github.io/rohslaw/duty/duty_pc.html",
  "manual": "https://appraisal-fee.github.io/rohslaw/duty/manual.pdf"
