@@ -298,6 +298,14 @@ body.withSrc main{margin-right:min(44vw,760px)}
 .lkd{display:inline-block;background:#1f3a68;color:#fff;border-radius:4px;padding:0 6px;font-size:11.5px;margin-right:4px}
 .lkw{display:inline-block;margin-left:6px;color:#8a6d1f;font-size:11.5px}
 .chips label.chip{display:inline-flex;align-items:center;gap:4px}
+
+/* v3.0 */
+.li.rec{align-items:flex-start;gap:10px}.li.rec input[type=checkbox]{margin-top:6px}
+.li.rec input.rt{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:13px}
+.tagm{display:inline-block;font-size:11px;background:#e8f3e8;color:#2e7d32;border-radius:4px;padding:0 5px;margin-left:4px}
+.tagm.ai{background:#eaf2fd;color:#2f6db5}
+.nside{display:grid;gap:6px;margin-top:8px;font-size:12.5px}
+.nside>div{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.nside>div>b{width:110px;flex:0 0 110px}
 </style>
 <style id="doccss"></style>
 <style id="printpage">@page{size:A4 portrait;margin:0}@page land{size:A4 landscape;margin:0}</style>
@@ -6361,7 +6369,7 @@ window.__authGate=true;
       ['ren', '✏️ 옛 이름 목록', '형식 검사·일괄 변경에 쓸 옛 이름 → 새 이름 목록'],
       ['sug', '💡 문구 제안', '고른 행의 개정안을 지시대로 고친 문구 후보 — 규칙(오프라인) · AI · 요청문 복사 (Ctrl+Alt+K)'],
       ['plain', '✨ 문구 다듬기', '개정안 전체의 어려운 한자어·옛 표현을 알기 쉬운 말로 (법제처 정비 기준)'],
-      ['newreg', '📝 새 내규 만들기', '내규관리내규 골격 + 주제별 점검 항목(구급차·이송, 의무기록, 감염 등)을 넣은 초안'],
+      ['newreg', '📝 새 내규 만들기', '원하는 내용을 적으면 병원 내규 주제 목록에서 목차·문구를 추천하고 초안(.hwpx)으로'],
       ['link', '🔗 내규 연계 검사', '빠진 항목 · 다른 내규와의 용어·기간·담당·위임 충돌과 공백 · 조문 연결'],
       ['review', '🧑‍⚖️ 검토 요청', '빠진 부분·뜻이 부딪히는 곳을 AI(켠 경우만) 또는 요청문 복사로 검토받기'],
       ['lib', '📚 내규 서고', '연계 검사·인용 검사에 쓸 다른 내규 올리기'],
@@ -6772,7 +6780,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     add('검토 회차 비교', () => roundsDialog(), '1차·2차 개정안 · 의견 반영 확인');
     add('인용 검사', () => citeDialog(), '번호 바뀐 조문을 인용한 곳 찾기');
     add('내규 서고(다른 내규 올리기)', () => libraryDialog(), '인용·연계 검사용');
-    add('새 내규 만들기(기본 골격)', () => newRegDialog(), '제정 초안 · 주제별 점검 항목', '신규 제정');
+    add('새 내규 만들기(메모로 추천)', () => newRegDialog(), '원하는 내용을 적으면 목차·문구 추천 → 초안', '신규 제정 추천');
     add('내규 연계 검사', () => linkCheckDialog(), '빠진 항목 · 다른 내규와 충돌·공백 · 조문 연결', '충돌 공백 연결');
     add('검토 요청(AI·요청문)', () => reviewDialog(), '빠진 부분·뜻 충돌 검토');
     add('여러 내규 일괄 비교', () => batchDialog());
@@ -7200,8 +7208,8 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     const D = { meta, txt };
     const sk = SKELETON.map(s => ({ t: s.t, ok: s.test ? s.test(D) : lines.some(l => s.re.test(l)) }));
     const name = L.tname + ' ' + lines.slice(0, 30).join(' ');
-    const tops = TOPICS.filter(tp => tp.kw.test(name) || (txt.match(new RegExp(tp.kw.source, 'g')) || []).length >= 4);
-    const topic = tops.map(tp => ({ t: tp.t, items: tp.items.map(([t, re]) => ({ t, ok: re.test(txt) })) }));
+    const tops = TOPICS2.map(tp => ({ tp, n: (txt.match(new RegExp(tp.kw.source, 'g')) || []).length + (tp.kw.test(L.tname) ? 4 : 0) })).filter(x => x.n >= 4).sort((a, b) => b.n - a.n).slice(0, 3).map(x => x.tp);
+    const topic = tops.map(tp => ({ t: tp.t, items: tp.items.map(x => ({ t: x.title, ok: x.kw.test(txt) })) }));
     return { sk, topic };
   }
   function conflictCheck(L) {
@@ -7230,7 +7238,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     // 6. 관련 근거 법령
     const tl = new Set(); T.forEach(c => c.laws.forEach(l => tl.add(l.replace(/\s/g, ''))));
     const relDocs = new Map(); T.forEach(c => c.rel.forEach(r => relDocs.set(r.o.doc, (relDocs.get(r.o.doc) || 0) + 1)));
-    const lawCnt = new Map(); O.filter(o => (relDocs.get(o.doc) || 0) >= 3).forEach(o => o.laws.forEach(l => { const k = l.replace(/\s/g, ''); if (!tl.has(k)) { const v = lawCnt.get(k) || { l, docs: new Set(), o }; v.docs.add(o.doc); lawCnt.set(k, v); } }));
+    const lawCnt = new Map(); O.filter(o => (relDocs.get(o.doc) || 0) >= 1).forEach(o => o.laws.forEach(l => { const k = l.replace(/\s/g, ''); if (!tl.has(k)) { const v = lawCnt.get(k) || { l, docs: new Set(), o }; v.docs.add(o.doc); lawCnt.set(k, v); } }));
     lawCnt.forEach(v => out.push({ cat: '근거', sev: 'info', msg: '관련 내규(' + Array.from(v.docs).join(', ') + ')가 근거로 드는 「' + v.l + '」이(가) 이 내규에는 없음', a: null, b: v.o }));
     // 중복 제거
     const seen = new Set(); return out.filter(x => { const k = x.cat + x.msg + (x.a ? x.a.bi : '') + (x.b ? x.b.doc + x.b.bi : ''); if (seen.has(k)) return false; seen.add(k); return true; });
@@ -7255,26 +7263,283 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     });
   }
 
-  /* ---------- 새 내규 만들기(기본 골격) ---------- */
+  /* =========================================================
+     v3.0: 메모를 적으면 내규 목차·문구를 추천 (병원 내규 주제 목록 + AI 선택)
+     항목 형식: '구역|항목|문구|찾을 말'  구역 R 책임과 권한 · P 정책 · C 절차 · D 기록 및 서식 · E 교육
+     문구 자리: {dept} 담당 부서 · {freq} 주기 · {keep} 보존 기간 · {role} 인력 · {who} 대상
+     ========================================================= */
+  const SECN = { R: '책임과 권한', P: '정 책', C: '절 차', D: '기록 및 서식', E: '교 육' };
+  const TOPIC_LIB = [
+    ['ptid', '환자 확인', '환자안전', '환자\\s*확인|환자\\s*식별|팔찌', ['의료법'], [
+      'P|확인 원칙|모든 검사·처치·투약 전에는 환자 이름과 등록번호 등 두 가지 이상의 지표로 환자를 확인한다.|두\\s*가지|지표|확인',
+      'C|확인 시점|투약, 수혈, 검사, 처치, 수술 전에는 반드시 환자 확인을 한다.|투약|수혈|검사|시점',
+      'C|환자 확인 팔찌|입원 환자에게는 이름과 등록번호가 적힌 환자 확인 팔찌를 채운다.|팔찌',
+      'C|의사소통이 어려운 환자|의식이 없거나 의사소통이 어려운 환자는 보호자 또는 팔찌로 확인한다.|의식|보호자|의사소통',
+      'E|교육|{dept}은(는) 환자 확인 절차를 신규 직원 교육에 포함한다.|교육']],
+    ['fall', '낙상 예방', '환자안전', '낙상', ['환자안전법'], [
+      'C|낙상 위험 평가|입원 시와 상태 변화 시 낙상 위험도를 평가한다.|위험\\s*평가|평가',
+      'C|예방 활동|고위험 환자에게는 침상 난간 올리기, 미끄럼 방지, 보호자 교육 등 예방 활동을 한다.|예방|난간',
+      'C|낙상 발생 시 조치|낙상이 생기면 즉시 환자 상태를 확인하고 담당 의사에게 알린다.|발생|즉시',
+      'D|보고와 기록|낙상 발생은 환자안전사고로 보고하고 의무기록에 남긴다.|보고|기록',
+      'E|교육|낙상 예방 교육은 {freq} 실시한다.|교육']],
+    ['pressure', '욕창 예방', '환자안전', '욕창', [], [
+      'C|위험 평가|입원 시와 정기적으로 욕창 위험도를 평가한다.|평가', 'C|체위 변경|고위험 환자는 {freq} 체위를 바꾼다.|체위', 'C|발생 시 관리|욕창이 생기면 단계를 평가하고 치료 계획을 세운다.|발생|단계', 'D|기록|욕창 평가와 처치 내용을 의무기록에 남긴다.|기록']],
+    ['transfusion', '수혈 관리', '진료', '수혈|혈액', ['혈액관리법'], [
+      'P|수혈 동의|수혈 전에는 환자 또는 대리인에게 설명하고 서면 동의를 받는다.|동의',
+      'C|수혈 전 확인|수혈 전 의료인 2인이 환자와 혈액 제제를 함께 확인한다.|2인|확인',
+      'C|이상 반응 관찰|수혈 시작 후 첫 15분과 수혈 중 활력징후를 관찰한다.|관찰|활력',
+      'C|이상 반응 발생 시 조치|이상 반응이 생기면 즉시 수혈을 멈추고 담당 의사와 {dept}에 알린다.|이상\\s*반응|중단',
+      'D|혈액 보관|혈액 제제는 정해진 온도에서 보관하고 온도를 기록한다.|보관|온도']],
+    ['sedation', '진정(시술 중 진정)', '진료', '진정|수면\\s*내시경', [], [
+      'R|진정 담당 인력|진정은 자격을 갖춘 의사가 시행하고 {role}이(가) 환자를 관찰한다.|담당|자격|관찰',
+      'C|진정 전 평가|진정 전 환자의 병력, 금식 여부, 기도 상태를 평가한다.|전\\s*평가|금식',
+      'C|진정 중 감시|진정 중에는 산소포화도와 활력징후를 감시한다.|감시|산소',
+      'C|회복과 퇴실 기준|회복 기준을 충족한 뒤 퇴실한다.|회복|퇴실',
+      'D|응급 장비|진정 장소에는 응급 장비와 의약품을 갖춘다.|응급\\s*장비']],
+    ['narcotic', '마약류 관리', '의약품', '마약|향정', ['마약류 관리에 관한 법률'], [
+      'R|관리 책임자|마약류 관리자는 {dept}에서 지정한다.|관리자|책임',
+      'P|저장|마약류는 잠금장치가 있는 전용 장소에 보관한다.|보관|잠금',
+      'C|사용과 잔량 처리|사용 후 남은 마약류는 정해진 절차에 따라 폐기하고 기록한다.|잔량|폐기',
+      'C|재고 확인|마약류 재고는 {freq} 확인한다.|재고',
+      'D|취급 보고|마약류 취급 내역은 법령에 따라 보고한다.|보고']],
+    ['highalert', '고위험 의약품', '의약품', '고위험\\s*의약품|주의\\s*의약품', ['약사법'], [
+      'P|대상 지정|고위험 의약품 목록은 {dept}에서 정한다.|목록|지정',
+      'C|구분 보관|고위험 의약품은 다른 의약품과 구분하여 보관하고 표시한다.|구분|표시',
+      'C|투약 전 이중 확인|투약 전 의료인 2인이 함께 확인한다.|이중|2인']],
+    ['drugstore', '의약품 보관·관리', '의약품', '의약품|약품|냉장', ['약사법'], [
+      'C|보관 조건|의약품은 정해진 온도와 습도에서 보관하고 냉장 의약품 온도를 {freq} 기록한다.|온도|냉장',
+      'C|유효 기간 확인|유효 기간을 {freq} 확인하고 지난 의약품은 폐기한다.|유효\\s*기간',
+      'C|병동 비치 의약품|병동 비치 의약품의 종류와 수량을 정하고 점검한다.|비치|병동',
+      'D|이상 반응 보고|의약품 이상 반응은 {dept}에 보고한다.|이상\\s*반응|부작용']],
+    ['crashcart', '응급카트·응급 의약품', '진료', '응급\\s*카트|응급\\s*의약품|제세동', [], [
+      'P|비치 장소|응급카트는 정해진 장소에 두고 위치를 표시한다.|비치|위치',
+      'C|점검|응급카트의 의약품과 장비는 {freq} 점검하고 봉인 상태를 확인한다.|점검|봉인',
+      'C|사용 후 보충|사용 후에는 즉시 보충하고 점검표에 기록한다.|보충']],
+    ['cpr', '심폐소생술·신속대응', '진료', '심폐소생|CPR|신속\\s*대응|코드\\s*블루', [], [
+      'R|대응팀|심폐소생술팀은 {dept}을(를) 중심으로 구성한다.|팀|구성',
+      'C|호출 방법|심정지 발생 시 정해진 번호로 호출한다.|호출|번호',
+      'C|심폐소생술 기록|심폐소생술 시작·종료 시각과 처치 내용을 기록한다.|기록',
+      'E|교육|의료인은 심폐소생술 교육을 {freq} 받는다.|교육']],
+    ['surgery', '수술 전 확인(타임아웃)', '수술', '수술|타임\\s*아웃|수술\\s*부위', ['의료법'], [
+      'C|수술 부위 표시|수술 전 집도의가 수술 부위를 표시한다.|부위\\s*표시',
+      'C|수술 전 확인|마취 전, 절개 전, 퇴실 전에 수술팀이 함께 확인한다.|확인|절개',
+      'P|설명과 동의|수술 전 환자 또는 대리인에게 설명하고 서면 동의를 받는다.|동의|설명']],
+    ['anesthesia', '마취 관리', '수술', '마취', [], [
+      'C|마취 전 평가|마취 전 환자를 평가하고 기록한다.|전\\s*평가', 'C|마취 중 감시|마취 중 활력징후를 감시한다.|감시', 'C|회복실 퇴실 기준|회복 기준을 충족한 뒤 회복실에서 퇴실한다.|퇴실|회복']],
+    ['cctv', '수술실 CCTV', '수술', 'CCTV|폐쇄회로|촬영', ['의료법'], [
+      'P|촬영 요청|환자 또는 보호자가 요청하면 수술 장면을 촬영한다.|요청|촬영',
+      'C|촬영 거부 사유|법령에서 정한 거부 사유가 있으면 그 사유를 설명하고 기록한다.|거부',
+      'D|보관 기간|촬영한 영상은 {keep}간 보관한다.|보관|보존',
+      'C|열람·제공|영상 열람·제공 요청은 {dept}에서 접수하여 처리한다.|열람|제공']],
+    ['hand', '손 위생', '감염', '손\\s*위생', ['감염병의 예방 및 관리에 관한 법률'], [
+      'P|손 위생 시점|환자 접촉 전후, 무균 처치 전, 체액 노출 후, 환자 주변 접촉 후 손 위생을 한다.|시점|접촉',
+      'C|수행률 감시|손 위생 수행률은 {dept}에서 {freq} 관찰한다.|수행률|감시|관찰', 'E|교육|손 위생 교육을 정기적으로 실시한다.|교육']],
+    ['isolation', '격리', '감염', '격리', ['감염병의 예방 및 관리에 관한 법률'], [
+      'P|격리 대상|격리가 필요한 감염병과 다제내성균 환자를 정한다.|대상', 'C|격리 방법|접촉·비말·공기 주의 격리 방법에 따라 병실과 보호구를 정한다.|방법|보호구', 'C|격리 해제|해제 기준을 충족하면 격리를 해제한다.|해제']],
+    ['sterile', '소독·멸균', '감염', '소독|멸균', [], [
+      'C|소독 수준|기구는 사용 목적에 따라 멸균 또는 소독한다.|수준|멸균', 'C|멸균 확인|멸균 효과는 지표로 확인하고 기록한다.|확인|지표', 'C|환경 소독|환경과 장비는 {freq} 소독한다.|환경|장비']],
+    ['exposure', '직원 감염 노출(자상)', '감염', '노출|자상|주사침', ['산업안전보건법'], [
+      'C|노출 직후 조치|노출 직후 상처를 씻고 {dept}에 알린다.|직후|씻', 'C|검사와 추적 관리|노출원과 노출자 검사를 하고 추적 관리한다.|추적|검사', 'D|보고|노출 사고를 기록하고 보고한다.|보고']],
+    ['waste', '의료폐기물', '감염', '폐기물', ['폐기물관리법'], [
+      'C|분리 배출|의료폐기물은 종류별 전용 용기에 분리하여 버린다.|분리|용기', 'C|보관|의료폐기물 보관 장소와 기간을 지킨다.|보관', 'D|위탁 처리|처리 업체 위탁과 인계 내역을 기록한다.|위탁|인계']],
+    ['record', '의무기록 작성·관리', '의무기록', '의무기록|진료기록', ['의료법'], [
+      'P|작성 원칙|의무기록은 진료 후 지체 없이 정확하게 작성하고 서명한다.|작성|서명',
+      'C|수정|기록을 고칠 때는 고친 사람·일시·사유를 남긴다.|수정|정정',
+      'D|보존 기간|의무기록은 법령에서 정한 기간 동안 보존한다.|보존',
+      'C|미비 기록 관리|미비 기록은 {dept}에서 {freq} 점검하여 알린다.|미비']],
+    ['recordcopy', '의무기록 열람·사본 발급', '의무기록', '열람|사본', ['의료법'], [
+      'P|신청자 범위|환자 본인과 법령에서 정한 사람만 열람·사본 발급을 신청할 수 있다.|신청자|본인',
+      'C|구비 서류|대리인은 동의서와 위임장, 신분증 사본을 낸다.|동의서|위임장',
+      'C|발급 기한|신청을 받은 날부터 ○일 이내에 발급한다.|기한|이내',
+      'D|수수료|발급 수수료는 별표로 정한다.|수수료',
+      'R|담당 부서|열람·사본 발급 업무는 {dept}에서 맡는다.|담당|부서']],
+    ['privacy', '개인정보 보호', '정보', '개인정보', ['개인정보 보호법'], [
+      'R|개인정보 보호책임자|개인정보 보호책임자는 {dept}장으로 한다.|책임자',
+      'P|수집·이용|개인정보는 진료와 법령에서 정한 목적으로만 수집·이용한다.|수집|이용',
+      'C|제3자 제공|제3자 제공은 본인 동의 또는 법령에 근거가 있을 때만 한다.|제3자|제공',
+      'C|파기|보존 기간이 지난 개인정보는 지체 없이 파기한다.|파기',
+      'C|유출 시 대응|유출 사고가 나면 즉시 {dept}에 보고하고 정보주체에게 알린다.|유출']],
+    ['infosec', '정보보안·접근 권한', '정보', '보안|접근\\s*권한|비밀번호|전산', ['개인정보 보호법'], [
+      'C|접근 권한 부여|직무에 필요한 범위에서 접근 권한을 주고, 퇴직·전보 시 바로 회수한다.|부여|회수',
+      'C|접속 기록 점검|접속 기록은 {freq} 점검한다.|접속\\s*기록|로그',
+      'C|비밀번호 관리|비밀번호는 정기적으로 바꾸고 공유하지 않는다.|비밀번호']],
+    ['rights', '환자 권리와 책임', '환자권리', '환자\\s*권리|권리와\\s*책임', ['의료법'], [
+      'P|권리 게시|환자의 권리와 의무를 병원 안 잘 보이는 곳에 게시한다.|게시', 'C|안내|입원 시 환자 권리와 책임을 안내한다.|안내']],
+    ['consent', '설명·동의', '환자권리', '동의|설명', ['의료법'], [
+      'P|설명 대상|수술, 수혈, 전신마취 등 위험이 따르는 행위는 미리 설명하고 서면 동의를 받는다.|대상|서면',
+      'C|대리인 동의|환자가 결정할 수 없으면 법정대리인 또는 보호자에게 동의를 받는다.|대리인|보호자',
+      'C|동의 철회|환자는 언제든 동의를 철회할 수 있고, 철회 내용을 기록한다.|철회']],
+    ['restraint', '신체 보호대', '환자권리', '보호대|억제대|강박', ['의료법'], [
+      'P|사용 원칙|신체 보호대는 다른 방법이 없을 때 최소한으로 쓴다.|원칙|최소',
+      'C|의사 처방과 동의|의사 처방에 따라 쓰고 환자 또는 보호자에게 설명하고 동의를 받는다.|처방|동의',
+      'C|관찰|사용 중 {freq} 피부·순환 상태를 관찰하고 기록한다.|관찰']],
+    ['complaint', '민원·고충 처리', '환자권리', '민원|고충|불만', [], [
+      'R|담당 부서|민원은 {dept}에서 접수하여 처리한다.|담당|접수', 'C|처리 기한|민원은 접수한 날부터 ○일 이내에 답한다.|기한|이내', 'D|기록|민원 내용과 처리 결과를 기록하고 분석한다.|기록|분석']],
+    ['lst', '연명의료 결정', '환자권리', '연명의료|사전연명|임종', ['호스피스·완화의료 및 임종과정에 있는 환자의 연명의료결정에 관한 법률'], [
+      'R|윤리위원회|의료기관윤리위원회를 두고 운영한다.|윤리위원회', 'C|결정 절차|연명의료계획서·사전연명의료의향서 확인 등 법령의 절차에 따라 결정한다.|계획서|의향서', 'D|기록과 보고|연명의료 결정과 이행 내용을 기록하고 보고한다.|보고|기록']],
+    ['incident', '환자안전사고 보고', '환자안전', '환자\\s*안전|안전\\s*사고|위해\\s*사건|근접\\s*오류', ['환자안전법'], [
+      'C|보고 대상과 방법|환자안전사고를 알게 된 직원은 {dept}에 보고한다.|보고',
+      'C|보고 기한|중대한 사고는 ○시간 이내에 보고한다.|기한|이내',
+      'C|분석과 재발 방지|보고된 사고는 원인을 분석하고 재발 방지 대책을 세운다.|분석|재발',
+      'P|비밀 보장|보고자에게 불이익을 주지 않고 비밀을 지킨다.|비밀|불이익']],
+    ['dispute', '의료분쟁 대응', '경영', '분쟁|의료사고|소송|조정', ['의료사고 피해구제 및 의료분쟁 조정 등에 관한 법률'], [
+      'R|담당 부서|의료분쟁 접수와 대응은 {dept}에서 맡는다.|담당|접수', 'C|초기 대응|사고가 나면 진료기록을 보존하고 사실관계를 확인한다.|초기|보존', 'C|조정·소송 대응|조정 신청과 소송에 관한 자료를 모아 대응한다.|조정|소송']],
+    ['amb', '구급차·환자 이송', '진료', '구급차|구급\\s*차량|이송|응급구조사|출동', ['응급의료에 관한 법률'], [
+      'R|운용 책임|{dept}은(는) 구급차 운용과 출동 접수를 맡는다.|접수|운용|총괄',
+      'C|탑승 인력|구급차가 출동할 때는 {role}이(가) 동승한다.|탑승|동승|응급구조사',
+      'C|차량 소독|구급차는 {freq} 소독하고 소독 내용을 기록한다.|소독',
+      'C|장비·의약품 비치|구급차에는 법령에서 정한 장비와 의약품을 갖춘다.|장비|의약품|비치',
+      'C|정기 점검|구급차는 {freq} 점검하고 고장이 나면 즉시 수리한다.|점검|정비',
+      'C|이송 중 환자 관찰|이송 중 환자 상태를 관찰하고 처치 내용을 기록한다.|관찰|처치',
+      'D|운행 기록 보존|출동·운행 기록은 {keep}간 보존한다.|운행\\s*기록|출동\\s*기록|보존',
+      'C|위탁 운용|구급차 운용을 위탁할 때는 계약에 책임과 관리 감독 방법을 정한다.|위탁|계약',
+      'D|이송 처치료|이송 처치료는 법령에서 정한 기준에 따른다.|처치료|요금']],
+    ['er', '응급실 운영', '진료', '응급실|응급\\s*환자|중증도\\s*분류', ['응급의료에 관한 법률'], [
+      'C|중증도 분류|응급실에 온 환자는 도착 즉시 중증도를 분류한다.|중증도|분류', 'C|진료 순서|중증도에 따라 진료 순서를 정한다.|순서', 'C|협진 요청|협진 요청을 받은 진료과는 ○분 이내에 응답한다.|협진']],
+    ['transfer', '전원(다른 의료기관으로 옮김)', '진료', '전원|전원\\s*의뢰|회송', ['응급의료에 관한 법률'], [
+      'C|전원 결정|담당 의사가 환자 상태를 평가하여 전원을 결정한다.|결정', 'C|받는 기관 확인|전원 전 받는 의료기관에 연락하여 수용 여부를 확인한다.|수용|연락', 'D|자료 제공|진료 기록 사본과 소견서를 함께 보낸다.|소견서|사본']],
+    ['device', '의료기기 관리', '시설', '의료기기|장비|기기', ['의료기기법'], [
+      'C|정기 점검|의료기기는 {freq} 점검하고 점검표에 기록한다.|점검', 'C|고장 시 조치|고장 난 기기는 사용 중지 표시를 하고 {dept}에 알린다.|고장', 'D|이력 관리|구매·수리·폐기 이력을 기록한다.|이력|대장', 'C|검·교정|측정 기기는 정기적으로 교정한다.|교정']],
+    ['fire', '시설 안전·화재 예방', '시설', '화재|소방|시설\\s*안전', ['소방시설 설치 및 관리에 관한 법률'], [
+      'R|안전 관리자|소방안전관리자는 {dept}에서 지정한다.|관리자', 'C|소방 점검|소방 시설은 {freq} 점검한다.|점검', 'E|소방 훈련|직원 소방 훈련을 정기적으로 실시한다.|훈련']],
+    ['disaster', '재난 대응', '시설', '재난|대량\\s*환자|비상', ['재난 및 안전관리 기본법'], [
+      'R|재난 대응 조직|재난 대응 본부와 역할을 정한다.|본부|조직', 'C|비상 연락망|비상 연락망을 {freq} 갱신한다.|연락망', 'E|모의 훈련|재난 모의 훈련을 {freq} 실시한다.|훈련']],
+    ['violence', '폭력 예방·보안', '시설', '폭력|폭언|보안\\s*요원|난동', ['의료법'], [
+      'C|발생 시 대응|폭력이 발생하면 보안 요원을 부르고 필요하면 경찰에 신고한다.|신고|대응', 'C|피해 직원 보호|피해 직원은 업무에서 분리하고 지원한다.|보호|지원', 'D|기록|발생 내용과 조치를 기록한다.|기록']],
+    ['staffedu', '직원 교육', '인사', '교육|직무\\s*교육|신규\\s*직원', [], [
+      'C|신규 직원 교육|신규 직원은 입사 후 ○일 이내에 기본 교육을 받는다.|신규', 'C|법정 교육|법령에서 정한 교육을 {freq} 실시한다.|법정', 'D|교육 기록|교육 이수 내용을 기록하고 보관한다.|기록|이수']],
+    ['committee', '위원회 운영', '경영', '위원회', [], [
+      'R|구성|위원회는 위원장 1명을 포함한 ○명 이내로 구성한다.|구성|위원장', 'P|임기|위원의 임기는 ○년으로 하며 연임할 수 있다.|임기', 'C|회의|정기 회의는 {freq} 열고, 필요하면 임시 회의를 연다.|회의|소집', 'C|의결|재적 위원 과반수 출석과 출석 위원 과반수 찬성으로 의결한다.|의결|과반', 'D|회의록|회의록을 작성하여 보관한다.|회의록']],
+    ['outsourcing', '업무 위탁·계약', '경영', '위탁|수탁|외주|계약', [], [
+      'C|수탁 기관 선정|수탁 기관은 정한 기준에 따라 선정한다.|선정', 'C|계약 내용|계약에 업무 범위, 책임, 기간, 개인정보 처리를 정한다.|계약', 'C|관리 감독|{dept}은(는) 수탁 기관의 업무를 {freq} 점검한다.|감독|점검']],
+    ['certificate', '진단서·증명서 발급', '의무기록', '진단서|증명서|소견서', ['의료법'], [
+      'P|발급 원칙|진단서는 직접 진찰한 의사가 작성하여 발급한다.|직접|작성', 'C|신청과 본인 확인|신청자의 신분을 확인하고 대리 신청은 위임장을 받는다.|신청|위임', 'D|발급 대장|발급 내용을 대장에 기록한다.|대장|기록', 'D|수수료|수수료는 별표로 정한다.|수수료']],
+    ['death', '사망 환자 관리', '진료', '사망|변사|사체|안치', ['의료법'], [
+      'C|사망 확인과 진단서|의사가 사망을 확인하고 사망진단서를 작성한다.|확인|진단서', 'C|변사 신고|변사가 의심되면 즉시 경찰에 신고하고 {dept}에 알린다.|변사|신고', 'C|시신 인계|보호자 확인 후 시신을 인계하고 기록한다.|인계']],
+    ['radiation', '방사선 안전', '시설', '방사선|피폭', ['진단용 방사선 발생장치의 안전관리에 관한 규칙'], [
+      'C|피폭 관리|방사선 관계 종사자의 피폭선량을 {freq} 측정한다.|피폭|선량', 'C|장치 검사|진단용 방사선 발생장치는 법령에 따라 검사를 받는다.|검사', 'C|임신 여부 확인|가임기 여성은 촬영 전 임신 여부를 확인한다.|임신']],
+    ['diet', '영양·급식', '진료', '급식|식사|영양', [], [
+      'C|식사 처방|의사의 식사 처방에 따라 식사를 제공한다.|처방', 'C|위생 관리|조리 장소와 기구의 위생을 {freq} 점검한다.|위생|점검', 'C|알레르기 확인|식품 알레르기가 있는 환자는 표시하고 대체 식사를 제공한다.|알레르기']],
+    ['lab', '검사실 관리', '진료', '검사실|검체|정도\\s*관리', [], [
+      'C|검체 확인|검체에는 환자 이름과 등록번호를 붙이고 접수 시 확인한다.|검체|확인', 'C|정도 관리|검사 정도 관리를 {freq} 실시한다.|정도\\s*관리', 'C|이상 결과 보고|위험 수치는 즉시 담당 의료진에게 알린다.|위험\\s*수치|이상']],
+    ['qi', '질 향상·지표 관리', '경영', '질\\s*향상|지표|QI', [], [
+      'R|담당 조직|질 향상 활동은 {dept}에서 총괄한다.|총괄', 'C|지표 관리|부서별 지표를 정하고 {freq} 측정한다.|지표|측정', 'C|개선 활동|결과를 분석하여 개선 활동을 한다.|개선']]
+  ];
+  const TOPICS2 = TOPIC_LIB.map(([k, t, area, kw, laws, items]) => ({ k, t, area, kw: new RegExp(kw), laws,
+    items: items.map(s => { const [sec, title, text, ...kws] = s.split('|'); return { sec, title, text, kw: new RegExp(kws.join('|') || title) }; }) }));
+
+  /* ---------- 메모 읽기 ---------- */
+  const ROLE_RE = /(응급구조사(?:\s*\d+\s*(?:명|인))?(?:\s*(?:이상|과|와|및)\s*(?:운전자|간호사)(?:\s*\d+\s*(?:명|인))?)?|간호사(?:\s*\d+\s*명)?|전문의|약사|방사선사|임상병리사|보안\s*요원|운전자)/;
+  const FREQ_RE = /(매\s*(?:이송|사용|운행|출동|근무|교대)\s*(?:후|전|마다)|매일|매주|매월|매년|매\s*분기|분기\s*(?:별|마다)?\s*1회|(?:주|월|연|년)\s*\d+\s*회|\d+\s*(?:시간|일|주|개월)\s*마다|하루\s*\d+\s*회)/;
+  const KEEP_RE = /(\d+\s*(?:년|개월))\s*(?:간|동안)?\s*(?:보존|보관)|(?:보존|보관)\s*(?:기간은?)?\s*(\d+\s*(?:년|개월))/;
+  function memoRead(memo, name) {
+    const text = (name || '') + '\n' + (memo || '');
+    const sents = String(memo || '').split(/[\n.。;]|(?:,\s)|(?:다\s)/).map(s => s.trim()).filter(s => s.length > 1);
+    const depts = Array.from(new Set((String(memo || '').match(DEPT_RE) || []).concat((String(memo || '').match(/([가-힣A-Za-z]{2,12}(?:팀|과|실|센터|Unit|위원회))/g) || [])).map(s => s.replace(/장$/, ''))));
+    const sc = TOPICS2.map(tp => { const n = (text.match(new RegExp(tp.kw.source, 'g')) || []).length; return { tp, n: n + (tp.kw.test(name || '') ? 3 : 0) }; }).filter(x => x.n > 0).sort((a, b) => b.n - a.n);
+    return { sents, depts, topics: sc.map(x => x.tp), all: text };
+  }
+  function fillItem(it, M, dept) {
+    const near = M.sents.find(s => it.kw.test(s)) || '';
+    const pick = (re, s) => { const m = (s || '').match(re); return m ? (m[1] || m[2] || m[0]).replace(/\s+/g, ' ').trim() : ''; };
+    const d = (near.match(/([가-힣A-Za-z]{2,12}(?:팀|과|실|센터|Unit|위원회))/) || [])[1] || dept || '';
+    const f = pick(FREQ_RE, near), k = pick(KEEP_RE, near) || pick(KEEP_RE, M.sents.find(s => /보존|보관/.test(s) && it.kw.test(s + it.title))), r = pick(ROLE_RE, near);
+    let used = false;
+    const t = it.text.replace(/\{dept\}/g, () => { if (d) { used = used || !!near; return d; } return '○○팀'; })
+      .replace(/\{freq\}/g, () => f ? (used = true, f.replace(/^매\s*(이송|사용|운행|출동|근무|교대)/, '매 $1').replace(/\s+/g, ' ')) : '○○마다')
+      .replace(/\{keep\}/g, () => k ? (used = true, k) : '○년')
+      .replace(/\{role\}/g, () => r ? (used = true, r) : '○○')
+    return { sec: it.sec, title: it.title, text: josa(t), memo: used || !!near, near };
+  }
+  // 받침에 맞춰 은(는)·이(가)·을(를) 고르기
+  function josa(s) {
+    const has = (ch) => { const c = ch.charCodeAt(0) - 0xAC00; if (c < 0 || c > 11171) return /[0-9LMNR]$/.test(ch) ? true : false; return c % 28 !== 0; };
+    return s.replace(/([가-힣A-Za-z0-9○)])(은\(는\)|이\(가\)|을\(를\)|과\(와\)|으로\(로\))/g, (m, ch, p) => { const h = ch === '○' || ch === ')' ? null : has(ch); if (h == null) return m; const [a, b] = p.replace(')', '').split('('); return ch + (h ? a : b); });
+  }
+
+  /* ---------- 새 내규 만들기: 메모 → 추천 → 초안 ---------- */
   async function newRegDialog() {
     const lib = await libraryAll();
-    modal(`<h3>새 내규 만들기 — 기본 골격</h3><div class="muted">내규관리내규 형식의 골격과 주제별 점검 항목을 넣은 초안 파일을 만듭니다. 내용을 채운 뒤 「내규 연계 검사」로 빠진 부분과 다른 내규와의 충돌을 확인하세요.</div>
+    let REC = []; // {sec,title,text,on,src}
+    let M = null;
+    modal(`<h3>새 내규 만들기</h3><div class="muted">어떤 내규를 만들고 싶은지 적으면, 병원 내규 주제 목록(${TOPICS2.length}개 주제)에서 목차와 문구를 추천합니다. 고른 항목으로 내규관리내규 형식의 초안을 만듭니다.</div>
       <div class="grid2" style="margin-top:8px"><label class="f">내규명<input type="text" id="nN" placeholder="예) 구급차량 관리 내규"></label><label class="f">담당 부서<input type="text" id="nD" placeholder="예) 원무팀"></label>
       <label class="f">제정(시행)일<input type="date" id="nE" value="${esc(defRevDate())}"></label><label class="f">검토 주기<select id="nC"><option>1년</option><option selected>2년</option><option>3년</option></select></label></div>
-      <div class="f" style="margin-top:6px">주제 — 내규명으로 자동 선택, 여러 개 고를 수 있음<div class="chips" id="nT">${TOPICS.map(tp => `<label class="chip"><input type="checkbox" value="${tp.k}"> ${esc(tp.t)}</label>`).join('')}</div></div>
-      <div class="f" style="margin-top:6px">관련 내규 — 내규 서고 ${lib.length}건 중 주제가 겹치는 것<div class="chips" id="nR"></div></div>
-      <div class="qout"><b>형식</b><label><input type="radio" name="nf" value="hwpx" checked> 한글(.hwpx)</label><label><input type="radio" name="nf" value="docx"> 워드(.docx)</label></div>
-      <div class="foot"><button class="btn" id="x">닫기</button><button class="btn pri" id="ok">초안 만들기</button></div>`, m => {
+      <label class="f" style="margin-top:6px">어떤 내용으로 만들고 싶은지 — 자유롭게 적기<textarea id="nM" style="height:78px" placeholder="예) 사설 구급차 위탁 운영. 출동은 원무팀이 접수하고 응급구조사 1명과 운전자가 탑승. 차량 소독은 매 이송 후, 점검은 매월. 운행기록은 5년 보존."></textarea></label>
+      <div class="row" style="margin-top:6px;gap:8px"><button class="btn pri" id="go">추천 받기</button><span class="muted" id="nTopic"></span></div>
+      <div id="nRec" class="lintlist" style="max-height:38vh;margin-top:8px;display:none"></div>
+      <div id="nSide" style="display:none"></div>
+      <div class="foot"><button class="btn" id="x">닫기</button><button class="btn" id="ai">AI로 더 추천</button><button class="btn pri" id="ok" disabled>초안 만들기</button></div>`, m => {
       $('#x', m).onclick = closeModal;
-      const upd = () => { const nm = $('#nN', m).value; TOPICS.forEach(tp => { const c = $('#nT input[value="' + tp.k + '"]', m); if (!c.dataset.touched) c.checked = tp.kw.test(nm); });
-        const sel = TOPICS.filter(tp => $('#nT input[value="' + tp.k + '"]', m).checked); const rel = lib.filter(d => !nameMatch(d.name, nm) && (sel.some(tp => tp.kw.test(d.name) || (d.paras || []).filter(p => tp.kw.test(p)).length >= 3)));
-        $('#nR', m).innerHTML = rel.length ? rel.slice(0, 12).map(d => `<label class="chip"><input type="checkbox" checked value="${esc(d.name)}"> ${esc(d.name)}</label>`).join('') : '<span class="muted">없음 — 내규 서고에 관련 내규를 올리면 여기에 나옵니다.</span>'; };
-      $('#nN', m).addEventListener('input', upd); $$('#nT input', m).forEach(c => c.addEventListener('change', () => { c.dataset.touched = 1; upd(); })); upd();
+      const draw = () => {
+        const box = $('#nRec', m); box.style.display = '';
+        const bySec = ['R', 'P', 'C', 'D', 'E'].map(s => [s, REC.filter(r => r.sec === s)]).filter(x => x[1].length);
+        box.innerHTML = bySec.map(([s, arr]) => `<div class="lkh">${SECN[s]}</div>` + arr.map(r => { const i = REC.indexOf(r); return `<div class="li nohover rec"><input type="checkbox" data-i="${i}" ${r.on ? 'checked' : ''}><div style="flex:1"><div class="d" style="margin:0 0 2px">${esc(r.title)}${r.memo ? ' <span class="tagm">메모 반영</span>' : ''}${r.src === 'ai' ? ' <span class="tagm ai">AI</span>' : ''}</div><input type="text" class="rt" data-i="${i}" value="${esc(r.text)}"></div></div>`; }).join('')).join('');
+        $$('input[type=checkbox][data-i]', box).forEach(c => c.onchange = () => { REC[+c.dataset.i].on = c.checked; });
+        $$('input.rt', box).forEach(c => c.oninput = () => { REC[+c.dataset.i].text = c.value; });
+        $('#ok', m).disabled = !REC.length;
+      };
+      const side = async () => {
+        const sd = $('#nSide', m); const nm = $('#nN', m).value; const tps = M.topics.slice(0, 3);
+        const rel = lib.filter(d => !nameMatch(d.name, nm) && tps.some(tp => tp.kw.test(d.name) || (d.paras || []).filter(p => tp.kw.test(p)).length >= 2));
+        const laws = Array.from(new Set([].concat(...tps.map(tp => tp.laws))));
+        // 메모의 숫자와 서고의 숫자 비교
+        const warns = []; const mc = analyze({ text: $('#nM', m).value });
+        if (mc.durs.length) rel.forEach(d => clausesOfLib(d).forEach(c => { analyze(c); c.durs.forEach(e => mc.durs.forEach(x => { if (x.key === e.key && Math.abs(x.v - e.v) > 1e-6 && jacc(c.tok, mc.tok) > 0.08) warns.push('메모의 ‘' + x.key + ' ' + x.raw + '’ ↔ 「' + d.name + '」 ' + (c.num || '') + ' ' + e.raw); })); }));
+        sd.style.display = ''; sd.className = 'nside';
+        sd.innerHTML = `<div><b>관련 내규</b>${rel.length ? rel.slice(0, 8).map(d => `<label class="chip"><input type="checkbox" class="rel" checked value="${esc(d.name)}"> ${esc(d.name)}</label>`).join('') : '<span class="muted">내규 서고에 관련 내규 없음</span>'}</div>
+          <div><b>확인할 근거 법령</b>${laws.length ? laws.map(l => `<span class="chip">「${esc(l)}」</span>`).join('') : '<span class="muted">없음</span>'}<span class="muted">조문 번호는 국가법령정보센터에서 확인</span></div>
+          ${warns.length ? `<div><b style="color:#b7791f">숫자 확인</b>${Array.from(new Set(warns)).slice(0, 5).map(w => `<div class="muted">${esc(w)}</div>`).join('')}</div>` : ''}`;
+      };
+      $('#go', m).onclick = async () => {
+        const nm = $('#nN', m).value.trim(), memo = $('#nM', m).value.trim();
+        if (!nm && !memo) { toast('내규명이나 원하는 내용을 적어 주세요.'); return; }
+        M = memoRead(memo, nm); const dept = $('#nD', m).value.trim() || M.depts[0] || '';
+        if (!$('#nD', m).value.trim() && M.depts[0]) $('#nD', m).value = M.depts[0];
+        const tps = M.topics.slice(0, 3);
+        $('#nTopic', m).textContent = tps.length ? '찾은 주제: ' + tps.map(t => t.t).join(' · ') : '주제를 찾지 못했습니다 — 기본 골격만 넣거나 「AI로 더 추천」을 써 보세요.';
+        REC = REC.filter(r => r.src === 'ai');
+        tps.forEach((tp, ti) => tp.items.forEach(it => { const f = fillItem(it, M, dept); if (!REC.some(r => r.text === f.text)) REC.push(Object.assign(f, { on: ti === 0 || f.memo, src: tp.k })); }));
+        // 메모에만 있고 목록에 없는 문장도 살림
+        M.sents.forEach(s => { if (s.length < 6) return; if (REC.some(r => r.near === s)) return; REC.push({ sec: 'C', title: '메모에 적은 내용', text: s.replace(/[.\s]*$/, '') + (/[다]$/.test(s) ? '.' : ' — (문장으로 다듬어 주세요)'), memo: true, on: true, src: 'memo', near: s }); });
+        draw(); await side(); LOG('새 내규 추천', nm + ' · ' + tps.map(t => t.t).join(','));
+      };
+      $('#ai', m).onclick = async () => {
+        const nm = $('#nN', m).value.trim(), memo = $('#nM', m).value.trim(); if (!memo && !nm) { toast('먼저 내규명이나 원하는 내용을 적어 주세요.'); return; }
+        M = M || memoRead(memo, nm);
+        const relTxt = []; lib.filter(d => M.topics.slice(0, 3).some(tp => tp.kw.test(d.name))).slice(0, 4).forEach(d => (d.paras || []).slice(0, 40).forEach(p => relTxt.push('「' + d.name + '」 ' + clip(p, 150))));
+        const prompt = `병원 새 내규 초안의 목차와 문구를 추천해 주세요.
+[내규명] ${nm || '(미정)'}
+[담당 부서] ${$('#nD', m).value || '(미정)'}
+[작성 기준] ${presetDesc()} · 문장은 "~한다"로 맺음
+[만들고 싶은 내용]
+${memo}
+
+[이미 추천된 항목]
+${REC.map(r => '- (' + SECN[r.sec] + ') ' + r.text).join('\n') || '- 없음'}
+
+[관련 내규 조문 — 충돌하지 않게 맞춰 주세요]
+${relTxt.slice(0, 60).join('\n') || '- 없음'}
+
+[요청] 위 내용을 바탕으로 빠진 항목을 더해 주세요. 메모에 없는 부서·숫자는 지어내지 말고 "○○"로 비워 두세요. 법령 조문 번호는 쓰지 마세요.
+[답 형식] 다른 말 없이 JSON만: {"items":[{"sec":"책임과 권한|정책|절차|기록|교육","title":"짧은 항목명","text":"내규 문장"}]}`;
+        const add = (txt) => { const j = String(txt || '').match(/\{[\s\S]*\}/); let arr = []; try { arr = JSON.parse(j[0]).items || []; } catch (e) { toast('답을 읽지 못했습니다.'); return; }
+          const SM = { 책임과권한: 'R', 책임: 'R', 정책: 'P', 절차: 'C', 기록: 'D', 기록및서식: 'D', 교육: 'E' };
+          arr.forEach(x => { const s = SM[String(x.sec || '').replace(/\s/g, '')] || 'C'; if (x.text && !REC.some(r => r.text === x.text)) REC.push({ sec: s, title: x.title || 'AI 추천', text: x.text, on: true, src: 'ai' }); }); draw(); toast(arr.length + '개 항목을 더했습니다.'); };
+        const c = aiCfg();
+        if (c.on && c.key) { busy(true, 'AI 추천 받는 중…'); try { add(await callClaude(prompt, { system: '당신은 병원 내규를 만드는 행정·법제 전문가입니다. 요청한 JSON 형식으로만 답합니다.', max: 3000, timeout: 90000 })); } catch (e) { toast('AI 요청 실패: ' + e.message, 6000); } finally { busy(false); } }
+        else {
+          try { await navigator.clipboard.writeText(prompt); } catch (e) { }
+          const ans = window.prompt('AI 연결이 꺼져 있어 요청문을 복사했습니다(복사가 막혔으면 「도구 → AI 문구 제안 설정」에서 연결을 켜세요).\n사내에서 허용된 AI에 붙여 넣고 받은 답(JSON)을 여기에 붙여 넣으세요.', '');
+          if (ans) add(ans);
+        }
+      };
       $('#ok', m).onclick = async () => {
         const nm = $('#nN', m).value.trim(); if (!nm) { toast('내규명을 적어 주세요.'); return; }
-        const info = { name: nm, dept: $('#nD', m).value.trim(), eff: $('#nE', m).value, cycle: $('#nC', m).value, topics: TOPICS.filter(tp => $('#nT input[value="' + tp.k + '"]', m).checked), rel: $$('#nR input:checked', m).map(c => c.value) };
-        const fmt = ($('input[name=nf]:checked', m) || {}).value || 'hwpx'; closeModal();
-        const blob = await exportPlain(nm, skeletonItems(info), fmt); download(blob, safe(nm) + ' (초안).' + fmt); LOG('새 내규 골격', nm); toast('초안을 만들었습니다. 채운 뒤 「내규 연계 검사」로 점검하세요.', 5000);
+        const tps = (M ? M.topics.slice(0, 3) : []);
+        const info = { name: nm, dept: $('#nD', m).value.trim(), eff: $('#nE', m).value, cycle: $('#nC', m).value, picked: REC.filter(r => r.on && r.text.trim()), laws: Array.from(new Set([].concat(...tps.map(tp => tp.laws)))), rel: $$('.rel:checked', m).map(c => c.value) };
+        closeModal(); const blob = await exportPlain(nm, skeletonItems(info), 'hwpx'); download(blob, safe(nm) + ' (초안).hwpx'); LOG('새 내규 초안', nm + ' · ' + info.picked.length + '항목');
+        toast('초안을 만들었습니다. 채운 뒤 「내규 연계 검사」로 점검하세요.', 5000);
       };
     });
   }
@@ -7283,21 +7548,23 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     const G = (t) => L(t, { runs: [{ t, c: '#2f6db5' }], hang: 3, ind: 1 });
     const cell = (t, bg) => ({ runs: [{ t, b: !!bg }], cs: 1, rs: 1, bg: bg || undefined, al: bg ? 'center' : 'left' });
     const dot = (iso) => iso ? iso.replace(/^(\d{4})-(\d{2})-(\d{2})$/, (x, y, mo, d) => y + '. ' + mo + '. ' + d + '.') : '';
-    const it = [];
-    it.push({ k: 'table', rows: [[cell('내규번호', '#e8ecf3'), cell('○○.○'), cell('담당부서', '#e8ecf3'), cell(info.dept || '')], [cell('제정일자', '#e8ecf3'), cell(dot(info.eff)), cell('검토책임자', '#e8ecf3'), cell((info.dept || '') + '장')], [cell('개정일자', '#e8ecf3'), cell(''), cell('검토주기', '#e8ecf3'), cell(info.cycle || '')]] });
+    const it = []; const HAN = '가나다라마바사아자차카타파하';
+    it.push({ k: 'table', rows: [[cell('내규번호', '#e8ecf3'), cell('○○.○'), cell('담당부서', '#e8ecf3'), cell(info.dept || '')], [cell('제정일자', '#e8ecf3'), cell(dot(info.eff)), cell('검토책임자', '#e8ecf3'), cell((info.dept || '○○팀') + '장')], [cell('개정일자', '#e8ecf3'), cell(''), cell('검토주기', '#e8ecf3'), cell(info.cycle || '')]] });
     it.push(L(''));
     const sec = (title, lines) => { it.push(H(title)); lines.forEach(l => it.push(typeof l === 'string' ? L(l, { hang: 3, ind: 1 }) : l)); it.push(L('')); };
+    const picked = info.picked || [];
+    const group = (code) => { const arr = picked.filter(r => r.sec === code); if (!arr.length) return null; const out = []; let n = 0; const seen = new Map();
+      arr.forEach(r => { if (!seen.has(r.title)) { seen.set(r.title, 0); n++; out.push(n + '. ' + r.title); } const k = seen.get(r.title); seen.set(r.title, k + 1); out.push(HAN[k % 14] + '. ' + r.text); }); return out; };
     sec('목 적', ['본 내규는 ' + info.name.replace(/\s*(내규|규정)$/, '') + '에 관한 기준과 절차를 정함을 목적으로 한다.']);
     sec('적용범위', ['본 내규는 ○○에 적용한다.']);
     sec('용어정의', ['1. ○○', '○○은 ○○을 말한다.', G('※ 다른 내규에서 이미 정의한 용어는 같은 뜻으로 씁니다(「내규 연계 검사」로 확인).')]);
-    sec('책임과 권한', ['1. ' + (info.dept || '○○팀') + '', '가. ○○ 업무를 총괄한다.', '2. ○○', '가. ○○를 수행한다.']);
-    sec('정 책', ['1. ○○']);
-    const procs = []; info.topics.forEach(tp => tp.items.forEach(([t]) => procs.push(t)));
-    sec('절 차', procs.length ? procs.map((t, i) => (i + 1) + '. ' + t).reduce((a, t) => a.concat([t, '가. (내용을 적어 주세요)']), []) : ['1. ○○', '가. ○○']);
-    sec('기록 및 서식', ['1. ○○ 기록은 ○년간 보존한다.', G('※ 보존 기간·점검 주기 같은 숫자는 관련 내규와 맞춰 주세요.')]);
-    sec('교 육', ['1. ○○ 업무 담당자는 연 ○회 교육을 받는다.']);
-    sec('관련 근거', ['1. 「○○법」 제○조', G('※ 근거 법령과 조문 번호는 국가법령정보센터에서 확인해 적어 주세요.')]);
-    sec('관련 내규', info.rel.length ? info.rel.map((n, i) => (i + 1) + '. ' + n) : ['1. ○○ 내규']);
+    sec('책임과 권한', group('R') || ['1. ' + (info.dept || '○○팀'), '가. ○○ 업무를 총괄한다.']);
+    sec('정 책', group('P') || ['1. ○○']);
+    sec('절 차', group('C') || ['1. ○○', '가. ○○']);
+    sec('기록 및 서식', (group('D') || ['1. ○○ 기록은 ○년간 보존한다.']).concat([G('※ 보존 기간·점검 주기 같은 숫자는 관련 내규와 맞춰 주세요.')]));
+    sec('교 육', group('E') || ['1. ○○ 업무 담당자는 연 ○회 교육을 받는다.']);
+    sec('관련 근거', (info.laws && info.laws.length ? info.laws.map((l, i) => (i + 1) + '. 「' + l + '」 제○조') : ['1. 「○○법」 제○조']).concat([G('※ 근거 조문 번호는 국가법령정보센터에서 확인해 적어 주세요.')]));
+    sec('관련 내규', info.rel && info.rel.length ? info.rel.map((n, i) => (i + 1) + '. ' + n) : ['1. ○○ 내규']);
     sec('부 칙', ['1. 이 내규는 ' + RG.korDate(info.eff) + '부터 시행한다.']);
     it.push(H('별 첨')); it.push(L('[별첨 1] ○○ 서식', { hang: 3, ind: 1 }));
     return it;
@@ -7327,7 +7594,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
         $$('.tabs2 .seg', m).forEach(b => b.classList.toggle('on', b.dataset.tab === k));
         if (k === 'a') {
           body.innerHTML = `<div class="lkh">기본 골격 (내규관리내규)</div>` + SC.sk.map(x => `<div class="li nohover"><span class="sev" style="background:${x.ok ? '#2e7d32' : '#c0392b'}">${x.ok ? '있음' : '없음'}</span><div class="t">${esc(x.t)}</div></div>`).join('') +
-            (SC.topic.length ? SC.topic.map(tp => `<div class="lkh">주제별 점검 — ${esc(tp.t)}</div>` + tp.items.map(x => `<div class="li nohover"><span class="sev" style="background:${x.ok ? '#2e7d32' : '#b7791f'}">${x.ok ? '있음' : '확인'}</span><div class="t">${esc(x.t)}</div></div>`).join('')).join('') : `<div class="lkh">주제별 점검</div><div class="muted" style="padding:8px 10px">내규명·본문에서 알려진 주제(구급차·이송, 의무기록, 감염, 환자 안전, 의약품, 장비, 설명·동의, 위원회, 위탁)를 찾지 못했습니다.</div>`);
+            (SC.topic.length ? SC.topic.map(tp => `<div class="lkh">주제별 점검 — ${esc(tp.t)}</div>` + tp.items.map(x => `<div class="li nohover"><span class="sev" style="background:${x.ok ? '#2e7d32' : '#b7791f'}">${x.ok ? '있음' : '확인'}</span><div class="t">${esc(x.t)}</div></div>`).join('')).join('') : `<div class="lkh">주제별 점검</div><div class="muted" style="padding:8px 10px">내규명·본문에서 병원 내규 주제 목록(${TOPICS2.length}개)의 주제를 찾지 못했습니다.</div>`);
         } else if (k === 'b') {
           body.innerHTML = CF.length ? CF.map((x, i) => `<div class="li" data-i="${i}"><span class="sev" style="background:${SEVC[x.sev][1]}">${esc(x.cat)}</span><div style="flex:1"><div class="t">${esc(x.msg)}</div>
             ${x.a ? `<div class="d"><b>이 내규</b> ${esc(cref(x.a))}${esc(clip(x.a.text, 90))}</div>` : ''}${x.b ? `<div class="d"><b>${esc(x.b.doc || '')}</b> ${esc((x.b.sec ? x.b.sec + ' ' : '') + (x.b.num ? x.b.num + ' ' : ''))}${esc(clip(x.b.text, 90))}</div>` : ''}</div></div>`).join('')
@@ -7412,7 +7679,7 @@ ${body}
   }
 
   (function mountV29() {
-    const T29 = [['newreg', '📝 새 내규 만들기', '내규관리내규 골격 + 주제별 점검 항목(구급차·이송, 의무기록, 감염 등)을 넣은 초안'], ['link', '🔗 내규 연계 검사', '빠진 항목 · 다른 내규와의 용어·기간·담당·위임 충돌과 공백 · 조문 연결'], ['review', '🧑‍⚖️ 검토 요청', '빠진 부분·뜻 충돌을 AI(켠 경우만) 또는 요청문 복사로 검토받기']];
+    const T29 = [['newreg', '📝 새 내규 만들기', '원하는 내용을 적으면 병원 내규 주제 목록에서 목차·문구를 추천하고 초안(.hwpx)으로'], ['link', '🔗 내규 연계 검사', '빠진 항목 · 다른 내규와의 용어·기간·담당·위임 충돌과 공백 · 조문 연결'], ['review', '🧑‍⚖️ 검토 요청', '빠진 부분·뜻 충돌을 AI(켠 경우만) 또는 요청문 복사로 검토받기']];
     window.__v29tools = T29;
   })();
 
@@ -8465,7 +8732,7 @@ ${body}
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '2.9';
+  const APP_VERSION = '3.0';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
