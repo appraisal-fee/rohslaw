@@ -285,6 +285,19 @@ body.withSrc main{margin-right:min(44vw,760px)}
 #srcPanel .spp{padding:1px 4px;border-radius:3px;white-space:pre-wrap}
 #srcPanel .spp.hit{background:rgba(255,193,7,.3);outline:2px solid #e65100}
 #srcPanel .spt{border-collapse:collapse;margin:4px 0;font-size:12px}#srcPanel .spt td{border:1px solid #999;padding:2px 5px}
+
+/* v2.9 */
+.tabs2{display:flex;gap:0;margin:10px 0 8px;border:1px solid var(--line);border-radius:8px;overflow:hidden;width:max-content}
+.tabs2 .seg{border:0;border-right:1px solid var(--line);background:#f7f9fc;padding:7px 16px;font-size:13px;cursor:pointer;color:var(--sub)}
+.tabs2 .seg:last-child{border-right:0}.tabs2 .seg b{margin-left:4px;color:var(--ink)}
+.tabs2 .seg.on{background:#eaf2fd;color:var(--pri);font-weight:700}
+.lkh{padding:8px 10px 4px;font-size:12.5px;font-weight:700;color:var(--pri);background:#f7f9fc;border-bottom:1px solid var(--line)}
+.lkc{padding:8px 10px;border-bottom:1px solid var(--line)}
+.lkt{font-size:13px;font-weight:600;margin-bottom:4px}
+.lko{font-size:12.5px;color:#3c4a60;padding:3px 0 3px 14px;border-left:3px solid #c9d7ec;margin:3px 0 0 4px;line-height:1.5}
+.lkd{display:inline-block;background:#1f3a68;color:#fff;border-radius:4px;padding:0 6px;font-size:11.5px;margin-right:4px}
+.lkw{display:inline-block;margin-left:6px;color:#8a6d1f;font-size:11.5px}
+.chips label.chip{display:inline-flex;align-items:center;gap:4px}
 </style>
 <style id="doccss"></style>
 <style id="printpage">@page{size:A4 portrait;margin:0}@page land{size:A4 landscape;margin:0}</style>
@@ -6348,11 +6361,15 @@ window.__authGate=true;
       ['ren', '✏️ 옛 이름 목록', '형식 검사·일괄 변경에 쓸 옛 이름 → 새 이름 목록'],
       ['sug', '💡 문구 제안', '고른 행의 개정안을 지시대로 고친 문구 후보 — 규칙(오프라인) · AI · 요청문 복사 (Ctrl+Alt+K)'],
       ['plain', '✨ 문구 다듬기', '개정안 전체의 어려운 한자어·옛 표현을 알기 쉬운 말로 (법제처 정비 기준)'],
+      ['newreg', '📝 새 내규 만들기', '내규관리내규 골격 + 주제별 점검 항목(구급차·이송, 의무기록, 감염 등)을 넣은 초안'],
+      ['link', '🔗 내규 연계 검사', '빠진 항목 · 다른 내규와의 용어·기간·담당·위임 충돌과 공백 · 조문 연결'],
+      ['review', '🧑‍⚖️ 검토 요청', '빠진 부분·뜻이 부딪히는 곳을 AI(켠 경우만) 또는 요청문 복사로 검토받기'],
+      ['lib', '📚 내규 서고', '연계 검사·인용 검사에 쓸 다른 내규 올리기'],
       ['ai', '🤖 AI 문구 제안 설정', 'Claude 연결 켜기·끄기, API 키 (켤 때만 요청한 문장이 전송됨)']
     ];
     modal(`<h3>도구</h3><div class="toolgrid">${T.map(([k, t, d]) => `<button class="tool" data-t="${k}"><b>${t}</b><span>${d}</span></button>`).join('')}</div><div class="foot"><button class="btn" id="x">닫기</button></div>`, m => {
       $('#x', m).onclick = closeModal;
-      $$('.tool', m).forEach(b => b.onclick = () => { const k = b.dataset.t; closeModal(); ({ lint: lintDialog, list: changeListDialog, submit: submitDialog, full: fullTextDialog, batch: batchDialog, rename: renameBatchDialog, reg: registryDialog, ren: () => renamesDialog(), sug: () => suggestDialog(), plain: plainDialog, ai: aiSettingsDialog })[k](); });
+      $$('.tool', m).forEach(b => b.onclick = () => { const k = b.dataset.t; closeModal(); ({ lint: lintDialog, list: changeListDialog, submit: submitDialog, full: fullTextDialog, batch: batchDialog, rename: renameBatchDialog, reg: registryDialog, ren: () => renamesDialog(), sug: () => suggestDialog(), plain: plainDialog, ai: aiSettingsDialog, newreg: () => newRegDialog(), link: () => linkCheckDialog(), review: () => reviewDialog(), lib: () => libraryDialog() })[k](); });
     });
   }
   (function mountTools() {
@@ -6551,16 +6568,17 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     const parts = ('\n' + txt).split(/\n\s*(?:\*\*)?(?:후보|대안|안)\s*\d+(?:\*\*)?\s*[:.)\]]?\s*|\n\s*[①②③]\s*/).map(s => s.trim()).filter(Boolean);
     return (parts.length > 1 ? parts : [txt]).map(t => ({ text: t.replace(/^```\w*|```$/g, '').trim() }));
   }
-  async function callClaude(prompt) {
+  async function callClaude(prompt, co) {
+    co = co || {};
     const c = aiCfg(); if (!c.on || !c.key) throw new Error('AI 연결이 꺼져 있습니다. 「도구 → AI 문구 제안 설정」에서 켜 주세요.');
-    const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 60000);
+    const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), co.timeout || 60000);
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: ctl.signal, headers: { 'content-type': 'application/json', 'x-api-key': c.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify({ model: c.model || 'claude-sonnet-5-5', max_tokens: 2000, system: '당신은 병원 내규 개정 문안을 다듬는 행정·법제 전문가입니다. 요청한 JSON 형식으로만 답합니다.', messages: [{ role: 'user', content: prompt }] }) });
+        body: JSON.stringify({ model: c.model || 'claude-sonnet-5-5', max_tokens: co.max || 2000, system: co.system || '당신은 병원 내규 개정 문안을 다듬는 행정·법제 전문가입니다. 요청한 JSON 형식으로만 답합니다.', messages: [{ role: 'user', content: prompt }] }) });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error((d.error && d.error.message) || ('HTTP ' + res.status));
       return (d.content || []).filter(x => x.type === 'text').map(x => x.text).join('\n');
-    } catch (e) { if (e.name === 'AbortError') throw new Error('응답이 60초 안에 오지 않았습니다.'); if (/Failed to fetch|NetworkError/i.test(e.message)) throw new Error('인터넷 연결 또는 병원 보안 프로그램이 Anthropic 접속(api.anthropic.com)을 막고 있습니다.'); throw e; }
+    } catch (e) { if (e.name === 'AbortError') throw new Error('응답이 ' + Math.round((co.timeout || 60000) / 1000) + '초 안에 오지 않았습니다.'); if (/Failed to fetch|NetworkError/i.test(e.message)) throw new Error('인터넷 연결 또는 병원 보안 프로그램이 Anthropic 접속(api.anthropic.com)을 막고 있습니다.'); throw e; }
     finally { clearTimeout(tm); }
   }
   function aiSettingsDialog() {
@@ -6753,7 +6771,10 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     add('원본 나란히 보기', () => srcPanel(true), 'Ctrl+Alt+O · 고른 행의 원본 쪽');
     add('검토 회차 비교', () => roundsDialog(), '1차·2차 개정안 · 의견 반영 확인');
     add('인용 검사', () => citeDialog(), '번호 바뀐 조문을 인용한 곳 찾기');
-    add('내규 서고(다른 내규 올리기)', () => libraryDialog(), '인용 검사용');
+    add('내규 서고(다른 내규 올리기)', () => libraryDialog(), '인용·연계 검사용');
+    add('새 내규 만들기(기본 골격)', () => newRegDialog(), '제정 초안 · 주제별 점검 항목', '신규 제정');
+    add('내규 연계 검사', () => linkCheckDialog(), '빠진 항목 · 다른 내규와 충돌·공백 · 조문 연결', '충돌 공백 연결');
+    add('검토 요청(AI·요청문)', () => reviewDialog(), '빠진 부분·뜻 충돌 검토');
     add('여러 내규 일괄 비교', () => batchDialog());
     add('이름 일괄 변경', () => renameBatchDialog(), '조직 개편');
     add('내규 대장', () => registryDialog(), '검토 주기·보존 기한');
@@ -7081,7 +7102,321 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     if (tools && !$('#bPal')) { tools.insertAdjacentHTML('beforebegin', '<button id="bPal" title="기능 찾기 (Ctrl+K) — 초성으로도 찾음">🔍<span class="pt"> 찾기</span><kbd>Ctrl K</kbd></button>'); $('#bPal').onclick = palette; }
   })();
 
-  window.__app = { palette, quickFinish, roundsDialog, citeDialog, citeCheck, libraryDialog, libraryAdd, srcPanel, saveMyDefaults, applyMyDefaults, recentDialog, clearReadCache, cAll, numberMaps, suggestDialog, plainDialog, aiSettingsDialog, parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
+
+  /* =========================================================
+     v2.9: 새 내규 기본 골격 · 주제별 점검표 · 조문 연결 · 내규 간 충돌·공백 검사 · 검토 요청(AI)
+     ========================================================= */
+  const SKELETON = [
+    { k: 'head', t: '머리표(내규 번호·제정일·담당 부서·검토 주기)', why: '내규관리내규의 머리표 항목', test: (D) => !!(D.meta.no || D.meta.dept || D.meta.enacted) },
+    { k: 'purpose', t: '목적', re: /^목\s*적|목적으로\s*한다/ },
+    { k: 'scope', t: '적용 범위(대상)', re: /적용\s*(범위|대상)|적용한다/ },
+    { k: 'terms', t: '용어 정의', re: /용어\s*(의\s*)?정의|(이)?란\s.+말한다/ },
+    { k: 'resp', t: '책임과 권한(부서·직종별 역할)', re: /책임|권한|역\s*할|담당한다|업무를\s*수행/ },
+    { k: 'policy', t: '정책(원칙)', re: /^정\s*책|원\s*칙/ },
+    { k: 'proc', t: '절차(업무 순서)', re: /^절\s*차|절차|순서|방법/ },
+    { k: 'record', t: '기록·서식 관리', re: /기록|서식|양식|대장/ },
+    { k: 'edu', t: '교육·훈련', re: /교육|훈련/ },
+    { k: 'basis', t: '관련 근거(법령·인증 기준)', re: /근거|법\b|법률|시행규칙|시행령|인증\s*기준|「[^」]*법[^」]*」/ },
+    { k: 'related', t: '관련 내규', re: /관련\s*내규|내규에\s*따|규정에\s*따/ },
+    { k: 'add', t: '부칙(시행일)', re: /^부\s*칙|시행한다/ }
+  ];
+  const TOPICS = [
+    { k: 'amb', t: '구급차·환자 이송', kw: /구급차|구급\s*차량|이송|응급구조사|출동/, items: [
+      ['차량 신고·등록과 표시', /신고|등록|표시|도색|표지/], ['장비·의약품 비치 기준', /장비|의약품|비치|구비/], ['차량 소독·감염 관리', /소독|세척|감염/],
+      ['탑승 인력(응급구조사·의료인) 기준', /탑승|응급구조사|간호사|의사.{0,6}동승|동승/], ['출동·운행 기록과 보존 기간', /운행\s*기록|출동\s*기록|기록.{0,10}보존|보존/],
+      ['정기 점검·정비와 고장 시 조치', /점검|정비|고장|수리/], ['위탁 운용 시 계약·관리 감독', /위탁|수탁|계약/], ['이송 요청·결정 절차', /요청|결정|의뢰|접수/],
+      ['이송 중 환자 관찰·처치 기록', /관찰|처치|활력|상태\s*기록/], ['사고·민원 발생 시 대응', /사고|민원|보고/], ['이송 처치료·요금', /요금|처치료|비용|수수료/]] },
+    { k: 'rec', t: '의무기록·개인정보', kw: /의무기록|진료기록|개인정보|열람|사본/, items: [
+      ['신청자 범위와 본인 확인', /본인|신분|확인|대리인/], ['동의서·위임장 등 구비 서류', /동의서|위임장|서류/], ['보존 기간', /보존/], ['파기 절차', /파기|폐기/],
+      ['접근 권한과 접속 기록 관리', /접근|권한|접속\s*기록|로그/], ['수수료', /수수료|비용/], ['외부 제공·위탁 시 관리', /제공|위탁|제3자/]] },
+    { k: 'inf', t: '감염 관리', kw: /감염|격리|소독|멸균|손\s*위생/, items: [
+      ['손 위생', /손\s*위생/], ['격리 기준과 방법', /격리/], ['소독·멸균', /소독|멸균/], ['노출 시 대응', /노출|자상|사후\s*관리/], ['감시·보고', /감시|보고/], ['교육', /교육/]] },
+    { k: 'safety', t: '환자 안전·사고 보고', kw: /환자\s*안전|안전\s*사고|위해\s*사건|근접\s*오류|사고\s*보고/, items: [
+      ['보고 대상과 보고 체계', /보고/], ['보고 기한', /\d+\s*(시간|일)\s*(이내|안)/], ['원인 분석과 재발 방지', /분석|재발/], ['비밀 보장·불이익 금지', /비밀|불이익/], ['환자·보호자 설명', /설명|안내/]] },
+    { k: 'drug', t: '의약품 관리', kw: /의약품|약품|마약|향정|투약/, items: [
+      ['보관 조건(온도·잠금)', /보관|온도|잠금/], ['마약류·향정신성의약품 관리', /마약|향정/], ['유효 기간 확인', /유효\s*기간|사용\s*기한/], ['투약 확인 절차', /투약|확인/], ['이상 반응 보고', /이상\s*반응|부작용/]] },
+    { k: 'equip', t: '의료기기·시설 장비', kw: /의료기기|장비|시설|기기/, items: [
+      ['점검 주기와 점검표', /점검/], ['고장 시 조치와 대체 장비', /고장|대체/], ['사용·수리 이력 관리', /이력|대장/], ['검·교정', /교정/]] },
+    { k: 'consent', t: '설명·동의', kw: /동의|설명/, items: [
+      ['설명 대상과 내용', /설명/], ['서면 동의', /서면|동의서/], ['대리인 동의', /대리인|법정대리인|보호자/], ['동의 철회', /철회/]] },
+    { k: 'comm', t: '위원회 운영', kw: /위원회/, items: [
+      ['구성(위원장·위원)', /구성|위원장/], ['임기', /임기/], ['회의 소집', /소집|개최/], ['의결 정족수', /의결|과반/], ['회의록', /회의록/]] },
+    { k: 'out', t: '업무 위탁·계약', kw: /위탁|수탁|계약|외주/, items: [
+      ['수탁 기관 선정 기준', /선정|기준/], ['계약 내용(업무·책임·기간)', /계약/], ['관리 감독과 평가', /감독|평가|점검/], ['개인정보 처리 위탁', /개인정보/]] }
+  ];
+  const LKEYS = ['보존', '파기', '폐기', '점검', '정비', '소독', '세척', '교육', '훈련', '보고', '기록', '출동', '이송', '탑승', '동승', '운행', '운전', '장비', '의약품', '비치', '신고', '등록', '위탁', '계약', '요금', '처치료', '수수료', '동의', '설명', '열람', '사본', '발급', '접근', '격리', '감염', '검토', '승인', '보관', '교체', '회의', '의결', '임기', '배치', '당직', '연락', '통보'];
+  const STOPW = new Set(['경우', '따른', '따라', '한다', '하여야', '있다', '없다', '해당', '관련', '사항', '내용', '이상', '이내', '다음', '각호', '같다', '위하여', '대한', '대하여', '또는', '및', '그', '이', '등', '수', '것', '때', '중', '내규', '규정', '병원', '본원']);
+  const PART = /(으로써|으로서|에게서|에서는|으로는|에서|에게|으로|부터|까지|라고|이란|란|은|는|이|가|을|를|에|의|로|와|과|도|만|이며|이고|하여|하고|한다|된다|한|할|하는|되는|된)$/;
+  const toks = (t) => { const out = []; String(t).replace(/[^가-힣A-Za-z0-9]+/g, ' ').split(' ').forEach(w => { if (!w) return; let x = w; for (let i = 0; i < 2; i++) x = x.replace(PART, ''); if (x.length >= 2 && !STOPW.has(x) && !/^\d/.test(x)) out.push(x); }); return out; };
+  const NUMRE = /^\s*((?:제\s*\d+\s*조(?:의\s*\d+)?)|\d{1,2}\.(?:\s?[가-하]\.)?|[가-하]\.|\d{1,2}\)|[가-하]\)|\(\d{1,2}\)|\([가-하]\))\s*/;
+  function clausesOfDoc(doc) {
+    const out = []; let sec = '';
+    (doc.blocks || []).forEach((b, i) => {
+      if (b.type === 'p') { const t = (b.text || '').trim(); if (!t) return; const n = b.num || ''; if (!n && t.replace(/\s/g, '').length <= 8 && !/[.다]$/.test(t)) sec = t.replace(/\s+/g, ''); out.push({ num: n, text: t, sec, bi: i, page: b.page }); }
+      else if (b.type === 'table') b.rows.forEach(r => { const t = r.map(c => c.text).join(' | ').trim(); if (t.replace(/[\s|]/g, '')) out.push({ num: '', text: t, sec, bi: i, page: b.page, table: true }); });
+    });
+    return out;
+  }
+  function clausesOfLib(d) {
+    let sec = ''; return (d.paras || []).map((p, i) => { const s = String(p); const m = s.match(NUMRE); const num = m ? m[1].replace(/\s+/g, '') : ''; const text = m ? s.slice(m[0].length) : s; if (!num && text.replace(/\s/g, '').length <= 8 && !/[.다]$/.test(text)) sec = text.replace(/\s+/g, ''); return { num, text: text.trim(), sec, bi: i }; }).filter(c => c.text);
+  }
+  const DEPT_RE = /([가-힣A-Za-z]{2,12}(?:팀|과|부|실|센터|Unit|유닛|파트|위원회|본부|병동))(?:장)?(?=\s*(?:은|는|이|가|에서|에|의|과|와|및|,|·))/g;
+  const DUR_RE = /(\d+(?:\.\d+)?)\s*(년|개월|월|주|일|시간|분)\s*(이상|이내|마다|간|에\s*1회|안에|까지)?/g;
+  const UNITD = { 년: 365, 개월: 30, 월: 30, 주: 7, 일: 1, 시간: 1 / 24, 분: 1 / 1440 };
+  const DELEG_RE = /[「『“"']?([가-힣A-Za-z0-9·\s]{2,30}?(?:내규|규정|지침|규칙|매뉴얼))[」』”"']?\s*(?:에서\s*정하는|에\s*정하는|에\s*따른다|에\s*따라|을\s*따른다|를\s*따른다|을\s*준용|를\s*준용|에\s*의한다|에서\s*정한|으로\s*정한다|로\s*정한다)/g;
+  const LAW_RE = /「([^」]{2,40}?(?:법|법률|시행령|시행규칙|규칙|고시|지침|기준))」|((?:[가-힣]{2,20}\s?)+(?:에\s*관한\s*법률|법\s*시행규칙|법\s*시행령|법))(?=[\s,·제(「]|$)/g;
+  function analyze(cl) {
+    const t = cl.text; cl.tok = toks(t); cl.keys = LKEYS.filter(k => t.indexOf(k) >= 0);
+    cl.depts = Array.from(new Set((t.match(DEPT_RE) || []).map(s => s.replace(/장$/, '')).filter(s => !/(본원|해당|각\s*부|관련\s*부|담당\s*부|소관\s*부)/.test(s))));
+    cl.durs = []; let m; DUR_RE.lastIndex = 0;
+    while ((m = DUR_RE.exec(t))) { const before = t.slice(Math.max(0, m.index - 30), m.index + m[0].length + 14); const key = LKEYS.find(k => before.indexOf(k) >= 0); if (key) cl.durs.push({ key, v: +m[1] * (UNITD[m[2]] || 1), raw: m[0].trim(), q: (m[3] || '').replace(/\s/g, '') }); }
+    cl.dels = []; DELEG_RE.lastIndex = 0; while ((m = DELEG_RE.exec(t))) cl.dels.push({ name: m[1].replace(/\s+/g, ' ').trim(), at: m.index });
+    cl.laws = []; LAW_RE.lastIndex = 0; while ((m = LAW_RE.exec(t))) { const n = (m[1] || m[2] || '').replace(/\s+/g, ' ').trim(); if (n.length >= 3 && !/내규|규정에|이\s*법/.test(n)) cl.laws.push(n); }
+    const dm = t.match(/^[“"‘']?([가-힣A-Za-z0-9·\s]{2,24}?)[”"’']?\s*(?:\(이하[^)]*\))?\s*(?:이란|란|은|는|이라\s*함은)\s+(.{4,}?)(?:을|를)\s*말한다/);
+    cl.def = dm ? { term: dm[1].replace(/\s+/g, ''), body: dm[2] } : null;
+    return cl;
+  }
+  const normName = (s) => String(s || '').replace(/\s+/g, '').replace(/^(가톨릭대학교)?부천성모병원/, '').replace(/(에\s*관한)?(운영|관리)?(내규|규정|지침|매뉴얼)$/, '');
+  function nameMatch(a, b) { const x = normName(a), y = normName(b); if (!x || !y) return false; if (x === y || (x.length >= 4 && y.indexOf(x) >= 0) || (y.length >= 4 && x.indexOf(y) >= 0)) return true; const f = (s) => toks(s).filter(w => !/^(관리|운영|내규|규정|지침|부천성모병원|가톨릭대학교)$/.test(w) && !/(병원|의료원)$/.test(w)); const tx = f(a), ty = f(b); if (!tx.length || !ty.length) return false; const sh = tx.filter(w => ty.indexOf(w) >= 0); return sh.length >= Math.min(2, tx.length, ty.length) && sh.length / Math.min(tx.length, ty.length) >= 0.6; }
+  const jacc = (a, b) => { const A = new Set(a), B = new Set(b); let n = 0; A.forEach(x => { if (B.has(x)) n++; }); return n / Math.max(1, A.size + B.size - n); };
+
+  async function linkData(target) {
+    const lib = await libraryAll(); const meta = RG.docMeta(target); const tname = String(meta.name || RG.guessTitle(target) || (target.name || '').replace(/\.[^.]+$/, '')).split(/\n/)[0].slice(0, 40).trim();
+    const others = lib.filter(d => !nameMatch(d.name, tname) && !(meta.no && d.no && d.no.replace(/\s/g, '') === meta.no.replace(/\s/g, '')));
+    const T = clausesOfDoc(target).map(analyze);
+    const O = []; others.forEach(d => clausesOfLib(d).forEach(c => { c.doc = d.name; c.no = d.no; O.push(analyze(c)); }));
+    const df = new Map(); [...T, ...O].forEach(c => new Set(c.tok).forEach(w => df.set(w, (df.get(w) || 0) + 1)));
+    const N = T.length + O.length; const idf = (w) => Math.log(1 + N / (df.get(w) || 1));
+    const score = (a, b) => { const B = new Set(b.tok); let s = 0, sh = []; new Set(a.tok).forEach(w => { if (B.has(w)) { s += idf(w); sh.push(w); } }); return { s: s / Math.sqrt(Math.max(4, a.tok.length) * Math.max(4, b.tok.length)) * 3, sh }; };
+    const WEAK = /^(목적|정함|시행|실시|작성|사항|기준|운영|관리|규정|정한다|따른다|말한다|본내규|이내규|병원|부칙)$/;
+    const strong = (sh) => sh.filter(w => !WEAK.test(w) && (df.get(w) || 0) < N * 0.5);
+    T.forEach(c => { if (/^(목적|부칙)/.test(c.sec) || (!c.num && /내규$|규정$/.test(c.text.trim()) && c.text.length < 40)) { c.rel = []; return; }
+      c.rel = O.filter(o => !/^(목적|부칙)/.test(o.sec)).map(o => Object.assign({ o }, score(c, o))).map(x => Object.assign(x, { st: strong(x.sh) })).filter(x => x.s >= 0.55 && x.st.length >= 2 && (x.st.some(w => LKEYS.some(k => w.indexOf(k) >= 0)) || x.st.length >= 3)).sort((x, y) => y.s - x.s).slice(0, 5); });
+    return { lib, others, T, O, tname, meta, score };
+  }
+  function skeletonCheck(target, L) {
+    const meta = L.meta; const txt = target.blocks.map(b => b.type === 'p' ? (b.num || '') + ' ' + b.text : b.type === 'table' ? b.rows.map(r => r.map(c => c.text).join(' ')).join(' ') : '').join('\n');
+    const lines = txt.split('\n').map(s => s.trim());
+    const D = { meta, txt };
+    const sk = SKELETON.map(s => ({ t: s.t, ok: s.test ? s.test(D) : lines.some(l => s.re.test(l)) }));
+    const name = L.tname + ' ' + lines.slice(0, 30).join(' ');
+    const tops = TOPICS.filter(tp => tp.kw.test(name) || (txt.match(new RegExp(tp.kw.source, 'g')) || []).length >= 4);
+    const topic = tops.map(tp => ({ t: tp.t, items: tp.items.map(([t, re]) => ({ t, ok: re.test(txt) })) }));
+    return { sk, topic };
+  }
+  function conflictCheck(L) {
+    const out = []; const T = L.T, O = L.O;
+    // 1. 용어 정의
+    const odefs = O.filter(c => c.def);
+    T.filter(c => c.def).forEach(c => odefs.forEach(o => { if (o.def.term === c.def.term && jacc(toks(c.def.body), toks(o.def.body)) < 0.5) out.push({ cat: '용어', sev: 'warn', msg: '‘' + c.def.term + '’의 뜻이 다르게 정의됨', a: c, b: o }); }));
+    // 2. 기간·주기·수치
+    T.forEach(c => c.durs.forEach(d => c.rel.forEach(r => r.o.durs.forEach(e => {
+      if (e.key !== d.key || Math.abs(e.v - d.v) < 1e-6) return; const sh = r.sh.filter(w => w !== d.key && w.indexOf(d.key) < 0); if (sh.length < 2) return;
+      out.push({ cat: '기간·주기', sev: 'warn', msg: '‘' + d.key + '’ 기간이 다름: 이 내규 ' + d.raw + ' ↔ ' + r.o.doc + ' ' + e.raw, a: c, b: r.o });
+    }))));
+    // 3. 담당 부서
+    T.forEach(c => { if (!c.depts.length) return; c.rel.forEach(r => { const o = r.o; if (!o.depts.length || r.s < 0.8) return; const k = c.keys.filter(x => o.keys.indexOf(x) >= 0); if (!k.length) return; if (c.depts.some(x => o.depts.indexOf(x) >= 0)) return; out.push({ cat: '책임', sev: 'warn', msg: '같은 업무(' + k.join('·') + ')의 담당이 다름: ' + c.depts.join('·') + ' ↔ ' + o.depts.join('·'), a: c, b: o }); }); });
+    // 4. 위임 공백: 다른 내규가 이 내규에 맡긴 사항
+    const GEN = /^(기준|사항|방법|절차|내용|관련|경우|세부|필요|구체적|운영|관리)$/;
+    const ttext = T.map(c => c.text).join('\n');
+    O.forEach(o => o.dels.forEach(dl => { if (!nameMatch(dl.name, L.tname)) return;
+      const subjT = toks(o.text.slice(0, dl.at)).filter(w => !GEN.test(w)); const subj = toks(o.text.slice(0, dl.at)).join(' ') || o.tok.slice(0, 5).join(' ');
+      const miss = subjT.filter(w => ttext.indexOf(w) < 0);
+      if (subjT.length && miss.length / subjT.length >= 0.4) out.push({ cat: '위임 공백', sev: 'err', msg: '「' + o.doc + '」에서 이 내규에 맡긴 사항(' + subj + ')이 이 내규에 없음 — 없는 말: ' + miss.join('·'), a: null, b: o });
+      else { const best = T.map(c => ({ c, s: L.score(o, c) })).sort((x, y) => y.s.s - x.s.s)[0]; out.push({ cat: '위임 확인', sev: 'info', msg: '「' + o.doc + '」에서 이 내규에 맡긴 사항(' + subj + ') — 이 내규 해당 조문이 충분한지 확인', a: best ? best.c : null, b: o }); } }));
+    // 5. 이 내규가 다른 내규에 맡긴 사항
+    T.forEach(c => c.dels.forEach(dl => { const nm = dl.name; if (/이\s*내규|본\s*내규/.test(nm)) return; const d = L.lib.find(x => nameMatch(x.name, nm)); if (!d) { out.push({ cat: '위임 대상', sev: 'info', msg: '‘' + nm + '’이(가) 내규 서고에 없어 확인하지 못함 — 서고에 올려 주세요', a: c, b: null }); return; }
+      const cs = O.filter(o => o.doc === d.name).map(o => ({ o, s: L.score(c, o) })).sort((x, y) => y.s.s - x.s.s)[0]; if (!cs || cs.s.s < 0.5) out.push({ cat: '위임 공백', sev: 'warn', msg: '이 내규가 ‘' + d.name + '’에 맡겼는데, 그 내규에 해당 내용이 보이지 않음', a: c, b: null }); }));
+    // 6. 관련 근거 법령
+    const tl = new Set(); T.forEach(c => c.laws.forEach(l => tl.add(l.replace(/\s/g, ''))));
+    const relDocs = new Map(); T.forEach(c => c.rel.forEach(r => relDocs.set(r.o.doc, (relDocs.get(r.o.doc) || 0) + 1)));
+    const lawCnt = new Map(); O.filter(o => (relDocs.get(o.doc) || 0) >= 3).forEach(o => o.laws.forEach(l => { const k = l.replace(/\s/g, ''); if (!tl.has(k)) { const v = lawCnt.get(k) || { l, docs: new Set(), o }; v.docs.add(o.doc); lawCnt.set(k, v); } }));
+    lawCnt.forEach(v => out.push({ cat: '근거', sev: 'info', msg: '관련 내규(' + Array.from(v.docs).join(', ') + ')가 근거로 드는 「' + v.l + '」이(가) 이 내규에는 없음', a: null, b: v.o }));
+    // 중복 제거
+    const seen = new Set(); return out.filter(x => { const k = x.cat + x.msg + (x.a ? x.a.bi : '') + (x.b ? x.b.doc + x.b.bi : ''); if (seen.has(k)) return false; seen.add(k); return true; });
+  }
+  const SEVC = { err: ['공백', '#c0392b'], warn: ['충돌', '#b7791f'], info: ['참고', '#5b6b85'] };
+  const clip = (s, n) => { s = String(s || '').replace(/\s+/g, ' '); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+  const cref = (c) => c ? (c.doc ? '「' + c.doc + '」 ' : '') + (c.sec ? c.sec + ' ' : '') + (c.num ? c.num + ' ' : '') : '';
+
+  async function chooseTarget(title) {
+    const cands = [];
+    if (state.docs.new) cands.push(['new', '지금 개정안 칸의 파일 — ' + (state.docs.new.name || '')]);
+    if (state.docs.old) cands.push(['old', '지금 현행 칸의 파일 — ' + (state.docs.old.name || '')]);
+    return new Promise(res => {
+      modal(`<h3>${esc(title)}</h3><div class="muted">점검할 내규를 고르세요. 새로 만든 내규 초안 파일(한글·워드·PDF)을 올려도 됩니다.</div>
+        <div class="lintlist" style="margin-top:8px">${cands.map(([k, t]) => `<div class="li" data-k="${k}"><span class="sev" style="background:#1f3a68">${k === 'new' ? '개정' : '현행'}</span><div class="t">${esc(t)}</div></div>`).join('')}
+        <div class="li" data-k="file"><span class="sev" style="background:#2e7d32">파일</span><div class="t">내규 파일 고르기…</div></div></div>
+        <div class="foot"><button class="btn" id="x">취소</button></div>`, m => {
+        $('#x', m).onclick = () => { closeModal(); res(null); };
+        $$('.li[data-k]', m).forEach(el => el.onclick = async () => { const k = el.dataset.k; if (k !== 'file') { closeModal(); res(state.docs[k]); return; }
+          const [f] = await pickFiles(false); if (!f) return; closeModal(); busy(true, '읽는 중… ' + f.name); try { const r = await parseFile(f, {}); r.doc.name = f.name; res(r.doc); } catch (e) { toast('읽기 실패: ' + e.message); res(null); } finally { busy(false); } });
+      });
+    });
+  }
+
+  /* ---------- 새 내규 만들기(기본 골격) ---------- */
+  async function newRegDialog() {
+    const lib = await libraryAll();
+    modal(`<h3>새 내규 만들기 — 기본 골격</h3><div class="muted">내규관리내규 형식의 골격과 주제별 점검 항목을 넣은 초안 파일을 만듭니다. 내용을 채운 뒤 「내규 연계 검사」로 빠진 부분과 다른 내규와의 충돌을 확인하세요.</div>
+      <div class="grid2" style="margin-top:8px"><label class="f">내규명<input type="text" id="nN" placeholder="예) 구급차량 관리 내규"></label><label class="f">담당 부서<input type="text" id="nD" placeholder="예) 원무팀"></label>
+      <label class="f">제정(시행)일<input type="date" id="nE" value="${esc(defRevDate())}"></label><label class="f">검토 주기<select id="nC"><option>1년</option><option selected>2년</option><option>3년</option></select></label></div>
+      <div class="f" style="margin-top:6px">주제 — 내규명으로 자동 선택, 여러 개 고를 수 있음<div class="chips" id="nT">${TOPICS.map(tp => `<label class="chip"><input type="checkbox" value="${tp.k}"> ${esc(tp.t)}</label>`).join('')}</div></div>
+      <div class="f" style="margin-top:6px">관련 내규 — 내규 서고 ${lib.length}건 중 주제가 겹치는 것<div class="chips" id="nR"></div></div>
+      <div class="qout"><b>형식</b><label><input type="radio" name="nf" value="hwpx" checked> 한글(.hwpx)</label><label><input type="radio" name="nf" value="docx"> 워드(.docx)</label></div>
+      <div class="foot"><button class="btn" id="x">닫기</button><button class="btn pri" id="ok">초안 만들기</button></div>`, m => {
+      $('#x', m).onclick = closeModal;
+      const upd = () => { const nm = $('#nN', m).value; TOPICS.forEach(tp => { const c = $('#nT input[value="' + tp.k + '"]', m); if (!c.dataset.touched) c.checked = tp.kw.test(nm); });
+        const sel = TOPICS.filter(tp => $('#nT input[value="' + tp.k + '"]', m).checked); const rel = lib.filter(d => !nameMatch(d.name, nm) && (sel.some(tp => tp.kw.test(d.name) || (d.paras || []).filter(p => tp.kw.test(p)).length >= 3)));
+        $('#nR', m).innerHTML = rel.length ? rel.slice(0, 12).map(d => `<label class="chip"><input type="checkbox" checked value="${esc(d.name)}"> ${esc(d.name)}</label>`).join('') : '<span class="muted">없음 — 내규 서고에 관련 내규를 올리면 여기에 나옵니다.</span>'; };
+      $('#nN', m).addEventListener('input', upd); $$('#nT input', m).forEach(c => c.addEventListener('change', () => { c.dataset.touched = 1; upd(); })); upd();
+      $('#ok', m).onclick = async () => {
+        const nm = $('#nN', m).value.trim(); if (!nm) { toast('내규명을 적어 주세요.'); return; }
+        const info = { name: nm, dept: $('#nD', m).value.trim(), eff: $('#nE', m).value, cycle: $('#nC', m).value, topics: TOPICS.filter(tp => $('#nT input[value="' + tp.k + '"]', m).checked), rel: $$('#nR input:checked', m).map(c => c.value) };
+        const fmt = ($('input[name=nf]:checked', m) || {}).value || 'hwpx'; closeModal();
+        const blob = await exportPlain(nm, skeletonItems(info), fmt); download(blob, safe(nm) + ' (초안).' + fmt); LOG('새 내규 골격', nm); toast('초안을 만들었습니다. 채운 뒤 「내규 연계 검사」로 점검하세요.', 5000);
+      };
+    });
+  }
+  function skeletonItems(info) {
+    const L = (t, o) => Object.assign({ k: 'line', runs: [{ t }] }, o || {}); const H = (t) => L(t, { runs: [{ t, b: true }] });
+    const G = (t) => L(t, { runs: [{ t, c: '#2f6db5' }], hang: 3, ind: 1 });
+    const cell = (t, bg) => ({ runs: [{ t, b: !!bg }], cs: 1, rs: 1, bg: bg || undefined, al: bg ? 'center' : 'left' });
+    const dot = (iso) => iso ? iso.replace(/^(\d{4})-(\d{2})-(\d{2})$/, (x, y, mo, d) => y + '. ' + mo + '. ' + d + '.') : '';
+    const it = [];
+    it.push({ k: 'table', rows: [[cell('내규번호', '#e8ecf3'), cell('○○.○'), cell('담당부서', '#e8ecf3'), cell(info.dept || '')], [cell('제정일자', '#e8ecf3'), cell(dot(info.eff)), cell('검토책임자', '#e8ecf3'), cell((info.dept || '') + '장')], [cell('개정일자', '#e8ecf3'), cell(''), cell('검토주기', '#e8ecf3'), cell(info.cycle || '')]] });
+    it.push(L(''));
+    const sec = (title, lines) => { it.push(H(title)); lines.forEach(l => it.push(typeof l === 'string' ? L(l, { hang: 3, ind: 1 }) : l)); it.push(L('')); };
+    sec('목 적', ['본 내규는 ' + info.name.replace(/\s*(내규|규정)$/, '') + '에 관한 기준과 절차를 정함을 목적으로 한다.']);
+    sec('적용범위', ['본 내규는 ○○에 적용한다.']);
+    sec('용어정의', ['1. ○○', '○○은 ○○을 말한다.', G('※ 다른 내규에서 이미 정의한 용어는 같은 뜻으로 씁니다(「내규 연계 검사」로 확인).')]);
+    sec('책임과 권한', ['1. ' + (info.dept || '○○팀') + '', '가. ○○ 업무를 총괄한다.', '2. ○○', '가. ○○를 수행한다.']);
+    sec('정 책', ['1. ○○']);
+    const procs = []; info.topics.forEach(tp => tp.items.forEach(([t]) => procs.push(t)));
+    sec('절 차', procs.length ? procs.map((t, i) => (i + 1) + '. ' + t).reduce((a, t) => a.concat([t, '가. (내용을 적어 주세요)']), []) : ['1. ○○', '가. ○○']);
+    sec('기록 및 서식', ['1. ○○ 기록은 ○년간 보존한다.', G('※ 보존 기간·점검 주기 같은 숫자는 관련 내규와 맞춰 주세요.')]);
+    sec('교 육', ['1. ○○ 업무 담당자는 연 ○회 교육을 받는다.']);
+    sec('관련 근거', ['1. 「○○법」 제○조', G('※ 근거 법령과 조문 번호는 국가법령정보센터에서 확인해 적어 주세요.')]);
+    sec('관련 내규', info.rel.length ? info.rel.map((n, i) => (i + 1) + '. ' + n) : ['1. ○○ 내규']);
+    sec('부 칙', ['1. 이 내규는 ' + RG.korDate(info.eff) + '부터 시행한다.']);
+    it.push(H('별 첨')); it.push(L('[별첨 1] ○○ 서식', { hang: 3, ind: 1 }));
+    return it;
+  }
+
+  /* ---------- 내규 연계 검사(골격·주제 점검 + 충돌·공백 + 조문 연결) ---------- */
+  let LAST_LINK = null;
+  async function linkCheckDialog(target) {
+    target = target || await chooseTarget('내규 연계 검사'); if (!target) return;
+    busy(true, '내규 서고와 맞대는 중…');
+    let L, SC, CF;
+    try { L = await linkData(target); SC = skeletonCheck(target, L); CF = conflictCheck(L); } catch (e) { busy(false); console.error(e); toast('검사 실패: ' + e.message, 6000); return; }
+    busy(false); LAST_LINK = { target, L, SC, CF };
+    const miss = SC.sk.filter(x => !x.ok).length + SC.topic.reduce((n, t) => n + t.items.filter(x => !x.ok).length, 0);
+    const linked = L.T.filter(c => c.rel.length).length;
+    const tab = (id, t, n) => `<button class="seg${id === 'a' ? ' on' : ''}" data-tab="${id}">${t} <b>${n}</b></button>`;
+    modal(`<h3>내규 연계 검사 <span class="muted" style="font-weight:400">— ${esc(L.tname || target.name || '')}</span></h3>
+      <div class="muted">내규 서고 ${L.lib.length}건 중 다른 내규 ${L.others.length}건과 맞대었습니다. 결과는 규칙으로 찾은 <b>확인 후보</b>이니 최종 판단은 담당자가 합니다.</div>
+      <div class="tabs2">${tab('a', '빠진 항목', miss)}${tab('b', '충돌·공백', CF.length)}${tab('c', '조문 연결', linked)}</div>
+      <div id="lkBody" class="lintlist" style="max-height:52vh"></div>
+      <div class="foot"><button class="btn" id="lb">내규 서고</button><button class="btn" id="rp">결과서 저장(.hwpx)</button><button class="btn" id="rv">검토 요청(AI·요청문)</button><button class="btn pri" id="x">닫기</button></div>`, m => {
+      $('#x', m).onclick = closeModal; $('#lb', m).onclick = () => { closeModal(); libraryDialog(() => linkCheckDialog(target)); };
+      $('#rv', m).onclick = () => { closeModal(); reviewDialog(); };
+      $('#rp', m).onclick = async () => { const blob = await exportPlain('「' + (L.tname || '내규') + '」 내규 연계 검사 결과', linkReportItems(), 'hwpx'); download(blob, safe(L.tname || '내규') + ' 연계 검사 결과.hwpx'); };
+      const body = $('#lkBody', m);
+      const show = (k) => {
+        $$('.tabs2 .seg', m).forEach(b => b.classList.toggle('on', b.dataset.tab === k));
+        if (k === 'a') {
+          body.innerHTML = `<div class="lkh">기본 골격 (내규관리내규)</div>` + SC.sk.map(x => `<div class="li nohover"><span class="sev" style="background:${x.ok ? '#2e7d32' : '#c0392b'}">${x.ok ? '있음' : '없음'}</span><div class="t">${esc(x.t)}</div></div>`).join('') +
+            (SC.topic.length ? SC.topic.map(tp => `<div class="lkh">주제별 점검 — ${esc(tp.t)}</div>` + tp.items.map(x => `<div class="li nohover"><span class="sev" style="background:${x.ok ? '#2e7d32' : '#b7791f'}">${x.ok ? '있음' : '확인'}</span><div class="t">${esc(x.t)}</div></div>`).join('')).join('') : `<div class="lkh">주제별 점검</div><div class="muted" style="padding:8px 10px">내규명·본문에서 알려진 주제(구급차·이송, 의무기록, 감염, 환자 안전, 의약품, 장비, 설명·동의, 위원회, 위탁)를 찾지 못했습니다.</div>`);
+        } else if (k === 'b') {
+          body.innerHTML = CF.length ? CF.map((x, i) => `<div class="li" data-i="${i}"><span class="sev" style="background:${SEVC[x.sev][1]}">${esc(x.cat)}</span><div style="flex:1"><div class="t">${esc(x.msg)}</div>
+            ${x.a ? `<div class="d"><b>이 내규</b> ${esc(cref(x.a))}${esc(clip(x.a.text, 90))}</div>` : ''}${x.b ? `<div class="d"><b>${esc(x.b.doc || '')}</b> ${esc((x.b.sec ? x.b.sec + ' ' : '') + (x.b.num ? x.b.num + ' ' : ''))}${esc(clip(x.b.text, 90))}</div>` : ''}</div></div>`).join('')
+            : `<div class="ok" style="padding:10px">${L.others.length ? '규칙으로 찾은 충돌·공백이 없습니다. 뜻이 같은데 말이 다른 경우는 「검토 요청」으로 AI 비교를 해 보세요.' : '내규 서고에 다른 내규가 없습니다. 「내규 서고」에 관련 내규(예: 응급환자 이송 내규)를 올리면 함께 검사합니다.'}</div>`;
+          $$('.li[data-i]', body).forEach(el => el.onclick = () => { const x = CF[+el.dataset.i]; if (x.a && target === (state.lastResult && state.lastResult.B)) { closeModal(); goStep(2); setTimeout(() => jumpToText(clip(x.a.text, 20).replace(/…$/, '')), 60); } });
+        } else {
+          const rows = L.T.filter(c => c.rel.length && !c.table);
+          body.innerHTML = rows.length ? rows.map((c, i) => `<div class="lkc"><div class="lkt">${esc(cref(c))}${esc(clip(c.text, 120))}</div>${c.rel.map(r => `<div class="lko"><span class="lkd">${esc(r.o.doc)}</span> ${esc((r.o.sec ? r.o.sec + ' ' : '') + (r.o.num ? r.o.num + ' ' : ''))}${esc(clip(r.o.text, 110))}<span class="lkw">${esc(r.sh.slice(0, 5).join(' · '))}</span></div>`).join('')}</div>`).join('')
+            : '<div class="muted" style="padding:10px">연결된 조문이 없습니다. 내규 서고에 관련 내규를 올려 주세요.</div>';
+        }
+      };
+      $$('.tabs2 .seg', m).forEach(b => b.onclick = () => show(b.dataset.tab)); show(miss ? 'a' : CF.length ? 'b' : 'c');
+    });
+    LOG('내규 연계 검사', (L.tname || '') + ' · 빠진 항목 ' + miss + ' · 충돌·공백 ' + CF.length);
+  }
+  function linkReportItems() {
+    const { L, SC, CF } = LAST_LINK; const Ln = (t, o) => Object.assign({ k: 'line', runs: [{ t }] }, o || {}); const H = (t) => Ln(t, { runs: [{ t, b: true }] });
+    const cell = (t, bg) => ({ runs: [{ t, b: !!bg }], cs: 1, rs: 1, bg: bg || undefined, al: bg ? 'center' : 'left' });
+    const it = [Ln('검사일 ' + ymdToday() + ' · 내규 서고 ' + L.lib.length + '건 중 다른 내규 ' + L.others.length + '건과 비교 · 규칙으로 찾은 확인 후보'), Ln('')];
+    it.push(H('1. 빠진 항목'));
+    it.push({ k: 'table', rows: [[cell('구분', '#e8ecf3'), cell('항목', '#e8ecf3'), cell('결과', '#e8ecf3')]].concat(SC.sk.map(x => [cell('기본 골격'), cell(x.t), cell(x.ok ? '있음' : '없음')]), [].concat(...SC.topic.map(tp => tp.items.map(x => [cell(tp.t), cell(x.t), cell(x.ok ? '있음' : '확인 필요')])))) });
+    it.push(Ln('')); it.push(H('2. 다른 내규와의 충돌·공백'));
+    it.push({ k: 'table', rows: [[cell('구분', '#e8ecf3'), cell('내용', '#e8ecf3'), cell('이 내규', '#e8ecf3'), cell('다른 내규', '#e8ecf3')]].concat(CF.length ? CF.map(x => [cell(x.cat), cell(x.msg), cell(x.a ? cref(x.a) + clip(x.a.text, 80) : ''), cell(x.b ? (x.b.doc || '') + ' ' + clip(x.b.text, 80) : '')]) : [[cell('-'), cell('찾은 항목 없음'), cell(''), cell('')]]) });
+    it.push(Ln('')); it.push(H('3. 조문 연결(관련 조문)'));
+    L.T.filter(c => c.rel.length && !c.table).slice(0, 60).forEach(c => { it.push(Ln('○ ' + cref(c) + clip(c.text, 90), { hang: 2 })); c.rel.slice(0, 3).forEach(r => it.push(Ln('   → 「' + r.o.doc + '」 ' + (r.o.num || '') + ' ' + clip(r.o.text, 80), { hang: 5, ind: 1 }))); });
+    return it;
+  }
+
+  /* ---------- 검토 요청(빠진 부분·의미 충돌) — AI 또는 요청문 복사 ---------- */
+  function reviewPrompt(LK, opt) {
+    const { target, L, SC, CF } = LK;
+    const body = target.blocks.map(b => b.type === 'p' ? ((b.num ? b.num + ' ' : '') + b.text) : b.type === 'table' ? '[표] ' + b.rows.map(r => r.map(c => c.text).join(' | ')).join(' / ') : '').filter(Boolean).join('\n').slice(0, 14000);
+    const missing = SC.sk.filter(x => !x.ok).map(x => '- ' + x.t).concat([].concat(...SC.topic.map(tp => tp.items.filter(x => !x.ok).map(x => '- (' + tp.t + ') ' + x.t))));
+    const rel = []; const used = new Set(); L.T.forEach(c => c.rel.forEach(r => { const k = r.o.doc + '|' + r.o.bi; if (used.has(k) || rel.length >= 40) return; used.add(k); rel.push('- 「' + r.o.doc + '」 ' + (r.o.sec ? r.o.sec + ' ' : '') + (r.o.num || '') + ' ' + clip(r.o.text, 200)); }));
+    const cand = CF.slice(0, 25).map(x => '- [' + x.cat + '] ' + x.msg);
+    return `병원 내규 검토를 요청합니다.
+
+[검토할 내규] ${L.tname || target.name || ''}
+[작성 기준] ${presetDesc()} · 문장은 "~한다"로 맺음
+
+[요청]
+${opt.missing ? '1. 이 내규에서 빠졌거나 부족한 내용(필수 조항, 절차의 공백, 책임 주체가 없는 업무, 기한·주기가 없는 의무 등)을 찾아 주세요.\n' : ''}${opt.conflict ? '2. 아래 [관련 내규 조문]과 비교해, 말은 달라도 뜻이 서로 부딪히거나(인력 기준, 기간, 담당 부서, 절차 순서 등) 한쪽에만 있어 공백이 생기는 곳을 찾아 주세요.\n' : ''}3. 법령 조문 번호는 확실할 때만 쓰고, 확실하지 않으면 "근거 확인 필요"라고 적어 주세요. 사실을 지어내지 마세요.
+
+[규칙 점검에서 빠진 것으로 보이는 항목]
+${missing.join('\n') || '- 없음'}
+
+[규칙 점검에서 찾은 충돌·공백 후보]
+${cand.join('\n') || '- 없음'}
+
+[관련 내규 조문]
+${rel.join('\n') || '- (내규 서고에 관련 내규 없음)'}
+
+[검토할 내규 전문]
+${body}
+
+[답 형식] 다른 말 없이 아래 JSON만 답하세요. kind는 "누락"·"충돌"·"공백"·"개선" 중 하나, where는 이 내규의 해당 조문(없으면 들어갈 자리), other는 관련 내규명과 조문(없으면 빈 문자열), suggest는 넣거나 고칠 문구 예시입니다.
+{"items":[{"kind":"누락","where":"...","issue":"...","other":"","suggest":"..."}]}`;
+  }
+  function parseReview(txt) {
+    const j = String(txt || '').match(/\{[\s\S]*\}/); if (j) { try { const o = JSON.parse(j[0]); const a = o.items || o.결과 || []; if (a.length) return a.map(x => ({ kind: x.kind || x.구분 || '검토', where: x.where || x.위치 || '', issue: x.issue || x.내용 || '', other: x.other || x.관련 || '', suggest: x.suggest || x.제안 || '' })); } catch (e) { } }
+    return String(txt || '').split(/\n+/).map(s => s.replace(/^[-•*\d.)\s]+/, '').trim()).filter(s => s.length > 4).map(s => ({ kind: '검토', where: '', issue: s, other: '', suggest: '' }));
+  }
+  async function reviewDialog() {
+    if (!LAST_LINK) { const t = await chooseTarget('검토 요청'); if (!t) return; busy(true, '준비 중…'); try { const L = await linkData(t); LAST_LINK = { target: t, L, SC: skeletonCheck(t, L), CF: conflictCheck(L) }; } finally { busy(false); } }
+    const c = aiCfg(); const on = c.on && c.key;
+    modal(`<h3>검토 요청 — ${esc(LAST_LINK.L.tname || '')}</h3><div class="muted">빠진 부분과, 뜻은 같은데 말이 달라 규칙으로 못 찾는 충돌을 검토받습니다. 규칙 점검 결과와 관련 내규 조문을 함께 보냅니다.</div>
+      <div class="qout"><b>요청</b><label><input type="checkbox" id="rM" checked> 빠진 내용 점검</label><label><input type="checkbox" id="rC" checked> 다른 내규와 뜻 비교(AI 의미 비교)</label></div>
+      <div class="okbox" style="margin-top:8px;${on ? '' : 'background:#fff8e6;border-color:#f0d58a'}">${on ? 'AI 연결이 켜져 있습니다. 「AI에 요청」을 누르면 <b>이 내규 전문과 관련 조문</b>이 Anthropic(Claude)으로 전송됩니다.' : 'AI 연결이 꺼져 있습니다. 「요청문 복사」로 요청문을 복사해 사내에서 허용된 AI에 붙여 넣고, 받은 답을 아래 칸에 붙여 넣으세요.'}</div>
+      <label class="f" style="margin-top:8px">받은 답 붙여 넣기<textarea id="rA" style="height:90px" placeholder='{"items":[...]} 또는 목록'></textarea></label>
+      <div id="rRes" class="lintlist" style="max-height:34vh;margin-top:8px;display:none"></div>
+      <div class="foot"><button class="btn" id="x">닫기</button><button class="btn" id="cp">요청문 복사</button><button class="btn" id="pa">붙여 넣은 답 보기</button>${on ? '<button class="btn pri" id="go">AI에 요청</button>' : '<button class="btn" id="st">AI 연결 설정</button>'}</div>`, m => {
+      const opt = () => ({ missing: $('#rM', m).checked, conflict: $('#rC', m).checked });
+      $('#x', m).onclick = closeModal;
+      $('#cp', m).onclick = async () => { const p = reviewPrompt(LAST_LINK, opt()); try { await navigator.clipboard.writeText(p); toast('요청문을 복사했습니다(' + p.length.toLocaleString() + '자).'); } catch (e) { const t = $('#rA', m); t.value = p; t.select(); toast('복사가 막혀 아래 칸에 넣었습니다. Ctrl+C로 복사하세요.'); } };
+      const render = (items) => { const box = $('#rRes', m); box.style.display = ''; const KC = { 누락: '#c0392b', 공백: '#c0392b', 충돌: '#b7791f', 개선: '#2f6db5' };
+        box.innerHTML = items.length ? items.map(x => `<div class="li nohover"><span class="sev" style="background:${KC[x.kind] || '#5b6b85'}">${esc(x.kind)}</span><div style="flex:1"><div class="t">${esc(x.issue)}</div><div class="d">${x.where ? '<b>위치</b> ' + esc(x.where) + ' ' : ''}${x.other ? '· <b>관련</b> ' + esc(x.other) : ''}</div>${x.suggest ? `<div class="d" style="color:#1f3a68"><b>제안</b> ${esc(x.suggest)}</div>` : ''}</div></div>`).join('') : '<div class="muted" style="padding:10px">항목을 읽지 못했습니다.</div>';
+        LAST_LINK.review = items; };
+      $('#pa', m).onclick = () => { const v = $('#rA', m).value.trim(); if (!v || v.indexOf('[검토할 내규]') >= 0) { toast('AI에게서 받은 답을 붙여 넣어 주세요.'); return; } render(parseReview(v)); };
+      if ($('#st', m)) $('#st', m).onclick = () => { closeModal(); aiSettingsDialog(); };
+      if ($('#go', m)) $('#go', m).onclick = async () => { busy(true, 'AI 검토 중… (최대 2분)'); try { const a = await callClaude(reviewPrompt(LAST_LINK, opt()), { system: '당신은 병원 내규 체계를 검토하는 행정·법제 전문가입니다. 요청한 JSON 형식으로만 답합니다.', max: 4000, timeout: 120000 }); render(parseReview(a)); LOG('내규 검토 요청(AI)', LAST_LINK.L.tname || ''); } catch (e) { toast('AI 요청 실패: ' + e.message, 6000); } finally { busy(false); } };
+    });
+  }
+
+  (function mountV29() {
+    const T29 = [['newreg', '📝 새 내규 만들기', '내규관리내규 골격 + 주제별 점검 항목(구급차·이송, 의무기록, 감염 등)을 넣은 초안'], ['link', '🔗 내규 연계 검사', '빠진 항목 · 다른 내규와의 용어·기간·담당·위임 충돌과 공백 · 조문 연결'], ['review', '🧑‍⚖️ 검토 요청', '빠진 부분·뜻 충돌을 AI(켠 경우만) 또는 요청문 복사로 검토받기']];
+    window.__v29tools = T29;
+  })();
+
+  window.__app = { newRegDialog, linkCheckDialog, reviewDialog, linkData, skeletonCheck, conflictCheck, chooseTarget, palette, quickFinish, roundsDialog, citeDialog, citeCheck, libraryDialog, libraryAdd, srcPanel, saveMyDefaults, applyMyDefaults, recentDialog, clearReadCache, cAll, numberMaps, suggestDialog, plainDialog, aiSettingsDialog, parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
   Object.defineProperty(window.__app, 'state', { get: () => state });
 })();
 
@@ -8130,7 +8465,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '2.8';
+  const APP_VERSION = '2.9';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
