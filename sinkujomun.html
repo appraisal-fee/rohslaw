@@ -456,7 +456,7 @@ body.withSrc main{margin-right:min(44vw,760px)}
     <button class="btn" id="bAddAnnex">+ 별첨 대조표 추가</button>
   </div>
 </section>
-<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.07. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
+<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.08. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
 </main>
 
 <!-- 설정 서랍 -->
@@ -7744,7 +7744,7 @@ ${body}
     LOG('관련 법령 보기', Array.from(found.keys()).join(', '));
   }
 
-  window.__app = { lawDialog, lawRefs, lawURL, newRegDialog, linkCheckDialog, reviewDialog, linkData, skeletonCheck, conflictCheck, chooseTarget, palette, quickFinish, roundsDialog, citeDialog, citeCheck, libraryDialog, libraryAdd, srcPanel, saveMyDefaults, applyMyDefaults, recentDialog, clearReadCache, cAll, numberMaps, suggestDialog, plainDialog, aiSettingsDialog, parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
+  window.__app = { busy, lawDialog, lawRefs, lawURL, newRegDialog, linkCheckDialog, reviewDialog, linkData, skeletonCheck, conflictCheck, chooseTarget, palette, quickFinish, roundsDialog, citeDialog, citeCheck, libraryDialog, libraryAdd, srcPanel, saveMyDefaults, applyMyDefaults, recentDialog, clearReadCache, cAll, numberMaps, suggestDialog, plainDialog, aiSettingsDialog, parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
   Object.defineProperty(window.__app, 'state', { get: () => state });
 })();
 
@@ -8457,6 +8457,7 @@ ${body}
       g.innerHTML = `<div class="gbox"><h2>처음 사용 — 관리자 등록</h2><div class="sub">이 PC에서 처음 쓰는 분이 관리자가 됩니다. 관리자는 사용자 추가·삭제, 비밀번호 초기화, 모든 이력 수정을 할 수 있습니다.</div>
         <label>이름<input id="gName" autocomplete="off"></label><label>부서<input id="gDept" placeholder="예) 원무팀" autocomplete="off"></label>
         <label>비밀번호<input id="gPw" type="password" placeholder="${pwHint}"></label><label>비밀번호 확인<input id="gPw2" type="password"></label>
+        <div class="remem"><label title="이 PC에서는 「로그아웃」을 누를 때까지 비밀번호 없이 바로 열립니다. 여러 사람이 함께 쓰는 PC에서는 켜지 마세요."><input type="checkbox" id="gKeep" checked> 이 PC에서 로그인 유지</label></div>
         <div class="err" id="gErr">${esc(msg || '')}</div><div class="btns"><button class="btn pri" id="gOk">관리자로 등록하고 시작</button></div>
         <div class="lnk"><a id="gImp">다른 PC에서 내보낸 사용자·이력 파일 가져오기</a></div>
         <div class="foot2">신·구조문 대조표 작성 도구 · 개발자 노상엽</div></div>`;
@@ -8465,6 +8466,7 @@ ${body}
       g.innerHTML = `<div class="gbox"><h2>사용자 등록</h2><div class="sub">등록한 이름과 비밀번호로 로그인합니다. 작업 기록에는 이름이 함께 남습니다.</div>
         <label>이름<input id="gName" autocomplete="off"></label><label>부서<input id="gDept" placeholder="예) 원무팀" autocomplete="off"></label>
         <label>비밀번호<input id="gPw" type="password" placeholder="${pwHint}"></label><label>비밀번호 확인<input id="gPw2" type="password"></label>
+        <div class="remem"><label title="이 PC에서는 「로그아웃」을 누를 때까지 비밀번호 없이 바로 열립니다. 여러 사람이 함께 쓰는 PC에서는 켜지 마세요."><input type="checkbox" id="gKeep" checked> 이 PC에서 로그인 유지</label></div>
         <div class="err" id="gErr">${esc(msg || '')}</div><div class="btns"><button class="btn" id="gBack">← 로그인으로</button><button class="btn pri" id="gOk">등록</button></div>
         <div class="foot2">신·구조문 대조표 작성 도구 · 개발자 노상엽</div></div>`;
       $('#gOk').onclick = () => register(false); $('#gBack').onclick = () => showGate('login');
@@ -8474,7 +8476,7 @@ ${body}
         <label>사용자<select id="gUser">${list.filter(u => !u.disabled).map(u => '<option value="' + u.id + '"' + (u.id === last ? ' selected' : '') + '>' + esc(u.name) + (u.dept ? ' (' + esc(u.dept) + ')' : '') + (u.role === 'admin' ? ' · 관리자' : '') + '</option>').join('')}</select></label>
         <label>비밀번호<input id="gPw" type="password" autocomplete="current-password"></label>
         <div class="remem"><label><input type="checkbox" id="gRemU" ${LS.get('sinkujomun_remuser') === '0' ? '' : 'checked'}> 이 사용자 기억</label>
-          <label title="비밀번호 대신 이 PC 전용 로그인 열쇠를 저장합니다. 여러 사람이 함께 쓰는 PC에서는 켜지 마세요."><input type="checkbox" id="gRemP"> 비밀번호 저장</label></div>
+          <label title="이 PC에서는 「로그아웃」을 누를 때까지 비밀번호 없이 바로 열립니다. 여러 사람이 함께 쓰는 PC에서는 켜지 마세요."><input type="checkbox" id="gRemP"> 로그인 유지</label></div>
         <div class="err" id="gErr">${esc(msg || '')}</div><div class="btns"><button class="btn" id="gReg">새 사용자 등록</button><button class="btn pri" id="gOk">로그인</button></div>
         <div class="lnk"><a id="gForgot">비밀번호를 잊었을 때</a> · <a id="gImp">사용자·이력 파일 가져오기</a></div>
         <div class="foot2">신·구조문 대조표 작성 도구 · 개발자 노상엽</div></div>`;
@@ -8504,6 +8506,7 @@ ${body}
     if (list.some(u => u.name === name && (u.dept || '') === dept)) { err.textContent = '같은 이름·부서의 사용자가 이미 있습니다.'; return; }
     const salt = uid(); const u = { id: uid(), name, dept, role: first || !list.length ? 'admin' : 'user', salt, pw: hashPw(pw, salt), createdAt: now(), lastLogin: null };
     await put('users', u);
+    const kp = $('#gKeep'); if (kp && kp.checked) { await makeToken(u); LS.set('sinkujomun_keep', u.id); }
     AU.user = u; await afterLogin(true);
     await log('사용자 등록', '', (u.role === 'admin' ? '관리자 ' : '') + u.name + (u.dept ? ' (' + u.dept + ')' : ''));
   }
@@ -8516,6 +8519,7 @@ ${body}
     } else if (hashPw(pw, u.salt) !== u.pw) { err.textContent = '비밀번호가 맞지 않습니다.'; pwI.select(); return; }
     LS.set('sinkujomun_remuser', remU ? '1' : '0');
     if (remP && !pwI.dataset.saved) await makeToken(u); else if (!remP) await dropToken(u);
+    if (remP) LS.set('sinkujomun_keep', u.id); else LS.del('sinkujomun_keep');
     AU.user = u; AU._remU = remU; await afterLogin(false);
   }
   async function afterLogin(isNew) {
@@ -8529,7 +8533,7 @@ ${body}
   }
   async function logout() {
     A().flushCells(); try { localStorage.setItem('sinkujomun_autosave_' + AU.user.id, JSON.stringify(A().projectData())); } catch (e) { }
-    await log('로그아웃'); AU.user = null; try { sessionStorage.removeItem('sinkujomun_session'); } catch (e) { }
+    await log('로그아웃'); if (LS.get('sinkujomun_keep') === AU.user.id) { LS.del('sinkujomun_keep'); await dropToken(AU.user); } AU.user = null; try { sessionStorage.removeItem('sinkujomun_session'); } catch (e) { }
     location.reload();
   }
   function forgot() {
@@ -8783,8 +8787,11 @@ ${body}
       if (!u) { const salt = uid(); u = { id: uid(), name: '체험 사용자', dept: '기획팀', role: 'admin', salt, pw: hashPw('0000', salt), createdAt: now(), lastLogin: null, demo: true }; await put('users', u); }
       AU.user = u; await afterLogin(false); return;
     }
-    if (u) { AU.user = u; renderChip(); setTimeout(() => A().offerRestore(), 200); }
-    else showGate(list.length ? 'login' : 'first');
+    if (u) { AU.user = u; renderChip(); setTimeout(() => A().offerRestore(), 200); return; }
+    const kid = LS.get('sinkujomun_keep'); const ku = kid && list.find(x => x.id === kid && !x.disabled);
+    if (ku && tokValid(ku, savedTok(ku.id))) { AU.user = ku; AU._remU = true; await afterLogin(false); return; }
+    if (kid) LS.del('sinkujomun_keep');
+    showGate(list.length ? 'login' : 'first');
   })();
 })();
 
@@ -8793,7 +8800,7 @@ ${body}
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '3.1';
+  const APP_VERSION = '3.2';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
