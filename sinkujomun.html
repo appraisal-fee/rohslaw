@@ -312,6 +312,9 @@ body.withSrc main{margin-right:min(44vw,760px)}
 .lawrow{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0}
 .lawbtn{border:1px solid #c9d7ec;background:#f3f7fd;color:#1f3a68;border-radius:14px;padding:3px 10px;font-size:12.5px;cursor:pointer;white-space:nowrap}
 .lawbtn:hover{background:#1f3a68;color:#fff;border-color:#1f3a68}
+
+/* 로그인 화면 위에도 대화상자·알림이 보이게 */
+body:has(#gate) .modal{z-index:450}body:has(#gate) .toast{z-index:470}body:has(#gate) .busy{z-index:460}
 </style>
 <style id="doccss"></style>
 <style id="printpage">@page{size:A4 portrait;margin:0}@page land{size:A4 landscape;margin:0}</style>
@@ -8536,17 +8539,26 @@ ${body}
     await log('로그아웃'); if (LS.get('sinkujomun_keep') === AU.user.id) { LS.del('sinkujomun_keep'); await dropToken(AU.user); } AU.user = null; try { sessionStorage.removeItem('sinkujomun_session'); } catch (e) { }
     location.reload();
   }
-  function forgot() {
-    A().modal(`<h3>비밀번호를 잊었을 때</h3><div>관리자에게 비밀번호 초기화를 요청하세요. 관리자는 [이력 → 사용자 관리]에서 새 비밀번호를 정해 줄 수 있습니다.</div>
-      <div class="warnbox" style="margin-top:12px">관리자도 비밀번호를 잊었다면, 이 PC의 <b>사용자 정보만</b> 지우고 다시 관리자를 등록할 수 있습니다. 작업 기록과 대조표 버전은 그대로 남고, "사용자 정보 초기화" 기록이 남습니다.</div>
-      <div class="row">확인을 위해 <b>초기화</b> 라고 입력: <input type="text" id="rsT" style="width:120px"></div>
-      <div class="foot"><button class="btn" id="x">닫기</button><button class="btn red" id="ok">사용자 정보 초기화</button></div>`, m => {
+  async function forgot() {
+    const list = (await users()).filter(u => !u.disabled); const sel = $('#gUser') ? $('#gUser').value : '';
+    A().modal(`<h3>비밀번호를 잊었을 때</h3><div>비밀번호를 잊은 사용자를 고르고 새 비밀번호를 정하세요. <b>작업 중이던 대조표, 버전, 내 기본값, 이력은 그대로</b> 남고, 「비밀번호 분실 재설정」 기록이 남습니다.</div>
+      <div class="muted" style="margin-top:6px">다른 관리자가 있으면 관리자가 [이력 → 사용자 관리]에서 바꿔 줄 수도 있습니다.</div>
+      <label class="f" style="margin-top:10px">사용자<select id="rsU">${list.map(u => '<option value="' + u.id + '"' + (u.id === sel ? ' selected' : '') + '>' + esc(u.name) + (u.dept ? ' (' + esc(u.dept) + ')' : '') + (u.role === 'admin' ? ' · 관리자' : '') + '</option>').join('')}</select></label>
+      <div class="grid2" style="margin-top:8px"><label class="f">새 비밀번호 (${MINPW}자리 이상)<input type="password" id="rsP"></label><label class="f">새 비밀번호 확인<input type="password" id="rsP2"></label></div>
+      <label style="display:block;margin-top:8px"><input type="checkbox" id="rsK" checked> 이 PC에서 로그인 유지</label>
+      <div class="row" style="margin-top:8px">확인을 위해 <b>재설정</b> 이라고 입력: <input type="text" id="rsT" style="width:120px"></div>
+      <div class="foot"><button class="btn" id="x">닫기</button><button class="btn red" id="ok">비밀번호 재설정하고 시작</button></div>`, m => {
       $('#x', m).onclick = A().closeModal;
       $('#ok', m).onclick = async () => {
-        if ($('#rsT', m).value.trim() !== '초기화') { A().toast('"초기화"라고 정확히 입력해 주세요.'); return; }
-        const list = await users(); for (const u of list) await del('users', u.id);
-        await put('logs', { id: uid(), ts: now(), userId: '-', userName: '(시스템)', dept: '', action: '사용자 정보 초기화', target: '', memo: '비밀번호 분실로 사용자 ' + list.length + '명 정보 삭제', edits: [] });
-        A().closeModal(); showGate('first', '사용자 정보를 초기화했습니다. 관리자를 다시 등록하세요.');
+        const u = (await users()).find(x => x.id === $('#rsU', m).value); const p1 = $('#rsP', m).value, p2 = $('#rsP2', m).value;
+        if (!u) { A().toast('사용자를 고르세요.'); return; }
+        if (p1.length < MINPW) { A().toast('비밀번호는 ' + MINPW + '자리 이상이어야 합니다.'); return; }
+        if (p1 !== p2) { A().toast('새 비밀번호 확인이 맞지 않습니다.'); return; }
+        if ($('#rsT', m).value.trim() !== '재설정') { A().toast('"재설정"이라고 정확히 입력해 주세요.'); return; }
+        u.salt = uid(); u.pw = hashPw(p1, u.salt); u.tokens = []; LS.del(tokKey(u.id)); await put('users', u);
+        await put('logs', { id: uid(), ts: now(), userId: u.id, userName: u.name, dept: u.dept || '', action: '비밀번호 분실 재설정', target: '', memo: '로그인 화면에서 재설정', edits: [] });
+        if ($('#rsK', m).checked) { await makeToken(u); LS.set('sinkujomun_keep', u.id); } else LS.del('sinkujomun_keep');
+        A().closeModal(); AU.user = u; AU._remU = true; await afterLogin(false); A().toast('비밀번호를 새로 정했습니다.', 4000);
       };
     });
   }
@@ -8800,7 +8812,7 @@ ${body}
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '3.2';
+  const APP_VERSION = '3.3';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
