@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-02 -->
+<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-09 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -211,11 +211,11 @@ select,input[type=text]{font:inherit;width:100%;padding:7px 9px;border:1px solid
 .stampbox input[type=number]{width:100%;font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)}
 .stampbox input[type=range]{width:100%}
 .stampbox .check.full{grid-column:1/-1}
-.isgrid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:start}
+.isgrid{display:grid;grid-template-columns:174px minmax(0,1fr);gap:14px;align-items:start}
 @media (max-width:620px){.isgrid{grid-template-columns:minmax(0,1fr)}}
 .isprev{margin:0;display:grid;gap:4px;justify-items:center}
 .isprev canvas{width:170px;max-width:100%;background:#fff;border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.18)}
-.isprev figcaption{font-size:12px;color:var(--muted)}
+.isprev figcaption{font-size:12px;color:var(--muted);text-align:center;line-height:1.45}
 .updbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-start;padding:12px 14px;border:1px solid #e6c88f;border-radius:10px;background:#fff7e6;color:#3d2c0c}
 .updbar .badge{flex:none;font-size:11.5px;font-weight:700;color:#fff;background:#c9781f;border-radius:999px;padding:3px 10px;margin-top:2px}
 .updbar .txt{flex:1 1 300px;min-width:0;font-size:13.5px}
@@ -305,6 +305,12 @@ input.num{width:100%;font:inherit;padding:7px 9px;border:1px solid var(--line);b
 .ispick .libitem.none span{max-width:none}
 .libitem .ren{padding:2px 6px}
 .libitem input.rn{width:9em;font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--accent);border-radius:5px}
+.checks2{display:flex;flex-wrap:wrap;gap:6px 18px;flex-direction:row}
+.stamp.stimg{border-left:3px solid var(--accent)}
+.st-over{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px}
+.st-over summary{cursor:pointer;font-size:13px;color:var(--muted)}
+.st-over[open] summary{margin-bottom:6px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
 .res .m.good{color:var(--ok);font-weight:700}
 footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -496,27 +502,46 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
                 <div class="row"><button type="button" id="isAdd">+ 도장 추가</button></div>
               </div>
               <div class="field">
-                <label for="isPages">넣을 쪽</label>
+                <label for="isPages">도장 찍을 쪽</label>
                 <select id="isPages"><option value="first">첫 장만</option><option value="last">마지막 장만</option><option value="all">모든 장</option></select>
               </div>
-              <div class="field"><label for="isPos">위치</label><select id="isPos"></select></div>
+              <div class="field"><label for="isPos">도장 위치</label><select id="isPos"></select></div>
               <div class="field"><label for="isMargin">가장자리에서 (mm)</label><input type="number" id="isMargin" min="0" max="80" step="1"></div>
               <div class="field"><label for="isW">도장 너비 (mm)</label><input type="number" id="isW" min="3" max="200" step="1"></div>
               <div class="field"><label for="isTr">도장 투명도 <span id="isTrV">0%</span></label><input type="range" id="isTr" min="0" max="90" step="5"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="stampbox" id="itBox">
+        <label class="check"><input type="checkbox" id="itOn"> <b>저장할 때 글자 넣기</b></label>
+        <div class="isbody" id="itBody" hidden>
+          <div class="isgrid">
+            <figure class="isprev"><canvas id="itCanvas" aria-label="글자 넣은 모습 미리보기"></canvas><figcaption id="itCap">첫 장 미리보기</figcaption></figure>
+            <div class="form">
               <div class="field full">
-                <label for="isText">도장 위에 쓸 글자</label>
+                <label for="isText">넣을 글자</label>
                 <textarea id="isText" rows="2" placeholder="예: {날짜} (Enter) {시간}"></textarea>
                 <div class="row"><button type="button" id="isDate">{날짜} 넣기</button><button type="button" id="isTime">{시간} 넣기</button></div>
               </div>
+              <div class="field">
+                <label for="itPages">글자 넣을 쪽</label>
+                <select id="itPages"><option value="first">첫 장만</option><option value="last">마지막 장만</option><option value="all">모든 장</option></select>
+              </div>
+              <div class="field"><label for="itPos">글자 위치</label><select id="itPos"></select></div>
+              <div class="field it-free"><label for="itMargin">가장자리에서 (mm)</label><input type="number" id="itMargin" min="0" max="80" step="1"></div>
               <div class="field"><label for="isSize">글자 크기 (pt)</label><input type="number" id="isSize" min="4" max="72" step="0.5"></div>
               <div class="field"><label for="isColor">글자 색</label><select id="isColor"></select></div>
-              <div class="field"><label for="isTx">글자 가로 위치</label><input type="range" id="isTx" min="0" max="100"></div>
-              <div class="field"><label for="isTy">글자 세로 위치</label><input type="range" id="isTy" min="0" max="100"></div>
-              <label class="check full"><input type="checkbox" id="isBold"> 글자 굵게</label>
+              <div class="field it-on"><label for="isTx">도장 위 가로 위치</label><input type="range" id="isTx" min="0" max="100"></div>
+              <div class="field it-on"><label for="isTy">도장 위 세로 위치</label><input type="range" id="isTy" min="0" max="100"></div>
+              <div class="field full checks2">
+                <label class="check"><input type="checkbox" id="isBold"> 굵게</label>
+                <label class="check"><input type="checkbox" id="itBg"> 흰 바탕으로 가리기</label>
+              </div>
             </div>
           </div>
           <div class="row" id="isFontRow" hidden>
-            <span class="note warn">도장 위 글자를 쓰려면 글꼴을 한 번 골라야 합니다.</span>
+            <span class="note warn">글자를 쓰려면 글꼴을 한 번 골라야 합니다.</span>
             <button type="button" id="isFontLoad">PC 글꼴 불러오기</button>
             <button type="button" id="isFontFile">글꼴 파일 선택</button>
           </div>
@@ -729,7 +754,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         <div class="field">
           <label for="dateBase">{날짜}에 들어갈 날짜</label>
           <div class="row">
-            <input type="date" id="dateBase">
+            <input type="text" id="dateBase" inputmode="numeric" maxlength="10" placeholder="예: 20261109" autocomplete="off" title="숫자만 눌러도 됩니다 (예: 20261109)" style="width:9.5em"><input type="date" id="datePick" class="vh" tabindex="-1" aria-hidden="true"><button type="button" id="dateCal" title="달력에서 고르기" aria-label="달력에서 고르기">📅</button>
             <select id="dateFmt" aria-label="날짜 형식" style="width:auto"></select>
             <button type="button" id="dateToday">오늘</button>
           </div>
@@ -761,13 +786,13 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
             <option value="eul">증거번호  을 제1호증</option>
             <option value="copy">사본</option>
             <option value="date">오늘 날짜</option>
-            <option value="imgdate">도장 이미지 + 날짜</option>
             <option value="blank">빈 문구 (직접 입력)</option>
           </select>
-          <button type="button" id="stampAdd">문구 추가</button>
+          <button type="button" id="stampAdd">+ 문구 추가</button>
+          <button type="button" id="stampAddImg">+ 도장 추가</button>
         </div>
-        <div class="row"><button type="button" id="stampClear" class="danger">문구 모두 지우기</button></div>
-        <p class="note">문구 안의 {쪽}은 쪽 번호, {전체}는 전체 쪽수, {날짜}·{시간}은 왼쪽에서 고른 날짜·시각으로 바뀝니다. 문구마다 '밑에 깔 이미지'를 고르면 이미지 위에 글자가 올라갑니다. 문구는 여러 개 넣을 수 있고, 아래 미리보기에 바로 보입니다.</p>
+        <div class="row"><button type="button" id="stampClear" class="danger">문구·도장 모두 지우기</button></div>
+        <p class="note">문구 안의 {쪽}은 쪽 번호, {전체}는 전체 쪽수, {날짜}·{시간}은 왼쪽에서 고른 날짜·시각으로 바뀝니다. 도장은 '+ 도장 추가'로 따로 넣어 위치·쪽을 문구와 따로 정합니다. 문구와 도장은 여러 개 넣을 수 있고, 아래 미리보기에 바로 보입니다.</p>
         <div class="stamps" id="stampList"></div>
         <div class="empty" id="stampEmpty">문구 종류를 고르고 '문구 추가'를 누르세요.</div>
       </section>
@@ -837,7 +862,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         </div>
         <div class="ibrow" id="ibRow" hidden>
           <b>고른 이미지</b>
-          <label>위에 쓸 글자 <textarea id="ibText" rows="1" placeholder="예: {날짜} (Enter) {시간}"></textarea></label>
+          <label>도장 위에 겹쳐 쓸 글자(선택) <textarea id="ibText" rows="1" placeholder="예: {날짜} (Enter) {시간}"></textarea></label>
           <button type="button" id="ibToday">{날짜} 넣기</button>
           <button type="button" id="ibTime">{시간} 넣기</button>
           <label>가로 <input type="range" id="ibTx" min="0" max="100" value="50"></label>
@@ -1218,7 +1243,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <footer>
     <span>개발자: 노상엽</span>
     <span>개발일자: 2026. 10. 16.</span>
-    <span>수정일자: 2026. 11. 2.</span>
+    <span>수정일자: 2026. 11. 9.</span>
     <span>버전 <b id="appVer"></b></span>
     <button type="button" class="linkbtn" id="updCheck">새 버전 확인</button>
     <span>HEIC(아이폰 사진)는 크롬·엣지에서 열리지 않으니 JPG로 저장해 올려 주세요.</span>
@@ -3296,7 +3321,7 @@ async function run(){
         catch(e){ console.error(e); errors.push(`도장을 찍지 못했습니다 (${name})`); }
       }
       pagesTotal += f.pages.length;
-      outs.push({blob, name, meta:`${f.pages.length.toLocaleString("ko-KR")}쪽 · ${fmtMB(blob.size)}` + (pick ? " · 도장" : "")});
+      outs.push({blob, name, meta:`${f.pages.length.toLocaleString("ko-KR")}쪽 · ${fmtMB(blob.size)}` + (pick ? " · " + imgStamp.label() : "")});
     }
     if(window.SaveOpt && SaveOpt.wantLog() && window.PII && PII.on){   // 가림 기록표
       const rows = []; let pno = 0;
@@ -3847,7 +3872,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "2.3", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
+const APP_VERSION = "2.4", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -4177,8 +4202,31 @@ try{ const f = localStorage.getItem("i2p.dateFmt"); if(f) $("dateFmt").value = f
 $("dateBase").value = isoToday();
 const dateChanged = () => { try{ localStorage.setItem("i2p.dateFmt", $("dateFmt").value); }catch(_){} if(typeof renderAllOverlays === "function") renderAllOverlays(); if(window.imgStamp) imgStamp.preview(); };
 $("dateFmt").addEventListener("change", dateChanged);
-$("dateBase").addEventListener("change", dateChanged);
-$("dateToday").onclick = () => { $("dateBase").value = isoToday(); dateChanged(); };
+/* 날짜 칸: 숫자만 눌러도(20261109) 날짜가 된다. 2026.11.9, 2026-11-09, 261109도 받는다 */
+function normDate(v){
+  const t = String(v).trim(); let y, m, d, g;
+  if((g = t.match(/^(\d{4})(\d{2})(\d{2})$/))) [, y, m, d] = g;
+  else if((g = t.match(/^(\d{2})(\d{2})(\d{2})$/))) { [, y, m, d] = g; y = "20" + y; }
+  else if((g = t.match(/^(\d{4})\s*[.\-/년]\s*(\d{1,2})\s*[.\-/월]\s*(\d{1,2})\s*[.일]?$/))) [, y, m, d] = g;
+  else return null;
+  y = +y; m = +m; d = +d;
+  const dt = new Date(y, m - 1, d);
+  if(dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
+  return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+let dateLast = $("dateBase").value;
+function dateCommit(){
+  const el = $("dateBase"), n = normDate(el.value);
+  if(n){ el.value = n; if(n !== dateLast){ dateLast = n; dateChanged(); } }
+  else if(el.value.trim()){ toast("날짜를 알아볼 수 없습니다. 예: 20261109"); el.value = dateLast; }
+  else el.value = dateLast;
+}
+$("dateBase").addEventListener("input", e => { const v = e.target.value.replace(/\D/g, ""); if(v.length === 8 && /^\d{8}$/.test(e.target.value.trim())) dateCommit(); });
+$("dateBase").addEventListener("change", dateCommit);
+$("dateBase").addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); dateCommit(); } });
+$("dateCal").onclick = () => { const p = $("datePick"); p.value = dateLast; try{ p.showPicker(); }catch(_){ p.focus(); p.click(); } };
+$("datePick").addEventListener("change", e => { if(e.target.value){ $("dateBase").value = e.target.value; dateCommit(); } });
+$("dateToday").onclick = () => { $("dateBase").value = isoToday(); dateCommit(); };
 
 /* 일괄 문구가 들어갈 쪽과 그 쪽의 문구 */
 function stampTargets(st, n){
@@ -4540,7 +4588,7 @@ function updateTextUI(){
   const n = T.boxes.filter(b => b.text.trim()).length, ni = T.imgs.length, ns = T.stamps.filter(stampLive).length;
   const nr = (T.red || []).reduce((s, pg) => s + (pg ? pg.length : 0), 0);
   const nt = (T.tables || []).length;
-  $("tbCount").textContent = `글자 상자 ${n}개 · 이미지 ${ni}개` + (nt ? ` · 표 ${nt}개` : "") + ` · 일괄 문구 ${ns}개` + (nr ? ` · 가림 ${nr}곳` : "");
+  $("tbCount").textContent = `글자 상자 ${n}개 · 이미지 ${ni}개` + (nt ? ` · 표 ${nt}개` : "") + ` · 일괄 문구·도장 ${ns}개` + (nr ? ` · 가림 ${nr}곳` : "");
   $("textRun").disabled = running || !T.pages.length || (!n && !ni && !ns && !nr && !nt);
 }
 
@@ -4774,28 +4822,49 @@ $("ibTime").onclick = () => insertVar("{시간}");
 function opts(list, v){ return list.map(([k, l]) => `<option value="${k}"${k === v ? " selected" : ""}>${l}</option>`).join(""); }
 function drawStamps(){
   const box = $("stampList"); box.replaceChildren();
-  T.stamps.forEach((st, k) => {
-    const c = document.createElement("div"); c.className = "stamp";
+  let nt = 0, ni = 0;
+  T.stamps.forEach(st => {
+    if(!st.kind) st.kind = st.img ? "img" : "text";
+    const isImg = st.kind === "img", no = isImg ? ++ni : ++nt;
+    const c = document.createElement("div"); c.className = "stamp" + (isImg ? " stimg" : "");
     const id = n => `st${st.id}_${n}`;
-    c.innerHTML = `
+    const pagesF = `<div class="field"><label for="${id("pages")}">넣을 쪽</label><select id="${id("pages")}">${opts([["all","모든 쪽"],["first","첫 쪽만"],["last","마지막 쪽만"],["range","쪽 지정"]], st.pages)}</select></div>`;
+    const rangeF = `<div class="field st-range" ${st.pages === "range" ? "" : "hidden"}><label for="${id("range")}">쪽 범위</label><input type="text" id="${id("range")}" placeholder="예: 1-3, 5, 8-" autocomplete="off"></div>`;
+    const posF = `<div class="field"><label for="${id("pos")}">위치</label><select id="${id("pos")}">${opts(POS, st.pos)}</select></div>`;
+    const marF = `<div class="field"><label for="${id("margin")}">가장자리에서 (mm)</label><input type="number" id="${id("margin")}" min="0" max="80" step="1" value="${st.margin}"></div>`;
+    const sizeF = `<div class="field"><label for="${id("size")}">글자 크기 (pt)</label><input type="number" id="${id("size")}" min="5" max="72" step="0.5" value="${st.size}"></div>`;
+    const colF = `<div class="field"><label for="${id("color")}">글자 색</label><select id="${id("color")}">${opts(COLORS, st.color)}</select></div>`;
+    c.innerHTML = isImg ? `
       <div class="st-head">
-        <label class="check"><input type="checkbox" id="${id("on")}" ${st.on ? "checked" : ""}> 문구 ${k+1}</label>
+        <label class="check"><input type="checkbox" id="${id("on")}" ${st.on ? "checked" : ""}> 도장 ${no}</label>
+        <button type="button" class="st-del" aria-label="도장 지우기">✕</button>
+      </div>
+      <div class="st-grid">
+        <div class="field"><label for="${id("img")}">도장</label><select id="${id("img")}">${T.lib.map(im => `<option value="${im.id}"${im.id === st.img ? " selected" : ""}>${esc(im.name)}</option>`).join("")}</select></div>
+        <div class="field"><label for="${id("imgW")}">도장 너비 (mm)</label><input type="number" id="${id("imgW")}" min="3" max="250" step="1" value="${st.imgW}"></div>
+        ${posF}${marF}${pagesF}
+        <div class="field"><label for="${id("tr")}">투명도 <span class="trv">${st.tr}%</span></label><input type="range" id="${id("tr")}" min="0" max="90" step="5" value="${st.tr}"></div>
+        ${rangeF}
+      </div>
+      <details class="st-over"${st.text.trim() ? " open" : ""}>
+        <summary>도장 위에 글자도 겹쳐 쓰기 (선택 · 따로 쓰려면 '문구 추가')</summary>
+        <textarea id="${id("text")}" class="st-text" rows="1" placeholder="비워 두면 도장만 찍힙니다. 예: {날짜}"></textarea>
+        <div class="st-grid">
+          ${sizeF}${colF}
+          <div class="field"><label for="${id("tx")}">가로 위치</label><input type="range" id="${id("tx")}" min="0" max="100" value="${st.tx}"></div>
+          <div class="field"><label for="${id("ty")}">세로 위치</label><input type="range" id="${id("ty")}" min="0" max="100" value="${st.ty}"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="${id("bold")}" ${st.bold ? "checked" : ""}> 굵게</label>
+      </details>` : `
+      <div class="st-head">
+        <label class="check"><input type="checkbox" id="${id("on")}" ${st.on ? "checked" : ""}> 문구 ${no}</label>
         <button type="button" class="st-del" aria-label="문구 지우기">✕</button>
       </div>
       <textarea id="${id("text")}" class="st-text" rows="1" placeholder="예: - {쪽} -  /  갑 제1호증  (Enter로 줄바꿈)"></textarea>
       <div class="st-grid">
-        <div class="field"><label for="${id("pos")}">위치</label><select id="${id("pos")}">${opts(POS, st.pos)}</select></div>
-        <div class="field"><label for="${id("margin")}">가장자리에서 (mm)</label><input type="number" id="${id("margin")}" min="0" max="80" step="1" value="${st.margin}"></div>
-        <div class="field"><label for="${id("size")}">글자 크기 (pt)</label><input type="number" id="${id("size")}" min="5" max="72" step="0.5" value="${st.size}"></div>
-        <div class="field"><label for="${id("color")}">색</label><select id="${id("color")}">${opts(COLORS, st.color)}</select></div>
-        <div class="field"><label for="${id("pages")}">넣을 쪽</label><select id="${id("pages")}">${opts([["all","모든 쪽"],["first","첫 쪽만"],["last","마지막 쪽만"],["range","쪽 지정"]], st.pages)}</select></div>
+        ${posF}${marF}${sizeF}${colF}${pagesF}
         <div class="field"><label for="${id("start")}">{쪽} 시작 번호</label><input type="number" id="${id("start")}" min="0" step="1" value="${st.start}"></div>
-        <div class="field st-range" ${st.pages === "range" ? "" : "hidden"}><label for="${id("range")}">쪽 범위</label><input type="text" id="${id("range")}" placeholder="예: 1-3, 5, 8-" autocomplete="off"></div>
-        <div class="field"><label for="${id("img")}">밑에 깔 이미지</label><select id="${id("img")}"><option value="">없음 (글자만)</option>${T.lib.map(im => `<option value="${im.id}"${im.id === st.img ? " selected" : ""}>${esc(im.name)}</option>`).join("")}</select></div>
-        <div class="field st-im" ${st.img ? "" : "hidden"}><label for="${id("imgW")}">이미지 너비 (mm)</label><input type="number" id="${id("imgW")}" min="3" max="250" step="1" value="${st.imgW}"></div>
-        <div class="field st-im" ${st.img ? "" : "hidden"}><label for="${id("tx")}">글자 가로 위치</label><input type="range" id="${id("tx")}" min="0" max="100" value="${st.tx}"></div>
-        <div class="field st-im" ${st.img ? "" : "hidden"}><label for="${id("ty")}">글자 세로 위치</label><input type="range" id="${id("ty")}" min="0" max="100" value="${st.ty}"></div>
-        <div class="field st-im" ${st.img ? "" : "hidden"}><label for="${id("tr")}">이미지 투명도 <span class="trv">${st.tr}%</span></label><input type="range" id="${id("tr")}" min="0" max="90" step="5" value="${st.tr}"></div>
+        ${rangeF}
       </div>
       <div class="row st-checks">
         <label class="check"><input type="checkbox" id="${id("bold")}" ${st.bold ? "checked" : ""}> 굵게</label>
@@ -4805,21 +4874,24 @@ function drawStamps(){
       </div>`;
     c.querySelector(".st-text").value = st.text;
     c.querySelector(`#${id("range")}`).value = st.range;
+    const v = (n, d) => { const e = $(id(n)); return e ? e.value : d; };
+    const ck = (n, d) => { const e = $(id(n)); return e ? e.checked : d; };
     const read = () => {
       st.on = $(id("on")).checked; st.text = $(id("text")).value; st.pos = $(id("pos")).value;
-      st.margin = Math.max(0, +$(id("margin")).value || 0); st.size = Math.max(5, +$(id("size")).value || 10);
-      st.color = $(id("color")).value; st.pages = $(id("pages")).value; st.start = +$(id("start")).value; st.range = $(id("range")).value;
-      st.bold = $(id("bold")).checked; st.border = $(id("border")).checked; st.bg = $(id("bg")).checked; st.vertical = $(id("vert")).checked;
-      const newImg = $(id("img")).value, sh = newImg && newImg !== st.img ? shapeOf(newImg) : null;
-      st.img = newImg; st.imgW = +$(id("imgW")).value || 30; st.tx = +$(id("tx")).value; st.ty = +$(id("ty")).value; st.tr = +$(id("tr")).value;
-      if(sh){                                   // 다른 도장으로 바꾸면 그 도장의 크기·위치를 불러온다
-        if(sh.wmm) $(id("imgW")).value = st.imgW = sh.wmm;
-        if(sh.tx != null) $(id("tx")).value = st.tx = sh.tx;
-        if(sh.ty != null) $(id("ty")).value = st.ty = sh.ty;
-        if(sh.tr != null) $(id("tr")).value = st.tr = sh.tr;
-      } else if(st.img) rememberShape(st.img, {wmm:st.imgW, tx:st.tx, ty:st.ty, tr:st.tr});
-      c.querySelector(".trv").textContent = st.tr + "%";
-      c.querySelectorAll(".st-im").forEach(x => x.hidden = !st.img);
+      st.margin = Math.max(0, +$(id("margin")).value || 0); st.size = Math.max(5, +v("size", st.size) || 10);
+      st.color = v("color", st.color); st.pages = $(id("pages")).value; st.start = +v("start", st.start); st.range = $(id("range")).value;
+      st.bold = ck("bold", st.bold); st.border = ck("border", st.border); st.bg = ck("bg", st.bg); st.vertical = ck("vert", st.vertical);
+      if(isImg){
+        const newImg = $(id("img")).value, sh = newImg && newImg !== st.img ? shapeOf(newImg) : null;
+        st.img = newImg; st.imgW = +$(id("imgW")).value || 30; st.tx = +$(id("tx")).value; st.ty = +$(id("ty")).value; st.tr = +$(id("tr")).value;
+        if(sh){                                   // 다른 도장으로 바꾸면 그 도장의 크기·위치를 불러온다
+          if(sh.wmm) $(id("imgW")).value = st.imgW = sh.wmm;
+          if(sh.tx != null) $(id("tx")).value = st.tx = sh.tx;
+          if(sh.ty != null) $(id("ty")).value = st.ty = sh.ty;
+          if(sh.tr != null) $(id("tr")).value = st.tr = sh.tr;
+        } else if(st.img) rememberShape(st.img, {wmm:st.imgW, tx:st.tx, ty:st.ty, tr:st.tr});
+        c.querySelector(".trv").textContent = st.tr + "%";
+      } else st.img = "";
       c.querySelector(".st-range").hidden = st.pages !== "range";
       c.classList.toggle("off", !st.on);
       scheduleOverlay(); updateTextUI();
@@ -4833,18 +4905,18 @@ function drawStamps(){
 }
 let ovT; function scheduleOverlay(){ clearTimeout(ovT); ovT = setTimeout(renderAllOverlays, 120); }
 $("stampAdd").onclick = () => {
-  const key = $("stampPreset").value, p = Object.assign({}, PRESETS[key] || PRESETS.blank);
-  if(key === "imgdate"){
-    const im = libGet($("tbPut").value) || T.lib[0];
-    if(!im){ toast("먼저 왼쪽 '도장·이미지'에서 이미지를 추가해 주세요."); $("imgAdd").focus(); return; }
-    p.img = im.id;
-    const sh = im.st || {};
-    if(sh.wmm) p.imgW = sh.wmm;
-    for(const k of ["tx","ty","tr","size","color","bold","text"]) if(sh[k] != null) p[k] = sh[k];
-  }
+  const key = $("stampPreset").value, p = Object.assign({}, PRESETS[key] || PRESETS.blank, {kind:"text", img:""});
   T.stamps.push(newStamp(p));
   drawStamps(); scheduleOverlay(); updateTextUI();
   const last = $("stampList").lastElementChild; if(last){ const t = last.querySelector(".st-text"); t.focus(); t.setSelectionRange(t.value.length, t.value.length); }
+};
+$("stampAddImg").onclick = () => {
+  const im = libGet($("tbPut").value) || T.lib[T.lib.length - 1];
+  if(!im){ toast("먼저 왼쪽 '도장·이미지'에서 도장 그림을 추가해 주세요."); $("imgAdd").focus(); return; }
+  const sh = im.st || {}, p = {kind:"img", img:im.id, text:"", pos:"br", margin:20, pages:"first", imgW:sh.wmm || 30, tx:sh.tx ?? 50, ty:sh.ty ?? 50, tr:sh.tr ?? 0, size:9};
+  T.stamps.push(newStamp(p));
+  drawStamps(); scheduleOverlay(); updateTextUI();
+  const last = $("stampList").lastElementChild; if(last) last.scrollIntoView({block:"nearest", behavior:"smooth"});
 };
 
 /* ---------- PDF에 쓰기 ---------- */
@@ -5368,16 +5440,28 @@ $("stampClear").onclick = () => { if(running) return; T.stamps.length = 0; drawS
    이미지 → PDF 탭: 저장할 때 첫 장(또는 고른 쪽)에 도장 찍기
    보관함·글꼴·날짜/시간은 'PDF 글자 넣기' 탭과 함께 쓴다
    ========================================================= */
-const IS = {on:false, img:"", pages:"first", pos:"br", margin:15, imgW:30, tr:0, text:"{날짜}\n{시간}", size:9, color:"#111111", bold:false, tx:50, ty:50};
-try{ const k = JSON.parse(localStorage.getItem("i2p.istamp") || "null"); if(k){ delete k.on; Object.assign(IS, k); } }catch(_){}
+/* 도장(IS)과 글자(IT)는 따로 켜고, 쪽·위치도 따로 정한다. 글자 위치를 '도장 위에 겹쳐서'로 하면 도장 안에 쓴다 */
+const IS = {on:false, img:"", pages:"first", pos:"br", margin:15, imgW:30, tr:0};
+const IT = {on:false, text:"{날짜}\n{시간}", pages:"first", pos:"br", margin:15, size:9, color:"#111111", bold:false, bg:false, tx:50, ty:50};
+try{
+  const k = JSON.parse(localStorage.getItem("i2p.istamp") || "null"), t = JSON.parse(localStorage.getItem("i2p.itext") || "null");
+  if(k){ for(const x of ["img","pages","pos","margin","imgW","tr"]) if(k[x] != null) IS[x] = k[x]; }
+  if(t){ delete t.on; Object.assign(IT, t); }
+  else if(k && k.text != null){                       // 예전 설정(도장+글자 한 묶음)을 옮겨 온다
+    Object.assign(IT, {text:k.text, pages:k.pages || "first", pos:k.img ? "onstamp" : (k.pos || "br"), margin:k.margin ?? 15});
+    for(const x of ["size","color","bold","tx","ty"]) if(k[x] != null) IT[x] = k[x];
+  }
+}catch(_){}
+const IT_POS = [...POS, ["onstamp", "도장 위에 겹쳐서"]];
 $("isPos").innerHTML = opts(POS, IS.pos);
-$("isColor").innerHTML = opts(COLORS, IS.color);
+$("itPos").innerHTML = opts(IT_POS, IT.pos);
+$("isColor").innerHTML = opts(COLORS, IT.color);
 let isPickNew = !IS.img;     // 도장을 새로 추가했거나 아직 고른 적이 없으면 마지막 도장을 고른다
 function isFillImgSel(){
   const sel = $("isImg");
   if(IS.img && !libGet(IS.img)){ IS.img = ""; isPickNew = true; }
   if(isPickNew && T.lib.length){ IS.img = T.lib[T.lib.length - 1].id; isPickNew = false; isLoadShape(); }
-  sel.innerHTML = `<option value="">도장 없이 글자만</option>` + T.lib.map(im => `<option value="${im.id}">${esc(im.name)}</option>`).join("");
+  sel.innerHTML = `<option value="">(도장 없음)</option>` + T.lib.map(im => `<option value="${im.id}">${esc(im.name)}</option>`).join("");
   sel.value = IS.img;
   isDrawPick();
 }
@@ -5386,8 +5470,7 @@ function isDrawPick(){
   const box = $("isPick"); if(!box) return;
   box.replaceChildren();
   const pick = id => { if(running) return; const sel = $("isImg"); sel.value = id; sel.dispatchEvent(new Event("change", {bubbles:true})); isDrawPick(); };
-  const none = document.createElement("div"); none.className = "libitem none" + (IS.img ? "" : " on"); none.innerHTML = `<span>도장 없이 글자만</span>`;
-  none.addEventListener("click", () => pick("")); box.appendChild(none);
+  if(!T.lib.length){ const e = document.createElement("span"); e.className = "note"; e.textContent = "등록한 도장이 없습니다. '+ 도장 추가'로 도장 그림을 넣어 주세요."; box.appendChild(e); }
   T.lib.forEach(im => {
     const r = document.createElement("div"); r.className = "libitem" + (IS.img === im.id ? " on" : ""); r.title = "눌러서 이 도장 쓰기";
     r.innerHTML = `<img alt=""><span></span><button type="button" class="ren" aria-label="이름 바꾸기" title="이름 바꾸기">✎</button>`;
@@ -5397,32 +5480,53 @@ function isDrawPick(){
     box.appendChild(r);
   });
 }
+function itShowFields(){
+  const on = IT.pos === "onstamp";
+  document.querySelectorAll("#itBody .it-on").forEach(x => x.hidden = !on);
+  document.querySelectorAll("#itBody .it-free").forEach(x => x.hidden = on);
+  $("itPages").disabled = on;
+  if(on) $("itPages").title = "도장 위에 겹쳐 쓰면 도장을 찍는 쪽에 함께 들어갑니다"; else $("itPages").removeAttribute("title");
+}
 function isToUI(){
   isFillImgSel();
   $("isPages").value = IS.pages; $("isPos").value = IS.pos; $("isMargin").value = IS.margin; $("isW").value = IS.imgW;
-  $("isTr").value = IS.tr; $("isTrV").textContent = IS.tr + "%"; $("isText").value = IS.text; $("isSize").value = IS.size;
-  $("isColor").value = IS.color; $("isTx").value = IS.tx; $("isTy").value = IS.ty; $("isBold").checked = IS.bold;
+  $("isTr").value = IS.tr; $("isTrV").textContent = IS.tr + "%";
+  $("isText").value = IT.text; $("itPages").value = IT.pos === "onstamp" ? IS.pages : IT.pages; $("itPos").value = IT.pos; $("itMargin").value = IT.margin;
+  $("isSize").value = IT.size; $("isColor").value = IT.color; $("isTx").value = IT.tx; $("isTy").value = IT.ty; $("isBold").checked = IT.bold; $("itBg").checked = IT.bg;
+  itShowFields();
 }
 function isLoadShape(){
   const sh = shapeOf(IS.img); if(!sh) return;
   if(sh.wmm) IS.imgW = sh.wmm;
-  for(const k of ["tx","ty","tr","size","color","bold","text"]) if(sh[k] != null) IS[k] = sh[k];
+  if(sh.tr != null) IS.tr = sh.tr;
+  if(sh.tx != null) IT.tx = sh.tx;
+  if(sh.ty != null) IT.ty = sh.ty;
+}
+function isSave(){
+  try{
+    const k = Object.assign({}, IS); delete k.on; localStorage.setItem("i2p.istamp", JSON.stringify(k));
+    const t = Object.assign({}, IT); delete t.on; localStorage.setItem("i2p.itext", JSON.stringify(t));
+  }catch(_){}
 }
 function isFromUI(){
   const prevImg = IS.img;
   Object.assign(IS, {img:$("isImg").value, pages:$("isPages").value, pos:$("isPos").value, margin:Math.max(0, +$("isMargin").value || 0),
-    imgW:Math.max(3, +$("isW").value || 30), tr:+$("isTr").value || 0, text:$("isText").value, size:Math.max(4, +$("isSize").value || 9),
-    color:$("isColor").value, tx:+$("isTx").value, ty:+$("isTy").value, bold:$("isBold").checked});
-  if(IS.img !== prevImg){ isLoadShape(); isToUI(); }        // 도장을 바꾸면 그 도장의 모양을 불러온다
-  else if(IS.img) rememberShape(IS.img, {wmm:IS.imgW, tx:IS.tx, ty:IS.ty, tr:IS.tr, size:IS.size, color:IS.color, bold:IS.bold, text:IS.text});
+    imgW:Math.max(3, +$("isW").value || 30), tr:+$("isTr").value || 0});
+  Object.assign(IT, {text:$("isText").value, pos:$("itPos").value, margin:Math.max(0, +$("itMargin").value || 0), size:Math.max(4, +$("isSize").value || 9),
+    color:$("isColor").value, tx:+$("isTx").value, ty:+$("isTy").value, bold:$("isBold").checked, bg:$("itBg").checked});
+  if(IT.pos !== "onstamp") IT.pages = $("itPages").value;
+  if(IS.img !== prevImg){ isLoadShape(); isToUI(); }        // 도장을 바꾸면 그 도장의 크기·투명도를 불러온다
+  else if(IS.img) rememberShape(IS.img, IT.pos === "onstamp" ? {wmm:IS.imgW, tr:IS.tr, tx:IT.tx, ty:IT.ty} : {wmm:IS.imgW, tr:IS.tr});
   $("isTrV").textContent = IS.tr + "%";
-  try{ const k = Object.assign({}, IS); delete k.on; localStorage.setItem("i2p.istamp", JSON.stringify(k)); }catch(_){}
-  isPreview();
+  if(IT.pos === "onstamp") $("itPages").value = IS.pages;
+  itShowFields(); isSave(); isPreview();
 }
-const isBody = $("isBody");
-isBody.addEventListener("input", e => { if(e.target.id !== "isOn") isFromUI(); });
-isBody.addEventListener("change", e => { if(e.target.id === "isImg") isPickNew = false; if(e.target.id !== "isOn") isFromUI(); });
-$("isOn").addEventListener("change", () => { IS.on = $("isOn").checked; isBody.hidden = !IS.on; if(IS.on){ isToUI(); isPreview(); } });
+["isBody", "itBody"].forEach(id => {
+  $(id).addEventListener("input", () => isFromUI());
+  $(id).addEventListener("change", e => { if(e.target.id === "isImg") isPickNew = false; isFromUI(); });
+});
+$("isOn").addEventListener("change", () => { IS.on = $("isOn").checked; $("isBody").hidden = !IS.on; if(IS.on || IT.on){ isToUI(); isPreview(); } });
+$("itOn").addEventListener("change", () => { IT.on = $("itOn").checked; $("itBody").hidden = !IT.on; if(IS.on || IT.on){ isToUI(); isPreview(); } });
 const isIns = v => { const t = $("isText"), a = t.selectionStart ?? t.value.length, b = t.selectionEnd ?? a; t.value = t.value.slice(0, a) + v + t.value.slice(b); t.focus(); t.setSelectionRange(a + v.length, a + v.length); isFromUI(); };
 $("isDate").onclick = () => isIns("{날짜}");
 $("isTime").onclick = () => isIns("{시간}");
@@ -5430,17 +5534,27 @@ $("isAdd").onclick = () => { isPickNew = true; $("imgIn").click(); };
 $("isFontLoad").onclick = () => loadLocalFonts();
 $("isFontFile").onclick = () => $("fontFile").click();
 
-function isStampSt(){ return Object.assign({border:false, bg:false, vertical:false}, IS); }
-/* 미리보기: 첫 이미지가 들어갈 쪽 모양을 그리고 그 위에 도장 */
+/* 한 쪽에 들어갈 도장 상자와 글자 상자 (서로 따로 계산) */
+const isStampOk = () => IS.on && IS.img && libGet(IS.img);
+function isBlocks(P, withStamp, withText, text){
+  const out = {img:null, text:null};
+  const base = {img:IS.img, pos:IS.pos, margin:IS.margin, imgW:IS.imgW, tr:IS.tr, tx:IT.tx, ty:IT.ty, size:IT.size, color:IT.color, bold:IT.bold, bg:IT.bg, border:false, vertical:false};
+  if(withStamp && isStampOk()){ const b = stampBlock(base, "", P); out.img = b; }
+  if(withText && text.trim()){
+    if(IT.pos === "onstamp"){ if(isStampOk()){ const b = stampBlock(base, text, P); out.text = b.text; } }
+    else out.text = stampBlock({img:"", pos:IT.pos, margin:IT.margin, size:IT.size, color:IT.color, bold:IT.bold, bg:IT.bg, border:false, vertical:false}, text, P).text;
+  }
+  return out;
+}
+/* 미리보기: 첫 이미지가 들어갈 쪽 모양을 그리고 그 위에 도장·글자 */
 async function isNatural(it){
   if(it.nw || it._nwBusy || isTiff(it.file)) return;
   it._nwBusy = true;
   try{ const b = await createImageBitmap(it.file); it.nw = b.width; it.nh = b.height; b.close(); }catch(_){}
   it._nwBusy = false; isPreview();
 }
-function isPreview(){
-  if(!IS.on) return;
-  const cv = $("isCanvas"), g = cv.getContext("2d"), first = items[0];
+function isDrawOn(cv){
+  const g = cv.getContext("2d"), first = items[0];
   const thumb = first && first.el && first.el.querySelector(".thumb canvas");
   let sw = thumb ? thumb.width : 210, sh = thumb ? thumb.height : 297;
   if(first && first.nw){ sw = first.nw; sh = first.nh; }
@@ -5465,44 +5579,64 @@ function isPreview(){
     g.save(); g.translate(cx + cw/2, cy + ch/2); g.rotate(rot*Math.PI/180);
     const dw = side ? ch : cw, dh = side ? cw : ch; g.drawImage(thumb, -dw/2, -dh/2, dw, dh); g.restore();
   } else { g.fillStyle = "#e9edf1"; g.fillRect(cx, cy, cw, ch); }
-  const text = fillVars(IS.text), b = stampBlock(isStampSt(), text, {W:PW, H:PH});
+  // 미리보기는 첫 장 기준: 첫 장에 들어가는 것만 그린다
+  const stampHere = IS.on && (IS.pages !== "last" || items.length <= 1);
+  const textHere = IT.on && (IT.pos === "onstamp" ? stampHere : (IT.pages !== "last" || items.length <= 1));
+  const b = isBlocks({W:PW, H:PH}, stampHere, textHere, fillVars(IT.text));
   if(b.img){
-    const im = libGet(b.img.id), el = im && (im._pimg || (im._pimg = Object.assign(new Image(), {src:libUrl(im)})));
+    const im = libGet(b.img.img.id), el = im && (im._pimg || (im._pimg = Object.assign(new Image(), {src:libUrl(im)})));
     if(el && !el.complete){ el.onload = () => isPreview(); }
-    else if(el){ g.globalAlpha = b.op; g.drawImage(el, b.ix, b.iy, b.iw, b.ih); g.globalAlpha = 1; }
+    else if(el){ g.globalAlpha = b.img.op; g.drawImage(el, b.img.ix, b.img.iy, b.img.iw, b.img.ih); g.globalAlpha = 1; }
   }
   if(b.text){
     const t = b.text, n = t.lines.length;
+    if(t.bg){ g.fillStyle = "#fff"; g.fillRect(t.x, t.y, t.w, t.h); }
     g.fillStyle = t.color; g.textAlign = "center"; g.textBaseline = "middle";
     g.font = `${t.bold ? 700 : 400} ${t.size}px i2pText, "Malgun Gothic", sans-serif`;
     const mx = t.center ? t.cx : t.x + t.w/2, my = t.center ? t.cy : t.y + t.h/2;
     t.lines.forEach((ln, i) => g.fillText(ln, mx, my - n*t.size*LINE/2 + (i + 0.5)*t.size*LINE));
   }
-  $("isCap").textContent = !first ? "이미지를 넣으면 첫 장이 보입니다" : IS.pages === "all" ? "모든 장에 이렇게 들어갑니다" : IS.pages === "last" ? "마지막 장에 이렇게 들어갑니다 (첫 장 모양)" : "첫 장 미리보기";
-  const needFont = !!text.trim() && !T.font;
-  $("isFontRow").hidden = !needFont;
-  $("isNote").textContent = `{날짜} = ${today()}, {시간} = ${nowTime()}` + (timeAuto ? " (저장하는 순간의 시각)" : "") + ". 날짜·시간과 형식은 'PDF 글자 넣기' 탭에서 바꿀 수 있습니다.";
 }
+function isPreview(){
+  if(!IS.on && !IT.on) return;
+  const first = items[0];
+  const cap = !first ? "이미지를 넣으면 첫 장이 보입니다" : "첫 장 미리보기 (도장·글자 함께)";
+  if(IS.on){ isDrawOn($("isCanvas")); $("isCap").textContent = cap + (IS.pages === "all" ? " · 모든 장에 찍힘" : IS.pages === "last" ? " · 마지막 장에 찍힘" : ""); }
+  if(IT.on){
+    isDrawOn($("itCanvas"));
+    const pg = IT.pos === "onstamp" ? IS.pages : IT.pages;
+    $("itCap").textContent = cap + (pg === "all" ? " · 모든 장에 들어감" : pg === "last" ? " · 마지막 장에 들어감" : "");
+  }
+  const text = fillVars(IT.text);
+  $("isFontRow").hidden = !(IT.on && text.trim() && !T.font);
+  $("isNote").textContent = (IT.pos === "onstamp" && !IS.on ? "글자 위치가 '도장 위에 겹쳐서'입니다. 위 '저장할 때 도장 넣기'도 켜야 들어갑니다. " : "")
+    + `{날짜} = ${today()}, {시간} = ${nowTime()}` + (timeAuto ? " (저장하는 순간의 시각)" : "") + ". 날짜·시간 형식은 '글자 넣기' 탭에서 바꿀 수 있습니다.";
+}
+const pagePick = (mode, k, nf) => mode === "all" ? (n => Array.from({length:n}, (_, i) => i))
+                                : mode === "last" ? (k === nf - 1 ? (n => [n - 1]) : null)
+                                : (k === 0 ? (() => [0]) : null);
 async function isApply(blob, pick){
   const doc = await PDFDocument.load(new Uint8Array(await blob.arrayBuffer()), {updateMetadata:false});
-  const pages = doc.getPages(), idx = pick(pages.length).filter(i => i >= 0 && i < pages.length);
-  if(!idx.length) return blob;
-  const text = fillVars(IS.text), st = isStampSt();
+  const pages = doc.getPages(), n = pages.length, sets = pick(n);
+  const sIdx = new Set((sets.s || []).filter(i => i >= 0 && i < n)), tIdx = new Set((sets.t || []).filter(i => i >= 0 && i < n));
+  if(!sIdx.size && !tIdx.size) return blob;
+  const text = fillVars(IT.text);
   let fonts = null;
-  if(text.trim()){
+  if(tIdx.size && text.trim()){
     doc.registerFontkit(fontkit);
     const shrink = u => trueTypeKeepSubset(u, " " + text) || u;
     fonts = {reg: await doc.embedFont(shrink(T.font.reg), {subset:false}), bold: T.font.bold ? await doc.embedFont(shrink(T.font.bold), {subset:false}) : null, asc:T.font.asc, desc:T.font.desc};
   }
-  const im = IS.img ? libGet(IS.img) : null;
+  const im = sIdx.size && isStampOk() ? libGet(IS.img) : null;
   const emb = im ? (im.kind === "png" ? await doc.embedPng(im.bytes) : await doc.embedJpg(im.bytes)) : null;
-  for(const i of idx){
+  for(let i = 0; i < n; i++){
+    if(!sIdx.has(i) && !tIdx.has(i)) continue;
     const p = pages[i], r = ((p.getRotation().angle % 360) + 360) % 360, cb = p.getCropBox();
     const P = {W: r % 180 ? cb.height : cb.width, H: r % 180 ? cb.width : cb.height, rot:r, crop:cb};
-    const b = stampBlock(st, text, P);
+    const b = isBlocks(P, sIdx.has(i), tIdx.has(i), text);
     if(b.img && emb){
-      const [ux, uy] = toUser(P, b.ix, b.iy + b.ih), o = {x:ux, y:uy, width:b.iw, height:b.ih, rotate:degrees(r)};
-      if(b.op < 1) o.opacity = Math.max(0.05, b.op);
+      const [ux, uy] = toUser(P, b.img.ix, b.img.iy + b.img.ih), o = {x:ux, y:uy, width:b.img.iw, height:b.img.ih, rotate:degrees(r)};
+      if(b.img.op < 1) o.opacity = Math.max(0.05, b.img.op);
       p.drawImage(emb, o);
     }
     if(b.text && fonts) drawBlock(p, P, b.text, fonts);
@@ -5510,7 +5644,8 @@ async function isApply(blob, pick){
   return new Blob([await doc.save({useObjectStreams:true})], {type:"application/pdf"});
 }
 window.imgStamp = {
-  enabled: () => IS.on,
+  enabled: () => IS.on || IT.on,
+  label: () => [IS.on ? "도장" : "", IT.on ? "글자" : ""].filter(Boolean).join("·"),
   preview: () => { try{ isPreview(); }catch(e){ console.error(e); } },
   libChanged: () => {                        // 보관함이 바뀌면 목록만 새로 고친다 (도장 모양은 건드리지 않음)
     if(!$("isImg")) return;
@@ -5519,15 +5654,21 @@ window.imgStamp = {
     try{ isPreview(); }catch(_){}
   },
   check: () => {
-    if(!IS.on) return "";
-    const text = fillVars(IS.text);
-    if(!text.trim() && !(IS.img && libGet(IS.img))) return "넣을 도장이나 글자가 없습니다. '저장할 때 도장 넣기'에서 도장을 고르거나 글자를 써 주세요.";
-    if(text.trim() && !T.font) return "도장 위 글자를 쓰려면 글꼴이 필요합니다. '저장할 때 도장 넣기'에서 'PC 글꼴 불러오기'를 눌러 주세요.";
+    if(IS.on && !isStampOk()) return "찍을 도장이 없습니다. '저장할 때 도장 넣기'에서 도장을 고르거나 '+ 도장 추가'로 넣어 주세요.";
+    if(IT.on){
+      const text = fillVars(IT.text);
+      if(!text.trim()) return "넣을 글자가 없습니다. '저장할 때 글자 넣기'에 글자를 써 주세요.";
+      if(IT.pos === "onstamp" && !IS.on) return "글자 위치가 '도장 위에 겹쳐서'입니다. '저장할 때 도장 넣기'도 켜거나 글자 위치를 바꿔 주세요.";
+      if(!T.font) return "글자를 쓰려면 글꼴이 필요합니다. '저장할 때 글자 넣기'에서 'PC 글꼴 불러오기'를 눌러 주세요.";
+    }
     return "";
   },
-  target: (k, nf) => IS.pages === "all" ? (n => Array.from({length:n}, (_, i) => i))
-                   : IS.pages === "last" ? (k === nf - 1 ? (n => [n - 1]) : null)
-                   : (k === 0 ? (() => [0]) : null),
+  target: (k, nf) => {
+    const s = IS.on ? pagePick(IS.pages, k, nf) : null;
+    const t = IT.on ? (IT.pos === "onstamp" ? s : pagePick(IT.pages, k, nf)) : null;
+    if(!s && !t) return null;
+    return n => ({s: s ? s(n) : [], t: t ? t(n) : []});
+  },
   apply: isApply
 };
 isToUI();
