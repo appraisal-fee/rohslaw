@@ -315,6 +315,21 @@ body.withSrc main{margin-right:min(44vw,760px)}
 
 /* 로그인 화면 위에도 대화상자·알림이 보이게 */
 body:has(#gate) .modal{z-index:450}body:has(#gate) .toast{z-index:470}body:has(#gate) .busy{z-index:460}
+
+/* v3.4 */
+.tagm.std{background:#fdf0e6;color:#b45309}
+.sbw{display:grid;grid-template-columns:280px 1fr;gap:10px;margin-top:8px;height:58vh}
+.sbl{overflow:auto;border:1px solid var(--line);border-radius:8px}
+.sbh{position:sticky;top:0;background:#f3f6fb;font-size:12px;font-weight:700;color:var(--pri);padding:6px 10px;border-bottom:1px solid var(--line)}
+.sbi{padding:6px 10px;font-size:12.5px;cursor:pointer;border-bottom:1px solid #eef1f5;line-height:1.45}
+.sbi b{display:inline-block;width:38px;color:#1f3a68}.sbi:hover{background:#f6f9fd}.sbi.on{background:#eaf2fd}
+.sbv{overflow:auto;border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.6}
+.sbt{font-size:15px;font-weight:700;color:#1f3a68}
+.sbtab{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:12.5px}.sbtab th,.sbtab td{border:1px solid #cfd6e2;padding:4px 7px;text-align:left;vertical-align:top}.sbtab th{background:#eef2f8}
+.sbtab td:nth-child(1),.sbtab td:nth-child(3),.sbtab td:nth-child(4),.sbtab th:nth-child(1),.sbtab th:nth-child(3),.sbtab th:nth-child(4){text-align:center;white-space:nowrap;width:1%}
+.sbu{margin:6px 0}.sbs{margin:3px 0 0 18px}.sbs .o{font-weight:600;margin-top:3px}.sbs .d{padding-left:12px}.sbs .n{padding-left:12px;color:#5b6577;font-size:12px}
+.gr{display:inline-block;border-radius:4px;padding:0 6px;font-size:11px;font-weight:700;color:#fff;background:#5b6b85}.gr.g-필수{background:#c0392b}.gr.g-정규{background:#2f6db5}.gr.g-시범{background:#7a5bb5}
+.scs{border-bottom:1px solid var(--line)}.sch{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f7f9fc;position:sticky;top:0;font-size:13px}
 </style>
 <style id="doccss"></style>
 <style id="printpage">@page{size:A4 portrait;margin:0}@page land{size:A4 landscape;margin:0}</style>
@@ -459,7 +474,7 @@ body:has(#gate) .modal{z-index:450}body:has(#gate) .toast{z-index:470}body:has(#
     <button class="btn" id="bAddAnnex">+ 별첨 대조표 추가</button>
   </div>
 </section>
-<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.08. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
+<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.09. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
 </main>
 
 <!-- 설정 서랍 -->
@@ -6381,13 +6396,15 @@ window.__authGate=true;
       ['newreg', '📝 새 내규 만들기', '원하는 내용을 적으면 병원 내규 주제 목록에서 목차·문구를 추천하고 초안(.hwpx)으로'],
       ['link', '🔗 내규 연계 검사', '빠진 항목 · 다른 내규와의 용어·기간·담당·위임 충돌과 공백 · 조문 연결'],
       ['review', '🧑‍⚖️ 검토 요청', '빠진 부분·뜻이 부딪히는 곳을 AI(켠 경우만) 또는 요청문 복사로 검토받기'],
+      ['std', '🏥 인증 기준 점검', '급성기병원 인증조사 표준지침서의 「규정에 포함할 내용」이 내규에 들어 있는지 점검·빠진 내용 문안'],
+      ['stdb', '📖 인증 기준 찾아보기·불러오기', '표준지침서 PDF를 이 PC에서 읽어 기준·조사항목 찾아보기'],
       ['law', '⚖️ 관련 법령', '내규에 적힌 법령과 주제별 확인할 법령의 현행 원문(국가법령정보센터) 바로 열기'],
       ['lib', '📚 내규 서고', '연계 검사·인용 검사에 쓸 다른 내규 올리기'],
       ['ai', '🤖 AI 문구 제안 설정', 'Claude 연결 켜기·끄기, API 키 (켤 때만 요청한 문장이 전송됨)']
     ];
     modal(`<h3>도구</h3><div class="toolgrid">${T.map(([k, t, d]) => `<button class="tool" data-t="${k}"><b>${t}</b><span>${d}</span></button>`).join('')}</div><div class="foot"><button class="btn" id="x">닫기</button></div>`, m => {
       $('#x', m).onclick = closeModal;
-      $$('.tool', m).forEach(b => b.onclick = () => { const k = b.dataset.t; closeModal(); ({ lint: lintDialog, list: changeListDialog, submit: submitDialog, full: fullTextDialog, batch: batchDialog, rename: renameBatchDialog, reg: registryDialog, ren: () => renamesDialog(), sug: () => suggestDialog(), plain: plainDialog, ai: aiSettingsDialog, newreg: () => newRegDialog(), link: () => linkCheckDialog(), review: () => reviewDialog(), lib: () => libraryDialog(), law: () => lawDialog() })[k](); });
+      $$('.tool', m).forEach(b => b.onclick = () => { const k = b.dataset.t; closeModal(); ({ lint: lintDialog, list: changeListDialog, submit: submitDialog, full: fullTextDialog, batch: batchDialog, rename: renameBatchDialog, reg: registryDialog, ren: () => renamesDialog(), sug: () => suggestDialog(), plain: plainDialog, ai: aiSettingsDialog, newreg: () => newRegDialog(), link: () => linkCheckDialog(), review: () => reviewDialog(), lib: () => libraryDialog(), law: () => lawDialog(), std: () => stdCheckDialog(), stdb: () => stdBrowse() })[k](); });
     });
   }
   (function mountTools() {
@@ -6684,7 +6701,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
   let cdb = null;
   function cOpen() {
     if (cdb) return Promise.resolve(cdb);
-    return new Promise(res => { try { const rq = indexedDB.open(CDB_NAME, 1); rq.onupgradeneeded = () => { const d = rq.result; ['docs', 'files', 'library'].forEach(n => { if (!d.objectStoreNames.contains(n)) d.createObjectStore(n, { keyPath: 'k' }); }); }; rq.onsuccess = () => { cdb = rq.result; res(cdb); }; rq.onerror = () => res(null); } catch (e) { res(null); } });
+    return new Promise(res => { try { const rq = indexedDB.open(CDB_NAME, 2); rq.onupgradeneeded = () => { const d = rq.result; ['docs', 'files', 'library', 'std'].forEach(n => { if (!d.objectStoreNames.contains(n)) d.createObjectStore(n, { keyPath: 'k' }); }); }; rq.onsuccess = () => { cdb = rq.result; res(cdb); }; rq.onerror = () => res(null); } catch (e) { res(null); } });
   }
   const cTx = async (store, mode, fn) => { const d = await cOpen(); if (!d) return null; return new Promise((res) => { try { const t = d.transaction(store, mode); const st = t.objectStore(store); const r = fn(st); t.oncomplete = () => res(r && 'result' in r ? r.result : r); t.onerror = () => res(null); t.onabort = () => res(null); } catch (e) { res(null); } }); };
   const cGet = (s, k) => cTx(s, 'readonly', st => st.get(k));
@@ -6793,6 +6810,9 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     add('새 내규 만들기(메모로 추천)', () => newRegDialog(), '원하는 내용을 적으면 목차·문구 추천 → 초안', '신규 제정 추천');
     add('내규 연계 검사', () => linkCheckDialog(), '빠진 항목 · 다른 내규와 충돌·공백 · 조문 연결', '충돌 공백 연결');
     add('검토 요청(AI·요청문)', () => reviewDialog(), '빠진 부분·뜻 충돌 검토');
+    add('인증 기준 점검', () => stdCheckDialog(), '표준지침서 「규정에 포함할 내용」 반영 여부', '인증 평가 지침서');
+    add('인증 기준 찾아보기', () => stdBrowse(), '기준·조사항목·기준의 이해', '인증 평가 지침서 조사항목');
+    add('인증 기준 불러오기(표준지침서 PDF)', () => stdLoadDialog(), '이 PC에서 읽어 색인', '인증 지침서');
     add('관련 법령(현행 원문 보기)', () => lawDialog(), '국가법령정보센터 바로가기', '법령 법률 조문 근거');
     add('여러 내규 일괄 비교', () => batchDialog());
     add('이름 일괄 변경', () => renameBatchDialog(), '조직 개편');
@@ -7115,7 +7135,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
     drawRecents();
     // 다듬기 화면: 원본 보기 · 인용 검사 · 회차 비교
     const after = $('#bSubmit');
-    if (after && !$('#bSrc')) { after.insertAdjacentHTML('afterend', '<button class="btn sm" id="bSrc" title="고른 행의 원본 쪽을 옆에 띄움 (Ctrl+Alt+O)">원본 보기</button><button class="btn sm" id="bCite" title="번호가 바뀐 조문을 인용한 곳 찾기">인용 검사</button><button class="btn sm" id="bLaw" title="내규에 적힌 법령·주제별 법령의 현행 원문(국가법령정보센터) 열기">관련 법령</button>'); $('#bLaw').onclick = () => lawDialog(); $('#bSrc').onclick = () => { srcRow = rowOfEl(lastCell); srcPanel(true); }; $('#bCite').onclick = citeDialog; }
+    if (after && !$('#bSrc')) { after.insertAdjacentHTML('afterend', '<button class="btn sm" id="bSrc" title="고른 행의 원본 쪽을 옆에 띄움 (Ctrl+Alt+O)">원본 보기</button><button class="btn sm" id="bCite" title="번호가 바뀐 조문을 인용한 곳 찾기">인용 검사</button><button class="btn sm" id="bLaw" title="내규에 적힌 법령·주제별 법령의 현행 원문(국가법령정보센터) 열기">관련 법령</button><button class="btn sm" id="bStd" title="인증 기준(표준지침서)의 「규정에 포함할 내용」이 개정안에 들어 있는지 점검">인증 기준</button>'); $('#bLaw').onclick = () => lawDialog(); $('#bStd').onclick = () => stdCheckDialog((state.lastResult && state.lastResult.B) || state.docs.new); $('#bSrc').onclick = () => { srcRow = rowOfEl(lastCell); srcPanel(true); }; $('#bCite').onclick = citeDialog; }
     // 위쪽: 기능 찾기
     const tools = $('#bTools');
     if (tools && !$('#bPal')) { tools.insertAdjacentHTML('beforebegin', '<button id="bPal" title="기능 찾기 (Ctrl+K) — 초성으로도 찾음">🔍<span class="pt"> 찾기</span><kbd>Ctrl K</kbd></button>'); $('#bPal').onclick = palette; }
@@ -7471,7 +7491,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
   /* ---------- 새 내규 만들기: 메모 → 추천 → 초안 ---------- */
   async function newRegDialog() {
     const lib = await libraryAll();
-    let REC = []; // {sec,title,text,on,src}
+    let REC = []; let STDHIT = []; // {sec,title,text,on,src}
     let M = null;
     modal(`<h3>새 내규 만들기</h3><div class="muted">어떤 내규를 만들고 싶은지 적으면, 병원 내규 주제 목록(${TOPICS2.length}개 주제)에서 목차와 문구를 추천합니다. 고른 항목으로 내규관리내규 형식의 초안을 만듭니다.</div>
       <div class="grid2" style="margin-top:8px"><label class="f">내규명<input type="text" id="nN" placeholder="예) 구급차량 관리 내규"></label><label class="f">담당 부서<input type="text" id="nD" placeholder="예) 원무팀"></label>
@@ -7485,7 +7505,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
       const draw = () => {
         const box = $('#nRec', m); box.style.display = '';
         const bySec = ['R', 'P', 'C', 'D', 'E'].map(s => [s, REC.filter(r => r.sec === s)]).filter(x => x[1].length);
-        box.innerHTML = bySec.map(([s, arr]) => `<div class="lkh">${SECN[s]}</div>` + arr.map(r => { const i = REC.indexOf(r); return `<div class="li nohover rec"><input type="checkbox" data-i="${i}" ${r.on ? 'checked' : ''}><div style="flex:1"><div class="d" style="margin:0 0 2px">${esc(r.title)}${r.memo ? ' <span class="tagm">메모 반영</span>' : ''}${r.src === 'ai' ? ' <span class="tagm ai">AI</span>' : ''}</div><input type="text" class="rt" data-i="${i}" value="${esc(r.text)}"></div></div>`; }).join('')).join('');
+        box.innerHTML = bySec.map(([s, arr]) => `<div class="lkh">${SECN[s]}</div>` + arr.map(r => { const i = REC.indexOf(r); return `<div class="li nohover rec"><input type="checkbox" data-i="${i}" ${r.on ? 'checked' : ''}><div style="flex:1"><div class="d" style="margin:0 0 2px">${esc(r.title)}${r.memo ? ' <span class="tagm">메모 반영</span>' : ''}${r.src === 'ai' ? ' <span class="tagm ai">AI</span>' : ''}${r.src === 'std' ? ' <span class="tagm std">인증 기준</span>' : ''}</div><input type="text" class="rt" data-i="${i}" value="${esc(r.text)}"></div></div>`; }).join('')).join('');
         $$('input[type=checkbox][data-i]', box).forEach(c => c.onchange = () => { REC[+c.dataset.i].on = c.checked; });
         $$('input.rt', box).forEach(c => c.oninput = () => { REC[+c.dataset.i].text = c.value; });
         $('#ok', m).disabled = !REC.length;
@@ -7500,9 +7520,10 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
         sd.style.display = ''; sd.className = 'nside';
         sd.innerHTML = `<div><b>관련 내규</b>${rel.length ? rel.slice(0, 8).map(d => `<label class="chip"><input type="checkbox" class="rel" checked value="${esc(d.name)}"> ${esc(d.name)}</label>`).join('') : '<span class="muted">내규 서고에 관련 내규 없음</span>'}</div>
           <div><b>확인할 근거 법령</b>${laws.length ? laws.map(l => lawChip(l)).join('') : '<span class="muted">없음</span>'}<span class="muted">누르면 현행 원문이 열립니다</span></div>
+          <div><b>관련 인증 기준</b>${STDHIT.length ? STDHIT.map(x => `<button class="lawbtn stdb" data-id="${x.s.id}">기준 ${x.s.id} ${esc(clip(x.s.title, 22))}</button>`).join('') : '<span class="muted">' + (STD_CACHE ? '찾지 못함' : '인증 기준을 불러오면 여기에 나옵니다') + '</span>'}</div>
           ${warns.length ? `<div><b style="color:#b7791f">숫자 확인</b>${Array.from(new Set(warns)).slice(0, 5).map(w => `<div class="muted">${esc(w)}</div>`).join('')}</div>` : ''}`;
       };
-      const sideBind = () => bindLawChips($('#nSide', m));
+      const sideBind = () => { bindLawChips($('#nSide', m)); $$('.stdb', m).forEach(b => b.onclick = () => { closeModal(); stdBrowse(); setTimeout(() => { const el = $('.sbi[data-id="' + b.dataset.id + '"]'); if (el) { el.click(); el.scrollIntoView({ block: 'center' }); } }, 80); }); };
       $('#go', m).onclick = async () => {
         const nm = $('#nN', m).value.trim(), memo = $('#nM', m).value.trim();
         if (!nm && !memo) { toast('내규명이나 원하는 내용을 적어 주세요.'); return; }
@@ -7514,6 +7535,9 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
         tps.forEach((tp, ti) => tp.items.forEach(it => { const f = fillItem(it, M, dept); if (!REC.some(r => r.text === f.text)) REC.push(Object.assign(f, { on: ti === 0 || f.memo, src: tp.k })); }));
         // 메모에만 있고 목록에 없는 문장도 살림
         M.sents.forEach(s => { if (s.length < 6) return; if (REC.some(r => r.near === s)) return; REC.push({ sec: 'C', title: '메모에 적은 내용', text: s.replace(/[.\s]*$/, '') + (/[다]$/.test(s) ? '.' : ' — (문장으로 다듬어 주세요)'), memo: true, on: true, src: 'memo', near: s }); });
+        const SD = await stdData(); STDHIT = [];
+        if (SD) { STDHIT = stdMatch(SD, memo + ' ' + nm, nm, 3).filter(x => x.sc > 1.4); STDHIT.forEach(x => x.s.req.filter(u => u.reg).forEach(u => { const kids = u.sub.filter(t => /^[-․ㆍ]/.test(t)).map(t => t.replace(/^[-․ㆍ]\s*/, '').replace(/[*]/g, '').trim()).slice(0, 6);
+          const t = u.head.replace(/[*]/g, '').trim() + (kids.length ? ': ' + kids.join(', ') : '') + ' — (병원 기준을 적어 주세요)'; if (!REC.some(r => r.title.indexOf(u.head) >= 0)) REC.push({ sec: 'C', title: '인증 ' + x.s.id + ' · ' + u.head.replace(/[*]/g, '').trim(), text: t, on: gradeAt(u) === '필수', src: 'std' }); })); }
         draw(); await side(); sideBind(); LOG('새 내규 추천', nm + ' · ' + tps.map(t => t.t).join(','));
       };
       $('#ai', m).onclick = async () => {
@@ -7597,7 +7621,8 @@ ${relTxt.slice(0, 60).join('\n') || '- 없음'}
       <div class="muted">내규 서고 ${L.lib.length}건 중 다른 내규 ${L.others.length}건과 맞대었습니다. 결과는 규칙으로 찾은 <b>확인 후보</b>이니 최종 판단은 담당자가 합니다.</div>
       <div class="tabs2">${tab('a', '빠진 항목', miss)}${tab('b', '충돌·공백', CF.length)}${tab('c', '조문 연결', linked)}</div>
       <div id="lkBody" class="lintlist" style="max-height:52vh"></div>
-      <div class="foot"><button class="btn" id="lb">내규 서고</button><button class="btn" id="rp">결과서 저장(.hwpx)</button><button class="btn" id="rv">검토 요청(AI·요청문)</button><button class="btn pri" id="x">닫기</button></div>`, m => {
+      <div class="foot"><button class="btn" id="lb">내규 서고</button><button class="btn" id="rp">결과서 저장(.hwpx)</button><button class="btn" id="rv">검토 요청(AI·요청문)</button><button class="btn" id="sc">인증 기준 점검</button><button class="btn pri" id="x">닫기</button></div>`, m => {
+      $('#sc', m).onclick = () => { closeModal(); stdCheckDialog(target); };
       $('#x', m).onclick = closeModal; $('#lb', m).onclick = () => { closeModal(); libraryDialog(() => linkCheckDialog(target)); };
       $('#rv', m).onclick = () => { closeModal(); reviewDialog(); };
       $('#rp', m).onclick = async () => { const blob = await exportPlain('「' + (L.tname || '내규') + '」 내규 연계 검사 결과', linkReportItems(), 'hwpx'); download(blob, safe(L.tname || '내규') + ' 연계 검사 결과.hwpx'); };
@@ -7747,7 +7772,239 @@ ${body}
     LOG('관련 법령 보기', Array.from(found.keys()).join(', '));
   }
 
-  window.__app = { busy, lawDialog, lawRefs, lawURL, newRegDialog, linkCheckDialog, reviewDialog, linkData, skeletonCheck, conflictCheck, chooseTarget, palette, quickFinish, roundsDialog, citeDialog, citeCheck, libraryDialog, libraryAdd, srcPanel, saveMyDefaults, applyMyDefaults, recentDialog, clearReadCache, cAll, numberMaps, suggestDialog, plainDialog, aiSettingsDialog, parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
+
+  /* =========================================================
+     v3.4: 의료기관 인증 기준(급성기병원 인증조사 표준지침서) 준거
+     - 사용자가 가진 표준지침서 PDF를 이 PC에서 읽어 기준·조사항목·「규정에 포함할 내용」을 색인
+     - 내규 점검(빠진 인증 요구 내용 안내) · 새 내규 추천에 반영 · 기준 찾아보기
+     ========================================================= */
+  const STD_KEY = 'std:acute';
+  const LVN = ['상급종합병원', '종합병원', '병원'];
+  async function stdGet() { const r = await cGet('std', STD_KEY); return r && r.data ? r.data : null; }
+  async function stdPut(data) { await cPut('std', { k: STD_KEY, data, at: Date.now() }); STD_CACHE = null; }
+  let STD_CACHE = null;
+  async function stdData() { if (STD_CACHE) return STD_CACHE; const d = await stdGet(); if (d) STD_CACHE = prepStd(d); return STD_CACHE; }
+  const stdLevel = () => { const v = +(localStorage.getItem('sinkujomun_stdlevel') || '1'); return isNaN(v) ? 1 : v; };
+
+  // PDF → 줄(내용 흐름 순서)
+  async function pdfLines(buf, onProg) {
+    const pdf = await RG.readers.openPdf(buf); const out = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const pg = await pdf.getPage(i); const tc = await pg.getTextContent(); let cur = '', lastY = null, lastX = null;
+      const push = () => { const t = cur.replace(/\s+/g, ' ').trim(); if (t) out.push(t); cur = ''; };
+      tc.items.forEach(it => {
+        if (typeof it.str !== 'string') return; const y = it.transform[5], x = it.transform[4];
+        if (lastY != null && Math.abs(y - lastY) > 2.5 && cur) push();
+        if (cur && lastX != null && x - lastX > 1.5 && !/\s$/.test(cur) && it.str && !/^\s/.test(it.str)) cur += ' ';
+        cur += it.str; lastY = y; lastX = x + (it.width || 0);
+        if (it.hasEOL) push();
+      });
+      push(); out.push('\f');
+      if (onProg && i % 10 === 0) onProg(i, pdf.numPages);
+    }
+    return out;
+  }
+  const CHN = { 1: '환자안전보장활동', 2: '진료전달체계와 평가', 3: '환자진료', 4: '의약품관리', 5: '수술 및 마취진정관리', 6: '환자권리존중 및 보호', 7: '환자안전 및 의료 질 향상 활동', 8: '감염관리', 9: '경영 및 조직운영', 10: '인적자원관리', 11: '시설 및 환경관리', 12: '의료정보/의무기록 관리', 13: '성과관리' };
+  function parseStdLines(lines) {
+    let title = '';
+    for (const l of lines.slice(0, 40)) if (/인증조사\s*표준지침서|인증기준/.test(l)) { title = l; break; }
+    const ver = (lines.slice(0, 40).join(' ').match(/Ver\.\s*[\d.]+\s*\([^)]*\)/) || [''])[0];
+    const appl = (lines.slice(0, 40).join(' ').match(/(\d{4}\.\s*\d{1,2}\.\s*\d{1,2}\.)\s*부터\s*적용/) || [])[1] || '';
+    let endIdx = lines.length; for (let i = 2000; i < lines.length; i++) if (/^시스템 추적조사/.test(lines[i])) { endIdx = i; break; }
+    const L = lines.slice(0, endIdx);
+    const STD = /^기준 (\d+)\.(\d+)\.(?:(\d+)\.)?(?:\s+.{0,16})?$/;
+    const PAGE = /^- \d+ -$/; const UMARK = /^(\d+\)|○|-\s|※|․|ㆍ|\*\s|[①-⑨])/;
+    const MMARK = /^(Ÿ|­|ü|\d+$|\[(필수|정규|시범)\]|조사항목 구분 조사|○ 조사장소|○ 조사대상|○ 참고자료|[SPO]$|[SPO]\s+Ÿ)/;
+    const stds = []; let cur = null, mode = null;
+    for (const raw of L) {
+      const l = raw.trim(); if (!l || l === '\f' || PAGE.test(l) || /^\d+장\.\s/.test(l) || l === '인증기준 및 조사방법의 이해') continue;
+      const m = l.match(STD);
+      if (m && !/에서확인|기준\d/.test(l)) { cur = { id: m[1] + '.' + m[2] + (m[3] ? '.' + m[3] : ''), ch: +m[1], title: '', purpose: '', il: [], ul: [] }; stds.push(cur); mode = 'title'; continue; }
+      if (!cur) continue;
+      if (l === '조사 목적') { mode = 'purpose'; continue; }
+      if (l === '조사항목' && (mode === 'purpose' || mode === 'title')) { mode = 'items0'; continue; }
+      if (/^조사항목 구분 상급/.test(l)) { mode = 'items'; continue; }
+      if (l === '기준의 이해') { mode = 'und'; continue; }
+      if (l === '조사방법') { mode = 'method'; continue; }
+      if (mode === 'title') { cur.title += (cur.title ? ' ' : '') + l; continue; }
+      if (mode === 'purpose') { cur.purpose += (cur.purpose ? ' ' : '') + l; continue; }
+      if (mode === 'items') { cur.il.push(l); continue; }
+      if (mode === 'und') { cur.ul.push(l); continue; }
+      if (mode === 'method' || mode === 'und2') {
+        if (UMARK.test(l) && !MMARK.test(l) && !/^○ 조사/.test(l)) { mode = 'und2'; cur.ul.push(l); }
+        else if (MMARK.test(l)) mode = 'method';
+        else if (mode === 'und2') cur.ul.push(l);
+      }
+    }
+    const LV = '(?:필수|정규|시범|-|－)';
+    const ROW = new RegExp('^(\\d+)\\s+(.*?)\\s*([SPO])\\s+(' + LV + '\\s+' + LV + '\\s+' + LV + ')\\s*□');
+    const TAIL = new RegExp('^([SPO])\\s+(' + LV + '\\s+' + LV + '\\s+' + LV + ')');
+    stds.forEach(s => {
+      const items = []; let buf = null;
+      s.il.forEach(l => { let m;
+        if ((m = l.match(ROW))) { items.push({ no: +m[1], text: m[2].trim(), type: m[3], lv: m[4].split(/\s+/) }); buf = null; return; }
+        if ((m = l.match(/^(\d+)$/))) { buf = { no: +m[1], text: '' }; return; }
+        if ((m = l.match(/^(\d+)\s+(.+)$/)) && l.indexOf('□') < 0) { buf = { no: +m[1], text: m[2] }; return; }
+        if ((m = l.match(TAIL)) && buf) { buf.type = m[1]; buf.lv = m[2].split(/\s+/); buf.text = buf.text.trim(); items.push(buf); buf = null; return; }
+        if (buf && l.indexOf('□') < 0) buf.text += (buf.text ? ' ' : '') + l; });
+      const J = []; s.ul.forEach(l => { if (UMARK.test(l) || !J.length) J.push(l); else J[J.length - 1] += (/[(/]$/.test(J[J.length - 1]) ? '' : ' ') + l; });
+      const und = []; const seen = new Set();
+      J.forEach(l => { const m = l.match(/^(\d+)\)\s*(?:\[(필수|정규|시범)\]\s*)?(.*)$/);
+        if (m) { const no = +m[1]; if (seen.has(no)) { und.push(null); return; } seen.add(no); und.push({ no, grade: m[2] || '', text: m[3].trim(), sub: [] }); return; }
+        const last = und[und.length - 1]; if (last) { if (!/ST>|구분 상 중 하|^※ 미해당/.test(l)) last.sub.push(l); } });
+      const lvmap = {}; items.forEach(it => lvmap[it.no] = (it.lv || [''])[0]);
+      s.items = items; s.und = und.filter(Boolean).map(u => Object.assign(u, { grade: u.grade || lvmap[u.no] || '' }));
+      s.chapter = s.ch + '장 ' + (CHN[s.ch] || ''); delete s.il; delete s.ul;
+    });
+    return { source: (title || '급성기병원 인증조사 표준지침서') + (ver && title.indexOf(ver) < 0 ? ' ' + ver : ''), applied: appl, standards: stds.filter(s => s.items.length) };
+  }
+  // 요구 내용 단위(○ 묶음)로 정리하고 낱말 색인
+  const stdToks = (t) => toks(String(t).replace(/\([A-Za-z\s.,/-]+\)/g, ' ')).map(w => w.length >= 3 ? w.replace(/(이나|이며|이고|나)$/, '') : w).filter(w => w.length >= 2 && /[가-힣]/.test(w) && !STD_GEN.has(w));
+  const STD_GEN = new Set(['최소', '알리', '최소한', '이상', '이하', '가지', '불가', '사용', '적용', '모든', '상황', '시행', '알리는', '하는', '위한', '대한', '따른', '통한', '있는', '없는', '되는', '등의', '규정', '내용', '포함', '다음', '사항', '관련', '경우', '의료기관', '수행', '확인', '관리', '필요', '방법', '절차', '기준', '대상', '정기적', '비정기적', '필요시', '예시', '운영', '활동', '직원']);
+  function prepStd(d) {
+    const units = [];
+    d.standards.forEach(s => {
+      s.req = [];
+      s.und.forEach(u => {
+        const it = s.items.find(x => x.no === u.no) || {}; const isReg = /규정|절차|계획/.test(u.text) && /포함|내용/.test(u.text);
+        let curU = null;
+        u.sub.forEach(line => {
+          if (/^○/.test(line)) { curU = { std: s.id, item: u.no, grade: u.grade, type: it.type || '', lv: it.lv || [], head: line.replace(/^○\s*/, '').trim(), sub: [], reg: isReg }; s.req.push(curU); units.push(curU); }
+          else if (curU) curU.sub.push(line);
+        });
+      });
+      s.tok = toks(s.title + ' ' + s.items.map(i => i.text).join(' ') + ' ' + s.req.map(r => r.head).join(' ')).filter(w => !STD_GEN.has(w));
+    });
+    const clean = (t) => String(t).replace(/\s*\*\s*/g, ' ').replace(/\s+,/g, ',').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')').replace(/\s{2,}/g, ' ').trim();
+    units.forEach(u => { u.head = clean(u.head); u.sub = u.sub.map(clean); u.tok = Array.from(new Set(stdToks(u.head)));
+      u.kids = u.sub.filter(x => /^[-․ㆍ]/.test(x)).map(x => ({ t: x, tok: Array.from(new Set(stdToks(x.replace(/^[-․ㆍ]\s*/, '')))) })).filter(k => k.tok.length); });
+    const udf = new Map(); let UN = 0; units.forEach(u => { [u.tok].concat(u.kids.map(k => k.tok)).forEach(arr => { UN++; arr.forEach(w => udf.set(w, (udf.get(w) || 0) + 1)); }); });
+    d._uidf = (w) => Math.log(1 + UN / (udf.get(w) || 1));
+    const df = new Map(); d.standards.forEach(s => new Set(s.tok).forEach(w => df.set(w, (df.get(w) || 0) + 1)));
+    d._df = df; d._N = d.standards.length; d._units = units; return d;
+  }
+  function stdMatch(D, text, title, n) {
+    const T = new Set(toks(text)); const TT = new Set(toks(title || ''));
+    const idf = (w) => Math.log(1 + D._N / (D._df.get(w) || 1));
+    return D.standards.map(s => { let sc = 0, hit = []; new Set(s.tok).forEach(w => { if (T.has(w)) { sc += idf(w); hit.push(w); } if (TT.has(w)) sc += idf(w) * 2.5; });
+      const regItem = s.items.some(i => i.type === 'S'); return { s, sc: sc / Math.sqrt(Math.max(8, s.tok.length)) * (regItem ? 1 : 0.7), hit }; })
+      .filter(x => x.sc > 0.9).sort((a, b) => b.sc - a.sc).filter((x, i, arr) => i === 0 || x.sc >= arr[0].sc * 0.45).slice(0, n || 5);
+  }
+  function unitCover(u, docTok, docText) {
+    const has = (w) => docTok.has(w) || docText.indexOf(w) >= 0;
+    const wt = STD_CACHE && STD_CACHE._uidf ? STD_CACHE._uidf : () => 1;
+    const cov = (arr) => { if (!arr.length) return 0; let a = 0, t = 0; arr.forEach(w => { const x = wt(w); t += x; if (has(w)) a += x; }); return t ? a / t : 0; };
+    const h = cov(u.tok);
+    if (!u.kids.length) { const st = h >= 0.67 ? 'ok' : h >= 0.34 ? 'part' : 'miss'; return { sc: h, st, missKids: [], missing: u.tok.filter(w => !has(w)).slice(0, 6) }; }
+    const kc = u.kids.map(k => ({ k, c: cov(k.tok) })); const okK = kc.filter(x => x.c >= 0.66).length / kc.length;
+    const avg = kc.reduce((n, x) => n + x.c, 0) / kc.length; const sc = h * 0.3 + avg * 0.7; const st = h >= 0.5 && okK >= 0.8 ? 'ok' : sc >= 0.4 ? 'part' : 'miss';
+    return { sc, st, missKids: kc.filter(x => x.c < 0.66).map(x => x.k.t), missing: u.tok.filter(w => !has(w)).slice(0, 6) };
+  }
+  const gradeAt = (u) => (u.lv && u.lv[stdLevel()]) || u.grade || '';
+
+  /* ---------- 표준지침서 불러오기 ---------- */
+  async function stdLoadDialog(back) {
+    const cur = await stdGet();
+    modal(`<h3>인증 기준 불러오기</h3><div class="muted">「급성기병원 인증조사 표준지침서」 PDF를 고르면 이 PC 안에서 읽어 기준·조사항목·「규정에 포함할 내용」을 색인합니다. 지침서 내용은 이 PC에만 저장되고 밖으로 보내지 않습니다.</div>
+      <div class="okbox" style="margin-top:8px">${cur ? '지금 쓰는 기준: <b>' + esc(cur.source) + '</b>' + (cur.applied ? ' · ' + esc(cur.applied) + '부터 적용' : '') + ' · 기준 ' + cur.standards.length + '개' : '아직 불러온 인증 기준이 없습니다.'}</div>
+      <label class="f" style="margin-top:8px">우리 병원 종별 (조사항목의 필수·정규·시범 구분 기준)<select id="sdL">${LVN.map((n, i) => `<option value="${i}" ${i === stdLevel() ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+      <div class="foot"><button class="btn" id="x">닫기</button><button class="btn" id="js" title="다른 PC에서 내보낸 색인 파일">색인 파일(.json) 가져오기</button>${cur ? '<button class="btn" id="ex">색인 파일 내보내기</button>' : ''}<button class="btn pri" id="ld">표준지침서 PDF 고르기</button></div>`, m => {
+      $('#sdL', m).onchange = (e) => { try { localStorage.setItem('sinkujomun_stdlevel', e.target.value); } catch (er) { } STD_CACHE = null; toast('병원 종별을 「' + LVN[+e.target.value] + '」로 정했습니다.'); };
+      $('#x', m).onclick = () => { closeModal(); if (back) back(); };
+      if ($('#ex', m)) $('#ex', m).onclick = () => download(new Blob([JSON.stringify(cur)], { type: 'application/json' }), '인증기준 색인 (' + safe(cur.source).slice(0, 40) + ').json');
+      $('#js', m).onclick = async () => { const [f] = await pickFiles(false); if (!f) return; try { const d = JSON.parse(await f.text()); if (!d.standards || !d.standards.length) throw new Error('인증 기준 색인 파일이 아닙니다.'); await stdPut(d); toast('인증 기준 ' + d.standards.length + '개를 불러왔습니다.'); closeModal(); if (back) back(); } catch (e) { toast('가져오기 실패: ' + e.message, 5000); } };
+      $('#ld', m).onclick = async () => {
+        const [f] = await pickFiles(false); if (!f) return; closeModal(); busy(true, '표준지침서를 읽는 중… ' + f.name);
+        try { const buf = await f.arrayBuffer(); const lines = await pdfLines(buf, (i, n) => { const t = $('#busytx'); if (t) t.textContent = '표준지침서를 읽는 중… ' + i + '/' + n + '쪽'; });
+          const d = parseStdLines(lines); if (!d.standards.length) throw new Error('기준(「기준 1.1.」 형식)을 찾지 못했습니다. 급성기병원 인증조사 표준지침서 PDF인지 확인해 주세요.');
+          d.file = f.name; d.loadedAt = ymdToday(); await stdPut(d); busy(false);
+          const nS = d.standards.reduce((n, s) => n + s.items.filter(i => i.type === 'S').length, 0);
+          toast('인증 기준 ' + d.standards.length + '개(조사항목 ' + d.standards.reduce((n, s) => n + s.items.length, 0) + '개, 규정 항목 ' + nS + '개)를 읽었습니다.', 6000); LOG('인증 기준 불러오기', d.source);
+          if (back) back(); else stdBrowse();
+        } catch (e) { busy(false); console.error(e); toast('읽기 실패: ' + e.message, 7000); }
+      };
+    });
+  }
+
+  /* ---------- 인증 기준 찾아보기 ---------- */
+  async function stdBrowse(q0) {
+    const D = await stdData(); if (!D) { stdLoadDialog(() => stdBrowse(q0)); return; }
+    modal(`<h3>인증 기준 찾아보기 <span class="muted" style="font-weight:400">— ${esc(D.source)}${D.applied ? ' · ' + esc(D.applied) + '부터 적용' : ''}</span></h3>
+      <div class="row" style="gap:6px"><input type="text" id="sbQ" placeholder="낱말로 찾기 (예: 환자 확인, 구두처방, 낙상, 소독)" value="${esc(q0 || '')}" style="flex:1"><button class="btn" id="sbS">설정</button></div>
+      <div class="sbw"><div class="sbl" id="sbL"></div><div class="sbv" id="sbV"><div class="muted" style="padding:12px">왼쪽에서 기준을 고르세요.</div></div></div>
+      <div class="foot"><button class="btn pri" id="x">닫기</button></div>`, m => {
+      $('#x', m).onclick = closeModal; $('#sbS', m).onclick = () => { closeModal(); stdLoadDialog(() => stdBrowse($('#sbQ', m) ? $('#sbQ', m).value : '')); };
+      const list = () => { const q = $('#sbQ', m).value.trim(); let arr = D.standards;
+        if (q) { const qt = toks(q); arr = arr.filter(s => { const t = s.title + ' ' + s.items.map(i => i.text).join(' ') + ' ' + s.req.map(r => r.head + ' ' + r.sub.join(' ')).join(' '); return qt.every(w => t.indexOf(w) >= 0) || t.indexOf(q) >= 0; }); }
+        let lastCh = ''; $('#sbL', m).innerHTML = arr.map(s => { const h = s.chapter !== lastCh ? `<div class="sbh">${esc(s.chapter)}</div>` : ''; lastCh = s.chapter; return h + `<div class="sbi" data-id="${s.id}"><b>${s.id}</b> ${esc(clip(s.title, 40))}</div>`; }).join('') || '<div class="muted" style="padding:10px">찾는 기준이 없습니다.</div>';
+        $$('.sbi', m).forEach(el => el.onclick = () => { $$('.sbi', m).forEach(x => x.classList.remove('on')); el.classList.add('on'); view(D.standards.find(s => s.id === el.dataset.id)); });
+        const f = $('.sbi', m); if (f) f.click(); else $('#sbV', m).innerHTML = ''; };
+      const view = (s) => { const lv = stdLevel();
+        $('#sbV', m).innerHTML = `<div class="sbt">기준 ${s.id} ${esc(s.title)}</div><div class="muted" style="margin:4px 0 8px">${esc(s.chapter)} · ${esc(s.purpose)}</div>
+          <table class="sbtab"><tr><th>번호</th><th>조사항목</th><th>구분</th><th>${LVN[lv]}</th></tr>${s.items.map(i => `<tr><td>${i.no}</td><td>${esc(i.text)}</td><td>${i.type || ''}</td><td>${esc((i.lv || [])[lv] || '')}</td></tr>`).join('')}</table>
+          ${s.und.map(u => `<div class="sbu"><b>${u.no})</b> ${u.grade ? '<span class="gr g-' + esc(u.grade) + '">' + esc(u.grade) + '</span> ' : ''}${esc(u.text)}${u.sub.length ? '<div class="sbs">' + u.sub.map(x => x.replace(/\s*\*\s*/g, ' ').replace(/\s+,/g, ',').replace(/\s{2,}/g, ' ').trim()).map(x => `<div class="${/^○/.test(x) ? 'o' : /^-/.test(x) ? 'd' : 'n'}">${esc(x)}</div>`).join('') + '</div>' : ''}</div>`).join('')}
+          <div class="muted" style="margin-top:8px">원문: 의료기관평가인증원 「${esc(D.source)}」 — 판정은 원문과 인증원 안내를 따르세요.</div>`; };
+      $('#sbQ', m).addEventListener('input', list); list();
+    });
+  }
+
+  /* ---------- 내규 인증 기준 점검 ---------- */
+  async function stdCheck(target, D, pick) {
+    const text = target.blocks.map(b => b.type === 'p' ? (b.num || '') + ' ' + b.text : b.type === 'table' ? b.rows.map(r => r.map(c => c.text).join(' ')).join(' ') : '').join('\n');
+    const meta = RG.docMeta(target); const title = String(meta.name || RG.guessTitle(target) || target.name || '').split('\n')[0];
+    const matched = pick ? pick.map(id => ({ s: D.standards.find(s => s.id === id), sc: 0, hit: [] })).filter(x => x.s) : stdMatch(D, text, title, 4);
+    const docTok = new Set(stdToks(text).concat(toks(text))); const flat = text.replace(/\s+/g, '');
+    const res = matched.map(x => ({ s: x.s, sc: x.sc, hit: x.hit, units: x.s.req.map(u => Object.assign({ u }, unitCover(u, docTok, flat))) }));
+    return { title, res, text };
+  }
+  const STC = { ok: ['반영', '#2e7d32'], part: ['일부', '#b7791f'], miss: ['빠짐', '#c0392b'] };
+  async function stdCheckDialog(target) {
+    const D = await stdData(); if (!D) { toast('먼저 인증 기준(표준지침서)을 불러와 주세요.'); stdLoadDialog(() => stdCheckDialog(target)); return; }
+    target = target || await chooseTarget('인증 기준 점검'); if (!target) return;
+    let R = await stdCheck(target, D); let only = false;
+    const render = (m) => {
+      const body = $('#scB', m); const lv = stdLevel();
+      body.innerHTML = R.res.length ? R.res.map((x, i) => { const us = x.units.filter(y => !only || y.st !== 'ok'); const miss = x.units.filter(y => y.st === 'miss').length, part = x.units.filter(y => y.st === 'part').length;
+        return `<div class="scs"><div class="sch"><label><input type="checkbox" class="scK" data-i="${i}" checked></label><b>기준 ${x.s.id}</b> ${esc(x.s.title)} <span class="muted">${esc(x.s.chapter)}</span><span style="flex:1"></span>${miss ? `<span class="sev" style="background:#c0392b">빠짐 ${miss}</span>` : ''}${part ? `<span class="sev" style="background:#b7791f">일부 ${part}</span>` : ''}<button class="btn sm sv" data-id="${x.s.id}">원문</button></div>
+          ${us.map(y => `<div class="li nohover"><span class="sev" style="background:${STC[y.st][1]}">${STC[y.st][0]}</span><div style="flex:1"><div class="t">${esc(y.u.head)} <span class="gr g-${esc(gradeAt(y.u))}">${esc(gradeAt(y.u))}</span> <span class="muted">조사항목 ${y.u.item}</span></div>${y.u.sub.length ? `<div class="d">${y.u.sub.slice(0, 6).map(esc).join('<br>')}${y.u.sub.length > 6 ? '<br>…' : ''}</div>` : ''}${y.st !== 'ok' && y.missKids.length ? `<div class="d" style="color:#b23b3b"><b>내규에 보이지 않는 세부 내용</b><br>${y.missKids.slice(0, 8).map(esc).join('<br>')}</div>` : y.st !== 'ok' && y.missing.length ? `<div class="d" style="color:#b23b3b">내규에서 찾지 못한 말: ${esc(y.missing.join(' · '))}</div>` : ''}</div></div>`).join('') || '<div class="ok" style="padding:8px 10px">이 기준의 요구 내용이 모두 보입니다.</div>'}</div>`; }).join('')
+        : '<div class="muted" style="padding:10px">이 내규와 관련된 인증 기준을 찾지 못했습니다. 「기준 고르기」로 직접 고를 수 있습니다.</div>';
+      $$('.sv', body).forEach(b => b.onclick = () => { closeModal(); stdBrowse(); setTimeout(() => { const el = $('.sbi[data-id="' + b.dataset.id + '"]'); if (el) { el.click(); el.scrollIntoView({ block: 'center' }); } }, 80); });
+      const tot = R.res.reduce((n, x) => n + x.units.length, 0), ms = R.res.reduce((n, x) => n + x.units.filter(y => y.st === 'miss').length, 0), pt = R.res.reduce((n, x) => n + x.units.filter(y => y.st === 'part').length, 0);
+      $('#scSum', m).innerHTML = `관련 기준 <b>${R.res.length}</b>개 · 요구 내용 <b>${tot}</b>개 중 <b style="color:#c0392b">빠짐 ${ms}</b> · <b style="color:#b7791f">일부 ${pt}</b> · 병원 종별: ${LVN[lv]}`;
+    };
+    modal(`<h3>인증 기준 점검 <span class="muted" style="font-weight:400">— ${esc(R.title || target.name || '')}</span></h3>
+      <div class="muted">「${esc(D.source)}」의 「규정에 포함할 내용」과 이 내규를 맞대었습니다. 낱말로 찾은 <b>확인 후보</b>이니 원문과 함께 확인하세요.</div>
+      <div class="row" style="margin:8px 0;gap:8px"><span id="scSum"></span><span style="flex:1"></span><label><input type="checkbox" id="scO"> 빠짐·일부만 보기</label></div>
+      <div id="scB" class="lintlist" style="max-height:54vh"></div>
+      <div class="foot"><button class="btn" id="pk">기준 고르기</button><button class="btn" id="rp">결과서 저장(.hwpx)</button><button class="btn" id="ad">빠진 내용을 문안으로 받기</button><button class="btn pri" id="x">닫기</button></div>`, m => {
+      $('#x', m).onclick = closeModal; render(m);
+      $('#scO', m).onchange = (e) => { only = e.target.checked; render(m); };
+      $('#pk', m).onclick = () => { const cur = R.res.map(x => x.s.id); const ids = prompt('점검할 기준 번호를 쉼표로 적으세요 (예: 1.1, 1.2, 8.3)', cur.join(', ')); if (ids == null) return; const pick = ids.split(/[,\s]+/).map(s => s.replace(/\.$/, '')).filter(Boolean); stdCheck(target, D, pick).then(r => { R = r; render(m); }); };
+      $('#rp', m).onclick = async () => { const keep = $$('.scK', m).filter(c => c.checked).map(c => R.res[+c.dataset.i]); const blob = await exportPlain('「' + (R.title || '내규') + '」 인증 기준 점검 결과', stdReportItems(D, keep), 'hwpx'); download(blob, safe(R.title || '내규') + ' 인증 기준 점검.hwpx'); LOG('인증 기준 점검 결과서', R.title); };
+      $('#ad', m).onclick = async () => { const keep = $$('.scK', m).filter(c => c.checked).map(c => R.res[+c.dataset.i]); const blob = await exportPlain('「' + (R.title || '내규') + '」 인증 기준 반영 문안(초안)', stdDraftItems(keep), 'hwpx'); download(blob, safe(R.title || '내규') + ' 인증 기준 반영 문안.hwpx'); toast('빠지거나 일부만 있는 요구 내용을 조문 틀로 만들었습니다. 내규에 맞게 고쳐 넣으세요.', 6000); };
+    });
+    LOG('인증 기준 점검', (R.title || '') + ' · ' + R.res.map(x => x.s.id).join(','));
+  }
+  function stdReportItems(D, res) {
+    const Ln = (t, o) => Object.assign({ k: 'line', runs: [{ t }] }, o || {}); const H = (t) => Ln(t, { runs: [{ t, b: true }] });
+    const cell = (t, bg) => ({ runs: [{ t, b: !!bg }], cs: 1, rs: 1, bg: bg || undefined, al: bg ? 'center' : 'left' });
+    const it = [Ln('점검일 ' + ymdToday() + ' · 기준: ' + D.source + (D.applied ? ' (' + D.applied + '부터 적용)' : '') + ' · 병원 종별 ' + LVN[stdLevel()]), Ln('※ 낱말로 찾은 확인 후보이며, 최종 판단은 원문과 담당자 검토에 따릅니다.'), Ln('')];
+    res.forEach(x => { it.push(H('기준 ' + x.s.id + ' ' + x.s.title)); it.push({ k: 'table', rows: [[cell('조사항목', '#e8ecf3'), cell('구분', '#e8ecf3'), cell('규정에 포함할 내용', '#e8ecf3'), cell('점검', '#e8ecf3')]].concat(x.units.map(y => [cell(String(y.u.item)), cell(gradeAt(y.u)), cell(y.u.head + (y.u.sub.length ? '\n' + y.u.sub.slice(0, 5).join('\n') : '')), cell(STC[y.st][0] + (y.st !== 'ok' && y.missKids.length ? '\n보이지 않는 세부 내용:\n' + y.missKids.slice(0, 6).join('\n') : y.st !== 'ok' && y.missing.length ? '\n(없는 말: ' + y.missing.join(', ') + ')' : ''))])) }); it.push(Ln('')); });
+    return it;
+  }
+  function stdDraftItems(res) {
+    const Ln = (t, o) => Object.assign({ k: 'line', runs: [{ t }] }, o || {}); const H = (t) => Ln(t, { runs: [{ t, b: true }] }); const G = (t) => Ln(t, { runs: [{ t, c: '#2f6db5' }], hang: 3, ind: 1 });
+    const HAN = '가나다라마바사아자차카타파하'; const it = []; let n = 0;
+    res.forEach(x => { const us = x.units.filter(y => y.st !== 'ok'); if (!us.length) return; it.push(H('[인증 기준 ' + x.s.id + '] ' + x.s.title));
+      us.forEach(y => { n++; it.push(Ln(n + '. ' + y.u.head.replace(/[*]/g, '').trim(), { hang: 3 })); let k = 0;
+        (y.st === 'part' && y.missKids.length ? y.missKids : y.u.sub.filter(s => /^[-․ㆍ]/.test(s))).forEach(s => { it.push(Ln(HAN[k++ % 14] + '. ' + s.replace(/^[-․ㆍ]\s*/, '').replace(/[*]/g, '').trim() + ' — (내용을 적어 주세요)', { hang: 5, ind: 1 })); });
+        if (!k) it.push(Ln('가. (내용을 적어 주세요)', { hang: 5, ind: 1 }));
+        y.u.sub.filter(s => /^※/.test(s)).slice(0, 2).forEach(s => it.push(G(s))); });
+      it.push(Ln('')); });
+    return it.length ? it : [Ln('빠지거나 일부만 있는 요구 내용이 없습니다.')];
+  }
+
+  window.__app = { stdLoadDialog, stdBrowse, stdCheckDialog, stdCheck, stdData, parseStdLines, pdfLines, stdMatch, busy, lawDialog, lawRefs, lawURL, newRegDialog, linkCheckDialog, reviewDialog, linkData, skeletonCheck, conflictCheck, chooseTarget, palette, quickFinish, roundsDialog, citeDialog, citeCheck, libraryDialog, libraryAdd, srcPanel, saveMyDefaults, applyMyDefaults, recentDialog, clearReadCache, cAll, numberMaps, suggestDialog, plainDialog, aiSettingsDialog, parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
   Object.defineProperty(window.__app, 'state', { get: () => state });
 })();
 
@@ -8812,7 +9069,7 @@ ${body}
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '3.3';
+  const APP_VERSION = '3.4';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
