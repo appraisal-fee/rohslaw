@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- PDF변환기, 글자(도장)넣기(개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-10 -->
+<!-- PDF 만능 도구 v2.6 (개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-11 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PDF변환기, 글자(도장)넣기(개발자 노상엽)</title>
+<title>PDF 만능 도구 v2.6 (개발자 노상엽)</title>
 <style>
 /* 레이아웃: 상단 작업대(불러오기·설정·실행) + 아래 쪽 순서 격자 */
 :root{
@@ -311,6 +311,8 @@ input.num{width:100%;font:inherit;padding:7px 9px;border:1px solid var(--line);b
 .st-over summary{cursor:pointer;font-size:13px;color:var(--muted)}
 .st-over[open] summary{margin-bottom:6px}
 .vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
+h1 .hver{font-size:.62em;font-weight:700;color:var(--accent);vertical-align:.12em}
+h1 .hdev{font-size:.62em;font-weight:600;color:var(--muted)}
 .res .m.good{color:var(--ok);font-weight:700}
 footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -319,7 +321,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
 <body>
 <div class="wrap">
   <header>
-    <h1>PDF변환기, 글자(도장)넣기(개발자 노상엽)</h1>
+    <h1>PDF 만능 도구 <span class="hver">v2.6</span> <span class="hdev">(개발자 노상엽)</span></h1>
     <span class="sub">이미지를 이 PC 안에서만 처리합니다. 인터넷 연결이 없어도 동작하며 파일이 외부로 전송되지 않습니다.</span>
   </header>
   <div class="updbar" id="updBar" role="status" hidden></div>
@@ -1254,7 +1256,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <footer>
     <span>개발자: 노상엽</span>
     <span>개발일자: 2026. 10. 16.</span>
-    <span>수정일자: 2026. 11. 10.</span>
+    <span>수정일자: 2026. 11. 11.</span>
     <span>버전 <b id="appVer"></b></span>
     <button type="button" class="linkbtn" id="updCheck">새 버전 확인</button>
     <span>HEIC(아이폰 사진)는 크롬·엣지에서 열리지 않으니 JPG로 저장해 올려 주세요.</span>
@@ -3883,7 +3885,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "2.5", APP_FILE = "PDF변환기, 글자(도장)넣기(개발자 노상엽).html";
+const APP_VERSION = "2.6", APP_NAME = "PDF 만능 도구", appFileName = v => `${APP_NAME} v${v} (개발자 노상엽).html`, APP_FILE = appFileName(APP_VERSION);
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -3927,9 +3929,9 @@ async function checkUpdate(manual){
           const re = /(<script type="application\/json" id="embeddedLib">)[\s\S]*?(<\/script>)/;
           if(re.test(html)) html = html.replace(re, (m, a, c) => a + EMBED_RAW + c);
         }
-        saveBlob(new Blob([html], {type:"text/html"}), APP_FILE);
+        saveBlob(new Blob([html], {type:"text/html"}), appFileName(info.version));     // 새 파일 이름에 새 버전을 붙인다
         b.textContent = "받았습니다";
-        toast("새 버전을 다운로드 폴더에 저장했습니다. 그 파일을 지금 파일 대신 쓰세요.");
+        toast(`새 버전을 다운로드 폴더에 '${appFileName(info.version)}'(으)로 저장했습니다. 그 파일을 지금 파일 대신 쓰세요.`);
       }catch(e){ b.disabled = false; b.textContent = "받기"; toast("새 버전을 받지 못했습니다. 인터넷 연결을 확인하거나 개발자에게 요청하세요."); }
     };
   }catch(e){ if(manual) toast("새 버전을 확인하지 못했습니다. 인터넷 연결을 확인해 주세요."); }
@@ -4719,7 +4721,7 @@ $("embedSave").onclick = async () => {
   const re = /(<script type="application\/json" id="embeddedLib">)[\s\S]*?(<\/script>)/;
   if(!re.test(PRISTINE_HTML)){ toast("프로그램 파일을 만들지 못했습니다."); return; }
   const html = PRISTINE_HTML.replace(re, (m, a, b) => a + json + b);
-  saveBlob(new Blob([html], {type:"text/html"}), "PDF변환기, 글자(도장)넣기(개발자 노상엽).html");
+  saveBlob(new Blob([html], {type:"text/html"}), APP_FILE);
   toast(`도장 ${T.lib.length}개${data.font ? "와 글꼴" : ""}을 담은 프로그램 파일을 저장했습니다. 다운로드 폴더의 새 파일을 지금 파일 대신 쓰세요.`);
 };
 $("imgIn").onchange = e => { const fs = [...e.target.files]; e.target.value = ""; if(fs.length) addLibFiles(fs); };
