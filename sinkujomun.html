@@ -474,7 +474,7 @@ body:has(#gate) .modal{z-index:450}body:has(#gate) .toast{z-index:470}body:has(#
     <button class="btn" id="bAddAnnex">+ 별첨 대조표 추가</button>
   </div>
 </section>
-<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.09. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
+<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.11. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
 </main>
 
 <!-- 설정 서랍 -->
@@ -3935,7 +3935,13 @@ window.__authGate=true;
       if (sec.type === 'annex') { lrows = [{ segs: segmentsOf(sec.old, sec.new), note: [] }]; if (S.annexReasonRow !== false && sec.reason && sec.reason.length) lrows.push({ segs: [[[], sec.reason]], note: [] }); }
       else lrows = (sec.rows || []).map(r => ({ segs: segmentsOf(r.old, r.new), note: hasNote ? noteItems(r, S) : null }));
       const nSub = lrows.reduce((a, r) => a + r.segs.length, 0);
-      return { sec, cols, g, lrows, nSub, hasNote, title: sec.showTitle !== false ? secTitle(sec, project.meta, S) : '' };
+      const title = sec.showTitle !== false ? secTitle(sec, project.meta, S) : '';
+      // 그림 최대 높이(mm): 쪽 높이 − 제목 − 머리행 − 개정 사유 행 − 여유. 그림이 쪽을 꽉 채워 뒤 행이 다음 쪽으로 밀리며 빈 쪽이 생기는 것을 막음
+      const ptMM = 0.3528, lineMM = S.size * ptMM * Math.max(1.3, S.lineH || 1.6);
+      const titleMM = title ? S.titleSize * ptMM * 1.6 + Math.max(2, S.titleGap) + 2 : 0;
+      const headMM = 9, reasonMM = (lrows.length > 1 && sec.type === 'annex') ? lineMM * Math.max(1, (sec.reason || []).length) + S.cellPadV * 2 + 3 : 0;
+      const imgH = Math.max(40, Math.min(g.ch - 30, g.ch - titleMM - headMM - reasonMM - S.cellPadV * 2 - 10));
+      return { sec, cols, g, lrows, nSub, hasNote, title, imgH };
     });
   }
 
@@ -4110,14 +4116,14 @@ window.__authGate=true;
       return x;
     }
     for (let si = 0; si < secs.length; si++) {
-      const { sec, cols, g, lrows, hasNote, title } = secs[si];
+      const { sec, cols, g, lrows, hasNote, title, imgH } = secs[si];
       if (title) body += pXML([{ t: title }], { align: 'center', rpr: { b: true, u: true, sz: Math.round(S.titleSize * 2) }, line: 300 }) + pXML([], { line: 120 });
       const totalTw = tw(g.cw); const gw = cols.w.map(w => Math.round(totalTw * w / 100));
       const OW = Math.round(S.outerW * 6);
       body += '<w:tbl><w:tblPr><w:tblW w:w="' + totalTw + '" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblCellMar><w:top w:w="' + tw(S.cellPadV) + '" w:type="dxa"/><w:left w:w="' + tw(S.cellPadH) + '" w:type="dxa"/><w:bottom w:w="' + tw(S.cellPadV) + '" w:type="dxa"/><w:right w:w="' + tw(S.cellPadH) + '" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>' + gw.map(w => '<w:gridCol w:w="' + w + '"/>').join('') + '</w:tblGrid>';
       // 머리행
       body += '<w:tr><w:trPr><w:tblHeader/><w:cantSplit/></w:trPr>' + cols.heads.map((h, ci) => '<w:tc><w:tcPr><w:tcW w:w="' + gw[ci] + '" w:type="dxa"/><w:tcBorders>' + bd('top', OW) + bd('left', ci === 0 ? OW : 4) + bd('bottom', OW) + bd('right', ci === cols.heads.length - 1 ? OW : 4) + '</w:tcBorders><w:shd w:val="clear" w:color="auto" w:fill="' + (S.headBg || '#bfbfbf').replace('#', '') + '"/><w:vAlign w:val="center"/></w:tcPr>' + pXML([{ t: h }], { align: 'center', rpr: { b: true, sp: 60 } }) + '</w:tc>').join('') + '</w:tr>';
-      const avH = g.ch - 30;
+      const avH = imgH;
       const rowB = S.rowLine === 'solid' ? 'single' : (S.rowLine === 'none' ? 'nil' : 'dotted');
       const nc = cols.heads.length;
       for (let ri = 0; ri < lrows.length; ri++) {
@@ -4295,7 +4301,7 @@ window.__authGate=true;
       return '<hp:ctrl><hp:' + which + ' id="' + (which === 'header' ? 1 : 2) + '" applyPageType="BOTH"><hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="' + (which === 'header' ? 'TOP' : 'BOTTOM') + '" linkListIDRef="0" linkListNextIDRef="0" textWidth="' + W + '" textHeight="' + HU(10) + '" hasTextRef="0" hasNumRef="0">' + body + '</hp:subList></hp:' + which + '></hp:ctrl>';
     }
     for (let si = 0; si < secs.length; si++) {
-      const { sec, cols, g, lrows, nSub, hasNote, title } = secs[si];
+      const { sec, cols, g, lrows, nSub, hasNote, title, imgH } = secs[si];
       const m = g.m;
       const secPr = '<hp:secPr id="" textDirection="HORIZONTAL" spaceColumns="1134" tabStop="8000" tabStopVal="4000" tabStopUnit="HWPUNIT" outlineShapeIDRef="1" memoShapeIDRef="0" textVerticalWidthHead="0" masterPageCnt="0"><hp:grid lineGrid="0" charGrid="0" wonggojiFormat="0"/><hp:startNum pageStartsOn="BOTH" page="0" pic="0" tbl="0" equation="0"/><hp:visibility hideFirstHeader="' + (S.hfSkipFirst && si === 0 ? 1 : 0) + '" hideFirstFooter="' + (S.hfSkipFirst && si === 0 ? 1 : 0) + '" hideFirstMasterPage="0" border="SHOW_ALL" fill="SHOW_ALL" hideFirstPageNum="0" hideFirstEmptyLine="0" showLineNumber="0"/><hp:lineNumberShape restartType="0" countBy="0" distance="0" startNumber="0"/><hp:pagePr landscape="' + (g.land ? 'NARROWLY' : 'WIDELY') + '" width="59528" height="84186" gutterType="LEFT_ONLY"><hp:margin header="' + HU(S.hfGap || 10) + '" footer="' + HU(S.hfGap || 10) + '" gutter="0" left="' + HU(m.l) + '" right="' + HU(m.r) + '" top="' + HU(m.t) + '" bottom="' + HU(m.b) + '"/></hp:pagePr><hp:footNotePr><hp:autoNumFormat type="DIGIT" userChar="" prefixChar="" suffixChar=")" supscript="0"/><hp:noteLine length="-1" type="SOLID" width="0.12 mm" color="#000000"/><hp:noteSpacing betweenNotes="283" belowLine="567" aboveLine="850"/><hp:numbering type="CONTINUOUS" newNum="1"/><hp:placement place="EACH_COLUMN" beneathText="0"/></hp:footNotePr><hp:endNotePr><hp:autoNumFormat type="DIGIT" userChar="" prefixChar="" suffixChar=")" supscript="0"/><hp:noteLine length="14692344" type="SOLID" width="0.12 mm" color="#000000"/><hp:noteSpacing betweenNotes="0" belowLine="567" aboveLine="850"/><hp:numbering type="CONTINUOUS" newNum="1"/><hp:placement place="END_OF_DOCUMENT" beneathText="0"/></hp:endNotePr><hp:pageBorderFill type="BOTH" borderFillIDRef="1" textBorder="PAPER" headerInside="0" footerInside="0" fillArea="PAPER"><hp:offset left="1417" right="1417" top="1417" bottom="1417"/></hp:pageBorderFill><hp:pageBorderFill type="EVEN" borderFillIDRef="1" textBorder="PAPER" headerInside="0" footerInside="0" fillArea="PAPER"><hp:offset left="1417" right="1417" top="1417" bottom="1417"/></hp:pageBorderFill><hp:pageBorderFill type="ODD" borderFillIDRef="1" textBorder="PAPER" headerInside="0" footerInside="0" fillArea="PAPER"><hp:offset left="1417" right="1417" top="1417" bottom="1417"/></hp:pageBorderFill></hp:secPr>';
       const ctrlCol = '<hp:ctrl><hp:colPr id="" type="NEWSPAPER" layout="LEFT" colCount="1" sameSz="1" sameGap="0"/></hp:ctrl>' + (S.hfOn ? hfCtrl('header', g) + hfCtrl('footer', g) : '');
@@ -4321,12 +4327,12 @@ window.__authGate=true;
           for (let ci = 0; ci < 2; ci++) {
             const wmm = g.cw * cols.w[ci] / 100 - S.cellPadH * 2 - 1;
             const b = bf(['solid', ci === 0 ? OW : IN], ['solid', ci === nc - 1 ? OW : IN], topT, botT);
-            rx += tc(await cellContent(lr.segs[k][ci] || [], wmm, g.ch - 30), ci, rAddr, 1, 1, cw[ci], b, { vAlign: 'TOP', ml: padH, mr: padH, mt: k === 0 ? padV : 57, mb: lastSeg ? padV : 0 });
+            rx += tc(await cellContent(lr.segs[k][ci] || [], wmm, imgH), ci, rAddr, 1, 1, cw[ci], b, { vAlign: 'TOP', ml: padH, mr: padH, mt: k === 0 ? padV : 57, mb: lastSeg ? padV : 0 });
           }
           if (hasNote && k === 0) {
             const wmm = g.cw * cols.w[2] / 100 - S.cellPadH * 2 - 1;
             const b = bf(['solid', IN], ['solid', OW], ri === 0 ? ['solid', OW] : [rl, IN], lastRow ? ['solid', OW] : [rl, IN]);
-            rx += tc(await cellContent(lr.note || [], wmm, g.ch - 30), 2, rAddr, 1, n, cw[2], b, { vAlign: S.vAlign === 'middle' ? 'CENTER' : 'TOP', ml: padH, mr: padH, mt: padV, mb: padV });
+            rx += tc(await cellContent(lr.note || [], wmm, imgH), 2, rAddr, 1, n, cw[2], b, { vAlign: S.vAlign === 'middle' ? 'CENTER' : 'TOP', ml: padH, mr: padH, mt: padV, mb: padV });
           }
           rx += '</hp:tr>'; rAddr++;
         }
@@ -9069,7 +9075,7 @@ ${body}
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '3.4';
+  const APP_VERSION = '3.4.1';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
