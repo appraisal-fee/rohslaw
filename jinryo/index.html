@@ -831,7 +831,7 @@ function renderDay(){
   else if(w==='토' && !SAT()[curDate]) ban=`<div class="banner warn">이 토요일의 토요 진료일정이 없습니다. (토요일 진료안내 엑셀에 없는 날짜이거나 휴진 토요일)</div>`;
   else if(w==='토') ban=`<div class="banner info">토요일은 오전 진료만 합니다. 토요일 진료안내 표 기준입니다.</div>`;
   const offToday=S.offs.filter(o=>offCovers(o,curDate) && W().rows.some(r=>norm(r.name)===norm(o.name)&&(!dept||r.dept===dept)&&matchQ(r,q)));
-  if(offToday.length) ban+=`<div class="banner warn">이날 휴진 ${offToday.length}건: ${offToday.map(o=>esc(o.name)+(o.part==='all'?'':'('+(o.part==='am'?'오전':'오후')+')')+(o.sub?' → 대진 '+esc(o.sub):'')).join(', ')}</div>`;
+  if(offToday.length && !VIEW_ONLY) ban+=`<div class="banner warn">이날 휴진 ${offToday.length}건: ${offToday.map(o=>esc(o.name)+(o.part==='all'?'':'('+(o.part==='am'?'오전':'오후')+')')+(o.sub?' → 대진 '+esc(o.sub):'')).join(', ')}</div>`;
   if(REQ_YM && REQ_YM!==S.curMonth) ban+=`<div class="banner info">${ymLabel(REQ_YM)} 일정표가 아직 없어 <b>${ymLabel(S.curMonth)}</b> 일정표로 보여 드립니다. 「일정표·설정 → 새 달 만들기」로 만들 수 있어요.</div>`;
   else if(curDate<W().effective) ban+=`<div class="banner info">평일 일정표가 ${esc(W().effective)}부터 적용된 것이라, 이전 날짜는 실제와 다를 수 있습니다.</div>`;
   $('#dBanner').innerHTML=ban;
