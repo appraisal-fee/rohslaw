@@ -1,0 +1,15 @@
+{
+  "name": "진료일정 검색",
+  "short_name": "진료일정",
+  "description": "외래 진료일정·토요진료 검색 (보기 전용)",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f9",
+  "theme_color": "#1f4e8c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

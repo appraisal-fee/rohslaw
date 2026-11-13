@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>진료일정 검색</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f4e8c">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#f4f6f9; --card:#fff; --line:#dde2ea; --line2:#eef1f5; --ink:#1d2433; --sub:#5d6778; --mute:#8a93a3;
+  --pri:#1f4e8c; --pri-l:#e8f0fb; --ok:#1d7a46; --ok-l:#e5f5ec; --off:#c0392b; --off-l:#fdecea;
+  --sat:#7a4fb5; --sat-l:#f1ebfa; --resv:#1f6fd1; --resv-l:#e7f1fd; --hol:#b35a00; --hol-l:#fff3e0;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;font-size:14px;line-height:1.45}
+header{background:var(--pri);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:-.3px}
+header select#hMonth{height:32px;border:0;border-radius:6px;font:inherit;font-weight:700;color:var(--pri);padding:0 8px}
+header #hStat .chip{font-size:12px;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.18)}
+header #hStat .chip.fin{background:#e5f5ec;color:#1d7a46;font-weight:700}
+header .meta{font-size:12px;opacity:.85;margin-left:auto;text-align:right}
+nav{display:flex;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;overflow-x:auto}
+nav button{flex:1;min-width:96px;border:0;background:none;padding:11px 8px;font:inherit;font-weight:600;color:var(--sub);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav button.on{color:var(--pri);border-bottom-color:var(--pri)}
+main{max-width:1180px;margin:0 auto;padding:14px}
+.panel{display:none}.panel.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 10px;color:var(--pri)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row+.row{margin-top:8px}
+label.f{display:inline-flex;align-items:center;gap:6px;color:var(--sub);font-size:13px}
+input[type=text],input[type=search],select,textarea{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);height:34px}
+textarea{height:auto;width:100%;min-height:110px;resize:vertical}
+input.date{width:128px;text-align:center;font-variant-numeric:tabular-nums}
+button.b{font:inherit;height:34px;padding:0 12px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;color:var(--ink);white-space:nowrap}
+button.b:hover{background:var(--line2)}
+button.p{background:var(--pri);border-color:var(--pri);color:#fff}
+button.p:hover{background:#173d6f}
+button.d{color:var(--off);border-color:#f0c4bf}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:#fff;font:inherit;height:32px;padding:0 12px;cursor:pointer;color:var(--sub)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--pri);color:#fff}
+.dayinfo{font-size:16px;font-weight:700}
+.dayinfo small{font-size:13px;font-weight:400;color:var(--sub);margin-left:6px}
+.banner{padding:9px 12px;border-radius:6px;margin-top:10px;font-size:13px}
+.banner.hol{background:var(--hol-l);color:var(--hol);border:1px solid #f3d3a8}
+.banner.info{background:var(--pri-l);color:var(--pri);border:1px solid #c9daf3}
+.banner.warn{background:var(--off-l);color:var(--off);border:1px solid #f0c4bf}
+table.t{width:100%;border-collapse:collapse;table-layout:fixed;background:#fff}
+table.t th,table.t td{border-bottom:1px solid var(--line2);padding:7px 8px;text-align:left;vertical-align:middle}
+table.t th{background:#f7f9fc;color:var(--sub);font-weight:600;font-size:12.5px;border-bottom:1px solid var(--line)}
+table.t td.c,table.t th.c{text-align:center}
+table.t tr.grp td{background:#f2f5fa;font-weight:700;color:var(--pri);border-bottom:1px solid var(--line)}
+table.t tr.dim td{color:var(--mute)}
+.col-name{width:120px}.col-st{width:96px}
+.spec{color:var(--sub);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{font-style:normal;white-space:nowrap;display:inline-block;min-width:52px;text-align:center;padding:2px 6px;border-radius:4px;font-size:12px;font-weight:600;line-height:18px}
+.tag.ok{background:var(--ok-l);color:var(--ok)}
+.tag.off{background:var(--off-l);color:var(--off)}
+.tag.sat{background:var(--sat-l);color:var(--sat)}
+.tag.resv{background:var(--resv-l);color:var(--resv)}
+.tag.no{color:#c3c9d3}
+.tag.hol{background:var(--hol-l);color:var(--hol)}
+.reason{display:block;font-size:11px;color:var(--off);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.name a{color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px dashed #b8c2d2;cursor:pointer}
+.count{color:var(--sub);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+.doc{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px}
+.hd{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.hd b{font-size:16px}
+.hd span{color:var(--sub);font-size:12.5px}
+.hd .act{margin-left:auto}
+.wk{width:100%;border-collapse:collapse;table-layout:fixed;margin:6px 0}
+.wk th,.wk td{border:1px solid var(--line2);text-align:center;padding:4px 0;font-size:12.5px}
+.wk th{background:#f7f9fc;color:var(--sub);font-weight:600}
+.wk td.y{background:var(--ok-l);color:var(--ok);font-weight:700}
+.wk td.r{background:var(--resv-l);color:var(--resv);font-weight:700}
+.wk td.s{background:var(--sat-l);color:var(--sat);font-weight:700}
+.wk th.l{width:44px}
+.mini{font-size:12.5px;color:var(--sub);margin-top:4px}
+.mini b{color:var(--ink);font-weight:600}
+.mini .o{color:var(--off)}
+.cal{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:8px}
+.cal th{font-size:12px;color:var(--sub);padding:3px 0;font-weight:600}
+.cal th:first-child{color:var(--off)}.cal th:last-child{color:var(--resv)}
+.cal td{border:1px solid var(--line2);height:46px;vertical-align:top;padding:2px 3px;font-size:11px}
+.cal td .n{font-size:11.5px;color:var(--sub)}
+.cal td.today{outline:2px solid var(--pri);outline-offset:-2px}
+.cal td.x{background:#fafbfc}
+.cal .p{display:block;border-radius:3px;margin-top:1px;text-align:center;line-height:15px}
+.cal .p.ok{background:var(--ok-l);color:var(--ok)}
+.cal .p.off{background:var(--off-l);color:var(--off);text-decoration:line-through}
+.cal .p.sat{background:var(--sat-l);color:var(--sat)}
+.cal .p.hol{background:var(--hol-l);color:var(--hol)}
+.calnav{display:flex;align-items:center;gap:6px;margin-top:8px}
+.calnav b{flex:1;text-align:center}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.empty{padding:28px;text-align:center;color:var(--mute)}
+.form .seg{justify-self:start}
+.form{display:grid;grid-template-columns:96px 1fr;gap:8px 10px;align-items:center;max-width:620px}
+.form>label{color:var(--sub);font-size:13px;text-align:right}
+.hint{font-size:12px;color:var(--mute)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#263246;color:#fff;padding:9px 16px;border-radius:6px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:50}
+.toast.on{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(20,28,40,.45);display:none;align-items:flex-start;justify-content:center;padding:40px 12px;z-index:40;overflow:auto}
+.modal.on{display:flex}
+#mConfirm{z-index:70}
+.modal .box{background:#fff;border-radius:10px;max-width:760px;width:100%;padding:16px}
+.modal .box .top{display:flex;align-items:center;margin-bottom:8px}
+.modal .box .top b{font-size:16px}
+.modal .box .top button{margin-left:auto}
+datalist{display:none}
+/* ===== A3 출력 ===== */
+.pv-opts .row{gap:10px}
+.pv-wrap{background:#c9ced6;border-radius:8px;padding:14px;overflow:auto}
+.pv-wrap .sheet{margin:0 auto 14px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.sheet{background:#fff;color:#1b2230;position:relative;overflow:hidden;font-family:"Malgun Gothic","맑은 고딕",sans-serif;display:flex;flex-direction:column}
+.sheet .in{flex:1;display:flex;flex-direction:column;padding:9mm 9mm 7mm}
+.sh-head{display:flex;align-items:flex-end;border-bottom:1.4mm solid #1f4e8c;padding-bottom:2.2mm;margin-bottom:2.6mm}
+.sh-head .hos{font-size:4.2mm;color:#1f4e8c;font-weight:700;letter-spacing:.2mm}
+.sh-head .ttl{font-size:9.2mm;font-weight:800;letter-spacing:-.2mm;line-height:1.15;color:#14223a}
+.sh-head .ttl em{font-style:normal;color:#1f4e8c}
+.sh-head .rt{margin-left:auto;text-align:right;font-size:3.3mm;color:#4a5568;line-height:1.5}
+.sh-head .rt b{display:block;font-size:6mm;color:#1f4e8c;letter-spacing:.1mm}
+.sh-legend{display:flex;gap:4mm;font-size:2.9mm;color:#4a5568;margin-bottom:2mm;align-items:center}
+.sh-legend i{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:4.2mm;height:4.2mm;border-radius:50%;font-size:2.6mm;font-weight:700;margin-right:1mm;vertical-align:middle}
+.dot{background:#1f4e8c;color:#fff}.dot.r{background:#fff;color:#1f6fd1;border:.35mm solid #1f6fd1}
+.st{width:100%;border-collapse:collapse;table-layout:fixed;font-size:var(--fs,8pt)}
+.st th,.st td{border:.2mm solid #c4ccd8;padding:.12mm .8mm;vertical-align:middle;line-height:1.12}
+.st thead th{background:#1f4e8c;color:#fff;font-weight:700;text-align:center;border-color:#1f4e8c;padding:.8mm .9mm}
+.st thead tr.sub th{background:#2f62a6;font-weight:600}
+.st thead th.pm{background:#3a5f8f}
+.st td.cen{background:#eef3fa;color:#1f4e8c;font-weight:700;text-align:center;font-size:.92em;word-break:keep-all}
+.st td.dep{font-weight:700;text-align:center;word-break:keep-all;background:#f7f9fc}
+.st td.nm{text-align:center;font-weight:700;white-space:nowrap}
+.st td.d{text-align:center;padding:0;width:auto}
+.st td.d.pmc{background:#f8fafc}
+.st td.sp{font-size:.9em;color:#2d3748}
+.st td.sp .off{color:#c0392b;font-weight:700}
+.st td.sp .nt{color:#b35a00}
+.st tr.clin td.nm{color:#7a4fb5;font-weight:600}
+.st tr.dg td{border-top:.45mm solid #8fa3c0}
+.st .mk{display:inline-flex;align-items:center;justify-content:center;width:1.22em;height:1.22em;border-radius:50%;background:#1f4e8c;color:#fff;font-size:.82em;font-weight:700;line-height:1}
+.st .mk.r{background:#fff;color:#1f6fd1;border:.3mm solid #1f6fd1}
+.st .mk.x{background:#c0392b}
+.sh-foot{margin-top:auto;padding-top:2mm;display:flex;gap:4mm;font-size:2.8mm;color:#4a5568;border-top:.3mm solid #c4ccd8}
+.sh-foot .r{margin-left:auto;text-align:right}
+.box{border:.3mm solid #c4ccd8;border-radius:1.5mm;margin-bottom:5mm;overflow:hidden}
+.box h3{margin:0;background:#1f4e8c;color:#fff;font-size:4.4mm;padding:2mm 3mm;letter-spacing:.2mm}
+.box h3 small{font-weight:400;font-size:3mm;opacity:.85;margin-left:2mm}
+.box .bd{padding:2.5mm}
+.sat{width:100%;border-collapse:collapse;table-layout:fixed;font-size:3.4mm}
+.sat th,.sat td{border:.2mm solid #c4ccd8;padding:1.4mm 1.5mm;text-align:center;vertical-align:middle;word-break:keep-all}
+.sat thead th{background:#eef3fa;color:#1f4e8c}
+.sat thead th .hol{color:#c0392b;font-size:.8em;display:block}
+.sat td.l{background:#f7f9fc;font-weight:700}
+.sat td.cen2{background:#eef3fa;color:#1f4e8c;font-size:.9em}
+.sat td.l small{display:block;font-weight:400;color:#6b7686;font-size:.82em}
+.sat td.none{color:#b9c1cc}
+.offt{width:100%;border-collapse:collapse;table-layout:fixed;font-size:3.4mm}
+.offt th,.offt td{border:.2mm solid #c4ccd8;padding:1.4mm 2mm;vertical-align:middle}
+.offt th{background:#fdecea;color:#c0392b}
+.offt td.c{text-align:center}
+.offt td.o{color:#c0392b;font-weight:700;text-align:center}
+.notes{font-size:3.2mm;color:#2d3748;line-height:1.7;margin:0;padding-left:4.5mm}
+.pv-note{font-size:12.5px;color:var(--sub)}
+.sheet .fit{flex:1 1 auto;display:flex;flex-direction:column}
+.sheet .cols{display:flex;justify-content:space-between;align-items:flex-start}
+.sheet .col{flex:none}
+#printRoot{display:none}
+@media print{
+  html,body{background:#fff}
+  header,nav,main,footer,.toast,.modal{display:none!important}
+  #printRoot{display:block!important}
+  #printRoot .sheet{box-shadow:none;margin:0;page-break-after:always;break-after:page}
+  #printRoot .sheet:last-child{page-break-after:auto;break-after:auto}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+/* ===== 고도화 ===== */
+.star{border:0;background:none;cursor:pointer;font-size:15px;color:#c9d0da;padding:0 3px 0 0;line-height:1;vertical-align:-1px}
+.star.on{color:#f0a500}
+.badge{display:inline-block;font-size:10.5px;font-weight:700;border-radius:3px;padding:0 4px;margin-left:4px;line-height:16px;vertical-align:1px}
+.badge.new{background:#e5f5ec;color:#1d7a46}.badge.chg{background:#fff3e0;color:#b35a00}.badge.edt{background:#fff8c5;color:#8a6d00}
+td.q{cursor:pointer}
+td.q:hover .tag{outline:2px solid #9db6dc}
+.qhint{font-size:12.5px;color:var(--pri);margin-top:6px}
+.cal td.q:hover{background:#f2f6fc}
+.ed-wrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:8px;background:#fff}
+table.ed{border-collapse:collapse;table-layout:fixed;width:100%;min-width:1060px;font-size:13px}
+table.ed th,table.ed td{border-bottom:1px solid var(--line2);padding:3px 4px;vertical-align:middle}
+table.ed thead th{position:sticky;top:0;background:#f7f9fc;color:var(--sub);font-weight:600;font-size:12px;z-index:2;border-bottom:1px solid var(--line);text-align:center}
+table.ed input{width:100%;height:28px;padding:3px 6px;border:1px solid transparent;border-radius:4px;font:inherit;background:transparent}
+table.ed input:hover{border-color:var(--line)}
+table.ed input:focus{border-color:var(--pri);background:#fff;outline:0}
+table.ed td.chgd input,table.ed td.chgd{background:#fff8c5}
+table.ed tr.newrow td{background:#eefaf2}
+table.ed tr.newrow td input{background:transparent}
+table.ed td.dc{text-align:center;padding:2px}
+.dbtn{width:100%;height:28px;border:1px solid var(--line);border-radius:4px;background:#fff;cursor:pointer;font:inherit;font-size:12px;color:#c3c9d3}
+.dbtn.ok{background:var(--pri);border-color:var(--pri);color:#fff;font-weight:700}
+.dbtn.resv{background:#fff;border-color:var(--resv);color:var(--resv);font-weight:700}
+td.chgd .dbtn{box-shadow:0 0 0 2px #f2c94c}
+.rowbtn{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}.rowbtn .b{height:28px;padding:0 8px;font-size:12.5px}
+tr.cur td{background:#f5f8fd}
+.rowact{display:flex;gap:2px;justify-content:center}
+.rowact button{width:26px;height:26px;padding:0;border:1px solid var(--line);background:#fff;border-radius:4px;cursor:pointer;color:var(--sub)}
+.rowact button:hover{background:var(--line2)}
+.rowact button.x{color:var(--off)}
+.hist{max-height:220px;overflow:auto;font-size:12.5px;border:1px solid var(--line2);border-radius:6px}
+.hist div{display:flex;gap:10px;padding:5px 8px;border-bottom:1px solid var(--line2)}
+.hist div span{color:var(--mute);width:84px;flex:none;font-variant-numeric:tabular-nums}
+.cmp{font-size:13px}
+.cmp .it{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line2);align-items:baseline}
+.cmp .it b{width:70px;flex:none}
+.cmp .it .k{width:150px;flex:none;color:var(--sub)}
+.qform{display:grid;grid-template-columns:70px 1fr;gap:8px 10px;align-items:center}
+.qform>label{color:var(--sub);font-size:13px;text-align:right}
+.qform .seg{justify-self:start}
+.qlist{margin-top:10px;font-size:13px}
+.qlist div{display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--line2)}
+.qlist div button{margin-left:auto}
+.dowpick{display:inline-flex;gap:4px}
+.dowpick label{display:inline-flex;align-items:center;gap:2px;font-size:13px;color:var(--sub)}
+.st td.d.chg{background:#fff3d6!important}
+.st td.d.gone{color:#b9c1cc;font-size:.8em;text-decoration:line-through}
+.st td.nm sup{font-size:.62em;color:#b35a00;font-weight:700;margin-left:.4mm}
+.st td.nm sup.n{color:#1d7a46}
+.chglist{font-size:3.1mm;line-height:1.65;margin:0;padding-left:4.5mm;columns:2;column-gap:8mm}
+
+table.chg td{vertical-align:top;font-size:13px}
+table.chg td .k{display:inline-block;min-width:44px;text-align:center;border-radius:4px;font-size:12px;font-weight:700;padding:1px 4px}
+.k.add{background:#e5f5ec;color:#1d7a46}.k.sat{background:#f1ebfa;color:#7a4fb5}.k.chg{background:#fff3e0;color:#b35a00}.k.del{background:#fdecea;color:#c0392b}.k.new{background:#e7f1fd;color:#1f6fd1}.k.off{background:#f1ebfa;color:#7a4fb5}.k.err{background:#eee;color:#777}
+table.chg tr.err td{color:#999}
+table.chg .after{color:var(--ink);font-weight:600}
+table.chg .src{color:var(--mute);font-size:12px}
+.he{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.he .hh{display:flex;gap:10px;align-items:center;padding:8px 10px;background:#f7f9fc;font-size:13px}
+.he .hh .no{font-weight:700;color:var(--pri);width:34px}
+.he .hh .tm{color:var(--sub);width:96px;font-variant-numeric:tabular-nums}
+.he .hh .sc{font-size:11.5px;border-radius:10px;padding:1px 8px;background:#e8f0fb;color:var(--pri);white-space:nowrap}
+.he .hh .msg{flex:1}
+.he .hd2{padding:6px 12px 8px 54px;font-size:12.5px;color:var(--sub);line-height:1.7}
+
+body.view nav button[data-tab=off],body.view nav button[data-tab=edit],body.view nav button[data-tab=data],body.view nav button[data-tab=print],body.view #hStat,body.view [data-off],body.view #mOff,body.view .nv{display:none!important}
+body.view td.q{cursor:default}body.view td.q:hover .tag{outline:0}
+footer{text-align:center;color:var(--mute);font-size:12px;padding:16px 0 26px}
+@media (max-width:720px){
+  .col-name{width:34%}.col-st{width:33%}
+  .hide-s{display:none}
+  .form{grid-template-columns:76px 1fr}
+  main{padding:10px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>진료일정 검색</h1>
+  <select id="hMonth" title="관리할 달"></select><span id="hStat"></span>
+  <div class="meta" id="hdrMeta"></div>
+</header>
+<nav>
+  <button data-tab="find" class="on">의사·질환 검색</button>
+  <button data-tab="day">날짜별 진료</button>
+  <button data-tab="off">휴진 관리</button>
+  <button data-tab="edit">일정 편집</button>
+  <button data-tab="print">A3 출력</button>
+  <button data-tab="data">일정표·설정</button>
+</nav>
+<main>
+
+<!-- 날짜별 -->
+<section class="panel" id="p-day">
+  <div class="card">
+    <div class="row">
+      <button class="b" id="dPrev" title="전날">◀</button>
+      <input type="text" class="date" id="dDate" placeholder="20261120" inputmode="numeric">
+      <button class="b" id="dNext" title="다음날">▶</button>
+      <button class="b" id="dToday">오늘</button>
+      <div class="seg" id="dPart"><button data-v="all" class="on">전체</button><button data-v="am">오전</button><button data-v="pm">오후</button></div>
+    </div>
+    <div class="row">
+      <select id="dDept"><option value="">전체 진료과</option></select>
+      <input type="search" id="dQ" placeholder="이름·진료과·질환·증상 (예: 백내장, 눈, ㄱㅌㅎ)" style="flex:1;min-width:180px">
+      <label class="f"><input type="checkbox" id="dOnly" checked> 진료하는 의사만</label>
+      <label class="f"><input type="checkbox" id="dFav"> ★ 즐겨찾기만</label>
+    </div>
+    <div class="qhint" id="dHint"></div>
+    <div class="row" style="margin-top:12px"><div class="dayinfo" id="dInfo"></div></div>
+    <div id="dBanner"></div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="t">
+      <colgroup><col class="col-name"><col class="col-st"><col class="col-st"><col class="hide-s"></colgroup>
+      <thead><tr><th>교수명</th><th class="c">오전</th><th class="c">오후</th><th class="hide-s">전문진료과목</th></tr></thead>
+      <tbody id="dBody"></tbody>
+    </table>
+  </div>
+  <div class="legend">
+    <span><i class="tag ok">진료</i></span><span><i class="tag resv">예약만</i> 예약환자만 진료</span>
+    <span><i class="tag sat">토요진료</i></span><span class="nv"><i class="tag off">휴진</i> 휴진 관리에 등록한 일정</span>
+    <span class="nv">· 진료 칸을 누르면 그 자리에서 휴진을 등록할 수 있어요</span>
+  </div>
+</section>
+
+<!-- 검색 -->
+<section class="panel on" id="p-find">
+  <div class="card">
+    <div class="row">
+      <input type="search" id="fQ" placeholder="교수명·진료과·질환·증상 (예: 김태호, ㄱㅌㅎ, 눈, 무릎)" style="flex:1;min-width:220px">
+      <select id="fDept"><option value="">전체 진료과</option></select>
+      <label class="f"><input type="checkbox" id="fFav"> ★ 즐겨찾기만</label>
+    </div>
+    <div class="qhint" id="fHint"></div>
+    <div class="row">
+      <span class="hint">요일로 좁히기</span>
+      <div class="seg" id="fDay"><button data-v="" class="on">전체</button><button data-v="월">월</button><button data-v="화">화</button><button data-v="수">수</button><button data-v="목">목</button><button data-v="금">금</button></div>
+      <div class="seg" id="fPart"><button data-v="" class="on">오전·오후</button><button data-v="am">오전</button><button data-v="pm">오후</button></div>
+      <span class="count" id="fCount" style="margin-left:auto"></span>
+    </div>
+  </div>
+  <div class="grid" id="fList"></div>
+</section>
+
+<!-- 휴진 관리 -->
+<section class="panel" id="p-off">
+  <div class="card">
+    <h2>휴진 등록</h2>
+    <div class="form">
+      <label>교수명</label>
+      <div class="row"><input type="text" id="oName" list="docList" placeholder="이름 입력" style="width:160px"><select id="oDept" style="flex:1;min-width:150px"></select></div>
+      <label>기간</label>
+      <div class="row"><input type="text" class="date" id="oFrom" placeholder="20261120" inputmode="numeric"> ~ <input type="text" class="date" id="oTo" placeholder="(하루면 비움)" inputmode="numeric"></div>
+      <label>구분</label>
+      <div class="seg" id="oPart"><button data-v="all" class="on">종일</button><button data-v="am">오전</button><button data-v="pm">오후</button></div>
+      <label>반복</label>
+      <div class="row"><div class="seg" id="oRep"><button data-v="" class="on">안 함</button><button data-v="w">매주</button></div><span class="dowpick" id="oDow"><label><input type="checkbox" value="월">월</label><label><input type="checkbox" value="화">화</label><label><input type="checkbox" value="수">수</label><label><input type="checkbox" value="목">목</label><label><input type="checkbox" value="금">금</label></span><span class="hint">매주 반복은 기간 안의 해당 요일에만 적용</span></div>
+      <label>사유</label>
+      <input type="text" id="oReason" placeholder="학회, 출장, 개인사정 등 (선택)">
+      <label>대진</label>
+      <input type="text" id="oSub" list="docList" placeholder="대신 진료하는 의사 (선택)">
+      <label></label>
+      <div class="row"><button class="b p" id="oAdd">등록</button><button class="b" id="oClear">새로 입력</button><span class="hint" id="oEditHint"></span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>휴진 공지 붙여넣기 (여러 건 한 번에)</h2>
+    <div class="hint" style="margin-bottom:6px">한 줄에 한 건. 날짜·이름·오전/오후를 순서 상관없이 적으면 됩니다. 예) <b>11/20 김태호 오전 학회 대진 김창환</b> · <b>20261124~20261126 이해림 출장</b> · <b>12/1~12/31 매주 수 오후 박찬석</b></div>
+    <textarea id="oBulk" placeholder="11/20 김태호 오전 학회&#10;11/24~11/26 이해림 출장"></textarea>
+    <div class="row" style="margin-top:8px"><button class="b" id="oBulkCheck">미리보기</button><button class="b p" id="oBulkAdd">모두 등록</button></div>
+    <div id="oBulkPrev"></div>
+  </div>
+  <div class="card">
+    <div class="row" style="margin-bottom:8px">
+      <h2 style="margin:0">등록된 휴진</h2>
+      <div class="seg" id="oShow" style="margin-left:12px"><button data-v="up" class="on">오늘 이후</button><button data-v="all">전체</button></div>
+      <input type="search" id="oQ" placeholder="이름·진료과 검색" style="margin-left:auto;width:180px">
+    </div>
+    <div style="overflow:auto">
+    <table class="t">
+      <colgroup><col style="width:190px"><col style="width:60px"><col style="width:120px"><col style="width:90px"><col><col style="width:110px"></colgroup>
+      <thead><tr><th>날짜</th><th class="c">구분</th><th>진료과</th><th>교수명</th><th>사유</th><th class="c">관리</th></tr></thead>
+      <tbody id="oBody"></tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<!-- 일정 편집 -->
+<section class="panel" id="p-edit">
+  <div class="card">
+    <div class="row">
+      <h2 style="margin:0">일정 편집</h2>
+      <b id="eMonth" style="color:var(--pri)"></b>
+      <span class="hint">칸을 고치면 검색·달력·A3 출력에 바로 반영됩니다. 요일 칸은 누를 때마다 <b>진료 → 예약만 → 없음</b>으로 바뀝니다.</span>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <input type="search" id="eQ" placeholder="이름·진료과로 찾기" style="width:220px">
+      <label class="f"><input type="checkbox" id="eOnlyChg"> 고친 줄만</label>
+      <span class="count" id="eCount"></span>
+      <span style="margin-left:auto" class="row">
+        <button class="b" id="eUndo">↶ 되돌리기</button>
+        <button class="b" id="eAdd">+ 교수 추가</button>
+        <button class="b d" id="eReset">원본으로</button>
+      </span>
+    </div>
+  </div>
+  <div id="eBanner"></div>
+  <div class="card" id="eCmdCard">
+    <div class="row"><h2 style="margin:0">글·파일로 고치기</h2><span class="hint">한 줄에 한 건씩 적거나, 바뀐 일정표 파일을 올리면 바뀌는 내용을 먼저 보여 드리고, 고른 것만 반영합니다.</span></div>
+    <textarea id="eCmd" style="margin-top:8px;min-height:96px" placeholder="예)&#10;김태호 월 오전 추가&#10;이해림 화 오전 → 목 오전&#10;박찬석 오전 화목, 오후 월로 변경&#10;김동빈 수 오전 예약만&#10;강혜선 금 오후 삭제&#10;홍길동 신장내과 신규 오전 월수 오후 금&#10;이경호 전문과목: 아토피피부염, 여드름&#10;고은정 장기연수&#10;11/20 김태호 오후 학회 대진 김창환   ← 평일 날짜는 휴진으로 등록&#10;신경외과 11/28 김성한, 12/5 김성림   ← 토요일 날짜는 토요진료로 등록"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="b p" id="eCmdGo">바뀌는 내용 보기</button>
+      <label class="b" style="display:inline-flex;align-items:center;cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:0 12px;height:34px;background:#fff">파일로 고치기 (엑셀·텍스트)<input type="file" id="eCmdFile" accept=".xls,.xlsx,.txt,.csv" hidden></label>
+      <button class="b" id="eCmdHelp">쓰는 법</button>
+      <button class="b" id="eHistOpen" style="margin-left:auto">수정 이력 보기</button>
+    </div>
+    <div class="hint" id="eCmdHelpBox" style="display:none;margin-top:8px;line-height:1.75">
+      · <b>추가</b>: 「김태호 월 오전 추가」, 「김태호 오전 월수」 (동작어가 없으면 추가로 봅니다)<br>
+      · <b>빼기</b>: 「강혜선 금 오후 삭제」, 「… 빼기·제외·중단」<br>
+      · <b>옮기기</b>: 「이해림 화 오전 → 목 오전」, 「화 오전에서 목 오전으로」<br>
+      · <b>통째로 바꾸기</b>: 「박찬석 오전 화목, 오후 월로 변경」 (적은 요일만 남깁니다)<br>
+      · <b>예약만</b>: 「김동빈 수 오전 예약만」 · <b>종일</b>: 「월 종일」은 오전·오후 모두<br>
+      · <b>전문과목</b>: 「이경호 전문과목: …」 · <b>격주</b>: 「김영민 수 오후 격주」 → [수 격주진료] 표시<br>
+      · <b>신규 교수</b>: 「홍길동 신장내과 신규 오전 월수」 · <b>줄 삭제</b>: 「홍길동 명단 삭제」, 「… 퇴직」<br>
+      · <b>장기 부재</b>: 「고은정 장기연수」(요일을 모두 비우고 사유 표시)<br>
+      · 같은 이름이 여러 줄이면 진료과나 센터를 같이 적으세요 (예: 「성기영 여성센터 화 오전 삭제」)<br>
+      · 날짜가 들어간 줄은, 토요일이면 <b>토요진료</b>로(「휴진·학회·출장·대진」 등의 말이 있으면 휴진), 평일이면 <b>휴진</b>으로 등록됩니다<br>· <b>토요진료</b>: 「신경외과 12/5 김성한, 12/12 김성림」, 「12/5 이비인후과 황세환」, 진료과만 한 줄 적고 아래에 「5일 김성한」「12일 김성림」처럼 이어 써도 됩니다. 「12월 토요진료」처럼 달을 먼저 적으면 「5일」만 써도 그 달로 읽어요. 「-」·「없음」은 그날 진료 없음<br>
+      · <b>파일</b>: 바뀐 진료일정표 엑셀을 올리면 지금 달과 비교해 달라진 줄만 보여 줍니다. 메모장(.txt)에 위 형식으로 적은 파일도 됩니다.
+    </div>
+  </div>
+  <div class="ed-wrap">
+    <table class="ed">
+      <colgroup><col style="width:120px"><col style="width:140px"><col style="width:86px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col style="width:46px"><col><col style="width:100px"></colgroup>
+      <thead><tr><th rowspan="2">센터</th><th rowspan="2">진료과</th><th rowspan="2">교수명</th><th colspan="5">오전</th><th colspan="5">오후</th><th rowspan="2">전문진료과목</th><th rowspan="2">순서·삭제</th></tr>
+      <tr><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr></thead>
+      <tbody id="eBody"></tbody>
+    </table>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="row"><h2 style="margin:0">고친 기록 <span class="hint" id="eHistCnt"></span></h2><button class="b" style="margin-left:auto" onclick="openHist()">자세히 (팝업)</button></div>
+    <div class="hist" id="eHist"></div>
+  </div>
+</section>
+
+<!-- A3 출력 -->
+<section class="panel" id="p-print">
+  <div class="card pv-opts">
+    <h2>A3 진료일정표 만들기</h2>
+    <div class="row">
+      <label class="f">대상 월 <select id="pMonth"></select></label><span id="pStat"></span>
+      <label class="f">용지 <span class="seg" id="pOri"><button data-v="l" class="on">A3 가로</button><button data-v="p">A3 세로</button></span></label>
+      <label class="f">기준일 <input type="text" class="date" id="pEff" inputmode="numeric"></label>
+    </div>
+    <div class="row">
+      <label class="f">병원명 <input type="text" id="pHos" style="width:220px"></label>
+      <label class="f">예약전화 <input type="text" id="pTel" style="width:120px"></label>
+    </div>
+    <div class="row">
+      <label class="f"><input type="checkbox" id="pSpec" checked> 전문진료과목</label>
+      <label class="f"><input type="checkbox" id="pOff" checked> 이달 휴진을 표에 표시</label>
+      <label class="f"><input type="checkbox" id="pClin" checked> 협진센터·클리닉 포함</label>
+      <label class="f"><input type="checkbox" id="pP2" checked> 2쪽: 토요진료·휴진 안내</label>
+      <label class="f"><input type="checkbox" id="pChg" checked> 지난달 대비 바뀐 칸 표시</label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="b p" id="pPrint">인쇄 / PDF 저장</button>
+      <span class="pv-note" id="pInfo"></span>
+    </div>
+    <div class="pv-note" style="margin-top:6px">인쇄 창에서 용지 <b>A3</b>, 배율 <b>100%(기본)</b>, 여백 <b>없음</b>, <b>배경 그래픽 켜기</b>로 맞추세요. 글자 크기는 한 장에 들어가도록 자동으로 맞춰집니다.</div>
+  </div>
+  <div class="pv-wrap" id="pvWrap"></div>
+</section>
+
+<!-- 일정표·설정 -->
+<section class="panel" id="p-data">
+  <div class="card">
+    <h2>월별 일정표</h2>
+    <div class="hint" style="margin-bottom:8px">진료일정은 달마다 따로 저장됩니다. 위쪽 달 선택에서 고른 달이 검색·편집·A3 출력에 쓰이고, 일정표가 없는 달은 가장 가까운 이전 달 것을 보여 줍니다. 다 고친 달은 「확정」하면 편집이 잠깁니다.</div>
+    <div class="row"><select id="mNewYm"></select><button class="b p" id="mNew">새 달 만들기</button><span class="hint">직전 달을 복사해서 시작</span>
+      <label class="b" style="display:inline-flex;align-items:center;margin-left:auto;cursor:pointer;border:1px solid var(--line);border-radius:6px;padding:0 12px;height:34px;background:#fff">달 파일 불러오기<input type="file" id="mLoad" accept=".json" multiple hidden></label><span class="hint" id="mMsg"></span></div>
+    <div style="overflow:auto;margin-top:10px"><table class="t">
+      <colgroup><col style="width:130px"><col style="width:80px"><col style="width:100px"><col style="width:50px"><col style="width:70px"><col style="width:50px"><col><col class="hide-s" style="width:90px"><col style="width:300px"></colgroup>
+      <thead><tr><th>달</th><th class="c">상태</th><th class="c">기준일</th><th class="c">줄</th><th class="c">고친 기록</th><th class="c">휴진</th><th>출처</th><th class="c hide-s">마지막 수정</th><th class="c">관리</th></tr></thead>
+      <tbody id="moBody"></tbody></table></div>
+    <div id="sInfo" class="mini" style="margin-top:10px"></div>
+  </div>
+  <div class="card">
+    <h2>지난달 대비 바뀐 점 <span class="hint" id="sCmpTitle"></span></h2>
+    <div id="sCmp"></div>
+    <div class="row" style="margin-top:10px"><label class="f">비교할 달 <select id="sCmpWith"></select></label></div>
+  </div>
+  <div class="card">
+    <h2>새 일정표 불러오기</h2>
+    <div class="hint" style="margin-bottom:8px">매달 받는 엑셀 파일을 그대로 넣으면 됩니다. 평일 「진료일정표」(.xls)는 고른 달(자동이면 표 안의 기준일 달)에 저장되고, 「토요일 진료안내」(.xlsx)는 월별 시트를 모두 합칩니다. 문서보안(DRM)이 걸린 파일은 읽히지 않으니, 보안 해제본이나 「다른 이름으로 저장」한 파일을 쓰세요.</div>
+    <div class="row"><label class="f">평일 일정표를 넣을 달 <select id="sTarget"></select></label></div>
+    <div class="row"><input type="file" id="sFile" accept=".xls,.xlsx" multiple><span class="hint" id="sMsg"></span></div>
+  </div>
+  <div class="card">
+    <h2>공휴일</h2>
+    <div class="hint" style="margin-bottom:6px">공휴일은 모든 진료가 휴진으로 표시됩니다. 한 줄에 「날짜 이름」 형식으로 고칠 수 있습니다. 임시공휴일이 생기면 여기에 추가하세요.</div>
+    <textarea id="sHol" style="min-height:150px;font-variant-numeric:tabular-nums"></textarea>
+    <div class="row" style="margin-top:8px"><button class="b p" id="sHolSave">공휴일 저장</button><button class="b" id="sHolReset">기본값으로</button></div>
+  </div>
+  <div class="card">
+    <h2>백업 · 옮기기</h2>
+    <div class="hint" style="margin-bottom:6px">휴진·공휴일·불러온 일정표는 이 브라우저에만 저장됩니다. 다른 PC·휴대폰으로 옮기거나 백업할 때 아래 텍스트를 복사해 두고, 옮긴 곳에서 붙여넣은 뒤 「복원」을 누르세요.</div>
+    <textarea id="sBak" placeholder="백업 텍스트"></textarea>
+    <div class="row" style="margin-top:8px"><button class="b" id="sBakMake">백업 텍스트 만들기</button><button class="b" id="sBakCopy">복사</button><button class="b p" id="sBakLoad">붙여넣은 내용으로 복원</button><button class="b d" id="sReset" style="margin-left:auto">모든 달 초기화</button></div>
+  </div>
+</section>
+</main>
+<div id="printRoot"></div>
+<datalist id="docList"></datalist>
+<div class="modal" id="mDoc"><div class="box"><div class="top"><b id="mTitle"></b><button class="b" id="mClose">닫기</button></div><div id="mBody"></div></div></div>
+<div class="modal" id="mConfirm"><div class="box" style="max-width:420px"><div id="cMsg" style="margin:6px 0 14px"></div><div class="row" style="justify-content:flex-end"><button class="b" id="cNo">취소</button><button class="b p" id="cYes">확인</button></div></div></div>
+<div class="modal" id="mQuick"><div class="box" style="max-width:440px"><div class="top"><b id="qTitle"></b><button class="b" id="qClose">닫기</button></div>
+<div class="qform"><label>날짜</label><b id="qDate"></b>
+<label>구분</label><div class="seg" id="qPart"><button data-v="all" class="on">종일</button><button data-v="am">오전</button><button data-v="pm">오후</button></div>
+<label>사유</label><input type="text" id="qReason" placeholder="학회, 출장 등 (선택)">
+<label>대진</label><input type="text" id="qSub" list="docList" placeholder="대신 진료하는 의사 (선택)">
+<label></label><div class="row"><button class="b p" id="qSave">휴진 등록</button></div></div>
+<div class="qlist" id="qList"></div></div></div>
+<div class="modal" id="mChg"><div class="box" style="max-width:1000px"><div class="top"><b id="gTitle">바뀌는 내용 확인</b><button class="b" id="gClose">닫기</button></div>
+<div class="hint" id="gSub" style="margin-bottom:8px"></div>
+<div style="overflow:auto;max-height:60vh;border:1px solid var(--line);border-radius:6px"><table class="t chg"><colgroup><col style="width:38px"><col style="width:64px"><col style="width:150px"><col><col><col style="width:200px"></colgroup>
+<thead><tr><th class="c"><input type="checkbox" id="gAll" checked></th><th class="c">구분</th><th>교수 (진료과)</th><th>바뀌기 전</th><th>바뀐 후</th><th>원문</th></tr></thead><tbody id="gBody"></tbody></table></div>
+<div class="row" style="margin-top:10px"><span class="hint" id="gCount"></span><span style="margin-left:auto" class="row"><button class="b" id="gHist">수정 이력 보기</button><button class="b p" id="gApply">고른 항목 반영</button></span></div>
+</div></div>
+<div class="modal" id="mHist"><div class="box" style="max-width:900px"><div class="top"><b id="hTitle">수정 이력</b><button class="b" id="hClose">닫기</button></div>
+<div class="hint" style="margin-bottom:8px">이 달 일정표를 고친 기록입니다. 최근 것이 위에 있고, 「이 수정 전으로」를 누르면 그 수정을 하기 직전 상태로 돌아갑니다(돌아간 것도 기록에 남습니다).</div>
+<div id="hBody" style="max-height:65vh;overflow:auto"></div></div></div>
+<div class="toast" id="toast"></div>
+<footer>개발자 노상엽</footer>
+
+<script>
+const BASE = {"weekday": {"effective": "2026-11-01", "title": "진료 일정표", "rows": [{"center": "소화기센터.외과", "dept": "소화기내과", "name": "김태호", "am": "수목", "pm": "월", "resv": [], "spec": "식도질환, 위, 십이지장궤양, 위암, 대장암, 만성대장염, 내시경"}, {"center": "소화기센터.외과", "dept": "소화기내과", "name": "장재혁", "am": "화금", "pm": "목", "resv": [], "spec": "췌장질환, 담관 및 담낭질환, 담석증"}, {"center": "소화기센터.외과", "dept": "소화기내과", "name": "김창환", "am": "월금", "pm": "목", "resv": [], "spec": "치료내시경(조기위암,위선종,조기대장암,대장용종,스텐트시술,담도담석),염증성장질환(크론병,궤양성대장염,베체트장염,장결핵),하부위장관질환(대장암,하부위장관 출혈,장염)"}, {"center": "소화기센터.외과", "dept": "소화기내과", "name": "권태근", "am": "월목", "pm": "수", "resv": [], "spec": "염증성장질환, 조기대장암 및 위암 치료내시경, 대장종양, 난치성 장염"}, {"center": "소화기센터.외과", "dept": "소화기내과", "name": "김효석", "am": "수", "pm": "화금", "resv": [], "spec": "췌장질환, 담관질환, 담낭질환, 식도질환, 위장관질환, 내시경"}, {"center": "소화기센터.외과", "dept": "소화기내과", "name": "김희언", "am": "월수", "pm": "화목", "resv": [], "spec": "간염, 간경변, 간암, 간이식"}, {"center": "소화기센터.외과", "dept": "소화기내과", "name": "이승원", "am": "월수금", "pm": "화", "resv": [], "spec": "간염, 간경변, 간암, 간이식"}, {"center": "소화기센터.외과", "dept": "소화기내과", "name": "이해림", "am": "화목", "pm": "월금", "resv": [], "spec": "간염, 간경변, 간암, 간이식"}, {"center": "소화기센터.외과", "dept": "소화기내과", "name": "김인섭", "am": "", "pm": "월", "resv": [], "spec": "위장관소화기내과질환"}, {"center": "소화기센터.외과", "dept": "소화기내과", "name": "김영민", "am": "", "pm": "수", "resv": [], "spec": "위장관소화기내과질환 [수 격주진료]"}, {"center": "소화기센터.외과", "dept": "소화기내과", "name": "이유진", "am": "", "pm": "수", "resv": [], "spec": "위장관소화기내과질환 [수 격주진료]"}, {"center": "소화기센터.외과", "dept": "대장항문외과", "name": "안창혁", "am": "월목", "pm": "", "resv": [], "spec": "결장암, 직장암, 항문암, 복강경"}, {"center": "소화기센터.외과", "dept": "대장항문외과", "name": "김현호", "am": "화금", "pm": "", "resv": [], "spec": "대장, 항문질환, 대장암, 대장 및 항문질환, 로봇수술"}, {"center": "소화기센터.외과", "dept": "대장항문외과", "name": "박미령", "am": "", "pm": "목", "resv": [], "spec": "대장항문질환"}, {"center": "소화기센터.외과", "dept": "갑상선내분비외과", "name": "성기영", "am": "금", "pm": "화", "resv": [], "spec": "갑상선암 및 질환, 내분비암 및 질환, 내시경 수술"}, {"center": "소화기센터.외과", "dept": "갑상선내분비외과", "name": "김영민", "am": "", "pm": "수", "resv": [], "spec": "갑상선 결절 및 종양질환(여성)"}, {"center": "소화기센터.외과", "dept": "간담췌외과", "name": "나건형", "am": "화금", "pm": "화", "resv": [], "spec": "간담췌 질환, 간담도췌장암, 복강경수술, 간이식, 로봇수술"}, {"center": "소화기센터.외과", "dept": "간담췌외과", "name": "서창호", "am": "", "pm": "월목", "resv": [], "spec": "간담췌 질환, 복강경 수술, 담석증, 담낭질환, 로봇수술"}, {"center": "소화기센터.외과", "dept": "혈관이식외과", "name": "전강웅", "am": "월목", "pm": "", "resv": [], "spec": "혈관외과,신장이식,혈관투석접근,혈관내치료 대동맥 및 다리동맥질환,하지정맥류,혈전증, 당뇨족, 다리 괴사"}, {"center": "소화기센터.외과", "dept": "위장관외과", "name": "이하예민", "am": "수", "pm": "월", "resv": [], "spec": "위암, 소장암, 위장관기질종양, 위점막하종양, 위식도 역류질환, 고도비만 대사수술, 로봇수술,서혜부,대퇴,복부탈장"}, {"center": "소화기센터.외과", "dept": "위장관외과", "name": "송형석", "am": "화", "pm": "금", "resv": [], "spec": "위암, 위장관기질종양, 고도비만대사수술"}, {"center": "여성센터,\n유방암센터", "dept": "갑상선내분비외과", "name": "성기영", "am": "화", "pm": "", "resv": [], "spec": "갑상선암 및 질환, 내분비암 및 질환, 내시경 수술"}, {"center": "여성센터,\n유방암센터", "dept": "갑상선내분비외과", "name": "김영민", "am": "목", "pm": "", "resv": [], "spec": "갑상선 결절 및 종양질환(여성)"}, {"center": "여성센터,\n유방암센터", "dept": "유방외과", "name": "류지영", "am": "월수", "pm": "월수", "resv": [], "spec": "유방암, 유방질환, 로봇수술"}, {"center": "여성센터,\n유방암센터", "dept": "유방외과", "name": "백필선", "am": "화금", "pm": "화목", "resv": [], "spec": "유방관련 질환, 로봇수술"}, {"center": "여성센터,\n유방암센터", "dept": "성형외과", "name": "이중호", "am": "목", "pm": "월", "resv": [], "spec": "유방성형, 유방암수술 후 재건, 미용성형, 미세수술, 림프부종, 반흔성형(켈로이드)"}, {"center": "여성센터,\n유방암센터", "dept": "재활의학과", "name": "박근영", "am": "금", "pm": "월", "resv": [], "spec": "암재활,림프부종,어깨통증,관절염,손 및 발저림,말초신경질환,근력약화, 근육통,유방암 및 부인암 수술 후 근골격계 증상"}, {"center": "호흡기폐암센터", "dept": "호흡기알레르기내과", "name": "권순석", "am": "월목", "pm": "", "resv": [], "spec": "호흡기 및 폐암, 알레르기 질환, 천식, 폐섬유화증, 만성폐쇄성 폐질환"}, {"center": "호흡기폐암센터", "dept": "호흡기내과", "name": "이응구", "am": "화금", "pm": "월", "resv": [], "spec": "만성폐쇄성 폐질환, 천식, 기관지 질환, 결핵, 폐렴, 기관지 내시경"}, {"center": "호흡기폐암센터", "dept": "호흡기내과", "name": "강혜선", "am": "월", "pm": "금", "resv": [], "spec": "폐암, 폐 결절, 만성폐쇄성 폐질환, 만성기침, 폐결핵"}, {"center": "호흡기폐암센터", "dept": "호흡기내과", "name": "김용현", "am": "수", "pm": "", "resv": [], "spec": "호흡기 및 폐암, 알레르기 질환, 천식, 폐섬유화증, 만성폐쇄성 폐질환"}, {"center": "호흡기폐암센터", "dept": "호흡기내과", "name": "일반의", "am": "", "pm": "금", "resv": [], "spec": "호흡기내과 공통진료(진료과 상황에 따라 일정 추가 예정)"}, {"center": "호흡기폐암센터", "dept": "심장혈관흉부외과", "name": "최시영", "am": "화목", "pm": "화", "resv": [], "spec": "폐암, 종격동 종양, 식도암, 다한증, 흉강경수술"}, {"center": "호흡기폐암센터", "dept": "심장혈관흉부외과", "name": "심성보", "am": "수", "pm": "", "resv": [], "spec": "심혈관질환, 일반 흉부질환 및 외상"}, {"center": "호흡기폐암센터", "dept": "심장혈관흉부외과", "name": "전현우", "am": "월금", "pm": "월", "resv": [], "spec": "폐결절, 간유리음영, 폐암, 식도암, 로봇수술"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과", "name": "전상훈", "am": "월화", "pm": "수목", "resv": [], "spec": "고형암(유방암,두경부암,식도암,뇌종양,흑색종,폐암 및 기타 고형암), 혈액암, 혈액질환"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과", "name": "김서리", "am": "화금", "pm": "월수", "resv": [], "spec": "고형암(비뇨기암, 위암, 소장암 및 기타 고형암), 혈액암, 혈액질환"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과", "name": "이국진", "am": "수", "pm": "화금", "resv": [], "spec": "고형암(간담도암,췌장암,대장암, 부인암, 육종 및 기타 고형암), 혈액암, 혈액질환"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "이성수", "am": "수목", "pm": "월화", "resv": [], "spec": "당뇨병, 갑상선질환, 골다공증, 고지혈증"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "김성래", "am": "월수목", "pm": "화", "resv": [], "spec": "당뇨병, 골다공증, 고혈압, 내분비질환, 고지혈증, 갑상선질환, 비만"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원", "am": "월화", "pm": "수금", "resv": [], "spec": "당뇨병, 골다공증, 고혈압, 내분비질환, 고지혈증, 갑상선질환, 비만"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "손장원", "am": "화금", "pm": "수목", "resv": [], "spec": "당뇨병, 골다공증, 고혈압, 내분비질환, 고지혈증, 갑상선질환, 비만"}, {"center": "안센터", "dept": "안과", "name": "김은철", "am": "목금", "pm": "수", "resv": [], "spec": "각막, 전안부, 백내장, 녹내장"}, {"center": "안센터", "dept": "안과", "name": "강남여", "am": "월금", "pm": "화목", "resv": [], "spec": "사시, 소아안과, 백내장, 녹내장"}, {"center": "안센터", "dept": "안과", "name": "나호", "am": "화수", "pm": "월목", "resv": [], "spec": "망막, 유리체, 백내장"}, {"center": "안센터", "dept": "안과", "name": "오시은", "am": "화수", "pm": "금", "resv": [], "spec": "녹내장, 백내장"}, {"center": "안센터", "dept": "안과", "name": "이지영", "am": "월목", "pm": "월화", "resv": [], "spec": "각막, 건조증, 전안부, 백내장"}, {"center": "안센터", "dept": "안과", "name": "일반의", "am": "", "pm": "", "resv": [], "spec": "안과 공통진료(토요진료)"}, {"center": "", "dept": "갑상선 협진센터", "name": "", "am": "금", "pm": "", "resv": ["금오전"], "spec": "갑상선 1day 클리닉(진단, 수술까지 1일안에 결정) (외과, 내분비내과 협진)"}, {"center": "", "dept": "폐 암 전문센터", "name": "", "am": "", "pm": "화", "resv": ["화오후"], "spec": "폐와 흉부에 발생한 양성 및 악성 종양 환자를 위한 7개과 전문의 다학제간 협진"}, {"center": "", "dept": "대장암 협진센터", "name": "", "am": "금", "pm": "", "resv": ["금오전"], "spec": "대장에 발생한 양성 및 악성 종양환자를 위한 전문의 다학제간 협진 [병동환자 대상]"}, {"center": "", "dept": "위 암 협진센터", "name": "", "am": "", "pm": "금", "resv": ["금오후"], "spec": "위장관에 발생한 양성 및 악성 종양환자를 위한 전문의 다학제간 협진"}, {"center": "", "dept": "간 암 협진센터", "name": "", "am": "", "pm": "화", "resv": ["화오후"], "spec": "간에 발생한 양성 및 악성 종양환자를 위한 전문의 다학제간 협진 [1주, 3주]"}, {"center": "", "dept": "유방암 협진센터", "name": "", "am": "", "pm": "목", "resv": ["목오후"], "spec": "유방에 발생한 종양환자를 위한 다학제간 협진"}, {"center": "", "dept": "비만대사수술클리닉", "name": "", "am": "금", "pm": "", "resv": ["금오전"], "spec": "비만대사수술클리닉 [예약제]"}, {"center": "", "dept": "두경부 협진클리닉", "name": "", "am": "", "pm": "월", "resv": ["월오후"], "spec": "두경부에 발생한 양성 및 악성 종양 환자를 위한 6개과 전문의 다학제간 협진 [2주, 4주]"}, {"center": "", "dept": "순환기내과", "name": "김동빈", "am": "월수", "pm": "목", "resv": [], "spec": "관상동맥질환(심근경색증, 협심증), 심부전, 고혈압, 고지혈증"}, {"center": "", "dept": "순환기내과", "name": "목지수", "am": "목", "pm": "월금", "resv": [], "spec": "관상동맥질환(심근경색증, 협심증), 심부전, 고혈압, 고지혈증"}, {"center": "", "dept": "순환기내과", "name": "박찬석", "am": "화목", "pm": "월", "resv": [], "spec": "심장초음파, 심부전, 판막질환, 고혈압, 고지혈증"}, {"center": "", "dept": "순환기내과", "name": "변성욱", "am": "화금", "pm": "수", "resv": [], "spec": "관상동맥질환(심근경색증, 협심증), 심부전, 고혈압, 고지혈증, 판막질환"}, {"center": "", "dept": "순환기내과", "name": "임상현", "am": "월수", "pm": "화", "resv": [], "spec": "고혈압, 심부전, 관상동맥질환, 판막질환, 고지혈증"}, {"center": "", "dept": "감염내과", "name": "최재기", "am": "화", "pm": "금", "resv": [], "spec": "감염 질환, 폐렴 [국책사업에 따른 외래진료 단축운영 '24.11~]"}, {"center": "", "dept": "감염내과", "name": "유진홍", "am": "목", "pm": "화", "resv": [], "spec": "감염 질환"}, {"center": "", "dept": "감염내과", "name": "이새봄", "am": "월수", "pm": "", "resv": [], "spec": "감염 질환"}, {"center": "", "dept": "신장내과", "name": "민지원", "am": "화목", "pm": "월수", "resv": [], "spec": "신장이식, 당뇨병성 신증, 고혈압성 콩팥병, 사구체신염, 혈뇨 단백뇨, 만성콩팥병, 투석"}, {"center": "", "dept": "신장내과", "name": "강동혁", "am": "월목", "pm": "화금", "resv": [], "spec": "당뇨병성신증, 고혈압성 콩팥병, 사구체신염, 혈뇨, 단백뇨, 만성콩팥병, 말기콩팥병(혈액투석, 복막투석)"}, {"center": "", "dept": "신장내과", "name": "고은정", "am": "", "pm": "", "resv": [], "spec": "장기연수"}, {"center": "", "dept": "신장내과", "name": "윤소정", "am": "수금", "pm": "월", "resv": [], "spec": "당뇨병성신증, 고혈압성 콩팥병, 사구체신염, 혈뇨, 단백뇨, 만성콩팥병"}, {"center": "", "dept": "류마티스내과", "name": "권의종", "am": "월화목", "pm": "수", "resv": [], "spec": "강직성척추염, 루푸스, 염증성근염, 쇼그렌병, 베체트병, IgG4 연관질환, 류마티스관절염, 통풍, 골관절염, 기타 결체조직 질환"}, {"center": "", "dept": "가정의학과", "name": "옥선명", "am": "화수금", "pm": "월", "resv": [], "spec": "만성질환 관리,만성피로 진료,정기건강검진 및 암조기 검진,건강검진 후 추가 상담 및 진료,성인예방접종, 임상 영양 및 대사불균형 교정,여행의학,유학생 예방접종, 진단서 발급(유학생 예방접종 관련, 진료환자 대상)[20일 이후 진료재개]"}, {"center": "", "dept": "핵의학과", "name": "김정호", "am": "화목", "pm": "", "resv": ["화오전", "목오전"], "spec": "갑상선 기능항진증, 갑상선암 방사선 동위원소 치료"}, {"center": "", "dept": "완화의학과", "name": "윤민기", "am": "", "pm": "화목", "resv": [], "spec": "가정형호스피스, 입원형호스피스"}, {"center": "", "dept": "정형외과", "name": "이재영", "am": "수목", "pm": "화", "resv": [], "spec": "슬관절(무릎 관절), 인공관절 클리닉, 스포츠 손상 및 관절경, 골 종양 및 연부조직 종양"}, {"center": "", "dept": "정형외과", "name": "박일중", "am": "화금", "pm": "월", "resv": [], "spec": "수부 및 수근관절, 주관절(팔꿈치), 미세혈관질환 및 말초신경질환, 수부관절 관련 외상"}, {"center": "", "dept": "정형외과", "name": "박일규", "am": "화", "pm": "월목", "resv": [], "spec": "슬관절(무릎관절), 인공관절, 스포츠 손상, 관절경, 슬관절 관련 외상, 경비골 골절(종아리, 정강뼈)"}, {"center": "", "dept": "정형외과", "name": "박종훈", "am": "", "pm": "화수금", "resv": [], "spec": "견관절, 견관절 관련 외상"}, {"center": "", "dept": "정형외과", "name": "박지훈", "am": "수", "pm": "월금", "resv": [], "spec": "고관절, 고관절 관련 외상"}, {"center": "", "dept": "정형외과", "name": "안중현", "am": "금", "pm": "화수", "resv": [], "spec": "척추관절 및 관련 외상"}, {"center": "", "dept": "정형외과", "name": "이기행", "am": "월목", "pm": "", "resv": [], "spec": "고관절(엉덩이포함), (고관절의)인공관절, 류마티스 고관절, 골다공증"}, {"center": "", "dept": "정형외과", "name": "정진화", "am": "화금", "pm": "수", "resv": [], "spec": "족부질환 및 외상, 발목(인대, 염좌)"}, {"center": "", "dept": "정형외과", "name": "정창훈", "am": "월수목", "pm": "", "resv": [], "spec": "소아정형외과(소아척추,종양질환 제외),소아외상 및 스포츠손상,견주관절질환(어깨관절) 및 외상,관절경수술"}, {"center": "", "dept": "정형외과", "name": "일반의", "am": "", "pm": "수금", "resv": [], "spec": "정형외과 공통진료"}, {"center": "", "dept": "정형외과 협진 클리닉", "name": "", "am": "금", "pm": "", "resv": ["금오전"], "spec": "수부 및 사지 재건술 클리닉 (정창훈 교수, 박일중 교수, 이재영 교수 협진)"}, {"center": "", "dept": "신경외과", "name": "박익성", "am": "화수", "pm": "화", "resv": [], "spec": "뇌종양, 뇌혈관질환*, 두부외상, 두통, 어지럼증, 안면마비, 안면경련, 방사선 수술"}, {"center": "", "dept": "신경외과", "name": "김성림", "am": "월화목", "pm": "", "resv": [], "spec": "뇌혈관 내 수술**,뇌졸중,기능성신경외과,소아신경외과"}, {"center": "", "dept": "신경외과", "name": "김동훈", "am": "월", "pm": "월목", "resv": [], "spec": "경추 디스크 및 협착증, 후종인대골화증, 요추 디스크 및 협착증, 미세절개 척추 수술, 척추 외상, 척추 종양, 척추 재수술"}, {"center": "", "dept": "신경외과", "name": "김성한", "am": "금", "pm": "월수", "resv": [], "spec": "뇌혈관질환*, 두부외상, 두통, 어지럼증, 안면마비, 소아신경외과"}, {"center": "", "dept": "신경외과", "name": "김훈", "am": "화목", "pm": "수", "resv": [], "spec": "뇌혈관질환(뇌경색,뇌출혈,뇌동맥류),뇌혈관내수술(급성뇌경색 혈전용해술,뇌혈관협착 스탠트 삽입술),두부외상"}, {"center": "", "dept": "신경외과", "name": "이형진", "am": "", "pm": "목금", "resv": [], "spec": "뇌혈관질환, 뇌경색, 두부외상, 두통, 어지러움, 안면마비, 뇌동맥류, 모야모야병"}, {"center": "", "dept": "신경외과", "name": "이후인", "am": "", "pm": "금", "resv": [], "spec": "뇌혈관질환, 뇌경색, 두부외상, 두통, 어지러움, 안면마비, 뇌동맥류, 모야모야병"}, {"center": "", "dept": "방사선종양학과", "name": "유미나", "am": "월수", "pm": "화목", "resv": [], "spec": "두경부암, 유방암, 소화기암(위, 대장, 직장, 췌장, 간 담도)"}, {"center": "", "dept": "방사선종양학과", "name": "이윤희", "am": "화목", "pm": "월수", "resv": [], "spec": "폐암, 유방암, 전립선암, 부인암, 뇌종양"}, {"center": "", "dept": "방사선종양학과", "name": "문소화", "am": "수금", "pm": "화금", "resv": [], "spec": "육종, 피부암, 혈액암, 림프종, 식도암, 두경부암, 전립선암, 전이암"}, {"center": "", "dept": "신경과", "name": "신혜은", "am": "화수목", "pm": "월", "resv": [], "spec": "기억장애, 치매, 뇌졸중, 두통, 어지럼증"}, {"center": "", "dept": "신경과", "name": "이지은", "am": "월금", "pm": "화수", "resv": [], "spec": "뇌전증, 파킨슨병 운동장애, 두통, 어지럼증"}, {"center": "", "dept": "신경과", "name": "호성희", "am": "월화", "pm": "목금", "resv": [], "spec": "치매, 두통, 어지럼증, 뇌졸중, 말초신경"}, {"center": "", "dept": "산부인과", "name": "이대우", "am": "수금", "pm": "월", "resv": [], "spec": "부인암(자궁암, 난소암), 부인과 질환(자궁근종, 난소 낭종), 복강경 수술 전문, 로봇수술"}, {"center": "", "dept": "산부인과", "name": "김민정", "am": "월목", "pm": "수", "resv": [], "spec": "자궁난소질환, 월경장애, 유전상담, 폐경, 유방질환, 산모, 복강경, 로봇수술, 나프로임신법"}, {"center": "", "dept": "산부인과", "name": "박성은", "am": "화", "pm": "목금", "resv": [], "spec": "부인암(자궁암, 난소암), 부인과 질환(자궁근종, 난소낭종), 복강경 수술 전문, 로봇수술"}, {"center": "", "dept": "산부인과", "name": "신재은", "am": "화금", "pm": "수", "resv": [], "spec": "산모, 정밀초음파, 복강경수술, 부인과질환(자궁근종, 난소 낭종), 로봇수술"}, {"center": "", "dept": "산부인과", "name": "이경은", "am": "수", "pm": "화목", "resv": [], "spec": "산모, 정밀초음파, 부인과 질환(자궁근종, 난소낭종), 로봇수술, 나프로임신법"}, {"center": "", "dept": "산부인과", "name": "이해남", "am": "월목", "pm": "화", "resv": [], "spec": "부인암(자궁암, 난소암), 부인과 질환(자궁근종, 난소낭종), 복강경 수술 전문, 로봇수술[화 격주진료]"}, {"center": "", "dept": "산부인과", "name": "이아라", "am": "화", "pm": "월금", "resv": [], "spec": "청소년/미혼여성, 월경장애, 폐경, 자궁난소질환(자궁근종, 난소낭종), 여성생식기 이상, 복강경 수술 전문, 로봇수술, 나프로임신법"}, {"center": "", "dept": "나프로임신센터", "name": "김민정", "am": "목", "pm": "월", "resv": [], "spec": "나프로임신법 [초진은 콜센터, 재진은 나프로임신센터로 문의]"}, {"center": "", "dept": "나프로임신센터", "name": "이경은", "am": "", "pm": "목", "resv": [], "spec": "나프로임신법 [초진은 콜센터, 재진은 나프로임신센터로 문의]"}, {"center": "", "dept": "나프로임신센터", "name": "이아라", "am": "화", "pm": "월금", "resv": [], "spec": "나프로임신법 [초진은 콜센터, 재진은 나프로임신센터로 문의]"}, {"center": "", "dept": "소아청소년과", "name": "빈중현", "am": "", "pm": "월수", "resv": [], "spec": "신생아, 소아일반질환, 미숙아 발달, 신경계질환, 두통, 뇌전증(간질)"}, {"center": "", "dept": "소아청소년과", "name": "김환수", "am": "월화", "pm": "금", "resv": [], "spec": "호흡기, 알러지질환, 천식, 아토피피부염, 호흡기감염"}, {"center": "", "dept": "소아청소년과", "name": "서진순", "am": "수", "pm": "목", "resv": [], "spec": "소아일반질환, 소아신장질환"}, {"center": "", "dept": "소아청소년과", "name": "이수영", "am": "목", "pm": "화", "resv": [], "spec": "소아감염, 임상면역(가와사끼병) [국책사업에 따른 외래진료 단축운영 '26.01~]"}, {"center": "", "dept": "소아청소년과", "name": "조경순", "am": "화수목금", "pm": "", "resv": [], "spec": "성장, 성조숙증, 소아내분비"}, {"center": "", "dept": "소아청소년과", "name": "한승범", "am": "", "pm": "", "resv": [], "spec": "장기연수"}, {"center": "", "dept": "콩팥병클리닉", "name": "서진순", "am": "월", "pm": "", "resv": [], "spec": "소아신장질환"}, {"center": "", "dept": "천식아토피클리닉", "name": "김환수", "am": "", "pm": "목", "resv": [], "spec": "천식, 아토피피부염"}, {"center": "", "dept": "이비인후과", "name": "주영훈", "am": "월화", "pm": "목", "resv": [], "spec": "두경부종양, 후두음성질환, 갑상선종양, 침샘질환, 편도질환, 로봇수술"}, {"center": "", "dept": "이비인후과", "name": "강준명", "am": "수금", "pm": "월", "resv": [], "spec": "부비동 질환, 코골이(수면무호흡), 비중격 및 성형, 편도 질환"}, {"center": "", "dept": "이비인후과", "name": "정준희", "am": "수목", "pm": "화", "resv": [], "spec": "귀질환(난청, 이명, 어지럼증, 중이염, 안면신경질환, 이관기능장애, 인공와우, 인공중이, 골도보청기)"}, {"center": "", "dept": "이비인후과", "name": "황세환", "am": "목", "pm": "수금", "resv": [], "spec": "비중격 및 외비성형, 알레르기, 부비동염, 코골이, 편도질환"}, {"center": "", "dept": "이비인후과", "name": "일반의", "am": "월화수목금", "pm": "월화수목금", "resv": [], "spec": "이비인후과 공통진료"}, {"center": "", "dept": "보청기클리닉", "name": "", "am": "수목", "pm": "화", "resv": [], "spec": "보청기 상담"}, {"center": "", "dept": "피부과", "name": "이경호", "am": "월화금", "pm": "화", "resv": [], "spec": "아토피피부염, 피부종양, 손발톱질환, 여드름, 주사, 감염성 피부질환"}, {"center": "", "dept": "피부과", "name": "김윤섭", "am": "월수", "pm": "수금", "resv": [], "spec": "건선, 아토피, 두드러기 (생물학적제제)"}, {"center": "", "dept": "피부과", "name": "박철종", "am": "화목", "pm": "월목", "resv": [], "spec": "피부 색소 질환(기미, 흑자, 백반증), 건선"}, {"center": "", "dept": "피부과", "name": "일반의", "am": "수목금", "pm": "목", "resv": [], "spec": "피부알레르기 질환"}, {"center": "", "dept": "성형외과", "name": "이중호", "am": "수", "pm": "", "resv": [], "spec": "유방성형, 유방암수술 후 재건, 미용성형, 미세수술, 림프부종, 반흔성형(켈로이드)"}, {"center": "", "dept": "성형외과", "name": "김영진", "am": "월", "pm": "화", "resv": [], "spec": "단순종괴"}, {"center": "", "dept": "성형외과", "name": "전대원", "am": "화금", "pm": "목", "resv": [], "spec": "미세수술, 당뇨족, 악성흑색종, 수부 및 안면 외상, 미용성형(코 성형), 로봇수술"}, {"center": "", "dept": "성형외과", "name": "권다윤", "am": "목", "pm": "월수", "resv": [], "spec": "안면부 및 수부 질환, 미세수술"}, {"center": "", "dept": "성형외과", "name": "일반의", "am": "", "pm": "금", "resv": [], "spec": "성형외과 공통진료"}, {"center": "", "dept": "치과", "name": "표성운", "am": "", "pm": "", "resv": [], "spec": "회갑연수"}, {"center": "", "dept": "치과", "name": "박수현", "am": "월목금", "pm": "화수", "resv": [], "spec": "치아질환, 치주질환, 발치, 구강 소수술, 보철 및 틀니"}, {"center": "", "dept": "치과", "name": "양미선", "am": "화수금", "pm": "수금", "resv": [], "spec": "치아질환, 치주질환, 치과보철"}, {"center": "", "dept": "치과", "name": "윤현중", "am": "수", "pm": "월화금", "resv": [], "spec": "턱관절 질환, 턱교정 (양악) 수술, 임플란트 수술"}, {"center": "", "dept": "치과", "name": "이혜경", "am": "목", "pm": "수목", "resv": [], "spec": "교정전문 [소아ㆍ성인ㆍ심미ㆍ주걱턱 교정]"}, {"center": "", "dept": "치과", "name": "허현아", "am": "수금", "pm": "월화목", "resv": [], "spec": "치과보존, 심미보철, 임플란트보철, 틀니, 발치"}, {"center": "", "dept": "비뇨의학과", "name": "조강준", "am": "목금", "pm": "수", "resv": [], "spec": "비뇨기과 공통진료, 전립선질환, 요로 및 신장결석, 전립선암 복강경수술, 골반장기탈출증 [금 격주진료]"}, {"center": "", "dept": "비뇨의학과", "name": "고준성", "am": "화금", "pm": "월", "resv": [], "spec": "비뇨기계종양 - 신장암,방광암,전립선종양(로봇복강경수술), 전립선질환, 요로결석 [금 격주진료]"}, {"center": "", "dept": "비뇨의학과", "name": "김준철", "am": "월수", "pm": "목", "resv": [], "spec": "배뇨장애, 여성 배뇨장애, 요실금클리닉, 전립선 질환, 복강경수술, 로봇수술"}, {"center": "", "dept": "비뇨의학과", "name": "최진봉", "am": "", "pm": "화금", "resv": [], "spec": "남성갱년기, 성기능장애, 전립선질환, 요로결석, 로봇수술, 나프로"}, {"center": "", "dept": "정신건강의학과", "name": "배치운", "am": "월화", "pm": "월목", "resv": [], "spec": "정신약물학, 기분장애(조울증,우울증), 정신분열증"}, {"center": "", "dept": "정신건강의학과", "name": "김하연", "am": "수목금", "pm": "화수", "resv": [], "spec": "소아청소년정신의학, 발달장애, 학습장애, ADHD, 성인 ADHD, 여성정신의학, 기분장애"}, {"center": "", "dept": "재활의학과", "name": "임선", "am": "화금", "pm": "수", "resv": [], "spec": "연하장애, 연하재활, 삼킴 장애, 뇌졸중재활, 인지재활, 뇌신경재활, 경직, 뇌병변"}, {"center": "", "dept": "재활의학과", "name": "김혜원", "am": "화목", "pm": "월", "resv": [], "spec": "뇌졸중, 뇌병변, 소아재활, 근골격계 통증, 근전도"}, {"center": "", "dept": "재활의학과", "name": "박근영", "am": "월", "pm": "목", "resv": [], "spec": "근골격계 질환, 뇌졸중, 척수마비, 족부, 보장구 클리닉(월), 족부 클리닉(목)"}, {"center": "", "dept": "재활의학과", "name": "박지수", "am": "", "pm": "", "resv": [], "spec": "장기휴가"}, {"center": "", "dept": "재활의학과", "name": "박혜연", "am": "수", "pm": "화금", "resv": [], "spec": "근감소증/노인재활, 손발저림, 근골격계재활, 호흡재활, 퇴행성 뇌질환(파킨슨병 등), 척수손상"}, {"center": "", "dept": "재활의학과", "name": "일반의", "am": "", "pm": "", "resv": [], "spec": "재활의학과 공통진료"}, {"center": "", "dept": "마취통증의학과", "name": "서경수", "am": "", "pm": "수", "resv": [], "spec": "척추통증(경추, 요추디스크, 척추관 협착증, 좌골신경통), 척추 및 신경병증성 통증의 비수술적 치료,  대상포진 및 대상포진 후 신경통, 만성두통 및 안명통증, 근골격계 통증(어깨, 무릎, 관절통증)"}, {"center": "", "dept": "마취통증의학과", "name": "허철령", "am": "수", "pm": "", "resv": [], "spec": "관절통(무릎, 어깨, 팔꿈치 등), 척추 및 골반통증, 복합부위 통증 증후군, 관절의 비수술적 치료, 각종 신경변증성 통증, 대상포진 후 신경통"}], "notes": ["[알림] 진료요일이 파란색 표시는 예약환자만 진료하고, 진료요일이 붉은색 표시는 진료일정 또는 과목에 제한이 있습니다.", "* 뇌경색, 뇌출혈, 뇌동맥류 /  ** 혈관협착스텐트 삽입술,뇌동맥류코일색전술,급성 뇌경색, 혈전 용해술"]}, "sat": {"2026-11-07": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "정형외과", "name": "이재영"}, {"center": "", "dept": "신경외과", "name": "김성한"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "성형외과", "name": "전대원"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-11-14": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "장재혁"}, {"center": "소화기센터.외과", "dept": "외과", "name": "나건형"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "이성수"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "순환기내과", "name": "목지수"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "이아라"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "일반의"}], "2026-11-21": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김인섭"}, {"center": "여성센터", "dept": "외과", "name": "김영민"}, {"center": "안센터", "dept": "안과", "name": "이지영"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "정형외과", "name": "일반의"}, {"center": "", "dept": "신경외과", "name": "이후인"}, {"center": "", "dept": "산부인과", "name": "김민정"}, {"center": "", "dept": "이비인후과", "name": "황세환"}], "2026-11-28": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김효석"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "소화기센터.외과", "dept": "외과", "name": "서창호"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "비뇨의학과", "name": "최진봉"}, {"center": "", "dept": "신장내과", "name": "민지원"}, {"center": "", "dept": "산부인과", "name": "신재은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "정준희"}, {"center": "", "dept": "피부과", "name": "박철종"}, {"center": "", "dept": "성형외과", "name": "권다윤"}], "2026-10-10": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "장재혁"}, {"center": "안센터", "dept": "안과", "name": "이지영"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "신경외과", "name": "김성한"}, {"center": "", "dept": "산부인과", "name": "신재은"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}, {"center": "", "dept": "피부과", "name": "김윤섭"}, {"center": "", "dept": "정신건강의학과", "name": "배치운"}], "2026-10-17": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "여성센터", "dept": "외과", "name": "김영민"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "정형외과", "name": "일반의"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "산부인과", "name": "이아라"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "황세환"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-10-24": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김영민"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "순환기내과", "name": "목지수"}, {"center": "", "dept": "신장내과", "name": "민지원"}, {"center": "", "dept": "정형외과", "name": "박종훈"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "김민정"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "박철종"}, {"center": "", "dept": "성형외과", "name": "전대원"}], "2026-10-31": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김인섭"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "비뇨의학과", "name": "최진봉"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "정형외과", "name": "일반의"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "정준희"}, {"center": "", "dept": "성형외과", "name": "권다윤"}], "2026-09-05": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "강혜선"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "이비인후과", "name": "정준희"}], "2026-09-12": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김효석"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "여성센터", "dept": "외과", "name": "백필선"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "이성수"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "순환기내과", "name": "목지수"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "정형외과", "name": "일반의"}, {"center": "", "dept": "신경외과", "name": "김성한"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "성형외과", "name": "권다윤"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-09-19": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "안센터", "dept": "안과", "name": "이지영"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "정형외과", "name": "박일중"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "산부인과", "name": "김민정"}, {"center": "", "dept": "이비인후과", "name": "황세환"}, {"center": "", "dept": "피부과", "name": "이경호"}, {"center": "", "dept": "성형외과", "name": "전대원"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-08-01": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "여성센터", "dept": "외과", "name": "류지영"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "신장내과", "name": "고은정"}, {"center": "", "dept": "정형외과", "name": "안중현"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "이아라"}, {"center": "", "dept": "이비인후과", "name": "정준희"}], "2026-08-08": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "강혜선"}, {"center": "안센터", "dept": "안과", "name": "나호"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "손장원"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "순환기내과", "name": "목지수"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "정형외과", "name": "박종훈"}, {"center": "", "dept": "신경외과", "name": "김성한"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}, {"center": "", "dept": "피부과", "name": "김윤섭"}, {"center": "", "dept": "성형외과", "name": "이중호"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-08-22": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김효석"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "박철종"}, {"center": "", "dept": "성형외과", "name": "전대원"}], "2026-08-29": [{"center": "소화기센터.외과", "dept": "외과", "name": "전강웅"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "김용현"}, {"center": "안센터", "dept": "안과", "name": "이지영"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "비뇨의학과", "name": "최진봉"}, {"center": "", "dept": "정형외과", "name": "박일중"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "정신건강의학과", "name": "배치운"}], "2026-07-04": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김효석"}, {"center": "여성센터", "dept": "외과", "name": "백필선"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "신장내과", "name": "고은정"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "이비인후과", "name": "정준희"}], "2026-07-11": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "안센터", "dept": "안과", "name": "나호"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "이성수"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "신경외과", "name": "김성한"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "황세환"}, {"center": "", "dept": "성형외과", "name": "이중호"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-07-18": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김인섭"}, {"center": "소화기센터.외과", "dept": "외과", "name": "송형석"}, {"center": "안센터", "dept": "안과", "name": "이지영"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "산부인과", "name": "김민정"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}, {"center": "", "dept": "피부과", "name": "이경호"}, {"center": "", "dept": "정신건강의학과", "name": "배치운"}], "2026-07-25": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "강혜선"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과", "name": "이국진"}, {"center": "안센터", "dept": "안과", "name": "백지원"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "신장내과", "name": "민지원"}, {"center": "", "dept": "정형외과", "name": "박종훈"}, {"center": "", "dept": "산부인과", "name": "이아라"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "박철종"}, {"center": "", "dept": "성형외과", "name": "전대원"}], "2026-06-13": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "장재혁"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "김용현"}, {"center": "안센터", "dept": "안과", "name": "이지영"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "이비인후과", "name": "황세환"}], "2026-06-20": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김효석"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "소화기센터.외과", "dept": "외과", "name": "송형석"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "정형외과", "name": "정진화"}, {"center": "", "dept": "신경외과", "name": "김동훈"}, {"center": "", "dept": "산부인과", "name": "김민정"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "이경호"}, {"center": "", "dept": "성형외과", "name": "이중호"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-06-27": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김영민"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "여성센터", "dept": "외과", "name": "김영민"}, {"center": "안센터", "dept": "안과", "name": "백지원"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "정형외과", "name": "박지훈"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "이아라"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}, {"center": "", "dept": "피부과", "name": "박철종"}, {"center": "", "dept": "성형외과", "name": "전대원"}], "2026-05-02": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "안센터", "dept": "안과", "name": "이지영"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "신경외과", "name": "김훈"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "성형외과", "name": "이중호"}], "2026-05-09": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "장재혁"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "소화기센터.외과", "dept": "외과", "name": "이하예민"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "강혜선"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과", "name": "이국진"}, {"center": "안센터", "dept": "안과", "name": "김은철"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "비뇨의학과", "name": "최진봉"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-05-16": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "김용현"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "정형외과", "name": "이재영"}, {"center": "", "dept": "신경외과", "name": "김성한"}, {"center": "", "dept": "산부인과", "name": "김민정"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "황세환"}, {"center": "", "dept": "피부과", "name": "이경호"}, {"center": "", "dept": "성형외과", "name": "전대원"}], "2026-05-23": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "소화기센터.외과", "dept": "외과", "name": "전강웅"}, {"center": "안센터", "dept": "안과", "name": "나호"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "신장내과", "name": "민지원"}, {"center": "", "dept": "정형외과", "name": "박일중"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "이아라"}, {"center": "", "dept": "이비인후과", "name": "정준희"}, {"center": "", "dept": "피부과", "name": "박철종"}, {"center": "", "dept": "정신건강의학과", "name": "배치운"}], "2026-05-30": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김효석"}, {"center": "안센터", "dept": "안과", "name": "백지원"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}], "2026-04-04": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "강혜선"}, {"center": "안센터", "dept": "안과", "name": "백지원"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "비뇨의학과", "name": "최진봉"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "신장내과", "name": "고은정"}, {"center": "", "dept": "정형외과", "name": "박종훈"}, {"center": "", "dept": "신경외과", "name": "김성한"}, {"center": "", "dept": "산부인과", "name": "이아라"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}], "2026-04-11": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "장재혁"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "여성센터", "dept": "외과", "name": "류지영"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "김용현"}, {"center": "안센터", "dept": "안과", "name": "나호"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "정형외과", "name": "박지훈"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "황세환"}, {"center": "", "dept": "피부과", "name": "김윤섭"}, {"center": "", "dept": "성형외과", "name": "전대원"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-04-18": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "안센터", "dept": "안과", "name": "이지영"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "이경호"}, {"center": "", "dept": "성형외과", "name": "이중호"}], "2026-04-25": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김효석"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "소화기센터.외과", "dept": "외과", "name": "나건형"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "손장원"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신장내과", "name": "민지원"}, {"center": "", "dept": "신경외과", "name": "김동훈"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "정준희"}, {"center": "", "dept": "피부과", "name": "박철종"}], "2026-03-07": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "강혜선"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과", "name": "이국진"}, {"center": "안센터", "dept": "안과", "name": "백지원"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "신장내과", "name": "고은정"}, {"center": "", "dept": "정형외과", "name": "박일중"}, {"center": "", "dept": "신경외과", "name": "김훈"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "정준희"}], "2026-03-14": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "장재혁"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "소화기센터.외과", "dept": "외과", "name": "서창호"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "김용현"}, {"center": "안센터", "dept": "안과", "name": "나호"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "이성수"}, {"center": "", "dept": "순환기내과", "name": "목지수"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "신경외과", "name": "김동훈"}, {"center": "", "dept": "산부인과", "name": "이아라"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}, {"center": "", "dept": "피부과", "name": "김윤섭"}, {"center": "", "dept": "성형외과", "name": "이중호"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-03-21": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "안센터", "dept": "안과", "name": "이지영"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "정형외과", "name": "이재영"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "김민정"}, {"center": "", "dept": "이비인후과", "name": "황세환"}, {"center": "", "dept": "피부과", "name": "이경호"}, {"center": "", "dept": "정신건강의학과", "name": "배치운"}], "2026-03-28": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김효석"}, {"center": "소화기센터.외과", "dept": "외과", "name": "송형석"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "비뇨의학과", "name": "최진봉"}, {"center": "", "dept": "정형외과", "name": "정진화"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "박철종"}, {"center": "", "dept": "성형외과", "name": "전대원"}], "2026-02-07": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이승원"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "김용현"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과", "name": "전상훈"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "신장내과", "name": "고은정"}, {"center": "", "dept": "정형외과", "name": "박종훈"}, {"center": "", "dept": "신경외과", "name": "김동훈"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-02-14": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "장재혁"}, {"center": "여성센터", "dept": "외과", "name": "백필선"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "강혜선"}, {"center": "안센터", "dept": "안과", "name": "김은철"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "손장원"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "순환기내과", "name": "목지수"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "정형외과", "name": "박일규"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}, {"center": "", "dept": "피부과", "name": "김윤섭"}, {"center": "", "dept": "성형외과", "name": "이중호"}], "2026-02-21": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "안센터", "dept": "안과", "name": "백지원"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "비뇨의학과", "name": "최진봉"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "정형외과", "name": "박일중"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "산부인과", "name": "김민정"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "황세환"}, {"center": "", "dept": "피부과", "name": "이경호"}, {"center": "", "dept": "성형외과", "name": "이채림"}, {"center": "", "dept": "정신건강의학과", "name": "배치운"}], "2026-02-28": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김인섭"}, {"center": "여성센터", "dept": "외과", "name": "류지영"}, {"center": "안센터", "dept": "안과", "name": "나호"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "신경외과", "name": "김성한"}, {"center": "", "dept": "산부인과", "name": "이대우"}, {"center": "", "dept": "이비인후과", "name": "정준희"}, {"center": "", "dept": "피부과", "name": "박철종"}, {"center": "", "dept": "성형외과", "name": "전대원"}], "2026-01-03": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "소화기센터.외과", "dept": "외과", "name": "서창호"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "강혜선"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과", "name": "이국진"}, {"center": "안센터", "dept": "안과", "name": "백지원"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "신장내과", "name": "고은정"}, {"center": "", "dept": "신경외과", "name": "김성한"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "이비인후과", "name": "일반의"}], "2026-01-10": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "장재혁"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "안센터", "dept": "안과", "name": "나호"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "이성수"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "순환기내과", "name": "목지수"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "정형외과", "name": "박일규"}, {"center": "", "dept": "신경외과", "name": "김동훈"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}, {"center": "", "dept": "성형외과", "name": "이중호"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2026-01-17": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "여성센터", "dept": "외과", "name": "김영민"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "김용현"}, {"center": "안센터", "dept": "안과", "name": "김은철"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "정형외과", "name": "이재영"}, {"center": "", "dept": "신경외과", "name": "김상돈"}, {"center": "", "dept": "산부인과", "name": "김민정"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "정준희"}, {"center": "", "dept": "피부과", "name": "이경호"}, {"center": "", "dept": "성형외과", "name": "전대원"}, {"center": "", "dept": "정신건강의학과", "name": "배치운"}], "2026-01-24": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "비뇨의학과", "name": "최진봉"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "정형외과", "name": "정진화"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "이대우"}, {"center": "", "dept": "이비인후과", "name": "황세환"}, {"center": "", "dept": "피부과", "name": "박철종"}, {"center": "", "dept": "성형외과", "name": "이채림"}], "2026-01-31": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김효석"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이승원"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "일반의"}], "2025-12-06": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "소화기센터.외과", "dept": "외과", "name": "나건형"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "정형외과", "name": "이재영"}, {"center": "", "dept": "신경외과", "name": "김성한"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "성형외과", "name": "전대원"}], "2025-12-13": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "장재혁"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "강혜선"}, {"center": "안센터", "dept": "안과", "name": "김은철"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "이성수"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "순환기내과", "name": "목지수"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "정형외과", "name": "정진화"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "김윤섭"}, {"center": "", "dept": "성형외과", "name": "이중호"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2025-12-20": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이승원"}, {"center": "소화기센터.외과", "dept": "외과", "name": "이하예민"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "김용현"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과", "name": "전상훈"}, {"center": "안센터", "dept": "안과", "name": "나호"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "정형외과", "name": "박종훈"}, {"center": "", "dept": "신경외과", "name": "최선웅"}, {"center": "", "dept": "산부인과", "name": "김민정"}, {"center": "", "dept": "이비인후과", "name": "황세환"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "이경호"}, {"center": "", "dept": "성형외과", "name": "이채림"}], "2025-12-27": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김인섭"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이승원"}, {"center": "안센터", "dept": "안과", "name": "백지원"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "비뇨의학과", "name": "최진봉"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "정형외과", "name": "박일규"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "이대우"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "정준희"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "박철종"}], "2025-11-01": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김태호"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "강혜선"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과", "name": "이국진"}, {"center": "안센터", "dept": "안과", "name": "나호"}, {"center": "", "dept": "순환기내과", "name": "김동빈"}, {"center": "", "dept": "신장내과", "name": "고은정"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "정준희"}, {"center": "", "dept": "이비인후과", "name": "일반의"}], "2025-11-08": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "장재혁"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "소화기센터.외과", "dept": "외과", "name": "전강웅"}, {"center": "안센터", "dept": "안과", "name": "김은철"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "손장원"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "비뇨의학과", "name": "최진봉"}, {"center": "", "dept": "순환기내과", "name": "목지수"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "정형외과", "name": "박일중"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "산부인과", "name": "이대우"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "김윤섭"}, {"center": "", "dept": "성형외과", "name": "이중호"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}], "2025-11-15": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김효석"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "김용현"}, {"center": "안센터", "dept": "안과", "name": "일반의"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "정형외과", "name": "이재영"}, {"center": "", "dept": "신경외과", "name": "김상돈"}, {"center": "", "dept": "산부인과", "name": "김민정"}, {"center": "", "dept": "이비인후과", "name": "황세환"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "성형외과", "name": "한혜주"}, {"center": "", "dept": "정신건강의학과", "name": "배치운"}], "2025-11-22": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "여성센터", "dept": "외과", "name": "류지영"}, {"center": "안센터", "dept": "안과", "name": "백지원"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "정형외과", "name": "일반의"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "성형외과", "name": "전대원"}], "2025-11-29": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "권태근"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "", "dept": "신경외과", "name": "최선웅"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}, {"center": "", "dept": "이비인후과", "name": "일반의"}], "2025-10-11": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "장재혁"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "여성센터", "dept": "외과", "name": "백필선"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "강혜선"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과", "name": "전상훈"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "이성수"}, {"center": "안센터", "dept": "안과", "name": "오시은"}, {"center": "", "dept": "감염내과", "name": "최재기"}, {"center": "", "dept": "순환기내과", "name": "목지수"}, {"center": "", "dept": "신장내과", "name": "고은정"}, {"center": "", "dept": "정형외과", "name": "일반의"}, {"center": "", "dept": "신경외과", "name": "이형진"}, {"center": "", "dept": "산부인과", "name": "이경은"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "주영훈"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "김윤섭"}, {"center": "", "dept": "성형외과", "name": "한혜주"}], "2025-10-18": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "권태근"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "이해림"}, {"center": "당뇨병센터", "dept": "내분비내과", "name": "문혜원"}, {"center": "안센터", "dept": "안과", "name": "김은철"}, {"center": "", "dept": "비뇨의학과", "name": "조강준"}, {"center": "", "dept": "순환기내과", "name": "변성욱"}, {"center": "", "dept": "신장내과", "name": "강동혁"}, {"center": "", "dept": "정형외과", "name": "안중현"}, {"center": "", "dept": "신경외과", "name": "김성림"}, {"center": "", "dept": "산부인과", "name": "박성은"}, {"center": "", "dept": "소아청소년과", "name": "서진순"}, {"center": "", "dept": "이비인후과", "name": "황세환"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "성형외과", "name": "전대원"}], "2025-10-25": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과", "name": "김창환"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과", "name": "김희언"}, {"center": "소화기센터.외과", "dept": "외과", "name": "김현호"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과", "name": "김용현"}, {"center": "안센터", "dept": "안과", "name": "나호"}, {"center": "", "dept": "신장내과", "name": "윤소정"}, {"center": "", "dept": "정형외과", "name": "박종훈"}, {"center": "", "dept": "신경외과", "name": "하명훈"}, {"center": "", "dept": "산부인과", "name": "이대우"}, {"center": "", "dept": "소아청소년과", "name": "빈중현"}, {"center": "", "dept": "이비인후과", "name": "일반의"}, {"center": "", "dept": "피부과", "name": "박철종"}, {"center": "", "dept": "성형외과", "name": "이중호"}, {"center": "", "dept": "정신건강의학과", "name": "김하연"}]}, "satRows": [{"center": "소화기센터.외과", "dept": "소화기(위장관)내과"}, {"center": "소화기센터.외과", "dept": "소화기(간담도)내과"}, {"center": "소화기센터.외과", "dept": "외과"}, {"center": "여성센터", "dept": "외과"}, {"center": "호흡기폐암센터", "dept": "호흡기 및 알레르기 내과"}, {"center": "호흡기폐암센터", "dept": "혈액종양내과"}, {"center": "안센터", "dept": "안과"}, {"center": "당뇨병센터", "dept": "내분비내과"}, {"center": "", "dept": "감염내과"}, {"center": "", "dept": "비뇨의학과"}, {"center": "", "dept": "순환기내과"}, {"center": "", "dept": "신장내과"}, {"center": "", "dept": "정형외과"}, {"center": "", "dept": "신경외과"}, {"center": "", "dept": "산부인과"}, {"center": "", "dept": "소아청소년과"}, {"center": "", "dept": "이비인후과"}, {"center": "", "dept": "피부과"}, {"center": "", "dept": "성형외과"}, {"center": "", "dept": "정신건강의학과"}]};
+const DEFAULT_HOL = `2026-01-01 신정
+2026-02-16 설날
+2026-02-17 설날
+2026-02-18 설날
+2026-03-01 삼일절
+2026-03-02 대체공휴일(삼일절)
+2026-05-05 어린이날
+2026-05-24 부처님오신날
+2026-05-25 대체공휴일(부처님오신날)
+2026-06-03 전국동시지방선거
+2026-06-06 현충일
+2026-07-17 제헌절
+2026-08-15 광복절
+2026-08-17 대체공휴일(광복절)
+2026-09-24 추석
+2026-09-25 추석
+2026-09-26 추석
+2026-10-03 개천절
+2026-10-05 대체공휴일(개천절)
+2026-10-09 한글날
+2026-12-25 성탄절
+2027-01-01 신정
+2027-02-06 설날
+2027-02-07 설날
+2027-02-08 설날
+2027-02-09 대체공휴일(설날)
+2027-03-01 삼일절
+2027-05-05 어린이날
+2027-05-13 부처님오신날
+2027-06-06 현충일
+2027-08-15 광복절
+2027-08-16 대체공휴일(광복절)
+2027-09-14 추석
+2027-09-15 추석
+2027-09-16 추석
+2027-10-03 개천절
+2027-10-04 대체공휴일(개천절)
+2027-10-09 한글날
+2027-10-11 대체공휴일(한글날)
+2027-12-25 성탄절
+2027-12-27 대체공휴일(성탄절)`;
+const DOW = ['일','월','화','수','목','금','토'];
+const VIEW_ONLY = true;
+const LS = VIEW_ONLY ? 'jinryo-view-v1' : 'jinryo-search-v1';
+if(VIEW_ONLY) document.body.classList.add('view');
+
+/* ---------- 저장 ---------- */
+let S = {offs:[], hol:null, weekday:null, sat:null};
+function load(){ try{ const t=localStorage.getItem(LS); if(t) S=Object.assign(S,JSON.parse(t)); }catch(e){} }
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(S)); return true; }catch(e){ toast('이 화면에서는 저장이 안 됩니다. 백업 텍스트를 꼭 복사해 두세요.'); return false; } }
+load();
+if(VIEW_ONLY){ S={offs:[],hol:null,sat:null,fav:S.fav||[],print:S.print}; }
+const W = () => (S.months && S.months[S.curMonth] ? S.months[S.curMonth].weekday : BASE.weekday);
+const SAT = () => Object.assign({}, BASE.sat, S.sat||{});
+function holMap(){ const m={}; (S.hol==null?DEFAULT_HOL:S.hol).split(/\n/).forEach(l=>{ const mm=l.trim().match(/^(\d{4}-\d{2}-\d{2})\s*(.*)$/); if(mm) m[mm[1]]=mm[2]||'공휴일'; }); return m; }
+
+/* ---------- 공통 ---------- */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm = s=>String(s||'').replace(/\s+/g,'');
+const pad = n=>String(n).padStart(2,'0');
+const ymd = d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parseYmd = s=>{ const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); if(!m) return null; const d=new Date(+m[1],m[2]-1,+m[3]); return (d.getMonth()==m[2]-1)?d:null; };
+const addDays=(s,n)=>{ const d=parseYmd(s); d.setDate(d.getDate()+n); return ymd(d); };
+const today = ()=>ymd(new Date());
+const label = s=>{ const d=parseYmd(s); return d? `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.(${DOW[d.getDay()]})` : s; };
+const short = s=>{ const d=parseYmd(s); return d? `${d.getMonth()+1}/${d.getDate()}(${DOW[d.getDay()]})` : s; };
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('on'),2200); }
+function ask(msg){ return new Promise(res=>{ $('#cMsg').innerHTML=msg; $('#mConfirm').classList.add('on'); const done=v=>{ $('#mConfirm').classList.remove('on'); $('#cYes').onclick=$('#cNo').onclick=null; res(v); }; $('#cYes').onclick=()=>done(true); $('#cNo').onclick=()=>done(false); }); }
+
+/* 날짜 칸: 숫자만 입력해도 자동 변환 (20261120 → 2026-11-20, 1120 → 올해 11-20) */
+function fixDate(v){
+  v=String(v||'').trim(); if(!v) return '';
+  let d=v.replace(/[^\d]/g,'');
+  const y=new Date().getFullYear();
+  let r='';
+  if(d.length===8) r=d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6);
+  else if(d.length===6) r='20'+d.slice(0,2)+'-'+d.slice(2,4)+'-'+d.slice(4);
+  else if(d.length===4 && !/[.\-\/]/.test(v)) r=y+'-'+d.slice(0,2)+'-'+d.slice(2);
+  else { const m=v.match(/^(?:(\d{4})\D+)?(\d{1,2})\D+(\d{1,2})/); if(m) r=(m[1]||y)+'-'+pad(m[2])+'-'+pad(m[3]); }
+  return parseYmd(r)? r : null;
+}
+function bindDate(el, onok){
+  const go=()=>{ const r=fixDate(el.value); if(r===null){ el.style.borderColor='var(--off)'; return; } el.style.borderColor=''; el.value=r; onok&&onok(r); };
+  el.addEventListener('input',()=>{ const d=el.value.replace(/[^\d]/g,''); if(d.length===8 && /^\d{8}$/.test(el.value.trim())) go(); });
+  el.addEventListener('change',go);
+  el.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
+}
+
+/* ---------- 의사 목록 ---------- */
+function docs(){ return W().rows.map((r,i)=>Object.assign({id:i,key:norm(r.name)},r)); }
+function absent(r){ return !r.am && !r.pm && /연수|휴가|휴직|파견/.test(r.spec); }
+function isDoctor(r){ return r.name && r.name!=='일반의'; }
+
+/* ===== 고도화: 공통 ===== */
+const clone = o=>JSON.parse(JSON.stringify(o));
+BASE.weekday.rows.forEach((r,i)=>{ if(!r.uid) r.uid='b'+i; });
+if(!S.fav) S.fav=[];
+/* ===== 월 단위 저장·관리 ===== */
+const ymLabel = ym=> ym? `${ym.slice(0,4)}년 ${+ym.slice(5)}월` : '';
+const nextYm = (ym,n=1)=>{ const d=new Date(+ym.slice(0,4), +ym.slice(5)-1+n, 1); return d.getFullYear()+'-'+pad(d.getMonth()+1); };
+function newMonth(w, src){ const x=clone(w); return {weekday:x, base:clone(x), hist:[], status:'draft', src, created:Date.now(), updated:Date.now()}; }
+function migrateMonths(){
+  if(S.months && Object.keys(S.months).length){ if(!S.curMonth||!S.months[S.curMonth]) S.curMonth=Object.keys(S.months).sort().pop(); return; }
+  S.months={};
+  const w=S.weekday||BASE.weekday, ym=(w.effective||today()).slice(0,7);
+  const m=newMonth(w, S.weekday?'불러온 파일':'기본 내장');
+  if(S.baseWeekday) m.base=clone(S.baseWeekday);
+  if(S.hist&&S.hist.length) m.hist=S.hist;
+  S.months[ym]=m;
+  if(S.prevWeekday && S.prevWeekday.effective && S.prevWeekday.effective.slice(0,7)!==ym){ const pm=newMonth(S.prevWeekday,'이전 일정표'); pm.status='final'; S.months[S.prevWeekday.effective.slice(0,7)]=pm; }
+  delete S.weekday; delete S.baseWeekday; delete S.hist; delete S.prevWeekday; delete S.prevLabel;
+  S.curMonth=ym; save();
+}
+migrateMonths();
+const monthKeys = ()=> Object.keys(S.months).sort();
+/* 사람 이름은 띄어쓰지 않음 (나 호 → 나호) */
+function nameFix(s){ return String(s||'').replace(/\s+/g,''); }
+(function fixStoredNames(){ let ch=false;
+  const fx=rows=>rows.forEach(r=>{ const n=nameFix(r.name); if(n!==r.name){ r.name=n; ch=true; } });
+  Object.values(S.months).forEach(m=>{ fx(m.weekday.rows); fx(m.base.rows); });
+  S.offs.forEach(o=>{ ['name','sub'].forEach(k=>{ if(o[k]&&nameFix(o[k])!==o[k]){ o[k]=nameFix(o[k]); ch=true; } }); });
+  if(S.sat) Object.values(S.sat).forEach(l=>l.forEach(x=>{ const n=nameFix(x.name); if(n!==x.name){ x.name=n; ch=true; } }));
+  if(ch) save(); })();
+const CM = ()=> S.months[S.curMonth];
+/* 그 달 일정표가 없으면 가장 가까운 이전 달 것을 씀 */
+function resolveYm(ym){ const ks=monthKeys(); if(S.months[ym]) return ym; const prev=ks.filter(k=>k<ym).pop(); return prev||ks[0]; }
+let REQ_YM=null;
+function setMonth(ym, opts={}){
+  const r=resolveYm(ym); REQ_YM=ym;
+  if(r!==S.curMonth){ S.curMonth=r; _cmpCache=null; save(); fillDepts(); }
+  if(!opts.silent) refreshAll();
+}
+function refreshAll(){ const t=document.querySelector('nav button.on'); if(t) showTab(t.dataset.tab); }
+const isFinal = ()=> CM().status==='final';
+/* 다른 달 날짜의 진료 요일은 그 달 일정표에서 같은 교수를 찾아 씀 */
+function rowForDate(r, date){
+  const ym=resolveYm(date.slice(0,7)); if(ym===S.curMonth) return r;
+  const rows=S.months[ym].weekday.rows; const k=norm(r.name)+'|'+norm(r.dept);
+  return rows.find(x=>norm(x.name)+'|'+norm(x.dept)===k && x.center===r.center) || rows.find(x=>norm(x.name)+'|'+norm(x.dept)===k) || {am:'',pm:'',resv:[],name:r.name,dept:r.dept,_none:true};
+}
+
+const baseW = ()=> CM().base;
+const favKey = r=> norm(r.name||r.dept)+'|'+norm(r.dept);
+const isFav = r=> S.fav.includes(favKey(r));
+function toggleFav(k){ const i=S.fav.indexOf(k); if(i>=0) S.fav.splice(i,1); else S.fav.push(k); save(); }
+const starBtn = r=> `<button class="star${isFav(r)?' on':''}" data-fav="${esc(favKey(r))}" title="즐겨찾기">★</button>`;
+function bindStars(root, re){ root.querySelectorAll('[data-fav]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); toggleFav(b.dataset.fav); re(); }); }
+
+/* 휴진이 그날에 해당하는지 (반복·제외일 포함) */
+function offCovers(o,date){
+  if(!(o.from<=date && date<=(o.to||o.from))) return false;
+  if(o.skip && o.skip.includes(date)) return false;
+  if(o.rep){ const d=parseYmd(date); return o.rep.includes(DOW[d.getDay()]); }
+  return true;
+}
+const partTxt = p=> p==='all'?'종일':p==='am'?'오전':'오후';
+function offWhy(o){ return (o.reason||'휴진')+(o.sub?` · 대진 ${o.sub}`:''); }
+
+/* 초성·증상어 검색 */
+const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+function cho(s){ return String(s||'').replace(/[가-힣]/g,c=>CHO[Math.floor((c.charCodeAt(0)-0xAC00)/588)]).replace(/\s+/g,''); }
+const SYN = {
+  '눈':['안과','백내장','녹내장','망막','각막'],'시력':['안과'],'백내장':['백내장'],
+  '귀':['이비인후과','난청','이명','중이염'],'코':['이비인후과','비중격','부비동','코골이'],'목':['이비인후과','편도','갑상선'],'편도':['편도'],'코골이':['코골이','수면무호흡'],
+  '심장':['순환기내과','심부전','관상동맥','판막','심혈관'],'가슴':['순환기내과','관상동맥','흉부'],'혈압':['고혈압'],'고혈압':['고혈압'],
+  '당뇨':['당뇨','내분비'],'갑상선':['갑상선'],'골다공증':['골다공증'],
+  '무릎':['슬관절','무릎','정형외과'],'어깨':['견관절','어깨','견주관절'],'허리':['요추','척추','디스크'],'목디스크':['경추','디스크'],'디스크':['디스크','척추'],'척추':['척추'],'관절':['관절'],'손':['수부','손'],'발':['족부','발목'],'발목':['족부','발목'],'고관절':['고관절'],'뼈':['정형외과','골절','외상'],
+  '피부':['피부과','아토피','건선','여드름'],'아토피':['아토피'],'여드름':['여드름'],'탈모':['피부과'],
+  '아이':['소아청소년과','소아'],'소아':['소아'],'어린이':['소아청소년과','소아'],'신생아':['신생아'],'성장':['성장','성조숙증'],
+  '치아':['치과'],'이빨':['치과'],'잇몸':['치주'],'임플란트':['임플란트'],'교정':['교정'],'턱':['턱관절','턱교정'],
+  '임신':['산부인과','산모','나프로'],'산모':['산모'],'난임':['나프로','임신'],'자궁':['자궁'],'생리':['월경'],'월경':['월경'],'폐경':['폐경'],
+  '소변':['비뇨의학과','배뇨','요실금'],'전립선':['전립선'],'요로결석':['결석'],'결석':['결석','담석'],
+  '우울':['정신건강의학과','우울','기분장애'],'불안':['정신건강의학과'],'불면':['정신건강의학과'],'adhd':['ADHD'],
+  '두통':['두통'],'어지럼':['어지럼','어지러움'],'치매':['치매','기억장애'],'기억':['기억장애','치매'],'뇌졸중':['뇌졸중','뇌경색','뇌출혈'],'중풍':['뇌졸중','뇌경색','뇌출혈'],'파킨슨':['파킨슨'],'뇌전증':['뇌전증'],'간질':['뇌전증','간질'],
+  '암':['암','종양'],'위':['위','위장관','소화기'],'위암':['위암'],'대장':['대장'],'대장암':['대장암'],'간':['간염','간경변','간암','간이식','간담췌'],'췌장':['췌장'],'담석':['담석','담낭'],'내시경':['내시경'],
+  '폐':['폐','호흡기'],'기침':['기침','호흡기','천식'],'천식':['천식'],'결핵':['결핵'],'폐암':['폐암'],
+  '콩팥':['신장','콩팥'],'신장':['신장','콩팥'],'투석':['투석'],'혈뇨':['혈뇨'],
+  '유방':['유방'],'유방암':['유방암'],
+  '통증':['통증','마취통증의학과'],'재활':['재활'],'삼킴':['연하'],
+  '감염':['감염'],'열':['발열','감염'],'폐렴':['폐렴'],
+  '성형':['성형'],'흉터':['성형'],'화상':['성형외과'],
+  '호스피스':['호스피스','완화'],'혈관':['혈관'],'하지정맥':['하지정맥류'],'비만':['비만'],'류마티스':['류마티스','루푸스','강직성'],'통풍':['류마티스내과'],'건강검진':['건강검진','가정의학과']
+};
+function synTerms(q){
+  const Q=norm(q).toLowerCase(); if(!Q) return [];
+  const out=new Set();
+  for(const [k,v] of Object.entries(SYN)){ const K=k.toLowerCase(); if(Q===K || (K.length>=2 && Q.includes(K))) v.forEach(x=>out.add(x)); }
+  return [...out];
+}
+function matchQ(r,q){
+  if(!q) return true;
+  const Q=norm(q).toLowerCase(), F=[r.name,r.dept,r.center,r.spec];
+  if(F.some(x=>norm(x).toLowerCase().includes(Q))) return true;
+  if(/^[ㄱ-ㅎ]+$/.test(Q)) return F.slice(0,3).some(x=>cho(x).includes(Q));
+  const t=synTerms(q); return t.length>0 && t.some(s=>F.some(x=>norm(x).toLowerCase().includes(norm(s).toLowerCase())));
+}
+function qHint(q){
+  const Q=norm(q); if(!Q) return '';
+  if(/^[ㄱ-ㅎ]+$/.test(Q)) return `초성 「${esc(Q)}」로 찾는 중`;
+  const t=synTerms(q); return t.length? `「${esc(q)}」 → ${t.slice(0,6).map(esc).join(', ')} 관련으로도 찾았어요` : '';
+}
+
+/* 지난달(비교 기준) 대비 변경 */
+const cmpKey = r=> norm(r.name||'')+'|'+norm(r.dept);
+let _cmpCache=null;
+function cmpBaseYm(){ const m=CM(); if(m.cmpWith && S.months[m.cmpWith] && m.cmpWith!==S.curMonth) return m.cmpWith; return monthKeys().filter(k=>k<S.curMonth).pop()||null; }
+function compareMonths(){
+  const bym=cmpBaseYm(); if(!bym) return null;
+  if(_cmpCache && _cmpCache.ym===S.curMonth && _cmpCache.bym===bym) return _cmpCache;
+  const PW=S.months[bym].weekday;
+  const keys=rows=>{ const cnt={}; return rows.map(r=>{ const b=norm(r.center)+'|'+cmpKey(r); cnt[b]=(cnt[b]||0)+1; return b+'#'+cnt[b]; }); };
+  const pk=keys(PW.rows), ck=keys(W().rows);
+  const prev=new Map(); PW.rows.forEach((r,i)=>prev.set(pk[i],r));
+  const map={}; const list=[]; const seen=new Set();
+  W().rows.forEach((r,i)=>{
+    const k=ck[i], p=prev.get(k); seen.add(k);
+    if(!p){ map[r.uid]={type:'new'}; list.push({type:'new',r}); return; }
+    const f=[];
+    if(p.am!==r.am||p.pm!==r.pm||(p.resv||[]).join()!==(r.resv||[]).join()) f.push('요일');
+    if(norm(p.spec)!==norm(r.spec)) f.push('전문과목');
+    if(f.length){ map[r.uid]={type:'chg',fields:f,prev:p}; list.push({type:'chg',r,p,fields:f}); }
+  });
+  PW.rows.forEach((p,i)=>{ if(!seen.has(pk[i])) list.push({type:'gone',r:p}); });
+  _cmpCache={map,list,label:ymLabel(bym),ym:S.curMonth,bym}; return _cmpCache;
+}
+function chgBadge(r){ const c=compareMonths(); if(!c) return ''; const x=c.map[r.uid]; if(!x) return ''; return x.type==='new'?'<span class="badge new">신규</span>':`<span class="badge chg" title="${esc(x.fields.join(', '))} 변경">변경</span>`; }
+const dayStr = r=> ['am','pm'].map(p=>(p==='am'?'오전 ':'오후 ')+(r[p]||'-')).join(' / ');
+
+/* 휴진 찾기 */
+function offsOn(r, date){
+  const k=norm(r.name); if(!k) return [];
+  return S.offs.filter(o=> norm(o.name)===k && (!o.dept || o.dept===r.dept) && offCovers(o,date));
+}
+function satWorkers(date){ return (SAT()[date]||[]); }
+function satDuty(r, date){
+  const k=norm(r.name); if(!k) return false;
+  const list=satWorkers(date);
+  if(r.name==='일반의') return list.some(x=>norm(x.name)==='일반의' && deptMatch(x.dept,r.dept));
+  return list.some(x=>norm(x.name)===k && deptMatch(x.dept,r.dept, r.name));
+}
+/* 토요일 표의 과 이름과 평일 표의 과 이름이 달라서 느슨하게 맞춤 */
+function deptMatch(a,b,name){
+  const A=norm(a).replace(/[()·.및]/g,''), B=norm(b).replace(/[()·.및]/g,'');
+  if(A===B||A.includes(B)||B.includes(A)) return true;
+  const core=x=>x.replace(/(위장관|간담도|알레르기|흉부|이식|대장항문|갑상선내분비|간담췌|유방)/g,'').replace(/외과$/,'외과').slice(0,3);
+  if(core(A)===core(B)) return true;
+  if(name){ // 같은 이름이 한 사람뿐이면 과 이름이 달라도 인정
+    const same=W().rows.filter(r=>norm(r.name)===norm(name));
+    return same.length===1;
+  }
+  return false;
+}
+
+/* 하루 상태: {am:{st,why}, pm:{...}} st: ok/resv/sat/off/hol/no */
+function statusOn(r0, date){
+  const r=rowForDate(r0,date);
+  const d=parseYmd(date), w=DOW[d.getDay()], hol=holMap()[date];
+  const out={am:{st:'no'},pm:{st:'no'}};
+  if(hol){ out.am={st:'hol',why:hol}; out.pm={st:'hol',why:hol}; return out; }
+  if(w==='일') return out;
+  if(w==='토'){ if(satDuty(r0,date)) out.am={st:'sat'}; }
+  else{
+    if(r.am.includes(w)) out.am={st: r.resv.includes(w+'오전')?'resv':'ok'};
+    if(r.pm.includes(w)) out.pm={st: r.resv.includes(w+'오후')?'resv':'ok'};
+  }
+  offsOn(r0,date).forEach(o=>{
+    ['am','pm'].forEach(p=>{ if((o.part==='all'||o.part===p) && out[p].st!=='no') out[p]={st:'off',why:offWhy(o)}; else if((o.part==='all'||o.part===p) && out[p].st==='no') out[p]={st:'no',offMark:offWhy(o)}; });
+  });
+  return out;
+}
+const TAG={ok:'<i class="tag ok">진료</i>',resv:'<i class="tag resv">예약만</i>',sat:'<i class="tag sat">토요진료</i>',off:'<i class="tag off">휴진</i>',hol:'<i class="tag hol">공휴일</i>',no:'<i class="tag no">—</i>'};
+const cell = x=> TAG[x.st] + (x.st==='off'&&x.why&&x.why!=='휴진'?`<span class="reason" title="${esc(x.why)}">${esc(x.why)}</span>`:'');
+
+/* ---------- 탭 ---------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+function showTab(t){
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));
+  if(t==='day') renderDay(); if(t==='find') renderFind(); if(t==='off') renderOffs(); if(t==='data'){ renderData(); renderCompare(); } if(t==='edit') renderEdit(); if(t==='print') renderPrint();
+}
+function seg(id, cb){ const el=$(id); el.querySelectorAll('button').forEach(b=>b.onclick=()=>{ el.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); cb&&cb(b.dataset.v); }); }
+const segVal = id=>$(id).querySelector('button.on').dataset.v;
+function setSeg(id,v){ $(id).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v)); }
+
+function fillDepts(){
+  const ds=[...new Set(W().rows.map(r=>r.dept))];
+  ['#dDept','#fDept'].forEach(id=>{ const el=$(id), v=el.value; el.innerHTML='<option value="">전체 진료과</option>'+ds.map(d=>`<option>${esc(d)}</option>`).join(''); el.value=v; });
+  $('#docList').innerHTML=[...new Set(W().rows.filter(isDoctor).map(r=>r.name))].map(n=>`<option value="${esc(n)}">`).join('');
+  const w=W(); $('#hdrMeta').innerHTML=VIEW_ONLY?`${esc(w.effective)} 기준 · 보기 전용`:`${esc(w.effective)} 기준 · 휴진 ${S.offs.length}건`;
+  $('#hMonth').innerHTML=monthKeys().slice().reverse().map(k=>`<option value="${k}">${ymLabel(k)}${S.months[k].status==='final'?' ✔':''}</option>`).join(''); $('#hMonth').value=S.curMonth;
+  $('#hStat').innerHTML=isFinal()?'<span class="chip fin">확정</span>':'<span class="chip">작성 중</span>';
+}
+
+/* ---------- 날짜별 ---------- */
+let curDate=today();
+function renderDay(){
+  setMonth(curDate.slice(0,7),{silent:true});
+  $('#dDate').value=curDate;
+  const d=parseYmd(curDate), w=DOW[d.getDay()], hol=holMap()[curDate];
+  const part=segVal('#dPart'), dept=$('#dDept').value, q=$('#dQ').value.trim(), only=$('#dOnly').checked, fav=$('#dFav').checked;
+  $('#dHint').innerHTML=qHint(q);
+  let ban='';
+  const satDates=Object.keys(SAT());
+  if(hol) ban=`<div class="banner hol">공휴일(${esc(hol)}) — 외래 진료가 없습니다. 응급·분만은 24시간 진료합니다.</div>`;
+  else if(w==='일') ban=`<div class="banner hol">일요일 — 외래 진료가 없습니다.</div>`;
+  else if(w==='토' && !SAT()[curDate]) ban=`<div class="banner warn">이 토요일의 토요 진료일정이 없습니다. (토요일 진료안내 엑셀에 없는 날짜이거나 휴진 토요일)</div>`;
+  else if(w==='토') ban=`<div class="banner info">토요일은 오전 진료만 합니다. 토요일 진료안내 표 기준입니다.</div>`;
+  const offToday=S.offs.filter(o=>offCovers(o,curDate));
+  if(offToday.length) ban+=`<div class="banner warn">이날 휴진 ${offToday.length}건: ${offToday.map(o=>esc(o.name)+(o.part==='all'?'':'('+(o.part==='am'?'오전':'오후')+')')+(o.sub?' → 대진 '+esc(o.sub):'')).join(', ')}</div>`;
+  if(REQ_YM && REQ_YM!==S.curMonth) ban+=`<div class="banner info">${ymLabel(REQ_YM)} 일정표가 아직 없어 <b>${ymLabel(S.curMonth)}</b> 일정표로 보여 드립니다. 「일정표·설정 → 새 달 만들기」로 만들 수 있어요.</div>`;
+  else if(curDate<W().effective) ban+=`<div class="banner info">평일 일정표가 ${esc(W().effective)}부터 적용된 것이라, 이전 날짜는 실제와 다를 수 있습니다.</div>`;
+  $('#dBanner').innerHTML=ban;
+  let rows=docs().filter(r=>(!dept||r.dept===dept) && matchQ(r,q) && (!fav||isFav(r)));
+  let n=0, html='', lastDept=null;
+  rows.forEach(r=>{
+    const s=statusOn(r,curDate);
+    const show = p=> part==='all'||part===p;
+    const working = (show('am')&&['ok','resv','sat'].includes(s.am.st)) || (show('pm')&&['ok','resv','sat'].includes(s.pm.st));
+    const offed = (show('am')&&s.am.st==='off')||(show('pm')&&s.pm.st==='off');
+    if(only && !working && !offed) return;
+    if(r.dept!==lastDept){ html+=`<tr class="grp"><td colspan="4">${esc(r.dept)}${r.center?` <span class="hint">· ${esc(r.center)}</span>`:''}</td></tr>`; lastDept=r.dept; }
+    if(working) n++;
+    const qc=(p,x)=> isDoctor(r)&&['ok','resv','sat','off'].includes(x.st)?` q" data-q="${r.id}|${p}`:'';
+    html+=`<tr class="${working?'':'dim'}"><td class="name">${starBtn(r)}${r.name?`<a data-id="${r.id}">${esc(r.name)}</a>`:'<span class="hint">협진</span>'}${chgBadge(r)}</td><td class="c${qc('am',s.am)}">${show('am')?cell(s.am):''}</td><td class="c${qc('pm',s.pm)}">${show('pm')?cell(s.pm):''}</td><td class="spec hide-s" title="${esc(r.spec)}">${esc(r.spec)}</td></tr>`;
+  });
+  $('#dBody').innerHTML=html||`<tr><td colspan="4" class="empty">${hol||w==='일'?'진료가 없는 날입니다.':'조건에 맞는 진료가 없습니다.'}</td></tr>`;
+  $('#dInfo').innerHTML=`${label(curDate)}${curDate===today()?' <small>오늘</small>':''}<small>진료 ${n}명${(q||dept)?' (검색 조건 적용)':''}</small>`;
+  $('#dBody').querySelectorAll('a[data-id]').forEach(a=>a.onclick=()=>openDoc(+a.dataset.id));
+  $('#dBody').querySelectorAll('td[data-q]').forEach(td=>td.onclick=()=>{ const [id,p]=td.dataset.q.split('|'); openQuick(+id,curDate,p); });
+  bindStars($('#dBody'),renderDay);
+}
+bindDate($('#dDate'), v=>{ curDate=v; renderDay(); });
+$('#dPrev').onclick=()=>{ curDate=addDays(curDate,-1); renderDay(); };
+$('#dNext').onclick=()=>{ curDate=addDays(curDate,1); renderDay(); };
+$('#dToday').onclick=()=>{ curDate=today(); renderDay(); };
+seg('#dPart',renderDay); $('#dDept').onchange=renderDay; $('#dQ').oninput=renderDay; $('#dOnly').onchange=renderDay; $('#dFav').onchange=renderDay;
+
+/* ---------- 검색 ---------- */
+function weekTable(r){
+  const cls=(p,d)=>{ const has=(p==='am'?r.am:r.pm).includes(d); if(!has) return ['',''] ; return r.resv.includes(d+(p==='am'?'오전':'오후'))?['r','예약']:['y','●']; };
+  let h='<table class="wk"><tr><th class="l"></th>'+'월화수목금'.split('').map(d=>`<th>${d}</th>`).join('')+'</tr>';
+  ['am','pm'].forEach(p=>{ h+=`<tr><th class="l">${p==='am'?'오전':'오후'}</th>`+'월화수목금'.split('').map(d=>{ const [c,t]=cls(p,d); return `<td class="${c}">${t}</td>`; }).join('')+'</tr>'; });
+  return h+'</table>';
+}
+function upcomingSat(r, n){ const t=today(); return Object.keys(SAT()).filter(d=>d>=t).sort().filter(d=>satDuty(r,d)).slice(0,n); }
+function upcomingOff(r){ const t=today(); return S.offs.filter(o=>norm(o.name)===norm(r.name)&&(!o.dept||o.dept===r.dept)&&(o.to||o.from)>=t).sort((a,b)=>a.from<b.from?-1:1); }
+const offTxt=o=>`${o.rep?'매주 '+o.rep+' ('+short(o.from)+'~'+short(o.to)+')':short(o.from)+(o.to&&o.to!==o.from?'~'+short(o.to):'')}${o.part==='all'?'':' '+(o.part==='am'?'오전':'오후')}${o.reason?' '+esc(o.reason):''}${o.sub?' → 대진 '+esc(o.sub):''}`;
+function docCard(r, full){
+  const sats=upcomingSat(r, full?10:3), offs=upcomingOff(r);
+  let h=`<div class="hd">${full?'':starBtn(r)}<b>${esc(r.name||r.dept)}</b>${chgBadge(r)}<span>${esc(r.name?r.dept:'협진·클리닉')}${r.center?' · '+esc(r.center):''}</span>`;
+  if(!full && isDoctor(r)) h+=`<span class="act"><button class="b" data-cal="${r.id}">달력</button> <button class="b" data-off="${r.id}">휴진 등록</button></span>`;
+  h+='</div>';
+  h+= absent(r)? `<div class="banner warn" style="margin:4px 0">${esc(r.spec)} — 현재 외래 진료 없음</div>` : weekTable(r);
+  if(!absent(r)) h+=`<div class="mini">${esc(r.spec)}</div>`;
+  const notes=(r.spec.match(/\[[^\]]+\]/g)||[]).join(' ');
+  if(notes && !full) {}
+  if(isDoctor(r)||r.name==='일반의') h+=`<div class="mini"><b>토요진료</b> ${sats.length?sats.map(short).join(', '):'예정 없음'}</div>`;
+  if(isDoctor(r)) h+=`<div class="mini nv"><b>휴진</b> <span class="${offs.length?'o':''}">${offs.length?offs.map(offTxt).join(' · '):'등록된 휴진 없음'}</span></div>`;
+  return h;
+}
+function renderFind(){
+  const q=$('#fQ').value.trim(), dept=$('#fDept').value, day=segVal('#fDay'), part=segVal('#fPart'), fav=$('#fFav').checked;
+  $('#fHint').innerHTML=qHint(q);
+  const list=docs().filter(r=>(!dept||r.dept===dept)&&matchQ(r,q)&&(!day||((part!=='pm'&&r.am.includes(day))||(part!=='am'&&r.pm.includes(day))))&&(!part||day||(part==='am'?r.am:r.pm))&&(!fav||isFav(r))).sort((a,b)=>(isFav(b)?1:0)-(isFav(a)?1:0));
+  $('#fCount').textContent=`${list.length}건`;
+  $('#fList').innerHTML=list.map(r=>`<div class="doc">${docCard(r,false)}</div>`).join('')||'<div class="empty">검색 결과가 없습니다.</div>';
+  $('#fList').querySelectorAll('[data-cal]').forEach(b=>b.onclick=()=>openDoc(+b.dataset.cal));
+  $('#fList').querySelectorAll('[data-off]').forEach(b=>b.onclick=()=>startOff(+b.dataset.off));
+  bindStars($('#fList'),renderFind);
+}
+$('#fQ').oninput=renderFind; $('#fFav').onchange=renderFind; $('#fDept').onchange=renderFind; seg('#fDay',renderFind); seg('#fPart',renderFind);
+
+/* ---------- 의사 달력 ---------- */
+let mDocId=null, mMonth=null;
+function openDoc(id){ mDocId=id; const t=parseYmd(curDate)||new Date(); mMonth=new Date(t.getFullYear(),t.getMonth(),1); drawDoc(); $('#mDoc').classList.add('on'); }
+function drawDoc(){
+  const r=docs()[mDocId]; $('#mTitle').textContent=(r.name||r.dept)+(r.name?' · '+r.dept:'');
+  const y=mMonth.getFullYear(), m=mMonth.getMonth(), first=new Date(y,m,1).getDay(), last=new Date(y,m+1,0).getDate();
+  let h=docCard(r,true);
+  h+=`<div class="calnav"><button class="b" id="cPrev">◀</button><b>${y}년 ${m+1}월</b><button class="b" id="cNext">▶</button></div><table class="cal"><tr>${DOW.map(d=>`<th>${d}</th>`).join('')}</tr><tr>`;
+  for(let i=0;i<first;i++) h+='<td class="x"></td>';
+  for(let dd=1;dd<=last;dd++){
+    const ds=`${y}-${pad(m+1)}-${pad(dd)}`, s=statusOn(r,ds);
+    let p='';
+    const one=(x,lab)=>{ if(x.st==='hol') return ''; if(x.st==='no') return x.offMark?'':''; const c={ok:'ok',resv:'ok',sat:'sat',off:'off'}[x.st]; return `<span class="p ${c}" title="${esc(x.why||'')}">${lab}${x.st==='resv'?'(예)':''}</span>`; };
+    if(s.am.st==='hol') p=`<span class="p hol" title="${esc(s.am.why)}">휴일</span>`; else p=one(s.am,s.am.st==='sat'?'토 오전':'오전')+one(s.pm,'오후');
+    h+=`<td class="${ds===today()?'today':''}${isDoctor(r)&&s.am.st!=='hol'?' q':''}" data-qd="${ds}"><span class="n">${dd}</span>${p}</td>`;
+    if((first+dd)%7===0 && dd<last) h+='</tr><tr>';
+  }
+  const tail=(7-(first+last)%7)%7; for(let i=0;i<tail;i++) h+='<td class="x"></td>';
+  h+='</tr></table><div class="legend"><span><i class="tag ok">오전·오후</i> 진료</span><span><i class="tag sat">토 오전</i> 토요진료</span><span><i class="tag off">휴진</i></span><span><i class="tag hol">휴일</i> 공휴일</span><span class="nv">· 날짜를 누르면 휴진 등록·해제</span></div>';
+  if(isDoctor(r)) h+=`<div class="row" style="margin-top:10px;justify-content:flex-end"><button class="b p" id="mOff">이 교수 휴진 등록</button></div>`;
+  $('#mBody').innerHTML=h;
+  $('#cPrev').onclick=()=>{ mMonth=new Date(y,m-1,1); drawDoc(); };
+  $('#cNext').onclick=()=>{ mMonth=new Date(y,m+1,1); drawDoc(); };
+  if(isDoctor(r)) $('#mBody').querySelectorAll('td.q[data-qd]').forEach(td=>td.onclick=()=>openQuick(mDocId,td.dataset.qd,'all'));
+  if($('#mOff')) $('#mOff').onclick=()=>{ $('#mDoc').classList.remove('on'); startOff(mDocId); };
+}
+$('#mClose').onclick=()=>$('#mDoc').classList.remove('on');
+$('#mDoc').onclick=e=>{ if(e.target.id==='mDoc') $('#mDoc').classList.remove('on'); };
+
+/* ---------- 휴진 관리 ---------- */
+let editId=null;
+function deptsOf(name){ return [...new Set(W().rows.filter(r=>norm(r.name)===norm(name)).map(r=>r.dept))]; }
+function syncDeptSel(){ const ds=deptsOf($('#oName').value); $('#oDept').innerHTML= ds.length? (ds.length>1?'<option value="">(모든 진료과)</option>':'')+ds.map(d=>`<option>${esc(d)}</option>`).join('') : '<option value="">일정표에 없는 이름</option>'; }
+$('#oName').oninput=syncDeptSel;
+bindDate($('#oFrom')); bindDate($('#oTo')); seg('#oPart'); seg('#oRep',v=>{ $('#oDow').style.opacity=v?1:.4; }); $('#oDow').style.opacity=.4;
+function startOff(id){ const r=docs()[id]; clearOff(); $('#oName').value=r.name; syncDeptSel(); $('#oDept').value=r.dept; $('#oFrom').value=curDate; showTab('off'); $('#oFrom').focus(); }
+function clearOff(){ editId=null; ['#oName','#oFrom','#oTo','#oReason','#oSub'].forEach(i=>$(i).value=''); setSeg('#oPart','all'); setSeg('#oRep',''); $('#oDow').style.opacity=.4; $('#oDow').querySelectorAll('input').forEach(c=>c.checked=false); syncDeptSel(); $('#oAdd').textContent='등록'; $('#oEditHint').textContent=''; }
+$('#oClear').onclick=clearOff;
+$('#oAdd').onclick=()=>{
+  const name=nameFix($('#oName').value); if(!name) return toast('교수명을 입력하세요.');
+  let from=fixDate($('#oFrom').value); if(!from) return toast('시작 날짜를 확인하세요. (예: 20261120)');
+  let to=$('#oTo').value.trim()? fixDate($('#oTo').value):from; if(!to) return toast('끝 날짜를 확인하세요.');
+  if(to<from) [from,to]=[to,from];
+  let rep='';
+  if(segVal('#oRep')){ rep=[...$('#oDow').querySelectorAll('input:checked')].map(c=>c.value).join(''); if(!rep) return toast('반복할 요일을 고르세요.'); if(to===from){ to=addDays(from,90); toast('끝 날짜가 없어 3개월 동안 반복으로 등록합니다.'); } }
+  const old=editId?S.offs.find(x=>x.id===editId):null;
+  const o={id:editId||Date.now()+''+Math.random().toString(36).slice(2,6), name, dept:$('#oDept').value||'', from, to, part:segVal('#oPart'), reason:$('#oReason').value.trim(), sub:nameFix($('#oSub').value)};
+  if(rep){ o.rep=rep; if(old&&old.skip) o.skip=old.skip; }
+  if(editId) S.offs=S.offs.map(x=>x.id===editId?o:x); else S.offs.push(o);
+  save(); toast(editId?'수정했습니다.':'휴진을 등록했습니다.'); clearOff(); renderOffs(); fillDepts();
+};
+function renderOffs(){
+  const show=segVal('#oShow'), q=norm($('#oQ').value), t=today();
+  const list=S.offs.filter(o=>(show==='all'||(o.to||o.from)>=t)&&(!q||norm(o.name+o.dept+o.reason).includes(q))).sort((a,b)=>a.from===b.from?(a.name<b.name?-1:1):(a.from<b.from?-1:1));
+  $('#oBody').innerHTML=list.map(o=>`<tr class="${(o.to||o.from)<t?'dim':''}"><td>${o.rep?`<b style="color:var(--pri)">매주 ${esc(o.rep)}</b><br>`:''}${label(o.from)}${o.to&&o.to!==o.from?'<br>~ '+label(o.to):''}</td><td class="c">${o.part==='all'?'종일':o.part==='am'?'오전':'오후'}</td><td class="spec">${esc(o.dept||'(전체)')}</td><td><b>${esc(o.name)}</b></td><td class="spec" title="${esc(offWhy(o))}">${esc(o.reason)}${o.sub?` <span style="color:var(--pri)">→ 대진 ${esc(o.sub)}</span>`:''}${o.skip&&o.skip.length?` <span class="hint">(${o.skip.length}일 제외)</span>`:''}</td><td class="c"><button class="b" data-e="${o.id}">수정</button> <button class="b d" data-x="${o.id}">삭제</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty">등록된 휴진이 없습니다.</td></tr>';
+  $('#oBody').querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{ const o=S.offs.find(x=>x.id===b.dataset.e); editId=o.id; $('#oName').value=o.name; syncDeptSel(); $('#oDept').value=o.dept; $('#oFrom').value=o.from; $('#oTo').value=o.to&&o.to!==o.from?o.to:''; setSeg('#oPart',o.part); $('#oReason').value=o.reason; $('#oSub').value=o.sub||''; setSeg('#oRep',o.rep?'w':''); $('#oDow').style.opacity=o.rep?1:.4; $('#oDow').querySelectorAll('input').forEach(c=>c.checked=!!o.rep&&o.rep.includes(c.value)); $('#oAdd').textContent='수정 저장'; $('#oEditHint').textContent='수정 중'; window.scrollTo({top:0,behavior:'smooth'}); });
+  $('#oBody').querySelectorAll('[data-x]').forEach(b=>b.onclick=async()=>{ const o=S.offs.find(x=>x.id===b.dataset.x); if(await ask(`<b>${esc(o.name)}</b> ${label(o.from)} 휴진을 삭제할까요?`)){ S.offs=S.offs.filter(x=>x!==o); save(); renderOffs(); fillDepts(); } });
+}
+seg('#oShow',renderOffs); $('#oQ').oninput=renderOffs;
+
+/* 붙여넣기 해석 */
+function parseBulk(text){
+  const names=[...new Set(W().rows.filter(isDoctor).map(r=>norm(r.name)))].sort((a,b)=>b.length-a.length);
+  const y=new Date().getFullYear(); const out=[];
+  text.split(/\n/).map(l=>l.trim()).filter(Boolean).forEach(line=>{
+    const L=line.replace(/\s+/g,' ');
+    const ds=[]; const re=/(?:(\d{4})\s*[.\-\/년]\s*)?(\d{1,2})\s*[.\-\/월]\s*(\d{1,2})\s*일?|(\d{8})/g; let m;
+    while((m=re.exec(L))){ if(m[4]) ds.push(fixDate(m[4])); else ds.push(fixDate(`${m[1]||y}-${m[2]}-${m[3]}`)); }
+    const dates=ds.filter(Boolean);
+    const L2=L.replace(/(?:대진|대체)\s*[:：]?\s*[가-힣]{2,4}|[→>]\s*[가-힣]{2,4}/g,' ');
+    const compact=norm(L2); let name=null; for(const n of names){ if(compact.includes(n)){ name=n; break; } }
+    const disp=name? (W().rows.find(r=>norm(r.name)===name)||{}).name : null;
+    const part=/오전/.test(L)&&!/오후/.test(L)?'am':/오후/.test(L)&&!/오전/.test(L)?'pm':'all';
+    let sub=''; const sm=L.match(/(?:대진|대체)\s*[:：]?\s*([가-힣]{2,4})|[→>]\s*([가-힣]{2,4})/); if(sm) sub=sm[1]||sm[2];
+    let rep=''; const rm=L.match(/매주\s*([월화수목금,·\s]+)/); if(rm) rep='월화수목금'.split('').filter(d=>rm[1].includes(d)).join('');
+    let reason=L.replace(re,'').replace(/\([월화수목금토일]\)/g,'').replace(/[~∼\-]/g,' ');
+    if(disp) reason=reason.replace(new RegExp(disp.split('').join('\\s*')),'');
+    if(sub) reason=reason.replace(/(?:대진|대체)\s*[:：]?\s*[가-힣]{2,4}|[→>]\s*[가-힣]{2,4}/,'');
+    if(rep) reason=reason.replace(/매주\s*[월화수목금,·\s]+/,' ');
+    { const dd=deptInLine(L); if(dd) reason=reason.replace(dd,' '); }
+    reason=reason.replace(/오전|오후|종일|휴진|교수|님/g,' ').replace(/\s+/g,' ').trim();
+    const range=(/[~∼]/.test(L)||rep)&&dates.length>=2;
+    const list= range? [[dates[0],dates[1]]] : dates.map(d=>[d,d]);
+    if(!name||!list.length){ out.push({line,err:!name?'이름을 찾지 못함':'날짜를 찾지 못함'}); return; }
+    list.forEach(([f,t])=>{ if(t<f)[f,t]=[t,f]; if(rep&&t===f) t=addDays(f,90); const dd=deptsOf(disp); const o={name:disp,dept:dd.length===1?dd[0]:'',from:f,to:t,part,reason,sub}; if(rep) o.rep=rep; out.push({line,o}); });
+  });
+  return out;
+}
+let bulkCache=[];
+$('#oBulkCheck').onclick=()=>{
+  bulkCache=parseBulk($('#oBulk').value);
+  $('#oBulkPrev').innerHTML=bulkCache.length?`<table class="t" style="margin-top:8px"><colgroup><col style="width:190px"><col style="width:60px"><col style="width:90px"><col><col></colgroup><thead><tr><th>날짜</th><th class="c">구분</th><th>교수명</th><th>사유</th><th>원문</th></tr></thead><tbody>${bulkCache.map(x=>x.err?`<tr><td colspan="4" style="color:var(--off)">✕ ${x.err}</td><td class="spec">${esc(x.line)}</td></tr>`:`<tr><td>${x.o.rep?'<b>매주 '+esc(x.o.rep)+'</b><br>':''}${label(x.o.from)}${x.o.to!==x.o.from?'<br>~ '+label(x.o.to):''}</td><td class="c">${x.o.part==='all'?'종일':x.o.part==='am'?'오전':'오후'}</td><td><b>${esc(x.o.name)}</b></td><td class="spec">${esc(x.o.reason)}${x.o.sub?' → 대진 '+esc(x.o.sub):''}</td><td class="spec" title="${esc(x.line)}">${esc(x.line)}</td></tr>`).join('')}</tbody></table>`:'';
+};
+$('#oBulkAdd').onclick=()=>{
+  if(!bulkCache.length) $('#oBulkCheck').onclick();
+  const ok=bulkCache.filter(x=>x.o); if(!ok.length) return toast('등록할 수 있는 줄이 없습니다.');
+  ok.forEach((x,i)=>S.offs.push(Object.assign({id:Date.now()+'_'+i},x.o)));
+  save(); toast(`${ok.length}건 등록했습니다.`+(bulkCache.length>ok.length?` (${bulkCache.length-ok.length}줄은 확인 필요)`:''));
+  $('#oBulk').value=bulkCache.filter(x=>x.err).map(x=>x.line).join('\n'); bulkCache=[]; $('#oBulkPrev').innerHTML=''; renderOffs(); fillDepts();
+};
+
+/* ---------- 일정표·설정 ---------- */
+function renderData(){
+  const w=W(), m=CM(), sd=Object.keys(SAT()).sort();
+  const months=[...new Set(sd.map(d=>d.slice(0,7)))];
+  renderMonths();
+  $('#sInfo').innerHTML=`<div><b>${ymLabel(S.curMonth)} 평일 일정표</b> · ${esc(w.effective)} 기준 · ${w.rows.length}줄 · ${esc(m.src||'')}${m.hist.length?` · 고친 기록 ${m.hist.length}건`:''}</div><div style="margin-top:4px"><b>토요일 진료안내</b> ${months.length}개월 (${months[0]||'-'} ~ ${months[months.length-1]||'-'}) · 토요일 ${sd.length}일</div>${(w.notes||[]).map(n=>`<div style="margin-top:4px">${esc(n)}</div>`).join('')}`;
+  $('#sHol').value= S.hol==null?DEFAULT_HOL:S.hol;
+  $('#sTarget').innerHTML='<option value="">자동 (표의 기준일 달)</option>'+[...new Set([...monthKeys(), nextYm(monthKeys().pop())])].reverse().map(k=>`<option value="${k}">${ymLabel(k)}${S.months[k]?'':' (새로 만듦)'}</option>`).join('');
+}
+$('#sHolSave').onclick=()=>{ S.hol=$('#sHol').value; save(); toast('공휴일을 저장했습니다.'); };
+$('#sHolReset').onclick=()=>{ S.hol=null; save(); renderData(); toast('기본 공휴일로 되돌렸습니다.'); };
+$('#sBakMake').onclick=()=>{ $('#sBak').value=JSON.stringify({app:'jinryo-search',v:1,saved:new Date().toISOString(),data:S}); toast('백업 텍스트를 만들었습니다.'); };
+$('#sBakCopy').onclick=async()=>{ if(!$('#sBak').value) $('#sBakMake').onclick(); try{ await navigator.clipboard.writeText($('#sBak').value); toast('복사했습니다.'); }catch(e){ $('#sBak').select(); toast('Ctrl+C로 복사하세요.'); } };
+$('#sBakLoad').onclick=async()=>{ try{ const j=JSON.parse($('#sBak').value); if(j.app!=='jinryo-search') throw 0; if(!await ask('붙여넣은 백업으로 지금 데이터를 바꿀까요?')) return; S=Object.assign({offs:[],hol:null,sat:null,fav:[]},j.data); migrateMonths(); _cmpCache=null; save(); fillDepts(); renderData(); toast(`복원했습니다. 휴진 ${S.offs.length}건`); }catch(e){ toast('백업 텍스트가 올바르지 않습니다.'); } };
+$('#sReset').onclick=async()=>{ if(await ask('<b>모든 달</b>의 일정표와 고친 기록을 지우고 처음 내장된 일정표로 되돌릴까요?<br><span class="hint">휴진·공휴일·즐겨찾기는 그대로 둡니다. 먼저 달 파일로 저장해 두세요.</span>')){ S.months=null; S.sat=null; S.satRows=null; S.satOrderD=null; _cmpCache=null; migrateMonths(); save(); fillDepts(); renderData(); renderCompare(); toast('처음 상태로 되돌렸습니다.'); } };
+
+/* 엑셀 읽기 */
+function sheetGrid(ws){
+  const ref=XLSX.utils.decode_range(ws['!ref']||'A1'); const g=[];
+  for(let r=ref.s.r;r<=ref.e.r;r++){ const row=[]; for(let c=ref.s.c;c<=ref.e.c;c++){ const cell=ws[XLSX.utils.encode_cell({r,c})]; row.push(cell?cell.v:''); } g.push(row); }
+  (ws['!merges']||[]).forEach(m=>{ const v=g[m.s.r-ref.s.r]?.[m.s.c-ref.s.c]; for(let r=m.s.r;r<=m.e.r;r++) for(let c=m.s.c;c<=m.e.c;c++){ if(g[r-ref.s.r]) g[r-ref.s.r][c-ref.s.c]=v; } });
+  return {g, merges:ws['!merges']||[], off:ref.s};
+}
+function parseWeekday(wb){
+  const order=wb.SheetNames.slice().sort((x,y)=>(/크기조정|진료지원/.test(x)?1:0)-(/크기조정|진료지원/.test(y)?1:0));
+  for(const sn of order){
+    const ws=wb.Sheets[sn]; if(!ws['!ref']) continue; const {g,merges}=sheetGrid(ws);
+    let hr=g.findIndex(r=>r.some(v=>String(v).trim()==='교수명')); if(hr<0) continue;
+    const H=g[hr].map(v=>String(v).trim()); const ci=H.indexOf('교수명'); const amC=H.indexOf('오전'), pmC=H.indexOf('오후'); const spC=H.findIndex(v=>/전문/.test(v));
+    if(amC<0||pmC<0) continue;
+    const title=String(g[0][0]||''); const em=title.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
+    const rows=[]; const notes=[];
+    for(let r=hr+1;r<g.length;r++){
+      const row=g[r]; const c0=String(row[0]||'').trim(), c1=String(row[1]||'').trim(), nm=nameFix(row[ci]);
+      if(/^\[알림\]/.test(c0)){ notes.push(c0); continue; } if(/^\*/.test(c1)){ notes.push(c1); continue; }
+      const marks=[]; for(let i=0;i<10;i++) marks.push(String(row[amC+i]||'').trim());
+      const spec=String(row[spC]||'').replace(/\n/g,' ').trim();
+      if(!marks.some(Boolean)&&!nm&&!spec) continue;
+      const clinic = merges.some(m=>m.s.r<=r&&r<=m.e.r&&m.s.c===0&&m.e.c>=ci) ? c0 : (merges.some(m=>m.s.r<=r&&r<=m.e.r&&m.s.c===1&&m.e.c>=ci)?c1:'');
+      let am='',pm=''; marks.forEach((v,i)=>{ if(v){ const d='월화수목금'[i%5]; if(i<5) am+=d; else pm+=d; } });
+      rows.push({center:clinic&&clinic===c0?'':c0, dept:clinic||c1, name:clinic?'':nm, am, pm, resv:[], spec});
+    }
+    if(rows.length) return {effective: em?`${em[1]}-${pad(em[2])}-${pad(em[3])}`:today(), title:title.split('(')[0].trim()||'진료 일정표', rows, notes};
+  }
+  return null;
+}
+function excelDate(v){ if(v instanceof Date) return ymd(v); if(typeof v==='number'){ const d=XLSX.SSF.parse_date_code(v); return d?`${d.y}-${pad(d.m)}-${pad(d.d)}`:null; } return fixDate(String(v))||null; }
+function parseSat(wb){
+  const out={}; let cnt=0; let order=null;
+  for(const sn of wb.SheetNames){
+    const ws=wb.Sheets[sn]; if(!ws['!ref']) continue; const {g}=sheetGrid(ws);
+    const hr=g.findIndex(r=>String(r[1]||'').includes('진료과')); if(hr<0) continue;
+    const cols=[]; g[hr].forEach((v,c)=>{ if(c>=2&&v!==''){ const d=excelDate(v); if(d) cols.push([c,d]); } });
+    if(!cols.length) continue; cnt++;
+    const latestD=cols.map(c=>c[1]).sort().pop();
+    cols.forEach(([,d])=>out[d]=[]);
+    const ord=[];
+    for(let r=hr+1;r<g.length;r++){
+      const center=String(g[r][0]||'').trim(), dept=String(g[r][1]||'').trim(); if(!dept || center===dept || /진료일정은/.test(center+dept)) continue;
+      ord.push({center,dept});
+      cols.forEach(([c,d])=>{ String(g[r][c]||'').split(/[,，\/]/).map(nameFix).filter(Boolean).forEach(n=>out[d].push({center,dept,name:n})); });
+    }
+    if(!order || latestD>order.d) order={d:latestD,rows:ord};
+  }
+  return cnt?{days:out,order}:null;
+}
+$('#sFile').onchange=async e=>{
+  const files=[...e.target.files]; const msg=[];
+  for(const f of files){
+    try{
+      const buf=await f.arrayBuffer(); const head=new Uint8Array(buf.slice(0,12)); const txt=String.fromCharCode(...head);
+      if(/DRMONE|DRM/.test(txt)||head[0]===0x9b){ msg.push(`${f.name}: 문서보안(DRM) 파일이라 읽을 수 없음`); continue; }
+      const wb=XLSX.read(buf,{type:'array',cellDates:false});
+      const w=parseWeekday(wb);
+      if(w){
+        const k=$('#sTarget').value || w.effective.slice(0,7);
+        if(S.months[k] && !await ask(`<b>${ymLabel(k)}</b> 일정표를 「${esc(f.name)}」 내용으로 바꿀까요?${S.months[k].status==='final'?'<br><b style="color:var(--off)">확정된 달입니다.</b>':''}<br><span class="hint">바꾸기 전 상태는 이 달의 「되돌리기」로 살릴 수 있어요.</span>`)){ msg.push(`${f.name}: 건너뜀`); continue; }
+        w.rows.forEach((r,i)=>r.uid='f'+Date.now().toString(36)+i);
+        const prevW=S.months[resolveYm(k)].weekday; w.rows.forEach(r=>{ const o=prevW.rows.find(x=>x.dept===r.dept&&x.name===r.name&&x.am===r.am&&x.pm===r.pm); if(o) r.resv=(o.resv||[]).slice(); });
+        if(S.months[k]){ const m=S.months[k]; m.hist.push({t:Date.now(),msg:`엑셀 「${f.name}」로 바꿈`,snap:JSON.stringify(m.weekday.rows)}); m.weekday=w; m.base=clone(w); m.src='파일: '+f.name; m.status='draft'; m.updated=Date.now(); }
+        else S.months[k]=newMonth(w,'파일: '+f.name);
+        S.curMonth=k; REQ_YM=k; _cmpCache=null;
+        msg.push(`${f.name}: ${ymLabel(k)} 평일 일정표 ${w.rows.length}줄`); continue; }
+      const s=parseSat(wb);
+      if(s){ S.sat=Object.assign(S.sat||{},s.days); if(s.order){ const cur=S.satOrderD||'0'; if(s.order.d>=cur){ S.satRows=s.order.rows; S.satOrderD=s.order.d; } } msg.push(`${f.name}: 토요일 ${Object.keys(s.days).length}일`); continue; }
+      msg.push(`${f.name}: 일정표 형식을 찾지 못함`);
+    }catch(err){ msg.push(`${f.name}: 읽기 실패`); }
+  }
+  _cmpCache=null; save(); fillDepts(); renderData(); renderCompare(); $('#sMsg').textContent=msg.join(' / '); e.target.value='';
+};
+
+/* ---------- A3 출력 ---------- */
+S.print = Object.assign({hos:'가톨릭대학교 부천성모병원', tel:'1577-0675', ori:'l'}, S.print||{});
+const MM = 3.7795; // 1mm = px (96dpi)
+function monthOpts(){
+  const set=new Set(); const e=W().effective.slice(0,7);
+  const base=parseYmd(W().effective+'')||new Date();
+  for(let i=-1;i<=3;i++){ const d=new Date(base.getFullYear(),base.getMonth()+i,1); set.add(d.getFullYear()+'-'+pad(d.getMonth()+1)); }
+  Object.keys(SAT()).forEach(d=>set.add(d.slice(0,7)));
+  const t=today().slice(0,7); set.add(t);
+  return {list:[...set].sort().reverse(), def:e};
+}
+function offsInMonth(ym){ const a=ym+'-01', b=ym+'-31'; return S.offs.filter(o=>o.from<=b && (o.to||o.from)>=a && (!o.rep || (()=>{ for(let d=(o.from>a?o.from:a); d<=b && d<=(o.to||o.from); d=addDays(d,1)){ if(offCovers(o,d)) return true; } return false; })())).sort((x,y)=>x.from<y.from?-1:x.from>y.from?1:(x.name<y.name?-1:1)); }
+function offShort(o,ym){ if(o.rep) return `매주 ${o.rep}`+(o.part==='all'?'':(o.part==='am'?' 오전':' 오후')); const f=o.from<ym+'-01'?ym+'-01':o.from, t=(o.to||o.from); const tt=t.slice(0,7)>ym?null:t; return short(f)+(o.to&&o.to!==o.from?'~'+(tt?short(tt):'월말'):'')+(o.part==='all'?'':(o.part==='am'?' 오전':' 오후')); }
+function runs(arr,key){ // 연속 같은 값 묶음 → [시작index]=길이
+  const out={}; let i=0; while(i<arr.length){ let j=i; while(j+1<arr.length && key(arr[j+1])===key(arr[i])) j++; out[i]=j-i+1; i=j+1; } return out; }
+function buildTable(rows, o){
+  const ym=o.ym, offs=offsInMonth(ym);
+  const cRun=runs(rows,r=>r.center+'|'+(r.center?'':r._grp)), dRun=runs(rows,r=>r.center+'|'+r.dept);
+  const spec=o.spec;
+  const hasC=rows.some(r=>r.center);
+  let h=`<table class="st"><colgroup>${hasC?`<col style="width:${o.wC}mm">`:''}<col style="width:${o.wD}mm"><col style="width:${o.wN}mm">${('<col style="width:'+o.wDay+'mm">').repeat(10)}${spec?'<col>':''}</colgroup>`;
+  h+=`<thead><tr>${hasC?'<th rowspan="2">센터</th>':''}<th rowspan="2">진료과</th><th rowspan="2">교수명</th><th colspan="5">오 전</th><th colspan="5" class="pm">오 후</th>${spec?'<th rowspan="2">전문진료과목</th>':''}</tr><tr class="sub">${'월화수목금'.split('').map(d=>`<th>${d}</th>`).join('')}${'월화수목금'.split('').map(d=>`<th class="pm">${d}</th>`).join('')}</tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    const clin=!r.name;
+    const myOff=o.off&&isDoctor(r)? offs.filter(x=>norm(x.name)===norm(r.name)&&(!x.dept||x.dept===r.dept)):[];
+    h+=`<tr class="${clin?'clin':''}${dRun[i]&&i>0?' dg':''}">`;
+    if(hasC && r.center && cRun[i]) h+=`<td class="cen" rowspan="${cRun[i]}">${esc(r.center).replace(/[.,]/g,'<br>')}</td>`;
+    if(dRun[i]) h+=`<td class="dep" rowspan="${dRun[i]}"${hasC&&!r.center?' colspan="2"':''}>${esc(r.dept)}</td>`;
+    const cx=o.chg? compareMonths().map[r.uid] : null;
+    h+=`<td class="nm">${clin?'협진':esc(r.name)}${cx?(cx.type==='new'?'<sup class="n">신규</sup>':'<sup>변경</sup>'):''}</td>`;
+    ['am','pm'].forEach(p=>'월화수목금'.split('').forEach(d=>{
+      const has=r[p].includes(d), rs=r.resv.includes(d+(p==='am'?'오전':'오후'));
+      const pv=cx&&cx.type==='chg'? cx.prev : null, phad=pv? pv[p].includes(d) : has;
+      const moved= o.chg && cx && (cx.type==='new' ? has : phad!==has);
+      h+=`<td class="d${p==='pm'?' pmc':''}${moved&&has?' chg':''}${moved&&!has?' gone':''}">${has?`<span class="mk${rs?' r':''}">${rs?'예':d}</span>`:(moved?d:'')}</td>`;
+    }));
+    if(spec){
+      let s=esc(r.spec).replace(/(\[[^\]]+\])/g,'<span class="nt">$1</span>');
+      if(myOff.length) s=`<span class="off">[휴진 ${myOff.map(x=>offShort(x,ym)+(x.sub?' 대진 '+esc(x.sub):'')).join(', ')}]</span> `+s;
+      h+=`<td class="sp">${s}</td>`;
+    }
+    h+='</tr>';
+  });
+  return h+'</tbody></table>';
+}
+function sheetOpen(o){ const w=o.ori==='p'?297:420, hh=o.ori==='p'?419.4:296.4; return `<div class="sheet" style="width:${w}mm;height:${hh}mm"><div class="in">`; }
+function head(o,sub){
+  const [y,m]=o.ym.split('-');
+  return `<div class="sh-head"><div><div class="hos">${esc(o.hos)}</div><div class="ttl"><em>${+y}년 ${+m}월</em> ${sub}</div></div><div class="rt"><b>진료예약 ${esc(o.tel)}</b>${o.eff?esc(o.eff.replace(/-/g,'. '))+'. 기준':''}</div></div>`;
+}
+function foot(o,pg,tot){ return `<div class="sh-foot"><span>평일 진료 오전 8:30 · 오후 1:30 시작 &nbsp;|&nbsp; 응급·분만은 휴무 없이 24시간 진료</span><span class="r">진료일정은 진료 사정에 따라 변경될 수 있습니다 &nbsp; ${pg}/${tot}</span></div>`; }
+function legend(o){ return `<div class="sh-legend"><span><i class="dot">월</i>진료 요일</span><span><i class="dot r">예</i>예약환자만 진료</span>${o.off?'<span style="color:#c0392b;font-weight:700">[휴진 ○/○]</span><span>이달 휴진 일정</span>':''}<span style="color:#b35a00">[ ]</span><span>격주·단축 등 진료 제한</span>${o.chg?'<span style="background:#fff3d6;padding:0 1.5mm;border:.2mm solid #f0c674">　</span><span>지난달과 달라진 칸 (흐린 글자는 없어진 요일)</span>':''}</div>`; }
+function page2(o){
+  const ym=o.ym, sd=Object.keys(SAT()).filter(d=>d.startsWith(ym)).sort(), H=holMap();
+  let h=sheetOpen(o)+head(o,'토요진료 · 휴진 안내')+'<div class="p2body">';
+  h+=`<div class="box"><h3>토요일 진료 <small>오전 진료만 합니다 · 진료 상황에 따라 바뀔 수 있습니다</small></h3><div class="bd">`;
+  if(!sd.length) h+=`<div style="padding:6mm;text-align:center;color:#8a93a3;font-size:3.6mm">${+ym.slice(5)}월 토요일 진료안내 자료가 없습니다. 「일정표·설정」에서 토요일 진료안내 엑셀을 불러오세요.</div>`;
+  else{
+    const rowsK=(S.satRows||BASE.satRows||[]).map(x=>({center:x.center,dept:x.dept,k:x.center+'|'+x.dept}));
+    const ks=new Set(rowsK.map(x=>x.k));
+    sd.forEach(d=>SAT()[d].forEach(x=>{ const k=x.center+'|'+x.dept; if(!ks.has(k)){ ks.add(k); rowsK.push({center:x.center,dept:x.dept,k}); } }));
+    const cr=runs(rowsK,r=>r.center||('_'+r.k));
+    h+=`<table class="sat"><colgroup><col style="width:${o.ori==='p'?30:40}mm"><col style="width:${o.ori==='p'?42:56}mm">${sd.map(()=>'<col>').join('')}</colgroup><thead><tr><th>센터</th><th>진료과</th>${sd.map(d=>`<th>${short(d)}${H[d]?`<span class="hol">${esc(H[d])}</span>`:''}</th>`).join('')}</tr></thead><tbody>`;
+    rowsK.forEach((r,i)=>{
+      h+='<tr>'+(r.center&&cr[i]?`<td class="l cen2" rowspan="${cr[i]}">${esc(r.center).replace(/[.,]/g,'<br>')}</td>`:'')+`<td class="l"${r.center?'':' colspan="2"'}>${esc(r.dept)}</td>`+sd.map(d=>{ const n=SAT()[d].filter(x=>x.center+'|'+x.dept===r.k).map(x=>x.name); return n.length?`<td>${n.map(esc).join(', ')}</td>`:'<td class="none">—</td>'; }).join('')+'</tr>';
+    });
+    h+='</tbody></table>';
+  }
+  h+='</div></div>';
+  const offs=offsInMonth(ym);
+  h+=`<div class="box"><h3 style="background:#c0392b">${+ym.slice(5)}월 휴진 안내 <small>${offs.length}건</small></h3><div class="bd">`;
+  if(!offs.length) h+='<div style="padding:5mm;text-align:center;color:#8a93a3;font-size:3.6mm">등록된 휴진이 없습니다.</div>';
+  else h+=`<table class="offt"><colgroup><col style="width:26%"><col style="width:9%"><col style="width:19%"><col style="width:12%"><col style="width:12%"><col></colgroup><thead><tr><th>날짜</th><th>구분</th><th>진료과</th><th>교수명</th><th>대진</th><th>비고</th></tr></thead><tbody>${offs.map(x=>`<tr><td class="c">${x.rep?`매주 ${esc(x.rep)} (${short(x.from<ym+'-01'?ym+'-01':x.from)}~)`:label(x.from)+(x.to&&x.to!==x.from?' ~ '+label(x.to).slice(6):'')}</td><td class="o">${x.part==='all'?'종일':x.part==='am'?'오전':'오후'}</td><td class="c">${esc(x.dept||deptsOf(x.name).join(', '))}</td><td class="c"><b>${esc(x.name)}</b></td><td class="c">${esc(x.sub||'')}</td><td>${esc(x.reason)}</td></tr>`).join('')}</tbody></table>`;
+  h+='</div></div>';
+  if(o.chg){ const c=compareMonths(); const L=c.list; if(L.length){ h+=`<div class="box"><h3 style="background:#b35a00">지난달과 달라진 점 <small>${L.length}건 · 기준 ${esc(c.label)}</small></h3><div class="bd"><ul class="chglist">${L.slice(0,40).map(x=>`<li><b>${x.type==='new'?'신규':x.type==='gone'?'빠짐':'변경'}</b> ${esc(x.r.dept)} ${esc(x.r.name||'협진')}${x.type==='chg'&&x.fields.includes('요일')?` — ${esc(dayStr(x.p))} → ${esc(dayStr(x.r))}`:''}${x.type==='chg'&&!x.fields.includes('요일')?' — 전문과목':''}</li>`).join('')}${L.length>40?`<li>외 ${L.length-40}건</li>`:''}</ul></div></div>`; } }
+  const hols=Object.entries(H).filter(([d])=>d.startsWith(ym));
+  h+=`<div class="box"><h3 style="background:#4a5568">알려 드립니다</h3><div class="bd"><ul class="notes">`;
+  if(hols.length) h+=`<li><b>공휴일 휴진</b>: ${hols.map(([d,n])=>short(d)+' '+esc(n)).join(', ')}</li>`;
+  (W().notes||[]).forEach(n=>h+=`<li>${esc(n.replace(/^\[알림\]\s*/,''))}</li>`);
+  h+=`<li>예약 없이 오실 때는 진료일정을 꼭 확인하신 뒤 내원해 주세요. (진료예약 ${esc(o.tel)})</li></ul></div></div>`;
+  return h+'</div>'+foot(o,2,2)+'</div></div>';
+}
+function printOpts(){
+  const o={ym:S.curMonth, ori:segVal('#pOri'), eff:fixDate($('#pEff').value)||W().effective, hos:$('#pHos').value.trim(), tel:$('#pTel').value.trim(), spec:$('#pSpec').checked, chg:$('#pChg').checked&&!!compareMonths(), off:$('#pOff').checked, clin:$('#pClin').checked, p2:$('#pP2').checked};
+  const usable=(o.ori==='p'?297:420)-18;
+  o.cols = o.ori==='l' ? 2 : 1; o.gap=6;
+  o.per = o.cols===2 ? (usable-o.gap)/2 : usable;
+  o.wC=o.cols===2?11:15; o.wD=o.cols===2?17:22; o.wN=o.cols===2?12:15; o.wDay=o.cols===2?4.6:6.4;
+  if(!o.spec){ o.wDay=(o.per-o.wC-o.wD-o.wN)/10; }
+  const rows=W().rows.filter(r=>o.clin||r.name).map((r,i)=>Object.assign({_grp:r.center?i:r.dept},r));
+  return {o,rows};
+}
+/* 나눌 수 있는 자리: 진료과가 바뀌고, 센터 칸이 이어지지 않는 곳 */
+function cutPoints(rows){ const c=[]; for(let i=1;i<rows.length;i++){ if(rows[i].dept!==rows[i-1].dept && (!rows[i].center || rows[i].center!==rows[i-1].center)) c.push(i); } return c; }
+function page1(o,rows,cut,fs){
+  const tot=o.p2?2:1;
+  const T=rs=>`<div class="col" style="width:${o.per}mm">${buildTable(rs,o)}</div>`;
+  const body= o.cols===2 ? `<div class="cols" style="gap:${o.gap}mm">${T(rows.slice(0,cut))}${T(rows.slice(cut))}</div>` : T(rows);
+  return sheetOpen(o)+head(o,'외래 진료일정표')+legend(o)+`<div class="fit" style="--fs:${fs}pt">${body}</div>`+foot(o,1,tot)+'</div></div>';
+}
+function bestCut(o,rows,fs,m){
+  m.innerHTML=`<div style="width:${o.per}mm;--fs:${fs}pt">${buildTable(rows,o)}</div>`;
+  const hs=[...m.querySelectorAll('tbody tr')].map(tr=>tr.getBoundingClientRect().height);
+  const pre=[0]; hs.forEach(h=>pre.push(pre[pre.length-1]+h)); const tot=pre[pre.length-1];
+  let cut=Math.ceil(rows.length/2), best=1e9;
+  cutPoints(rows).forEach(i=>{ const d=Math.abs(pre[i]-(tot-pre[i])); if(d<best){ best=d; cut=i; } });
+  return cut;
+}
+/* 글자 크기 맞추기 + 좌우 높이 맞추기 + 표를 쪽 아래까지 고르게 늘리기 */
+function makePage1(o,rows,m){
+  let fs=10.5, cut=0, html='';
+  const over=sh=>{ const inn=sh.querySelector('.in'); return inn.scrollHeight>sh.clientHeight+1 || inn.scrollWidth>sh.clientWidth+1; };
+  while(fs>=4.5){
+    if(o.cols===2) cut=bestCut(o,rows,fs,m);
+    html=page1(o,rows,cut,fs); m.innerHTML=html;
+    if(!over(m.querySelector('.sheet'))) break;
+    fs-=0.25;
+  }
+  const sh=m.querySelector('.sheet'), fit=sh.querySelector('.fit');
+  const tables=[...fit.querySelectorAll('table.st')];
+  const nat=tables.map(t=>t.getBoundingClientRect().height);
+  const avail=fit.getBoundingClientRect().height;
+  const target=Math.min(avail-2, Math.max(...nat)*1.35);
+  if(target>Math.max(...nat)-1) tables.forEach(t=>t.style.height=(target/MM).toFixed(2)+'mm');
+  sh.dataset.fs=fs;
+  return {html:m.innerHTML, fs, cut};
+}
+function fitPage2(m){
+  const sh=m.querySelector('.sheet'); if(!sh) return; const inn=sh.querySelector('.in'), pb=sh.querySelector('.p2body'); if(!pb) return;
+  let z=1; while(inn.scrollHeight>sh.clientHeight+1 && z>0.5){ z-=0.03; pb.style.zoom=z; }
+}
+let measure=null;
+function renderPrint(){
+  $('#pMonth').innerHTML=monthKeys().slice().reverse().map(x=>`<option value="${x}">${ymLabel(x)}</option>`).join(''); $('#pMonth').value=S.curMonth;
+  $('#pStat').innerHTML=isFinal()?'<span class="tag ok">확정본</span>':'<span class="tag resv">작성 중</span>';
+  if(!$('#pHos').value){
+    $('#pHos').value=S.print.hos; $('#pTel').value=S.print.tel; setSeg('#pOri',S.print.ori); }
+  if($('#pEff').dataset.ym!==S.curMonth){ $('#pEff').value=W().effective; $('#pEff').dataset.ym=S.curMonth; }
+  const {o,rows}=printOpts();
+  if(!measure){ measure=document.createElement('div'); measure.style.cssText='position:absolute;left:-10000px;top:0;visibility:hidden'; document.body.appendChild(measure); }
+  const p1=makePage1(o,rows,measure);
+  let out=p1.html;
+  if(o.p2){ measure.innerHTML=page2(o); fitPage2(measure); out+=measure.innerHTML; }
+  measure.innerHTML='';
+  $('#printRoot').innerHTML=out;
+  let ps=document.getElementById('pageStyle'); if(!ps){ ps=document.createElement('style'); ps.id='pageStyle'; document.head.appendChild(ps); }
+  ps.textContent=`@page{size:A3 ${o.ori==='p'?'portrait':'landscape'};margin:0}`;
+  const wrap=$('#pvWrap'); const z=Math.min(1,(wrap.clientWidth-28)/((o.ori==='p'?297:420)*MM));
+  wrap.innerHTML=`<div style="zoom:${z}">${out}</div>`;
+  const fs=p1.fs; $('#pInfo').textContent=`${rows.length}줄${o.cols===2?` · 좌 ${p1.cut}줄 / 우 ${rows.length-p1.cut}줄 (높이 맞춤)`:''} · 표 글자 ${fs}pt${fs<5?' (글자가 작습니다 — 협진센터 빼기나 전문진료과목 끄기로 키울 수 있어요)':''}`;
+}
+['#pSpec','#pOff','#pClin','#pP2','#pChg'].forEach(id=>$(id).onchange=renderPrint); $('#pMonth').onchange=e=>goMonth(e.target.value);
+seg('#pOri',v=>{ S.print.ori=v; save(); renderPrint(); });
+bindDate($('#pEff'),renderPrint);
+['#pHos','#pTel'].forEach(id=>$(id).onchange=()=>{ S.print.hos=$('#pHos').value.trim(); S.print.tel=$('#pTel').value.trim(); save(); renderPrint(); });
+$('#pPrint').onclick=()=>{
+  renderPrint();
+  if(window.self!==window.top) toast('미리보기 창에서는 인쇄가 막힐 수 있어요. PC에 저장한 HTML 파일에서 인쇄하세요.');
+  try{ window.print(); }catch(e){ toast('이 화면에서는 인쇄할 수 없습니다. HTML 파일로 여세요.'); }
+};
+window.addEventListener('resize',()=>{ if($('#p-print').classList.contains('on')) renderPrint(); });
+
+
+/* ===== 휴진 빠른 입력 (날짜별 화면·달력에서 칸 누르기) ===== */
+let Q=null;
+function openQuick(rid, date, part){
+  if(VIEW_ONLY) return;
+  const r=docs()[rid]; if(!r||!isDoctor(r)) return;
+  Q={rid,date};
+  $('#qTitle').textContent=`${r.name} · ${r.dept}`;
+  $('#qDate').textContent=label(date);
+  setSeg('#qPart', part||'all'); $('#qReason').value=''; $('#qSub').value='';
+  const ex=S.offs.filter(o=>norm(o.name)===norm(r.name)&&(!o.dept||o.dept===r.dept)&&offCovers(o,date));
+  $('#qList').innerHTML= ex.length? '<div class="hint" style="padding-top:8px">이날 이미 등록된 휴진</div>'+ex.map(o=>`<div><b>${partTxt(o.part)}</b> ${esc(offWhy(o))} <span class="hint">${o.rep?'매주 '+o.rep:(o.to&&o.to!==o.from?short(o.from)+'~'+short(o.to):'')}</span><button class="b d" data-un="${o.id}">이날만 해제</button></div>`).join('') : '';
+  $('#qList').querySelectorAll('[data-un]').forEach(b=>b.onclick=()=>{ unOffDate(b.dataset.un, date); toast('이날 휴진을 해제했습니다.'); afterOffChange(); openQuick(rid,date,part); });
+  $('#mQuick').classList.add('on'); setTimeout(()=>$('#qReason').focus(),50);
+}
+function unOffDate(id,date){
+  const o=S.offs.find(x=>x.id===id); if(!o) return;
+  const to=o.to||o.from;
+  if(o.rep || (o.from<date && date<to)){ if(o.rep){ o.skip=(o.skip||[]).concat(date); } else { S.offs.push(Object.assign({},o,{id:o.id+'s',from:addDays(date,1),to})); o.to=addDays(date,-1); } }
+  else if(o.from===to) S.offs=S.offs.filter(x=>x!==o);
+  else if(date===o.from) o.from=addDays(date,1);
+  else if(date===to) o.to=addDays(date,-1);
+  save();
+}
+function afterOffChange(){ fillDepts(); if($('#p-day').classList.contains('on')) renderDay(); if($('#mDoc').classList.contains('on')) drawDoc(); if($('#p-off').classList.contains('on')) renderOffs(); }
+$('#qSave').onclick=()=>{
+  const r=docs()[Q.rid];
+  S.offs.push({id:Date.now()+'q', name:r.name, dept:r.dept, from:Q.date, to:Q.date, part:segVal('#qPart'), reason:$('#qReason').value.trim(), sub:nameFix($('#qSub').value)});
+  save(); $('#mQuick').classList.remove('on'); toast(`${r.name} ${short(Q.date)} ${partTxt(segVal('#qPart'))} 휴진 등록`); afterOffChange();
+};
+$('#qClose').onclick=()=>$('#mQuick').classList.remove('on');
+$('#mQuick').onclick=e=>{ if(e.target.id==='mQuick') $('#mQuick').classList.remove('on'); };
+$('#qReason').onkeydown=$('#qSub').onkeydown=e=>{ if(e.key==='Enter') $('#qSave').onclick(); };
+seg('#qPart');
+
+/* ===== 일정 편집 ===== */
+function editW(){ return CM().weekday; }
+function pushHist(msg,extra){
+  const H=CM().hist; H.push(Object.assign({t:Date.now(),msg,snap:JSON.stringify(CM().weekday.rows)},extra||{})); if(H.length>200) H.shift(); CM().updated=Date.now();
+}
+function afterEdit(){ _cmpCache=null; CM().updated=Date.now(); save(); fillDepts(); }
+function baseRow(uid){ return baseW().rows.find(x=>x.uid===uid); }
+function slotOf(r,p,d){ return r[p].includes(d)? (r.resv.includes(d+(p==='am'?'오전':'오후'))?'resv':'ok') : ''; }
+function setSlot(r,p,d,v){
+  const tag=d+(p==='am'?'오전':'오후');
+  let s=r[p].replace(d,''); if(v) s+=d; r[p]='월화수목금'.split('').filter(x=>s.includes(x)).join('');
+  r.resv=(r.resv||[]).filter(x=>x!==tag); if(v==='resv') r.resv.push(tag);
+}
+function rowChanged(r){ const b=baseRow(r.uid); if(!b) return true; return b.center!==r.center||b.dept!==r.dept||b.name!==r.name||b.am!==r.am||b.pm!==r.pm||(b.resv||[]).join()!==(r.resv||[]).join()||b.spec!==r.spec; }
+function renderEdit(){
+  $('#eMonth').textContent=ymLabel(S.curMonth)+(isFinal()?' (확정)':' (작성 중)');
+  const q=norm($('#eQ').value).toLowerCase(), only=$('#eOnlyChg').checked;
+  const rows=W().rows;
+  let n=0, nc=0;
+  const html=rows.map((r,i)=>{
+    const b=baseRow(r.uid), chg=rowChanged(r); if(chg) nc++;
+    if(q && !matchQ(r,q)) return '';
+    if(only && !chg) return '';
+    n++;
+    const c=f=> b && b[f]!==r[f] ? ' chgd':'';
+    let h=`<tr data-uid="${r.uid}" class="${b?'':'newrow'}"><td class="${c('center')}"><input data-f="center" value="${esc(r.center)}"></td><td class="${c('dept')}"><input data-f="dept" value="${esc(r.dept)}"></td><td class="${c('name')}"><input data-f="name" value="${esc(r.name)}" placeholder="(협진)"></td>`;
+    ['am','pm'].forEach(p=>'월화수목금'.split('').forEach(d=>{ const v=slotOf(r,p,d), bv=b?slotOf(b,p,d):''; h+=`<td class="dc${b&&bv!==v?' chgd':''}"><button class="dbtn ${v}" data-p="${p}" data-d="${d}" title="${b&&bv!==v?'원본: '+(bv==='ok'?'진료':bv==='resv'?'예약만':'없음'):''}">${v==='ok'?d:v==='resv'?'예':'·'}</button></td>`; }));
+    h+=`<td class="${c('spec')}"><input data-f="spec" value="${esc(r.spec)}" title="${esc(r.spec)}"></td><td><div class="rowact"><button data-a="up" title="위로">▲</button><button data-a="dn" title="아래로">▼</button><button data-a="add" title="아래에 교수 추가">+</button><button data-a="del" class="x" title="삭제">✕</button></div></td></tr>`;
+    return h;
+  }).join('');
+  $('#eBody').innerHTML=html||'<tr><td colspan="15" class="empty">해당하는 줄이 없습니다.</td></tr>';
+  $('#eCount').textContent=`${n}줄 표시 · 원본과 다른 줄 ${nc}개`;
+  $('#eHistCnt').textContent=CM().hist.length?`(${CM().hist.length}건, 최근 것이 위)`:'';
+  $('#eHist').innerHTML=CM().hist.slice().reverse().map(h=>{ const d=new Date(h.t); return `<div><span>${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}</span>${esc(h.msg)}</div>`; }).join('')||'<div style="color:var(--mute)">아직 고친 기록이 없습니다.</div>';
+  $('#eUndo').disabled=!CM().hist.length;
+  const lock=isFinal();
+  $('#eBanner').innerHTML=lock?'<div class="banner warn" style="margin:0 0 10px">확정된 달이라 편집이 잠겨 있습니다. 고치려면 「일정표·설정 → 월별 일정표」에서 「확정 해제」를 누르세요.</div>':'';
+  document.querySelectorAll('#p-edit table.ed input, #p-edit table.ed button, #eAdd, #eReset, #eCmd, #eCmdGo, #eCmdFile').forEach(x=>x.disabled=lock); if(lock) $('#eUndo').disabled=true;
+}
+function rowByUid(uid){ return editW().rows.find(x=>x.uid===uid); }
+$('#eBody').addEventListener('change',e=>{
+  if(isFinal()) return;
+  const inp=e.target.closest('input[data-f]'); if(!inp) return;
+  const uid=inp.closest('tr').dataset.uid, f=inp.dataset.f, v=f==='name'?nameFix(inp.value):inp.value.trim(); if(f==='name') inp.value=v;
+  const r=rowByUid(uid); if(r[f]===v) return;
+  pushHist(`${r.name||r.dept} · ${({center:'센터',dept:'진료과',name:'교수명',spec:'전문진료과목'})[f]}: 「${r[f]||'없음'}」 → 「${v||'없음'}」`);
+  r[f]=v; afterEdit();
+  const b=baseRow(uid); inp.parentElement.classList.toggle('chgd', !!b && b[f]!==v);
+  $('#eHist').innerHTML=''; renderEditMeta();
+});
+function renderEditMeta(){ let nc=0; W().rows.forEach(r=>{ if(rowChanged(r)) nc++; }); $('#eCount').textContent=$('#eCount').textContent.replace(/원본과 다른 줄 \d+개/,`원본과 다른 줄 ${nc}개`); $('#eHistCnt').textContent=`(${CM().hist.length}건, 최근 것이 위)`; $('#eHist').innerHTML=CM().hist.slice().reverse().map(h=>{ const d=new Date(h.t); return `<div><span>${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}</span>${esc(h.msg)}</div>`; }).join(''); $('#eUndo').disabled=!CM().hist.length; }
+$('#eBody').addEventListener('click',async e=>{
+  if(isFinal()) return;
+  const db=e.target.closest('.dbtn'), ab=e.target.closest('[data-a]'); if(!db&&!ab) return;
+  const tr=e.target.closest('tr'), uid=tr.dataset.uid, rows=editW().rows, i=rows.findIndex(x=>x.uid===uid), r=rows[i];
+  if(db){
+    const p=db.dataset.p, d=db.dataset.d, cur=slotOf(r,p,d), nx=cur===''?'ok':cur==='ok'?'resv':'';
+    pushHist(`${r.name||r.dept} · ${d} ${p==='am'?'오전':'오후'}: ${cur===''?'없음':cur==='ok'?'진료':'예약만'} → ${nx===''?'없음':nx==='ok'?'진료':'예약만'}`);
+    setSlot(r,p,d,nx); afterEdit();
+    db.className='dbtn '+nx; db.textContent=nx==='ok'?d:nx==='resv'?'예':'·';
+    const b=baseRow(uid); db.parentElement.classList.toggle('chgd', !!b && slotOf(b,p,d)!==nx);
+    renderEditMeta(); return;
+  }
+  const a=ab.dataset.a;
+  if(a==='up'&&i>0){ pushHist(`${r.name||r.dept} 순서 위로`); [rows[i-1],rows[i]]=[rows[i],rows[i-1]]; }
+  else if(a==='dn'&&i<rows.length-1){ pushHist(`${r.name||r.dept} 순서 아래로`); [rows[i+1],rows[i]]=[rows[i],rows[i+1]]; }
+  else if(a==='add'){ $('#eQ').value=''; $('#eOnlyChg').checked=false; pushHist(`${r.dept}에 교수 추가`); rows.splice(i+1,0,{uid:'n'+Date.now(),center:r.center,dept:r.dept,name:'',am:'',pm:'',resv:[],spec:''}); afterEdit(); renderEdit(); const t=$(`#eBody tr[data-uid="${rows[i+1].uid}"] input[data-f=name]`); if(t) t.focus(); return; }
+  else if(a==='del'){ if(!await ask(`<b>${esc(r.name||r.dept)}</b> (${esc(r.dept)}) 줄을 삭제할까요?<br><span class="hint">「되돌리기」로 다시 살릴 수 있어요.</span>`)) return; pushHist(`${r.name||r.dept} (${r.dept}) 삭제`); rows.splice(i,1); }
+  else return;
+  afterEdit(); renderEdit();
+});
+function undo(){
+  if(isFinal()) return toast('확정된 달은 되돌릴 수 없습니다. 먼저 확정을 해제하세요.');
+  const H=CM().hist; let k=H.length-1; while(k>=0&&!H[k].snap) k--; if(k<0) return toast('되돌릴 기록이 없습니다.'); const h=H.splice(k,1)[0]; if(h.satSnap) restoreSat(h.satSnap);
+  editW().rows=JSON.parse(h.snap); afterEdit(); renderEdit(); toast(`되돌림: ${h.msg}`);
+}
+$('#eUndo').onclick=undo;
+$('#eAdd').onclick=()=>{ pushHist('새 교수 추가(맨 아래)'); const rows=editW().rows; rows.push({uid:'n'+Date.now(),center:'',dept:'',name:'',am:'',pm:'',resv:[],spec:''}); afterEdit(); $('#eQ').value=''; $('#eOnlyChg').checked=false; renderEdit(); const t=$('#eBody tr:last-child input[data-f=dept]'); if(t){ t.scrollIntoView({block:'center'}); t.focus(); } };
+$('#eReset').onclick=async()=>{ if(!await ask('고친 내용을 모두 버리고 불러온 원본 일정표로 되돌릴까요?<br><span class="hint">이 작업도 「되돌리기」로 취소할 수 있어요.</span>')) return; pushHist('원본으로 되돌림'); editW().rows=clone(baseW().rows); afterEdit(); renderEdit(); };
+$('#eQ').oninput=renderEdit; $('#eOnlyChg').onchange=renderEdit;
+document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&$('#p-edit').classList.contains('on')&&!e.target.closest('input,textarea')){ e.preventDefault(); undo(); } });
+
+/* ===== 지난달 비교 카드 ===== */
+function renderCompare(){
+  const bym=cmpBaseYm(); $('#sCmpWith').innerHTML='<option value="">자동 (직전 달)</option>'+monthKeys().filter(k=>k!==S.curMonth).reverse().map(k=>`<option value="${k}">${ymLabel(k)}</option>`).join(''); $('#sCmpWith').value=CM().cmpWith||''; $('#sCmpTitle').textContent=`— ${ymLabel(S.curMonth)}`;
+  const c=compareMonths(), el=$('#sCmp');
+  if(!c){ el.innerHTML=`<div class="hint">비교할 이전 달 일정표가 없습니다. 다음 달을 만들면 이 달과 자동으로 비교됩니다.</div>`; return; }
+  const nw=c.list.filter(x=>x.type==='new'), ch=c.list.filter(x=>x.type==='chg'), gn=c.list.filter(x=>x.type==='gone');
+  let h=`<div class="hint" style="margin-bottom:6px">${esc(c.label)} → ${esc(ymLabel(S.curMonth))} · 신규 ${nw.length} · 변경 ${ch.length} · 빠짐 ${gn.length}</div><div class="cmp">`;
+  h+=nw.map(x=>`<div class="it"><b style="color:var(--ok)">신규</b><span class="k">${esc(x.r.dept)}</span><span>${esc(x.r.name||'협진')} — ${esc(dayStr(x.r))}</span></div>`).join('');
+  h+=ch.map(x=>`<div class="it"><b style="color:var(--hol)">변경</b><span class="k">${esc(x.r.dept)}</span><span>${esc(x.r.name||'협진')} — ${x.fields.includes('요일')?`${esc(dayStr(x.p))} → <b>${esc(dayStr(x.r))}</b>`:''}${x.fields.includes('전문과목')?`${x.fields.length>1?' · ':''}전문과목 변경`:''}</span></div>`).join('');
+  h+=gn.map(x=>`<div class="it"><b style="color:var(--off)">빠짐</b><span class="k">${esc(x.r.dept)}</span><span>${esc(x.r.name||'협진')}</span></div>`).join('');
+  if(!c.list.length) h+='<div class="hint">바뀐 점이 없습니다.</div>';
+  el.innerHTML=h+'</div>';
+}
+
+
+/* ===== 월 관리 화면 ===== */
+function offsCountIn(ym){ return offsInMonth(ym).length; }
+function renderMonths(){
+  const ks=monthKeys();
+  // 새 달 후보
+  const lo=nextYm(ks[0],-12), hi=nextYm(ks[ks.length-1],6); const cand=[]; for(let k=lo;k<=hi;k=nextYm(k)) if(!S.months[k]) cand.push(k);
+  const def=nextYm(ks[ks.length-1]);
+  $('#mNewYm').innerHTML=cand.map(k=>`<option value="${k}">${ymLabel(k)}</option>`).join(''); if(cand.includes(def)) $('#mNewYm').value=def;
+  $('#moBody').innerHTML=ks.slice().reverse().map(k=>{ const m=S.months[k], u=new Date(m.updated||m.created||Date.now());
+    return `<tr class="${k===S.curMonth?'cur':''}"><td><b>${ymLabel(k)}</b>${k===S.curMonth?' <span class="badge chg">보는 중</span>':''}</td><td class="c">${m.status==='final'?'<span class="tag ok">확정</span>':'<span class="tag resv">작성 중</span>'}</td><td class="c">${esc(m.weekday.effective||'')}</td><td class="c">${m.weekday.rows.length}</td><td class="c">${m.hist.length}</td><td class="c">${offsCountIn(k)}</td><td class="spec">${esc(m.src||'')}</td><td class="c hide-s" style="white-space:nowrap">${u.getMonth()+1}/${u.getDate()} ${pad(u.getHours())}:${pad(u.getMinutes())}</td>
+    <td class="c"><div class="rowbtn"><button class="b" data-m="open" data-k="${k}">열기</button><button class="b" data-m="fin" data-k="${k}">${m.status==='final'?'확정 해제':'확정'}</button><button class="b" data-m="save" data-k="${k}">파일 저장</button><button class="b d" data-m="del" data-k="${k}">삭제</button></div></td></tr>`; }).join('');
+  $('#moBody').querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{
+    const k=b.dataset.k, m=S.months[k], a=b.dataset.m;
+    if(a==='open'){ goMonth(k); toast(`${ymLabel(k)} 일정표를 엽니다.`); }
+    else if(a==='fin'){ m.status=m.status==='final'?'draft':'final'; m.updated=Date.now(); save(); fillDepts(); renderMonths(); toast(m.status==='final'?`${ymLabel(k)}을 확정했습니다. 이제 편집이 잠깁니다.`:`${ymLabel(k)} 확정을 풀었습니다.`); }
+    else if(a==='save') saveMonthFile(k);
+    else if(a==='del'){ if(monthKeys().length<2) return toast('달이 하나뿐이라 지울 수 없습니다.'); if(!await ask(`<b>${ymLabel(k)}</b> 일정표를 삭제할까요?<br><span class="hint">이 달에 고친 내용과 기록도 함께 지워집니다. 휴진은 남습니다.</span>`)) return; delete S.months[k]; if(S.curMonth===k) S.curMonth=monthKeys().pop(); _cmpCache=null; save(); fillDepts(); renderData(); }
+  });
+}
+function goMonth(k){ REQ_YM=k; S.curMonth=k; _cmpCache=null; save(); if(curDate.slice(0,7)!==k) curDate=(today().slice(0,7)===k?today():k+'-01'); fillDepts(); refreshAll(); }
+$('#hMonth').onchange=e=>goMonth(e.target.value);
+$('#mNew').onclick=async()=>{
+  const k=$('#mNewYm').value; if(!k) return;
+  const src=resolveYm(k); 
+  if(!await ask(`<b>${ymLabel(k)}</b> 일정표를 새로 만들까요?<br><span class="hint">${ymLabel(src)} 일정표를 그대로 복사해 시작합니다. 엑셀을 받으면 아래 「새 일정표 불러오기」에서 이 달로 덮어쓰면 됩니다.</span>`)) return;
+  const w=clone(S.months[src].weekday); w.effective=k+'-01';
+  const m=newMonth(w, `${ymLabel(src)} 복사`); S.months[k]=m; goMonth(k); renderData(); toast(`${ymLabel(k)} 일정표를 만들었습니다. 「일정 편집」에서 고치세요.`);
+};
+function saveMonthFile(k){
+  const m=S.months[k]; const offs=offsInMonth(k); const sat={}; Object.keys(SAT()).filter(d=>d.startsWith(k)).forEach(d=>sat[d]=SAT()[d]);
+  const data={app:'jinryo-search',type:'month',v:2,ym:k,saved:new Date().toISOString(),month:m,offs,sat,satRows:S.satRows||BASE.satRows};
+  const name=`진료일정_${k}${m.status==='final'?'_확정':''}.json`;
+  try{ const blob=new Blob([JSON.stringify(data)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); toast(`${name} 파일로 저장했습니다. 공유폴더에 옮겨 두세요.`); }
+  catch(e){ toast('이 화면에서는 파일 저장이 막혀 있어요. PC의 HTML 파일에서 저장하세요.'); }
+  if(window.self!==window.top) toast('미리보기 창에서는 파일 저장이 막힐 수 있어요. PC의 HTML 파일에서 저장하세요.');
+}
+$('#mLoad').onchange=async e=>{
+  const msg=[];
+  for(const f of [...e.target.files]){
+    try{
+      const j=JSON.parse(await f.text()); if(j.app!=='jinryo-search') throw 0;
+      if(j.type==='month'){
+        if(S.months[j.ym] && !await ask(`<b>${ymLabel(j.ym)}</b> 일정표가 이미 있어요. 파일 내용으로 바꿀까요?`)){ msg.push(`${f.name}: 건너뜀`); continue; }
+        S.months[j.ym]=j.month; const ids=new Set(S.offs.map(o=>o.id)); (j.offs||[]).forEach(o=>{ if(!ids.has(o.id)) S.offs.push(o); });
+        S.sat=Object.assign(S.sat||{}, j.sat||{}); if(j.satRows&&!S.satRows) S.satRows=j.satRows;
+        msg.push(`${f.name}: ${ymLabel(j.ym)} 불러옴`); S.curMonth=j.ym;
+      } else if(j.data){ if(!await ask('전체 백업 파일입니다. 지금 데이터를 이 파일로 바꿀까요?')) continue; S=Object.assign({offs:[],hol:null,sat:null,fav:[]},j.data); migrateMonths(); msg.push(`${f.name}: 전체 복원`); }
+    }catch(err){ msg.push(`${f.name}: 진료일정 파일이 아님`); }
+  }
+  _cmpCache=null; save(); fillDepts(); renderData(); $('#mMsg').textContent=msg.join(' / '); e.target.value='';
+};
+$('#sCmpWith').onchange=e=>{ CM().cmpWith=e.target.value||null; _cmpCache=null; save(); renderCompare(); };
+
+
+/* ===== 글·파일로 고치기 ===== */
+const DAYS5='월화수목금';
+const slotTxt = r=>{ const f=p=>DAYS5.split('').filter(d=>r[p].includes(d)).map(d=>d+((r.resv||[]).includes(d+(p==='am'?'오전':'오후'))?'(예)':'')).join('')||'-'; return `오전 ${f('am')} / 오후 ${f('pm')}`; };
+const who = r=> `${r.name||'협진'} (${r.dept}${r.center?' · '+r.center.replace(/\n/g,''):''})`;
+/* 글 속에서 요일·오전/오후만 골라 냄 */
+function slotsOf(seg){
+  const res={am:new Set(),pm:new Set()};
+  const toks=seg.replace(/\d+\s*월/g,' ').replace(/[→=>~\-:：()\[\]]/g,' ').split(/[\s,·\/]+/).filter(Boolean);
+  const keep=toks.map(tk=>tk.replace(/(요일|에서|으로|에는|에|은|는|만|도|과|와|및|로|을|를|이|가)/g,'')).map((x,i)=>/^([월화수목금]|오전|오후|종일|전일|하루)+$/.test(x)?x:'').join(' ');
+  const s=keep.replace(/(종일|전일|하루)/g,'@').replace(/오전/g,'A').replace(/오후/g,'P');
+  const firstP=s.search(/[AP@]/), firstD=s.search(/[월화수목금]/);
+  const daysRe='[월화수목금](?:[\\s]*[월화수목금])*';
+  const reA=new RegExp(`(${daysRe})\\s*([AP@])`,'g'), reB=new RegExp(`([AP@])\\s*(${daysRe})`,'g');
+  const add=(days,p)=>{ days.replace(/\s/g,'').split('').forEach(d=>{ if(p!=='P') res.am.add(d); if(p!=='A') res.pm.add(d); }); };
+  let rest=s;
+  const order=(firstP>=0&&(firstD<0||firstP<firstD))?[reB,reA]:[reA,reB];
+  order.forEach(re=>{ rest=rest.replace(re,(m,a,b)=>{ re===reA?add(a,b):add(b,a); return ' '; }); });
+  const loose=(rest.match(/[월화수목금]/g)||[]);
+  return {am:res.am,pm:res.pm,loose,empty:!res.am.size&&!res.pm.size};
+}
+const STOP=new Set(['오전','오후','종일','전일','추가','삭제','변경','진료','예약','예약만','신규','신임','교수','선생님','전문','전문과목','명단','퇴직','장기연수','연수','휴직','파견','격주','제외','중단','센터','협진','외래','진료과']);
+function findRows(line){
+  const C=norm(line), rows=W().rows;
+  const names=[...new Set(rows.filter(r=>r.name).map(r=>r.name))].sort((a,b)=>b.length-a.length);
+  let nm=null; for(const n of names){ if(C.includes(norm(n))){ nm=n; break; } }
+  const depts=[...new Set(rows.map(r=>r.dept))].sort((a,b)=>norm(b).length-norm(a).length);
+  let dp=null; for(const d of depts){ if(C.includes(norm(d))){ dp=d; break; } }
+  const centers=[...new Set(rows.map(r=>r.center).filter(Boolean))];
+  const ce=centers.find(c=>c.split(/[.,\n]/).some(p=>p.includes('센터')&&C.includes(norm(p.trim()))));
+  let hit=nm? rows.filter(r=>r.name===nm) : [];
+  if(hit.length>1&&dp) { const h=hit.filter(r=>r.dept===dp); if(h.length) hit=h; }
+  if(hit.length>1&&ce) { const h=hit.filter(r=>r.center===ce); if(h.length) hit=h; }
+  return {nm,dp,ce,hit};
+}
+function strip(line,f){ let s=line; [f.nm,f.dp].filter(Boolean).forEach(x=>{ s=s.replace(new RegExp(x.split('').join('\\s*')),' '); }); if(f.ce) f.ce.split(/[.,\n]/).forEach(p=>{ p=p.trim(); if(p) s=s.replace(p,' '); }); return s; }
+function cloneSlots(r){ return {am:r.am,pm:r.pm,resv:(r.resv||[]).slice(),spec:r.spec}; }
+function applySlots(after, sl, mode){ // mode: add|del|resv
+  ['am','pm'].forEach(p=>{ const tag=p==='am'?'오전':'오후';
+    sl[p].forEach(d=>{
+      if(mode==='del'){ after[p]=after[p].replace(d,''); after.resv=after.resv.filter(x=>x!==d+tag); }
+      else { if(!after[p].includes(d)) after[p]+=d; if(mode==='resv'&&!after.resv.includes(d+tag)) after.resv.push(d+tag); if(mode==='add') after.resv=after.resv.filter(x=>x!==d+tag); }
+    });
+    after[p]=DAYS5.split('').filter(d=>after[p].includes(d)).join('');
+  });
+}
+
+/* ===== 토요진료 글 입력 ===== */
+const OFFWORD=/(휴진|학회|출장|휴가|연수|대진|병가|교육|외부|부재|결근)/;
+const satRowsAll = ()=> (S.satRows||BASE.satRows||[]);
+const nk = s=> norm(s).replace(/[()·.,및]/g,'');
+function deptInLine(line){
+  const C=nk(line);
+  const sat=satRowsAll().map(r=>r.dept), wk=[...new Set(W().rows.map(r=>r.dept))];
+  const all=[...new Set([...sat,...wk])].sort((a,b)=>nk(b).length-nk(a).length);
+  const d=all.find(x=>nk(x).length>=2 && C.includes(nk(x)));
+  if(d) return d;
+  // 소화기내과(위장관) 같은 변형
+  return sat.find(x=>{ const m=x.match(/^(.+?)\((.+)\)(.+)$/); return m && C.includes(nk(m[1]+m[3])) && C.includes(nk(m[2])); }) || null;
+}
+function satRowFor(deptText, name){
+  const rows=satRowsAll();
+  if(deptText){
+    let r=rows.find(x=>nk(x.dept)===nk(deptText));
+    if(!r){ const cands=rows.filter(x=>deptMatch(x.dept,deptText)); if(cands.length===1) r=cands[0]; else if(cands.length>1 && name){ r=cands.find(x=>pastSatDept(name)===x.center+'|'+x.dept)||cands[0]; } else if(cands.length) r=cands[0]; }
+    if(r) return r;
+  }
+  if(name){
+    const p=pastSatDept(name); if(p){ const r=rows.find(x=>x.center+'|'+x.dept===p); if(r) return r; }
+    const wd=W().rows.find(x=>norm(x.name)===norm(name)); if(wd){ const r=rows.find(x=>deptMatch(x.dept,wd.dept)); if(r) return r; return {center:'',dept:wd.dept,_new:true}; }
+  }
+  return deptText? {center:'',dept:deptText,_new:true} : null;
+}
+function pastSatDept(name){ const k=norm(name); const ds=Object.keys(SAT()).sort().reverse(); for(const d of ds){ const x=SAT()[d].find(y=>norm(y.name)===k); if(x) return x.center+'|'+x.dept; } return null; }
+const DATE_RE=/(?:(\d{4})\s*[.\-\/년]\s*)?(\d{1,2})\s*[.\/월]\s*(\d{1,2})\s*(?:일(?![가-힣]))?(?:\s*\([^)]*\))?|(?<![\d.\/])(\d{1,2})\s*일(?![가-힣])(?:\s*\([^)]*\))?|\b(\d{8})\b/g;
+function satDatesNames(line, ctx){
+  // 날짜 위치를 찾고, 날짜 사이 조각에서 이름을 뽑음
+  const marks=[]; let m; DATE_RE.lastIndex=0;
+  while((m=DATE_RE.exec(line))){
+    let ds=null;
+    if(m[5]) ds=fixDate(m[5]);
+    else if(m[2]){ let y=m[1]? +m[1] : +ctx.ym.slice(0,4); const mo=+m[2]; if(!m[1]){ const cm=+ctx.ym.slice(5); if(cm>=10&&mo<=3) y++; else if(cm<=3&&mo>=10) y--; } ds=fixDate(`${y}-${pad(mo)}-${pad(+m[3])}`); }
+    else if(m[4]) ds=fixDate(`${ctx.ym}-${pad(+m[4])}`);
+    marks.push({i:m.index, end:m.index+m[0].length, ds});
+  }
+  const known=new Set(W().rows.filter(r=>r.name).map(r=>norm(r.name))); known.add('일반의');
+  const dept=deptInLine(line);
+  const namesIn=seg=>{ let s=seg; if(dept) s=s.replace(new RegExp(dept.split('').map(c=>c.replace(/[()]/g,'\\$&')).join('\\s*')),' ');
+    const toks=(s.match(/[가-힣]{2,5}/g)||[]).map(nameFix);
+    if(/(^|[\s,:])(-|없음|미정|휴무)([\s,]|$)/.test(seg)) return ['-'];
+    return toks.filter(t=>known.has(t) || (/^[가-힣]{2,4}$/.test(t) && !STOP.has(t) && !/(토요|진료|일정|오전|오후|센터|내과|외과|의학과|안과|피부과|요일|담당|교수|선생|월|일$)/.test(t)));
+  };
+  const out=[];
+  const pre=namesIn(line.slice(0, marks.length?marks[0].i:line.length));
+  marks.forEach((mk,j)=>{ const seg=line.slice(mk.end, j+1<marks.length?marks[j+1].i:line.length); let ns=namesIn(seg); if(!ns.length) ns=pre; out.push({ds:mk.ds, names:ns}); });
+  return {dept, pairs:out};
+}
+
+function parseCmdText(text){
+  const items=[];
+  const satMode=/토요/.test(text);
+  const ctx={ym:S.curMonth, dept:null};
+  const satAcc={};
+  text.split(/\n/).map(l=>l.trim()).filter(l=>l&&!/^#/.test(l)).forEach(line=>{
+    // 머리줄: "12월 토요진료", "2026년 12월"
+    const mh=line.match(/(?:(\d{4})\s*년\s*)?(\d{1,2})\s*월(?!\s*\d)/);
+    const hasDate=/(\d{1,2}\s*[\/.]\s*\d{1,2})|(\d{1,2}\s*월\s*\d{1,2}\s*일?)|(?<![\d.\/])\d{1,2}\s*일(?![가-힣])|\b\d{8}\b/.test(line);
+    if(mh && !hasDate){ const y=mh[1]? +mh[1] : (()=>{ const cy=+S.curMonth.slice(0,4), cm=+S.curMonth.slice(5), mo=+mh[2]; return cm>=10&&mo<=3?cy+1:(cm<=3&&mo>=10?cy-1:cy); })(); ctx.ym=`${y}-${pad(+mh[2])}`; if(/토요|일정|진료/.test(line) && !findRows(line).nm) return; }
+    // 진료과만 있는 줄 → 이어지는 줄의 진료과
+    const dOnly=deptInLine(line);
+    if(dOnly && !hasDate && !findRows(line).nm && !/[월화수목금]\s*(오전|오후)|(오전|오후)\s*[월화수목금]/.test(line)){ ctx.dept=dOnly; return; }
+    if(hasDate){
+      const sd=satDatesNames(line, ctx);
+      const sats=sd.pairs.filter(p=>p.ds && parseYmd(p.ds).getDay()===6);
+      const isSat= sats.length && !OFFWORD.test(line) && (satMode || sats.length===sd.pairs.length);
+      if(isSat){
+        sd.pairs.forEach(p=>{
+          if(!p.ds) return items.push({kind:'err',line,err:'날짜를 읽지 못함'});
+          if(parseYmd(p.ds).getDay()!==6) return items.push({kind:'err',line,err:`${short(p.ds)}은 토요일이 아님`});
+          if(!p.names.length) return items.push({kind:'err',line,err:`${short(p.ds)} 진료 의사 이름을 찾지 못함`});
+          const nm=p.names.find(n=>n!=='-'&&n!=='일반의');
+          const sr=satRowFor(sd.dept||ctx.dept, nm);
+          if(!sr) return items.push({kind:'err',line,err:'진료과를 알 수 없음 — 진료과를 함께 적어 주세요'});
+          const key=p.ds+'|'+sr.center+'|'+sr.dept;
+          if(!satAcc[key]){ const before=(SAT()[p.ds]||[]).filter(x=>x.center===sr.center&&x.dept===sr.dept).map(x=>x.name); satAcc[key]={kind:'sat',date:p.ds,center:sr.center,dept:sr.dept,newRow:!!sr._new,before,names:[],line}; items.push(satAcc[key]); }
+          else satAcc[key].line+=' / '+line;
+          p.names.forEach(n=>{ if(n==='-') satAcc[key].names=['-']; else if(!satAcc[key].names.includes(n)) satAcc[key].names=satAcc[key].names.filter(x=>x!=='-').concat(n); });
+        });
+        return;
+      }
+      if(satMode && !OFFWORD.test(line)){ sd.pairs.forEach(p=>items.push({kind:'err',line,err:p.ds?`${short(p.ds)}은 토요일이 아님 (휴진이면 「휴진」을 적어 주세요)`:'날짜를 읽지 못함'})); return; }
+    }
+    // 날짜가 있으면 휴진
+    if(hasDate){
+      parseBulk(line).forEach(x=> items.push(x.err?{kind:'err',line,err:'휴진: '+x.err}:{kind:'off',o:x.o,line}));
+      return;
+    }
+    const f=findRows(line); const body=strip(line,f);
+    const specM=line.match(/(전문\s*(진료)?\s*(과목|분야)?|진료\s*분야)\s*[:：]\s*(.+)$/);
+    const isNew=/(신규|신임|새로|부임|합류)/.test(line);
+    if(!f.hit.length){
+      if(isNew && f.dp){
+        const nm=(strip(line,{dp:f.dp}).match(/[가-힣]{2,4}/g)||[]).find(w=>!STOP.has(w)&&!/^[월화수목금]+$/.test(w)&&!/(오전|오후|요일)/.test(w));
+        if(!nm) return items.push({kind:'err',line,err:'새 교수 이름을 찾지 못함'});
+        const sl=slotsOf(body.replace(nm,' ')); const r={uid:'n'+Date.now()+Math.random().toString(36).slice(2,5),center:f.ce||(W().rows.find(x=>x.dept===f.dp)||{}).center||'',dept:f.dp,name:nameFix(nm),am:'',pm:'',resv:[],spec:specM?specM[4].trim():''};
+        applySlots(r,sl,/예약/.test(line)?'resv':'add'); return items.push({kind:'new',row:r,line});
+      }
+      return items.push({kind:'err',line,err:f.nm?'':(isNew?'신규는 진료과를 함께 적어 주세요':'일정표에서 이름을 찾지 못함')});
+    }
+    f.hit.forEach(r=>{
+      const before=cloneSlots(r), after=cloneSlots(r);
+      if(specM){ after.spec=specM[4].trim(); return items.push({kind:'chg',uid:r.uid,r,before,after,line,what:'전문과목'}); }
+      const arrow=body.split(/→|->|=>|에서\s/);
+      if(arrow.length>=2){ const L=slotsOf(arrow[0]), Rr=slotsOf(arrow.slice(1).join(' ')); if(L.empty||Rr.empty) return items.push({kind:'err',line,err:'옮길 요일을 읽지 못함 (예: 화 오전 → 목 오전)'}); applySlots(after,L,'del'); applySlots(after,Rr,/예약/.test(arrow.slice(1).join(' '))?'resv':'add'); return items.push({kind:'chg',uid:r.uid,r,before,after,line}); }
+      const sl=slotsOf(body);
+      if(sl.empty){
+        if(/(퇴직|명단\s*(에서)?\s*삭제|줄\s*삭제|목록\s*(에서)?\s*삭제)/.test(line)) return items.push({kind:'del',uid:r.uid,r,line});
+        const lv=line.match(/(장기연수|해외연수|연수|휴직|파견|장기휴가|출산휴가|육아휴직)/);
+        if(lv){ after.am='';after.pm='';after.resv=[];after.spec=lv[1]; return items.push({kind:'chg',uid:r.uid,r,before,after,line}); }
+        return items.push({kind:'err',line,err:sl.loose.length?'요일은 있는데 오전·오후를 못 찾음 (예: 월 오전)':'바꿀 요일을 찾지 못함'});
+      }
+      if(/격주/.test(line)){ const tag=[...new Set([...sl.am,...sl.pm])].join(''); if(!after.spec.includes('격주')) after.spec=(after.spec+` [${tag} 격주진료]`).trim(); applySlots(after,sl,'add'); return items.push({kind:'chg',uid:r.uid,r,before,after,line}); }
+      if(/(삭제|빼|제외|중단|폐지|없앰|없음|안\s*함|취소)/.test(line)) applySlots(after,sl,'del');
+      else if(/(변경|바꿈|바꿔|바꾸|수정|로\s*$|으로\s*$)/.test(line)&&!/추가/.test(line)){ after.am='';after.pm='';after.resv=[]; applySlots(after,sl,/예약/.test(line)?'resv':'add'); }
+      else applySlots(after,sl,/예약/.test(line)?'resv':'add');
+      if(before.am===after.am&&before.pm===after.pm&&before.resv.join()===after.resv.join()) return items.push({kind:'err',line,err:`이미 그렇게 되어 있음 — ${who(r)}`});
+      items.push({kind:'chg',uid:r.uid,r,before,after,line});
+    });
+  });
+  items.forEach((x,i)=>{ if(x.kind==='sat'){ x.after=x.names.filter(n=>n!=='-'); if(x.after.join()===x.before.join()) items[i]={kind:'err',line:x.line,err:`이미 그렇게 되어 있음 — ${short(x.date)} ${x.dept}`}; }
+    if(x.kind==='err'&&!x.err) x.err='읽지 못함';
+    if(x.kind==='chg'&&x.before.am===x.after.am&&x.before.pm===x.after.pm&&x.before.resv.join()===x.after.resv.join()&&x.before.spec===x.after.spec) items[i]={kind:'err',line:x.line,err:`이미 그렇게 되어 있음 — ${who(x.r)}`}; });
+  const cnt={}; items.forEach(x=>{ if(x.kind==='chg'){ cnt[x.line]=(cnt[x.line]||0)+1; } }); items.forEach(x=>{ if(x.kind==='chg'&&cnt[x.line]>1) x.multi=cnt[x.line]; });
+  return items;
+}
+/* 엑셀 일정표와 지금 달 비교 */
+function diffWeekday(nw){
+  const cur=W().rows, items=[];
+  const keys=rows=>{ const cnt={}; return rows.map(r=>{ const b=norm(r.center)+'|'+norm(r.dept)+'|'+norm(r.name); cnt[b]=(cnt[b]||0)+1; return b+'#'+cnt[b]; }); };
+  const ck=keys(cur), nk=keys(nw.rows); const cmap=new Map(); cur.forEach((r,i)=>cmap.set(ck[i],r));
+  const seen=new Set();
+  nw.rows.forEach((n,i)=>{
+    const r=cmap.get(nk[i]);
+    if(!r){ n.uid='n'+Date.now()+i; n.name=nameFix(n.name); items.push({kind:'new',row:n,line:'파일',after_i:i}); return; }
+    seen.add(nk[i]);
+    const before=cloneSlots(r), after={am:n.am,pm:n.pm,resv:(n.resv&&n.resv.length?n.resv:before.resv.filter(t=>(t.includes('오전')?n.am:n.pm).includes(t[0]))),spec:n.spec};
+    if(before.am!==after.am||before.pm!==after.pm||norm(before.spec)!==norm(after.spec)) items.push({kind:'chg',uid:r.uid,r,before,after,line:'파일'});
+  });
+  cur.forEach((r,i)=>{ if(!seen.has(ck[i])) items.push({kind:'del',uid:r.uid,r,line:'파일',off:true}); });
+  return items;
+}
+let G=null; // 미리보기 상태
+function showChanges(items, src){
+  G={items,src,done:false};
+  $('#gTitle').textContent='바뀌는 내용 확인 — '+ymLabel(S.curMonth);
+  const ok=items.filter(x=>x.kind!=='err').length;
+  $('#gSub').innerHTML=`출처: <b>${esc(src)}</b> · 반영할 수 있는 항목 ${ok}건${items.length>ok?` · 읽지 못한 줄 ${items.length-ok}건`:''}. 체크한 항목만 반영됩니다.`;
+  drawChanges(); $('#gApply').style.display=''; $('#gAll').parentElement.style.visibility='';
+  $('#mChg').classList.add('on');
+}
+const KIND={sat:['sat','토요'],add:['add','추가'],chg:['chg','변경'],del:['del','줄 삭제'],new:['new','신규'],off:['off','휴진'],err:['err','확인']};
+function itemKind(x){ if(x.kind!=='chg') return x.kind; const b=x.before,a=x.after; const bs=b.am.length+b.pm.length, as=a.am.length+a.pm.length; if(a.spec!==b.spec&&b.am===a.am&&b.pm===a.pm) return 'chg'; return as>bs&&b.am.split('').every(d=>a.am.includes(d))&&b.pm.split('').every(d=>a.pm.includes(d))?'add':'chg'; }
+function itemCols(x){
+  if(x.kind==='chg'){ const sp=x.before.spec!==x.after.spec; return [esc(who(x.r)), slotTxt(x.before)+(sp?`<br><span class="src">${esc(x.before.spec)}</span>`:''), `<span class="after">${slotTxt(x.after)}</span>`+(sp?`<br><span class="after">${esc(x.after.spec)}</span>`:'')]; }
+  if(x.kind==='new') return [esc(who(x.row)),'<span class="src">(없음)</span>',`<span class="after">${slotTxt(x.row)}</span>${x.row.spec?'<br><span class="src">'+esc(x.row.spec)+'</span>':''}`];
+  if(x.kind==='del') return [esc(who(x.r)), slotTxt(x.r), '<span class="after" style="color:var(--off)">일정표에서 빠짐</span>'];
+  if(x.kind==='sat') return [`${esc(x.dept)}${x.center?' · '+esc(x.center.replace(/\n/g,'')):''}<br><b>${label(x.date)}</b>`, x.before.length?esc(x.before.join(', ')):'<span class="src">(없음)</span>', `<span class="after">${x.after.length?esc(x.after.join(', ')):'진료 없음'}</span>${x.newRow?'<br><span class="src">※ 토요 표에 새 진료과로 추가</span>':''}`];
+  if(x.kind==='off') return [`${esc(x.o.name)}${x.o.dept?' ('+esc(x.o.dept)+')':''}`, '-', `<span class="after">${x.o.rep?'매주 '+esc(x.o.rep)+' ':''}${label(x.o.from)}${x.o.to!==x.o.from?' ~ '+label(x.o.to):''} ${partTxt(x.o.part)} 휴진${x.o.reason?' · '+esc(x.o.reason):''}${x.o.sub?' · 대진 '+esc(x.o.sub):''}</span>`];
+  return ['-', '-', `<span style="color:var(--off)">${esc(x.err)}</span>`];
+}
+function drawChanges(){
+  const items=G.items;
+  $('#gBody').innerHTML=items.map((x,i)=>{ if(x.chk===undefined) x.chk= x.kind!=='err' && !x.off; const k=KIND[itemKind(x)]; const [a,b,c]=itemCols(x);
+    return `<tr class="${x.kind==='err'?'err':''}"><td class="c">${x.kind==='err'||G.done?'':`<input type="checkbox" data-i="${i}" ${x.chk?'checked':''}>`}</td><td class="c"><span class="k ${k[0]}">${k[1]}</span></td><td>${a}</td><td>${b}</td><td>${c}</td><td class="src">${esc(x.line)}${x.off?'<br>※ 지울지 확인 후 체크':''}${x.multi?`<br>※ 같은 이름 ${x.multi}줄 — 맞는 줄만 체크`:''}</td></tr>`; }).join('')||'<tr><td colspan="6" class="empty">바뀌는 내용이 없습니다.</td></tr>';
+  $('#gBody').querySelectorAll('input[data-i]').forEach(c=>c.onchange=()=>{ items[+c.dataset.i].chk=c.checked; cnt(); });
+  const cnt=()=>{ const n=items.filter(x=>x.chk&&x.kind!=='err').length; $('#gCount').textContent=G.done?'':`${n}건 선택됨`; $('#gApply').disabled=!n||isFinal(); };
+  cnt(); if(isFinal()&&!G.done) $('#gCount').textContent='확정된 달이라 반영할 수 없습니다. 확정을 해제하세요.';
+}
+$('#gAll').onchange=e=>{ G.items.forEach(x=>{ if(x.kind!=='err') x.chk=e.target.checked; }); drawChanges(); };
+$('#gClose').onclick=()=>$('#mChg').classList.remove('on');
+$('#gApply').onclick=()=>{
+  if(isFinal()) return toast('확정된 달입니다.');
+  const sel=G.items.filter(x=>x.chk&&x.kind!=='err'); if(!sel.length) return;
+  const rowItems=sel.filter(x=>x.kind!=='off'&&x.kind!=='sat'), offItems=sel.filter(x=>x.kind==='off'), satItems=sel.filter(x=>x.kind==='sat');
+  const detail=sel.map(x=>{ const k=KIND[itemKind(x)][1]; if(x.kind==='sat') return `토요 · ${short(x.date)} ${x.dept}: ${x.before.join(', ')||'없음'} → ${x.after.join(', ')||'진료 없음'}`; if(x.kind==='chg') return `${k} · ${who(x.r)}: ${slotTxt(x.before)} → ${slotTxt(x.after)}${x.before.spec!==x.after.spec?' (전문과목 변경)':''}`; if(x.kind==='new') return `신규 · ${who(x.row)}: ${slotTxt(x.row)}`; if(x.kind==='del') return `줄 삭제 · ${who(x.r)}`; return `휴진 · ${x.o.name} ${x.o.rep?'매주 '+x.o.rep+' ':''}${short(x.o.from)}${x.o.to!==x.o.from?'~'+short(x.o.to):''} ${partTxt(x.o.part)}${x.o.sub?' 대진 '+x.o.sub:''}`; });
+  if(rowItems.length){
+    pushHist(`${G.src}${G.src==='글 입력'?'으로':'로'} ${rowItems.length}건 수정`,{src:G.src,items:detail.filter((d,i)=>sel[i].kind!=='off'&&sel[i].kind!=='sat')});
+    const rows=editW().rows;
+    rowItems.forEach(x=>{
+      if(x.kind==='chg'){ const r=rows.find(y=>y.uid===x.uid); if(r) Object.assign(r,{am:x.after.am,pm:x.after.pm,resv:x.after.resv.slice(),spec:x.after.spec}); }
+      else if(x.kind==='del'){ const i=rows.findIndex(y=>y.uid===x.uid); if(i>=0) rows.splice(i,1); }
+      else if(x.kind==='new'){ const i=x.after_i; let at=-1; for(let j=rows.length-1;j>=0;j--){ if(rows[j].dept===x.row.dept){ at=j; break; } } rows.splice(at>=0?at+1:rows.length,0,x.row); }
+    });
+    afterEdit();
+  }
+  if(satItems.length){
+    const snapSat={}; satItems.forEach(x=>{ if(!(x.date in snapSat)) snapSat[x.date]=S.sat&&S.sat[x.date]?clone(S.sat[x.date]):null; });
+    pushHist(`${G.src}${G.src==='글 입력'?'으로':'로'} 토요진료 ${satItems.length}건 반영`,{src:G.src,items:detail.filter((d,i)=>sel[i].kind==='sat'),satSnap:snapSat});
+    S.sat=S.sat||{};
+    satItems.forEach(x=>{ const list=(SAT()[x.date]||[]).filter(y=>!(y.center===x.center&&y.dept===x.dept)); x.after.forEach(n=>list.push({center:x.center,dept:x.dept,name:n})); S.sat[x.date]=list; if(x.newRow){ S.satRows=(S.satRows||clone(BASE.satRows)); if(!S.satRows.some(r=>r.center===x.center&&r.dept===x.dept)) S.satRows.push({center:x.center,dept:x.dept}); } });
+    afterEdit();
+  }
+  offItems.forEach((x,i)=>S.offs.push(Object.assign({id:Date.now()+'g'+i},x.o)));
+  if(offItems.length){ CM().hist.push({t:Date.now(),msg:`${G.src}${G.src==='글 입력'?'으로':'로'} 휴진 ${offItems.length}건 등록`,src:G.src,items:detail.filter((d,i)=>sel[i].kind==='off'),offOnly:true}); save(); fillDepts(); }
+  G.done=true; G.items=sel;
+  $('#gTitle').textContent='반영했습니다 — '+ymLabel(S.curMonth);
+  $('#gSub').innerHTML=`<b>${sel.length}건</b>을 반영하고 수정 이력 #${CM().hist.length}에 남겼습니다. 잘못 반영했다면 「일정 편집」의 「되돌리기」로 한 번에 취소할 수 있어요.`;
+  $('#gApply').style.display='none'; $('#gAll').parentElement.style.visibility='hidden'; drawChanges();
+  $('#eCmd').value=''; if($('#p-edit').classList.contains('on')) renderEdit();
+};
+$('#gHist').onclick=()=>{ $('#mChg').classList.remove('on'); openHist(); };
+$('#eCmdGo').onclick=()=>{ const t=$('#eCmd').value.trim(); if(!t) return toast('고칠 내용을 적어 주세요.'); showChanges(parseCmdText(t),'글 입력'); };
+$('#eCmdHelp').onclick=()=>{ const b=$('#eCmdHelpBox'); b.style.display=b.style.display==='none'?'block':'none'; };
+$('#eCmdFile').onchange=async e=>{
+  const f=e.target.files[0]; e.target.value=''; if(!f) return;
+  try{
+    if(/\.(txt|csv)$/i.test(f.name)){ let txt=await f.text(); if(txt.includes(String.fromCharCode(65533))){ try{ txt=new TextDecoder('euc-kr').decode(await f.arrayBuffer()); }catch(_){} } return showChanges(parseCmdText(txt.replace(/,/g,' ')),`파일 「${f.name}」`); }
+    const buf=await f.arrayBuffer(); const head=new Uint8Array(buf.slice(0,12));
+    if(/DRM/.test(String.fromCharCode(...head))||head[0]===0x9b) return toast('문서보안(DRM) 파일이라 읽을 수 없어요. 보안 해제본을 올려 주세요.');
+    const wb=XLSX.read(buf,{type:'array'}); const w=parseWeekday(wb);
+    if(w) return showChanges(diffWeekday(w),`파일 「${f.name}」`);
+    const s=parseSat(wb);
+    if(s){ let n=0; Object.entries(s.days).forEach(([d,l])=>{ if(JSON.stringify(l)!==JSON.stringify(SAT()[d]||[])) n++; }); S.sat=Object.assign(S.sat||{},s.days); if(s.order) S.satRows=s.order.rows; CM().hist.push({t:Date.now(),msg:`토요일 진료안내 「${f.name}」 반영 (${n}일 바뀜)`,src:`파일 「${f.name}」`,items:[],offOnly:true}); save(); return toast(`토요일 진료안내를 반영했습니다. 바뀐 토요일 ${n}일`); }
+    toast('진료일정표 형식을 찾지 못했어요.');
+  }catch(err){ toast('파일을 읽지 못했어요.'); }
+};
+
+/* ===== 수정 이력 팝업 ===== */
+function restoreSat(snap){ S.sat=S.sat||{}; Object.entries(snap).forEach(([d,v])=>{ if(v===null) delete S.sat[d]; else S.sat[d]=v; }); save(); }
+function openHist(){
+  const H=CM().hist; $('#hTitle').textContent=`수정 이력 — ${ymLabel(S.curMonth)} (${H.length}건)`;
+  $('#hBody').innerHTML=H.length? H.map((h,i)=>({h,i})).reverse().map(({h,i})=>{ const d=new Date(h.t);
+    return `<div class="he"><div class="hh"><span class="no">#${i+1}</span><span class="tm">${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}</span><span class="sc">${esc(h.src||'직접 편집')}</span><span class="msg">${esc(h.msg)}</span>${h.snap&&!isFinal()?`<button class="b" data-rb="${i}">이 수정 전으로</button>`:''}</div>${h.items&&h.items.length?`<div class="hd2">${h.items.map(x=>'· '+esc(x)).join('<br>')}</div>`:''}</div>`; }).join('') : '<div class="empty">아직 수정 이력이 없습니다.</div>';
+  $('#hBody').querySelectorAll('[data-rb]').forEach(b=>b.onclick=async()=>{ const i=+b.dataset.rb, h=CM().hist[i];
+    if(!await ask(`이력 <b>#${i+1}</b> 「${esc(h.msg)}」을 하기 전 상태로 되돌릴까요?<br><span class="hint">그 뒤의 수정도 함께 되돌아갑니다. 되돌린 것도 이력에 남습니다.</span>`)) return;
+    const H2=CM().hist; const back={}; for(let j=H2.length-1;j>=i;j--){ if(H2[j].satSnap) Object.entries(H2[j].satSnap).forEach(([d,v])=>{ back[d]=v; }); } const cur={}; Object.keys(back).forEach(d=>cur[d]=S.sat&&S.sat[d]?clone(S.sat[d]):null); pushHist(`이력 #${i+1} 이전 상태로 복원`,{src:'복원',satSnap:Object.keys(cur).length?cur:undefined}); restoreSat(back); editW().rows=JSON.parse(h.snap); afterEdit(); openHist(); if($('#p-edit').classList.contains('on')) renderEdit(); toast('되돌렸습니다.'); });
+  $('#mHist').classList.add('on');
+}
+$('#hClose').onclick=()=>$('#mHist').classList.remove('on');
+$('#mHist').onclick=e=>{ if(e.target.id==='mHist') $('#mHist').classList.remove('on'); };
+$('#eHistOpen').onclick=openHist;
+
+/* 시작 */
+fillDepts(); setMonth(today().slice(0,7),{silent:true}); renderFind();
+if(VIEW_ONLY && 'serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+if(!/Mobi|Android|iPhone/i.test(navigator.userAgent)) setTimeout(()=>$('#fQ').focus(),100);
+</script>
+
+</body>
+</html>
