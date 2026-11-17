@@ -331,6 +331,7 @@ body:has(#gate) .modal{z-index:450}body:has(#gate) .toast{z-index:470}body:has(#
 .gr{display:inline-block;border-radius:4px;padding:0 6px;font-size:11px;font-weight:700;color:#fff;background:#5b6b85}.gr.g-필수{background:#c0392b}.gr.g-정규{background:#2f6db5}.gr.g-시범{background:#7a5bb5}
 .scs{border-bottom:1px solid var(--line)}.sch{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f7f9fc;position:sticky;top:0;font-size:13px}
 /* v3.5 */
+.bkf{display:grid;gap:6px;margin-top:8px}.bkf label{display:grid;grid-template-columns:20px 1fr;column-gap:6px;align-items:start;border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer}.bkf label:has(input:checked){border-color:var(--pri);background:#eef4fc}.bkf input{margin-top:3px}.bkf b{font-size:13.5px}.bkf span{grid-column:2;font-size:12px;color:var(--sub);line-height:1.5}
 .zseg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}.zseg button{border:0;border-left:1px solid var(--line);background:#fff;padding:6px 12px;min-width:58px}.zseg button:first-child{border-left:0}.zseg button.on{background:var(--pri);color:#fff;font-weight:700}
 .mbox .sev{display:inline-block;color:#fff;border-radius:5px;font-size:11px;line-height:1.5;padding:1px 6px;white-space:nowrap;text-align:center;min-width:34px;flex:0 0 auto}
 .mbox.wide{max-width:1180px}
@@ -499,7 +500,7 @@ body.hc{--sub:#2b3442;--line:#8a94a6;--ink:#0b0f17}body.hc .muted{color:#2b3442!
     <button class="btn" id="bAddAnnex">+ 별첨 대조표 추가</button>
   </div>
 </section>
-<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.16. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
+<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.17. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
 </main>
 
 <!-- 설정 서랍 -->
@@ -8518,7 +8519,7 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
     let tries = 0; const ti = setInterval(() => { tries++; if (tries > 40) { clearInterval(ti); return; } if ($('#gate') || ($('#modal') && $('#modal').classList.contains('on')) || $('#busy.on')) return; clearInterval(ti); setTimeout(tourOffer, 600); }, 1500);
   })();
 
-  window.__app = { stdMatrixDialog, stdMatrix, helpDialog, tour, tourHere, uiSet, uiGet, histDialog, histSave, histAll, histBuild, reviewOutDialog, reviewInDialog, reviewPageHTML, reviewMenu, stdLoadDialog, stdBrowse, stdCheckDialog, stdCheck, stdData, parseStdLines, pdfLines, stdMatch, busy, lawDialog, lawRefs, lawURL, newRegDialog, linkCheckDialog, reviewDialog, linkData, skeletonCheck, conflictCheck, chooseTarget, palette, quickFinish, roundsDialog, citeDialog, citeCheck, libraryDialog, libraryAdd, srcPanel, saveMyDefaults, applyMyDefaults, recentDialog, clearReadCache, cAll, numberMaps, suggestDialog, plainDialog, aiSettingsDialog, parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
+  window.__app = { cPut, stdMatrixDialog, stdMatrix, helpDialog, tour, tourHere, uiSet, uiGet, histDialog, histSave, histAll, histBuild, reviewOutDialog, reviewInDialog, reviewPageHTML, reviewMenu, stdLoadDialog, stdBrowse, stdCheckDialog, stdCheck, stdData, parseStdLines, pdfLines, stdMatch, busy, lawDialog, lawRefs, lawURL, newRegDialog, linkCheckDialog, reviewDialog, linkData, skeletonCheck, conflictCheck, chooseTarget, palette, quickFinish, roundsDialog, citeDialog, citeCheck, libraryDialog, libraryAdd, srcPanel, saveMyDefaults, applyMyDefaults, recentDialog, clearReadCache, cAll, numberMaps, suggestDialog, plainDialog, aiSettingsDialog, parseFile, buildSections, lintDialog, submitDialog, batchDialog, renameBatchDialog, registryDialog, changeListDialog, fullTextDialog, runCompare, loadProject, openPreview, setDoc, state, renderSections, autosave, toast, modal, closeModal, insertImage, pickImage, flushCells, getLastCell: () => lastCell, saveWork: () => $('#bSave').click(), hfDialog, compareFromFiles, projectData, loadProject, offerRestore, fileBase, download, goStep };
   Object.defineProperty(window.__app, 'state', { get: () => state });
 })();
 
@@ -9233,7 +9234,7 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
         <label>비밀번호<input id="gPw" type="password" placeholder="${pwHint}"></label><label>비밀번호 확인<input id="gPw2" type="password"></label>
         <div class="remem"><label title="이 PC에서는 「로그아웃」을 누를 때까지 비밀번호 없이 바로 열립니다. 여러 사람이 함께 쓰는 PC에서는 켜지 마세요."><input type="checkbox" id="gKeep" checked> 이 PC에서 로그인 유지</label></div>
         <div class="err" id="gErr">${esc(msg || '')}</div><div class="btns"><button class="btn pri" id="gOk">관리자로 등록하고 시작</button></div>
-        <div class="lnk"><a id="gImp">다른 PC에서 내보낸 사용자·이력 파일 가져오기</a></div>
+        <div class="lnk"><a id="gImp">다른 PC에서 받은 백업 파일(.zip·.json) 가져오기</a></div>
         <div class="foot2">신·구조문 대조표 작성 도구 · 개발자 노상엽</div></div>`;
       $('#gOk').onclick = () => register(true);
     } else if (mode === 'register') {
@@ -9358,7 +9359,7 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
   async function openHist(tab) {
     histTab = tab || histTab;
     A().modal(`<div class="hist"><div class="row"><h3 style="margin:0">이력</h3><span style="flex:1"></span><button class="btn sm" id="hX">닫기 ✕</button></div>
-      <div class="tabs"><button data-t="logs">작업 기록</button><button data-t="versions">대조표 버전</button><button data-t="me">내 정보</button>${isAdmin() ? '<button data-t="users">사용자 관리</button>' : ''}<button data-t="data">파일로 주고받기</button></div><div id="hBody"></div></div>`, m => {
+      <div class="tabs"><button data-t="logs">작업 기록</button><button data-t="versions">대조표 버전</button><button data-t="me">내 정보</button>${isAdmin() ? '<button data-t="users">사용자 관리</button>' : ''}<button data-t="data">백업 · 가져오기</button></div><div id="hBody"></div></div>`, m => {
       m.style.maxWidth = '1180px';
       $('#hX', m).onclick = () => { m.style.maxWidth = ''; A().closeModal(); };
       $$('.tabs button', m).forEach(b => b.onclick = () => { histTab = b.dataset.t; draw(); });
@@ -9519,24 +9520,78 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
     const size = vs.reduce((a, v) => a + (v.size || 0), 0);
     let quota = ''; try { const e = await navigator.storage.estimate(); quota = ' · 저장 공간 ' + Math.round(e.usage / 1048576) + 'MB 사용 / 약 ' + Math.round(e.quota / 1048576) + 'MB'; } catch (e) { }
     body.innerHTML = `<div class="card"><h2>이 PC에 보관된 정보</h2><div>사용자 ${us.length}명 · 작업 기록 ${lg.length}건 · 대조표 버전 ${vs.length}개 (${Math.round(size / 1048576 * 10) / 10}MB)${quota}</div>
-      <div class="muted" style="margin-top:4px">정보는 이 PC의 브라우저 안에 보관됩니다. 브라우저 방문 기록·사이트 데이터를 지우면 함께 지워지니, 가끔 아래 "내보내기"로 파일을 받아 두세요.</div></div>
-      <div class="grid2"><div class="card"><h2>내보내기</h2><div class="muted">사용자·작업 기록·버전을 파일 하나(.json)로 받습니다. 공유 폴더에 두면 다른 PC에서 가져올 수 있습니다. 비밀번호는 암호화된 값만 들어갑니다.</div>
-        <label style="display:block;margin:8px 0"><input type="checkbox" id="xV" checked> 대조표 버전도 포함 (용량이 커질 수 있음)</label><button class="btn pri" id="xGo">파일로 내보내기</button></div>
-      <div class="card"><h2>가져오기</h2><div class="muted">다른 PC에서 내보낸 파일을 합칩니다. 같은 항목은 더 최근에 고친 쪽을 남기고, 지금 정보는 지우지 않습니다.${isAdmin() ? '' : ' <b>관리자만 가져올 수 있습니다.</b>'}</div>
+      <div class="muted" style="margin-top:4px">정보는 이 PC의 브라우저 안에 보관됩니다. 브라우저 방문 기록·사이트 데이터를 지우면 함께 지워지니, 가끔 아래 「백업 내보내기」로 파일을 받아 두세요.</div></div>
+      <div class="grid2"><div class="card"><h2>백업 내보내기</h2><div class="muted">공유 폴더나 USB에 두면 다른 PC에서 가져올 수 있습니다. 비밀번호는 암호화된 값만 들어갑니다.</div>
+        <div class="bkf" id="xF">
+          <label><input type="radio" name="xF" value="zip" checked><b>압축 파일 (.zip)</b><span>추천 · 사용자·기록·버전·내규 대장에 내규 서고·조문 변천사·인증 기준 색인·지금 작업까지 한 파일로. 용량이 작고 그대로 가져올 수 있습니다. 엑셀 목록도 함께 들어갑니다.</span></label>
+          <label><input type="radio" name="xF" value="xlsx"><b>엑셀 (.xlsx)</b><span>사람이 열어 보는 목록용 · 사용자·작업 기록·버전·내규 대장·변천사를 시트별로. <u>가져오기에는 쓸 수 없습니다.</u></span></label>
+          <label><input type="radio" name="xF" value="json"><b>json (.json)</b><span>이전 방식 · 사용자·기록·버전·내규 대장만.</span></label></div>
+        <label style="display:block;margin:8px 0"><input type="checkbox" id="xV" checked> 대조표 버전도 포함 (용량이 커질 수 있음)</label><button class="btn pri" id="xGo">백업 파일 받기</button></div>
+      <div class="card"><h2>가져오기</h2><div class="muted">다른 PC에서 내보낸 백업 파일(.zip 또는 .json)을 합칩니다. 같은 항목은 더 최근에 고친 쪽을 남기고, 지금 정보는 지우지 않습니다.${isAdmin() ? '' : ' <b>관리자만 가져올 수 있습니다.</b>'}</div>
         <button class="btn pri" id="iGo" style="margin-top:8px" ${isAdmin() ? '' : 'disabled'}>파일 가져오기</button></div></div>`;
     $('#xGo', body).onclick = async () => {
+      const fmtSel = (body.querySelector('input[name=xF]:checked') || {}).value || 'zip'; const ymd = new Date().toISOString().slice(0, 10); const base = '대조표 도구 백업 ' + ymd;
       const data = { app: 'sinkujomun-users', ver: 1, exportedAt: now(), exportedBy: AU.user.name, users: await users(), logs: await all('logs'), versions: $('#xV', body).checked ? await all('versions') : [], registry: window.__registry ? window.__registry.all() : [] };
-      A().download(new Blob([JSON.stringify(data)], { type: 'application/json' }), '대조표 도구 사용자·이력 ' + new Date().toISOString().slice(0, 10) + '.json');
-      await log('사용자·이력 내보내기', '', '사용자 ' + data.users.length + ' · 기록 ' + data.logs.length + ' · 버전 ' + data.versions.length);
+      const app = A(); app.busy && app.busy(true, '백업 파일을 만드는 중…');
+      try {
+        if (fmtSel === 'json') { app.download(new Blob([JSON.stringify(data)], { type: 'application/json' }), base + '.json'); }
+        else {
+          const extra = {}; for (const st of ['library', 'hist', 'std']) { try { extra[st] = await app.cAll(st); } catch (e) { extra[st] = []; } }
+          if (fmtSel === 'xlsx') app.download(await backupXlsx(data, extra), base + '.xlsx');
+          else {
+            const z = new JSZip(); z.file('사용자·이력.json', JSON.stringify(data));
+            if (extra.library.length) z.file('내규 서고.json', JSON.stringify(extra.library)); if (extra.hist.length) z.file('조문 변천사.json', JSON.stringify(extra.hist)); if (extra.std.length) z.file('인증 기준 색인.json', JSON.stringify(extra.std));
+            let pj = null; try { pj = app.projectData(); } catch (e) { } if (pj && pj.sections && pj.sections.length) z.file('지금 작업.json', JSON.stringify(pj));
+            z.file('목록 보기.xlsx', await backupXlsx(data, extra));
+            z.file('읽어 주세요.txt', ['신·구조문 대조표 작성 도구 백업 (' + ymd + ', ' + AU.user.name + ')', '', '· 가져오기: 사용자·이력 → 파일 가져오기에서 이 압축 파일(.zip)을 그대로 고르세요. 풀지 않아도 됩니다.', '· 목록 보기.xlsx: 사용자·작업 기록·버전·내규 대장·변천사를 엑셀로 볼 수 있습니다.', '· 지금 작업.json: 「작업 불러오기」로 열면 백업할 때 다듬던 대조표가 열립니다.', '· 인증 기준 색인은 의료기관평가인증원 지침서를 이 PC에서 읽은 것이니 병원 밖으로 내보내지 마세요.'].join('\r\n'));
+            app.download(await z.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } }), base + '.zip');
+          }
+        }
+      } catch (e) { app.toast('백업 실패: ' + e.message, 6000); return; } finally { app.busy && app.busy(false); }
+      await log('백업 내보내기', '', fmtSel + ' · 사용자 ' + data.users.length + ' · 기록 ' + data.logs.length + ' · 버전 ' + data.versions.length);
     };
     $('#iGo', body).onclick = () => importFile(false, () => drawData(body));
   }
+  async function backupXlsx(data, extra) {
+    const X = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, '');
+    const d10 = (v) => { if (!v) return ''; const t = new Date(v); if (!/T/.test(String(v)) || isNaN(t)) return String(v).slice(0, 16); const z = (n) => String(n).padStart(2, '0'); return t.getFullYear() + '-' + z(t.getMonth() + 1) + '-' + z(t.getDate()) + ' ' + z(t.getHours()) + ':' + z(t.getMinutes()); };
+    const RG_ = { name: '내규명', no: '번호', dept: '담당 부서', enacted: '제정일', revised: '최종 개정일', reviewed: '최종 검토일', cycleMonths: '검토 주기(개월)', nextReview: '다음 검토', keepUntil: '보존 기한', owner: '담당자', memo: '메모', createdAt: '등록일', updatedAt: '고친 날' };
+    const reg = data.registry || []; const rk = Object.keys(RG_).filter(k => reg.some(r => r[k] != null && r[k] !== ''));
+    const sheets = [
+      ['요약', [['항목', '값'], ['백업한 날', d10(data.exportedAt)], ['백업한 사람', data.exportedBy], ['사용자', data.users.length + '명'], ['작업 기록', data.logs.length + '건'], ['대조표 버전', data.versions.length + '개'], ['내규 대장', reg.length + '건'], ['내규 서고', (extra.library || []).length + '건'], ['조문 변천사', (extra.hist || []).length + '판']], [16, 30]],
+      ['사용자', [['이름', '부서', '권한', '등록일', '마지막 로그인', '상태']].concat(data.users.map(u => [u.name, u.dept || '', u.role === 'admin' ? '관리자' : '사용자', d10(u.createdAt), d10(u.lastLogin), u.disabled ? '사용 중지' : ''])), [14, 16, 10, 18, 18, 10]],
+      ['작업 기록', [['일시', '사용자', '부서', '작업', '대상', '내용']].concat(data.logs.slice().sort((a, b) => (b.ts || '').localeCompare(a.ts || '')).map(l => [d10(l.ts), l.userName, l.dept || '', l.action, l.target || '', l.memo || ''])), [18, 12, 14, 22, 30, 50]],
+      ['대조표 버전', [['저장 일시', '사용자', '내규', '버전 이름', '메모', '행 수', '별첨 수', '크기(KB)', '보존 기한']].concat(data.versions.slice().sort((a, b) => (b.ts || '').localeCompare(a.ts || '')).map(v => [d10(v.ts), v.userName, v.title || '', v.name || '', v.memo || '', v.rows || 0, v.annex || 0, Math.round((v.size || 0) / 1024), d10(v.keepUntil).slice(0, 10)])), [18, 12, 34, 20, 30, 8, 8, 10, 12]],
+      ['내규 대장', [rk.map(k => RG_[k])].concat(reg.map(r => rk.map(k => r[k] == null ? '' : r[k]))), rk.map(k => k === 'name' ? 34 : k === 'memo' ? 30 : 14)],
+      ['내규 서고', [['내규명', '번호', '문단 수', '올린 날']].concat((extra.library || []).map(l => [l.name || '', l.no || '', (l.paras || []).length, l.at ? d10(new Date(l.at).toISOString()) : ''])), [40, 14, 10, 18]],
+      ['조문 변천사', [['내규', '번호', '개정일', '구분', '기록 방법', '파일']].concat((extra.hist || []).slice().sort((a, b) => (a.name || '').localeCompare(b.name || '') || (a.date || '').localeCompare(b.date || '')).map(h => [h.name || '', h.no || '', h.date || '', h.kind || '', h.src === 'file' ? '파일 올림' : '자동', h.file || ''])), [34, 12, 12, 10, 10, 34]]];
+    const col = (i) => { let s = ''; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
+    const sheetXml = ([, rows, w]) => { const n = Math.max(1, ...rows.map(r => r.length));
+      return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>' + Array.from({ length: n }, (_, i) => '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + ((w || [])[i] || 14) + '" customWidth="1"/>').join('') + '</cols><sheetData>' +
+        rows.map((r, ri) => '<row r="' + (ri + 1) + '">' + r.map((v, ci) => { const ref = col(ci) + (ri + 1); const st = ri === 0 ? ' s="1"' : ' s="2"'; return typeof v === 'number' ? '<c r="' + ref + '"' + st + '><v>' + v + '</v></c>' : '<c r="' + ref + '"' + st + ' t="inlineStr"><is><t xml:space="preserve">' + X(v) + '</t></is></c>'; }).join('') + '</row>').join('') +
+        '</sheetData>' + (rows.length > 1 ? '<autoFilter ref="A1:' + col(n - 1) + rows.length + '"/>' : '') + '<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>'; };
+    const z = new JSZip();
+    z.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' + sheets.map((_, i) => '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('') + '</Types>');
+    z.file('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>');
+    z.file('xl/workbook.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' + sheets.map((s, i) => '<sheet name="' + X(s[0]) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>').join('') + '</sheets>' + '<definedNames>' + sheets.map((s, i) => s[1].length > 1 ? '<definedName name="_xlnm._FilterDatabase" localSheetId="' + i + '" hidden="1">\'' + X(s[0]) + '\'!$A$1:$' + col(Math.max(1, ...s[1].map(r => r.length)) - 1) + '$' + s[1].length + '</definedName>' : '').join('') + '</definedNames></workbook>');
+    z.file('xl/_rels/workbook.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + sheets.map((_, i) => '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>').join('') + '<Relationship Id="rId' + (sheets.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>');
+    z.file('xl/styles.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="10"/><name val="맑은 고딕"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="맑은 고딕"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F3A68"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFC9D1DE"/></left><right style="thin"><color rgb="FFC9D1DE"/></right><top style="thin"><color rgb="FFC9D1DE"/></top><bottom style="thin"><color rgb="FFC9D1DE"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>');
+    sheets.forEach((s, i) => z.file('xl/worksheets/sheet' + (i + 1) + '.xml', sheetXml(s)));
+    return await z.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', compression: 'DEFLATE' });
+  }
   function importFile(fromGate, done) {
-    const f = document.createElement('input'); f.type = 'file'; f.accept = '.json,application/json';
+    const f = document.createElement('input'); f.type = 'file'; f.accept = '.zip,.json,application/json,application/zip';
     f.onchange = async () => {
       const file = f.files[0]; if (!file) return;
       try {
-        const d = JSON.parse(await file.text()); if (!d || d.app !== 'sinkujomun-users') throw new Error('이 도구의 사용자·이력 파일이 아닙니다.');
+        if (/\.xlsx$/i.test(file.name)) throw new Error('엑셀 백업은 목록 보기용이라 가져올 수 없습니다. .zip 또는 .json 백업을 골라 주세요.');
+        let d, extra = null;
+        if (/\.zip$/i.test(file.name)) {
+          const z = await JSZip.loadAsync(await file.arrayBuffer()); const rd = async (n) => { const e = z.file(n); return e ? JSON.parse(await e.async('string')) : null; };
+          d = await rd('사용자·이력.json'); extra = { library: await rd('내규 서고.json'), hist: await rd('조문 변천사.json'), std: await rd('인증 기준 색인.json') };
+          if (!d) throw new Error('이 도구의 백업 압축 파일이 아닙니다.');
+        } else d = JSON.parse(await file.text());
+        if (!d || d.app !== 'sinkujomun-users') throw new Error('이 도구의 사용자·이력 파일이 아닙니다.');
         const stamp = (x) => (x.edits && x.edits.length ? x.edits[x.edits.length - 1].at : '') || x.lastLogin || x.ts || x.createdAt || '';
         let n = { users: 0, logs: 0, versions: 0 };
         for (const store of ['users', 'logs', 'versions']) {
@@ -9544,7 +9599,10 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
           for (const x of (d[store] || [])) { const cur = map[x.id]; if (!cur || stamp(x) > stamp(cur)) { await put(store, x); n[store]++; } }
         }
         const nr = d.registry && window.__registry ? window.__registry.merge(d.registry) : 0;
-        const msg = `가져왔습니다: 사용자 ${n.users} · 기록 ${n.logs} · 버전 ${n.versions}` + (nr ? ` · 내규 대장 ${nr}` : '');
+        const ne = { library: 0, hist: 0, std: 0 };
+        if (extra) for (const st of ['library', 'hist', 'std']) { const arr = extra[st]; if (!Array.isArray(arr) || !arr.length) continue; let mine = []; try { mine = await A().cAll(st); } catch (e) { } const keyOf = (x) => x.k || x.key || x.id || x.name; const map = {}; mine.forEach(x => map[keyOf(x)] = x);
+          for (const x of arr) { const cur = map[keyOf(x)]; if (!cur || (x.at || 0) > (cur.at || 0)) { try { await A().cPut(st, x); ne[st]++; } catch (e) { } } } }
+        const msg = `가져왔습니다: 사용자 ${n.users} · 기록 ${n.logs} · 버전 ${n.versions}` + (nr ? ` · 내규 대장 ${nr}` : '') + (ne.library ? ` · 내규 서고 ${ne.library}` : '') + (ne.hist ? ` · 변천사 ${ne.hist}판` : '') + (ne.std ? ' · 인증 기준 색인' : '');
         if (AU.user) { await log('사용자·이력 가져오기', '', file.name + ' — ' + msg); A().toast(msg, 5000); }
         if (fromGate) showGate('login', msg); if (done) done();
       } catch (e) { A().toast('가져오기 실패: ' + e.message, 6000); }
@@ -9583,7 +9641,7 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '3.5';
+  const APP_VERSION = '3.5.1';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
