@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1f3a5f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>원내 전화번호 검색 · 부천성모병원</title>
+<style>
+:root{
+  --navy:#1f3a5f; --navy2:#2b4f7e; --teal:#0f8a83; --bg:#f3f5f8; --card:#fff;
+  --line:#dde3ea; --text:#1c2430; --muted:#6b7684; --hl:#fff1a8; --star:#f2a900; --mine:#7b4fd6; --share:#1e7bc8;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;font-size:15px}
+button,input,select,textarea{font:inherit}
+.tnum{font-variant-numeric:tabular-nums}
+
+header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:16px 20px 14px}
+.hwrap{max-width:1400px;margin:0 auto}
+.htop{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.htop h1{margin:0;font-size:21px;letter-spacing:-.3px}
+.base{font-size:13px;background:rgba(255,255,255,.16);padding:3px 10px;border-radius:20px}
+.hinfo{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.pill{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--navy);border:0;
+  border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;font-weight:600}
+.pill b{font-weight:700;color:var(--teal)}
+.cmc{margin-top:8px;font-size:12.5px;opacity:.85;line-height:1.5}
+
+.searchbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.swrap{max-width:1400px;margin:0 auto;padding:12px 20px 10px}
+.srow{display:flex;gap:8px;align-items:center}
+.sbox{flex:1;position:relative}
+.sbox input{width:100%;height:48px;border:2px solid var(--navy2);border-radius:12px;padding:0 44px 0 16px;
+  font-size:17px;outline:none;background:#fff}
+.sbox input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(15,138,131,.15)}
+.sclear{position:absolute;right:8px;top:8px;width:32px;height:32px;border:0;border-radius:8px;background:#eef1f5;
+  cursor:pointer;color:var(--muted);font-size:16px;display:none}
+.btn{height:48px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer;
+  white-space:nowrap;font-weight:600;color:var(--navy)}
+.btn:hover{background:#eef3f8}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn:disabled{opacity:.45;cursor:default}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 12px;font-size:13.5px;cursor:pointer;color:#33404f}
+.chip .c{color:var(--muted);font-size:12px;margin-left:4px}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.chip.on .c{color:#cbd6e4}
+.chip.chg{border-color:#f0b54a}
+.status{margin-top:8px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;min-height:28px}
+.status .notice{color:#8a5a00;background:#fff4d6;border-radius:6px;padding:2px 8px;margin-left:8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.seg button{border:0;background:none;padding:4px 12px;font-size:13px;cursor:pointer;color:#33404f}
+.seg button.on{background:var(--navy);color:#fff}
+.sharebar{display:none;margin-top:8px;font-size:13px;border-radius:8px;padding:6px 10px;align-items:center;gap:8px}
+.sharebar.show{display:flex}
+.sharebar.warnb{background:#fff4d6;color:#7a5200}
+.sharebar.okb{background:#e8f3fc;color:#1b5f98}
+.sharebar button{border:1px solid currentColor;background:#fff;color:inherit;border-radius:6px;padding:2px 10px;cursor:pointer;font-size:12.5px;font-weight:600}
+
+main{max-width:1400px;margin:0 auto;padding:14px 20px 40px}
+.grid{columns:3 380px;column-gap:14px}
+.grid.flat{columns:1;max-width:880px;margin:0 auto}
+.group{break-inside:avoid;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  margin:0 0 14px;overflow:hidden}
+.gh{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f7f9fb;border-bottom:1px solid var(--line)}
+.gh .path{font-weight:700;color:var(--navy);font-size:14.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gh .path .div{color:var(--muted);font-weight:600}
+.gh .path .sep{color:#aab4c0;margin:0 4px}
+.gh .cnt{margin-left:auto;font-size:12px;color:var(--muted);flex:none}
+.gh.mine{background:#f4effd}.gh.mine .path{color:var(--mine)}
+.gh.share{background:#eaf3fc}.gh.share .path{color:var(--share)}
+.gh.hot{background:#fff8e6}
+.row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:6px;
+  padding:6px 12px 6px 6px;border-bottom:1px solid #eef1f4;min-height:44px}
+.row:last-child{border-bottom:0}
+.row:hover{background:#fafcfe}
+.row.sel{background:#e9f6f5;box-shadow:inset 3px 0 0 var(--teal)}
+.star,.more{width:30px;height:30px;border:0;background:none;cursor:pointer;border-radius:6px;font-size:17px;color:#c4ccd6;padding:0}
+.star.on{color:var(--star)}
+.star:hover,.more:hover{background:#eef2f6}
+.more{font-size:15px;color:#9aa5b2}
+.nm{min-width:0}
+.nm .n{font-weight:600;word-break:keep-all;overflow-wrap:anywhere}
+.nm .sub{font-size:12px;color:var(--muted);margin-top:1px}
+.nm .memo{font-size:12px;color:var(--teal);margin-top:1px}
+.nm .note{display:inline-block;font-size:11.5px;color:#8a5a00;background:#fff4d6;border-radius:4px;padding:0 5px;margin-left:6px;font-weight:500}
+.tag{display:inline-block;font-size:11px;color:#fff;background:var(--mine);border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:1px;font-weight:600}
+.tag.sh{background:var(--share)}
+.tag.new{background:#1f9d55}.tag.chg{background:#e08a00}
+.nums{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:240px}
+.num{min-width:62px;height:32px;padding:0 9px;border:1px solid #cfd8e3;background:#f2f6fa;border-radius:7px;cursor:pointer;
+  font-weight:700;color:var(--navy);font-size:15px;font-variant-numeric:tabular-nums;text-align:center}
+.num:hover{background:var(--teal);border-color:var(--teal);color:#fff}
+.num.none{background:none;border-style:dashed;color:var(--muted);font-weight:500;cursor:default}
+mark{background:var(--hl);color:inherit;border-radius:2px;padding:0 1px}
+.empty{text-align:center;color:var(--muted);padding:60px 20px;background:#fff;border:1px dashed var(--line);border-radius:var(--radius);column-span:all}
+.empty b{color:var(--text)}
+
+.quick{column-span:all;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;margin-bottom:14px;
+  display:grid;grid-template-columns:92px 1fr;gap:8px 10px;align-items:start}
+.quick .lb{font-size:13px;color:var(--muted);font-weight:600;padding-top:5px}
+.quick .qs{display:flex;flex-wrap:wrap;gap:6px}
+.qb{border:1px solid #cfe3e1;background:#f0f8f7;color:#0b6d67;border-radius:16px;padding:4px 11px;font-size:13.5px;cursor:pointer}
+.qb:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+.qb.rc{border-color:var(--line);background:#f6f7f9;color:#3b4756}
+.qb .xx{margin-left:6px;color:#9aa5b2}
+footer{text-align:center;color:var(--muted);font-size:12.5px;padding:10px 20px 30px}
+
+.dim{position:fixed;inset:0;background:rgba(18,28,42,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.dim.show{display:flex}
+.dlg{background:#fff;border-radius:14px;width:min(600px,100%);max-height:calc(100vh - 32px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.dlg.wide{width:min(860px,100%)}
+.dlg h2{margin:0;padding:16px 20px;font-size:17px;border-bottom:1px solid var(--line);color:var(--navy);display:flex;align-items:center;position:sticky;top:0;background:#fff;z-index:1}
+.dlg h2 .x{margin-left:auto;border:0;background:none;font-size:20px;cursor:pointer;color:var(--muted)}
+.dbody{padding:16px 20px}
+.form{display:grid;grid-template-columns:88px 1fr;gap:10px 12px;align-items:center}
+.form label{font-weight:600;font-size:14px;color:#3b4756;text-align:right}
+.form input,.form textarea{width:100%;height:40px;border:1px solid #cdd5df;border-radius:8px;padding:0 10px;outline:none}
+.form textarea{height:64px;padding:8px 10px;resize:vertical}
+.form input:focus,.form textarea:focus{border-color:var(--teal)}
+.form input[readonly]{background:#f3f5f8;color:#556}
+.form .hint{grid-column:2;font-size:12px;color:var(--muted);margin-top:-4px}
+.radios{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
+.radios label{font-weight:500;text-align:left;display:flex;align-items:center;gap:5px;cursor:pointer}
+.radios input{width:auto;height:auto}
+.dfoot{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px 16px;border-top:1px solid var(--line)}
+.dfoot .btn{height:40px}
+.dfoot .del{margin-right:auto;color:#c0392b;border-color:#f0c9c4}
+.sec{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.sec h3{margin:0 0 6px;font-size:14.5px;color:var(--navy)}
+.sec p{margin:0 0 10px;font-size:13px;color:var(--muted);line-height:1.55}
+.sec .btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sec .btn{height:38px;font-size:13.5px}
+.sec textarea{width:100%;min-height:120px;border:1px solid #cdd5df;border-radius:8px;padding:8px 10px;font-size:13.5px;line-height:1.6;outline:none;resize:vertical}
+.sec input.me{height:38px;border:1px solid #cdd5df;border-radius:8px;padding:0 10px;width:160px}
+.kv{display:grid;grid-template-columns:96px 1fr;gap:4px 10px;font-size:13.5px;margin-bottom:10px}
+.kv span:nth-child(odd){color:var(--muted)}
+details{font-size:12.5px;color:var(--muted);margin-top:8px}
+details summary{cursor:pointer}
+details .al{max-height:200px;overflow:auto;margin-top:6px;line-height:1.7;background:#f7f9fb;border-radius:8px;padding:8px 10px}
+
+.dsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.dsum div{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center;font-size:13px;color:var(--muted)}
+.dsum b{display:block;font-size:22px;color:var(--text);font-variant-numeric:tabular-nums}
+.dsum .a b{color:#1f9d55}.dsum .c b{color:#e08a00}.dsum .r b{color:#c0392b}
+table.diff{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:fixed}
+table.diff th,table.diff td{border-bottom:1px solid #eef1f4;padding:7px 8px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+table.diff th{background:#f7f9fb;color:#3b4756;font-weight:700;position:sticky;top:57px}
+table.diff col.k{width:64px}table.diff col.p{width:34%}table.diff col.n{width:22%}
+.kind{display:inline-block;font-size:12px;font-weight:700;border-radius:4px;padding:1px 6px;color:#fff}
+.kind.a{background:#1f9d55}.kind.c{background:#e08a00}.kind.r{background:#c0392b}
+.old{color:#9aa5b2;text-decoration:line-through}
+.drop{position:fixed;inset:0;background:rgba(15,138,131,.18);border:4px dashed var(--teal);z-index:60;display:none;
+  align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--navy)}
+.drop.show{display:flex}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#1c2430;color:#fff;
+  padding:11px 18px;border-radius:10px;font-size:14.5px;opacity:0;transition:.2s;z-index:70;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.warn{background:#fff4d6;color:#7a5200;font-size:13px;padding:8px 20px;text-align:center;display:none}
+@media (max-width:640px){
+  header{padding:14px 14px 12px}.swrap,main{padding-left:12px;padding-right:12px}
+  .hinfo{margin-left:0;width:100%}
+  .btn .lbl{display:none}
+  .btn{padding:0 13px}
+  .grid{columns:1}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-12px;padding-right:12px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none}
+  .sbox input{height:44px;font-size:16px}.btn{height:44px}.sclear{top:6px}
+  .nums{max-width:170px}
+  .form{grid-template-columns:1fr}.form label{text-align:left}.form .hint{grid-column:1}
+  .quick{grid-template-columns:1fr}.quick .lb{padding-top:0}
+  table.diff col.p{width:30%}
+}
+@media print{
+  .searchbar,.more,.star,footer,.warn,.quick{display:none!important}
+  header{background:none;color:#000}.pill{border:1px solid #999}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div class="htop">
+      <h1>원내 전화번호 검색</h1>
+      <span class="base" id="baseLbl"></span>
+      <div class="hinfo" id="hinfo"></div>
+    </div>
+    <div class="cmc" id="cmcLbl"></div>
+  </div>
+</header>
+
+<div class="searchbar">
+  <div class="swrap">
+    <div class="srow">
+      <div class="sbox">
+        <input id="q" type="text" enterkeyhint="search" autocomplete="off" placeholder="이름 · 부서 · 업무 · 번호 · 초성 — 한/영 안 바꿔도, 조금 틀려도 찾습니다">
+        <button class="sclear" id="qclear" title="지우기 (Esc)">✕</button>
+      </div>
+    </div>
+    <div class="chips" id="chips"></div>
+        <div class="status">
+      <span><span id="statusL"></span><span id="notice"></span></span>
+      <span id="statusR"></span>
+    </div>
+  </div>
+</div>
+
+<main><div class="grid" id="list"></div></main>
+<footer>개발자 노상엽</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_GRID=[["대표전화: 1577-0675    FAX: 032) 340-2544",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"(CMC산하병원간통화 : 서울 #1+구내번호,  여의도 #2, 의정부 #3,  은평 #5, 인천 #6, 빈센트 #7, 의료원, 옴니버스파크#8  (26.10.16기준) "],["[ 진 료 부 ]",null,"SONO(병동)","2070"," 장기이식센터",null,"[ 진료지원 ]",null,null,null,"[ 행 정 부 ]",null,"재무팀 ",null,"[ 영 성 부 ]",null,"[ 교수  연구실 ]",null," 성형외과 ",null,"정신건강의학과",null],["내과 ",null,"분만실","2067~8","협진실","7137"," 건강증진팀 ",null," 약제팀",null,"비서실",null,"팀   장","2315","영성부원장","2385","내과 ",null,"권다윤","7106","김하연","7061"],["접   수","2010","분만당직실","2069"," 재활의학과(팀) ",null,"일반검진실",null,"팀   장","2436","2003~4",null,"결   산","2317","영성부장","2389","강동혁","7182","김영진","7188","배치운","7067"],["1~8진료실","2011~8","성형외과",null,"접   수","2170","접   수","2169","복약상담(조제UM)","7210",null,null,"자   금","2319","원목팀",null,"강혜선","7630","이중호","7059",null,null],["당뇨병센터 접수","2025","접   수","2095","1진료실","2173","수   납","2254","약무UM","7614"," CS팀",null,"급   여","2316","팀   장","2386","고은정","연수","전대원","7103","정형외과",null],["   〃         1진료","2024","진   료","2098","2진료실","2171","사무실         2287. 2091",null,"교육연구UM","7615","팀   장","2055","출   납","2318","원목실","2387","권순석","7010"," 소아청소년과 ",null,"박일규","7441"],["   〃         2진료","2026"," 소아청소년과 ",null,"3진료실","2172","진료상담실","7223","약무실","2437","VOC","2047",null,null,null,null,"권의종","7007","김환수","7046","박일중","7034"],["   〃         3진료","2029","접   수","2080","근전도실 1","2175","영상촬영실","2092","마약류","2640","CRM,CS교육,CSI","2056"," 적정진료관리팀",null," 가정간호팀 ",null,"권태근","7149","한승범","연수","박종훈","7442"],["   〃   합병증검사","2057","1 … 4 진료","2081~4","근전도실 2","2578","채혈실","2285","조제실(경구,식별)","2438","PI팀",null,"팀   장","2336","가정간호","2649","김동빈","7019","조경순","7065","박지훈","7165"],["신경과,정신건강의학과 검사실",null,"신생아실","2085","성인운동치료","7748","종합검진센터",null,"조제실(주사)","2439","팀   장","2644","U    M","2337",null,"2650","김상훈","7022","이수영","7045","안중현","7175"],[null,"2027","미숙아실","2086","성인작업치료(연하)","2177","접수, 상담          2160~1",null,"조제실(산제)","2643","지표, CP","2645","수   가                 2625, 2337",null,"사회사업팀",null,"김서리","7646","서진순","7047","이기행","7038"],["내시경센터",null," 소화기센터,외과",null,"전기통증치료(OS)","2178","진료상담실","7078","특수조제실","2441","RM1","2648","평   가","2653","팀   장","2382","김성래","7013","빈중현","7049","이재영","7099"],["내시경실 접수","2230","접   수","7130","소아운동치료","2179","사무실","2167","외래투약구","2443","RM2","2646","심   사                     2654~9           ",null,"사무실","2383~4","김영민","7169"," 신경과 ",null,"정진화","7035"],["    〃    검사실","2291~6","진료실1~6","7131~6","소아작업치료","2174","행   정","7088","약품정보실","2442","QI, HWCI","2647",null,null,null,"7343","김용현","7242","신혜은","7642","정창훈","7089"],["기관지내시경접수,회복실 2229 ",null,"초음파실1~2","7138~9","언어치료","2181","방사선,골밀도실","2642","자문의뢰(NST.TDM)","2372","기획팀",null," 구매관리팀 ",null,"알코올의존치료팀",null,"김인섭","7158","이지은","7147",null,null],["내시경 회복실","2228"," 신경과 ",null,"병동 재활치료실(1009호)","2719","판   정","2164","임상약조제","2397","팀   장","2006","팀   장","2356","팀   장","7215","김창환","7012","호성희","7638"," 종합검진센터 ",null],["마취통증의학과",null,"접   수","2020","팀   장","2180","F  A  X","2163"," 영양팀",null,"투자심의, 원가","2256","구매물류실(수탁, 정기물품)","7388","알코올의존센타","7216","김태호","7017","신경외과 ",null,"조형지","7645"],["수술실(대표)","2147","진   료","2021","정신건강의학과",null,null,null,"팀   장","2461","인센티브, 예산, 위원회","2313","일반소모품","2357","자원봉사unit",null,"김효석","7157","박익성","7212",null,null],["팀   장","2151","신경과 검사실","2022","접   수","2140","국제진료팀",null,"사무실              2462~3",null,"정원(직원), 조직, 감사","2007","의료소모품(신규, 의료비품)","2358","U   M","7335","김희언","7167","김동훈","7190"," 진단검사의학과 ",null],["UM","2149","신경외과",null,"진   료","2142","국제진료 의사","7080","직원식당","2465","정원(교원), 규정","2300","의료소모품(청구, 발주)","2359","U   M","7325","목지수","7151","김성림","7031","강지민","2208"],["회복실        2156, 2145",null,"접   수","2040","연구실","2141","팀   장","7081","식사변경           2466~7",null,"사업계획, 영성","2350","의료장비","2360"," 호스피스완화의료팀 ",null,"문혜원","7008","김훈","7107","박해일","2093"],["#1.안과","7731","1 … 3 진료       2041~3",null,"임상심리검사","2231","행   정","7798",null,null,"홍보팀",null,"계약, 일반비품","2394","팀   장","2435","민지원","7312","이형진","7153",null,null],["#2.이비인후과","7732"," 안센터 ",null,"정형외과",null,"통   역","7797"," 의학정보Unit",null,"팀   장","2008","세탁물정리","2392","병   동","2530","박찬석","7235","이후인","7066"," 치과 ",null],["#3.신경외과","7733","접   수","2125","접   수","2050",null,null,"사서 UM","2209","원내홍보","2284","린넨실","2393","가정호스피스","2434","변성욱","7084"," 안과 ",null,"박수현","7236"],["#4.외과","7734","1진료","2128","1…4 진료                       2051~4",null,"기능검사팀",null,"사서 ","2409","대외홍보","2311",null,null," 영성간호팀 ",null,"손장원","7040","강남여","7060","윤현중","7077"],["#5.로봇수술","7735","2진료","2127","5…6 진료                       2591~2",null,"팀   장","2224",null,null,"인사팀",null,"의공학팀",null,"나프로임신센터","2065","유진홍","7014","김은철","7207","표성운","7064"],["#6.정형외과","7736","3진료","2129","석고실","2059","뇌파검사","2232"," 의무기록팀 ",null,"팀   장","2277","U   M","2487","(성모관 2층)",null,"윤소정","7155","나 호 ","7063","허현아","7201"],["#7.산부인과","7737","공통진료","2126","주사실","2105","뇌유발검사","2233","팀   장","2444","직원인사, 노무","2278","담   당                        2361~2",null,"간호사","2412","이국진","7098","오시은","7062",null,null],["#8.치과/비뇨의학과","7738","검사실","2235"," 진단검사의학과(팀)",null,"전정기능검사","2236","미비/연구","2445~6","교육, 복리후생","2279",null,null,"팀장","2411","이새봄","7016","이지영","7186"," 피부과 ",null],["#9.외과","7739","망막검사실","7226","팀  장","2218","뇌혈류초음파(TCD) 7364",null,"서식/산정특례/인증서  2447~8",null,"고충처리","2280"," 시설팀 ",null,null,null,"이성수","7224",null,null,"김윤섭","7052"],["#10.외과","7740","여성센터.유방암센터",null,"응급검사실","2143","신경전도검사","7364","OCR/동의서","2450","교원인사, 복무","2381","팀   장","2363"," 기   타 ",null,"이승원","7244","완화의학과",null,"박철종","7053"],["#11.정형외과","7741","접수,수납","7560","판독실(위탁검사)","7217","심장초음파","2225","통계","7349","채용, 사원증","2299","사무실","2364","스탭당직실(여)","7641","이유진","7163","윤민기","2529","이경호","7054"],["#12.성형외과","7742","진료실1~2       7561~2",null,"채혈실","7218","심장검사실","2234","진료협력팀",null,null,null,"건   축","2302","스탭당직실(남)","7636","이응구","7727",null,null,null,null],["#13.흉부외과/비뇨의학과 7743",null,"협진실","7563","혈액은행","7323","심전도검사실","2223","팀   장","7893"," 총무팀",null,"소   방","2303","스탭휴게실","7227","이해림","7670","영상의학과",null,"핵의학과",null],["#14.국소 수술실","2144","activity room","7564","혈액학부","2210","폐기능검사실","2226","진료협력(원내)","7892","팀   장","2305","기관 UNIT","2367","대강당            7395~6",null,"임상현","7027","길보미","2205","김 정 호","7612"],["간호사당직실","2152","유방촬영실","7566","미생물부","2213",null,null,"진료협력(원외,진료상담)  ",null,"교수코디네이터","2306","전기 UNIT","2374","omnibus","7397","장재혁","7086","김일중","2186","부선하","7058"],["대기실","7785","유방초음파실","7565","생화학부","2215",null,null,"                      7890~1",null,"서   무","2307","시설 UNIT","2369","communication","7381","전상훈","7087","성미숙","2184",null,null],["통증클리닉접수","7220","영상의학과(팀)",null,"분자진단학","2276",null,null,null,null,"총   무","2308","의료계폐기물(환경)         2368",null,"cohesion","7382","최재기","7643","유원종","7082","흉부외과",null],["통증치료실","7221","팀   장","2203","면역혈청학부","2217",null,null,null,null,"사진제작실","2312","성심관 시설관리",null,"creativity","7383","최혜영","7168","이우진","7369","심성보","7202"],["수술실미화부","2183","특수촬영실","2191","뇨분석부","2221","[ 간 호 부 ]",null,null,null,"운전기사실","2310","기관,전기,영선             7457~8",null,"contens","7384",null,null,"임연수","2185","전현우","7056"],["혈관센터",null,"3.촬영실","2193"," 치과 ",null," 병동 ",null,"중환자실",null,"FAX","2255",null,null,"challenge","7746","가정의학과",null,"임현욱","2204","최시영","7029"],["접   수        7780, 7535",null,"5.6촬영실","2195","접   수","2130","가병동",null,"신경외과중환자실",null,"안전보건관리팀",null,"정보보호팀 ",null,"omnia","7747","옥선명","7181","정명희","7085",null,null],["협진실(진료실)","7537","초음파진단","2198","1 … 2 진료                    2134~5",null,"가06병동          7600~5",null,"2247, 2248 (대표)",null,"팀   장","2305","팀   장","2375","요셉관5층승강기홀","7639",null,null,null,null,"[ 의국 ]",null],["초음파실(1)","7536","혈관조영실(영상)","2199"," 피부과 ",null,"가07병동          7600~5",null,"3061호","7439","안전관리JM","2351","nU운영","7313","성가라운지","7340","마취통증의학과",null," 외     과 ",null,"내   과 ","2257"],["초음파실(2)","7534","혈관조영실(심장)","7368","접   수","2115","가08병동          7800~2",null,"3062호","7438","보건관리","2623","정보보호","2378","마리아의 집","2561","김용석","7074","김영민","7178","   〃 ","7363"],["외래검사예약",null,"혈관조영실(뇌혈관)","2665","1 … 2 진료                    2116~7",null,"뇌졸중집중치료실 (815호)",null,"3063호","7437","안전관리","2353","PC고장문의","7315","양로원","2757","김의숙","7096","김현호","7160","외   과","2258"],["검사예약 (외래)","7780","MRI실","2200","치료실","2118",null,"2815","내외과중환자실",null,null,null,"nu콜센터                   2376~7",null,null,null,"김태관","7073","나건형","7104","신경외과","2259"],["검사예약 (병동)","2329","MRI실(간호사)","7213","피부건강클리닉","2119","가09병동          7900~4",null,"2245, 2246 (대표)",null,"원 무 팀",null,null,null,"노동조합 ",null,"유주현","7159","류지영","7362","정형외과","2260"],["방사선종양학과(팀)",null,"CT실","2202","핵의학과(팀)",null,"가10병동          7100~2",null,"3071(A구역,내과)","7431","입원원무 Unit",null,null,null,"2634, 2564",null,"정은용","7076","박미령","7039","성형외과","2261"],["팀   장","7121","병동CT실","2496","외래진료실","7623","나병동",null,"3072(B구역,내과)","7432","팀   장","2320","[ 연 구 부 ]",null,null,null,"방사선종양학과",null,"백필선","7185","마취통증의학","2158"],["접   수            7112~3",null,"전공의 판독실","2188","팀   장","7211","나04병동          7410~1",null,"3073(C구역,외과)","7433","UM(민원상담,재원환자관리)","2321","임상시험센터",null," 안내 ",null,"문소화","7128","서창호","7177","산부인과","2262"],["진료실 1,2       7115~6",null,"PACS","2194","PET/CT","7620","나05병동          7510~1",null,"3074(D구역,외과)","7434","산업재해","2222","임상시험센터","7392","종합안내(1층)","2345~6","유미나","7105","성기영","7024","소아청소년과","2263"],["CT모의치료실","7118","전사실","2651","PET/CT촬영실","7621","나06병동          7610~1",null,"3075(E구역,내과)","2246","자동차보험","2220","임상연구지원실          7624~7",null,"2층안내","2347","이윤희","7122","송형석","7189","안   과","2268"],["1방사선치료실","7124","응급촬영실","2190","핵의학일반촬영1","2197","나07병동          7710~1",null,null,"7428","전원상담, 입원비문의","2323","                           7633,7393",null,"진료상담(1층안내)","2046"," 병리과 ",null,"안창혁","7028","이비인후과","2264"],["2방사선치료실","7127","응급의료센터",null,"핵의학일반촬영2","7197","나08병동          7810~1",null,"이식방","7435","건강보험","2325"," 임상의학연구소 ",null,null,null,"김나래","7094","이하예민","7631","피부과","2139"],["전산화 치료계획실","7120","중증 A구역(5-8)","2100","핵체외(내분비연구실)","2240~1","나09병동          7910~1",null,null,null,"진료일정,긴급지원","2334","임의연","2242",null,null,"김유일","7095","전강웅","7243","비뇨기과","2267"],["병리과(팀)",null,"중증 A구역(1-4)","2101","호흡기 폐암센터",null,"나10병동          7110~1",null," 인공신장실 ",null,"외래원무 Unit",null,"U   M","7316","장례식장",null,"김진아","7091",null,null,"치   과","2138"],["팀  장","2216","중증 A구역(9-12)","2102","접수","7140",null,null,"인공신장실","2238~9","U   M","2340","동물실험실","2243","상담실","7300","이희정","7092","응급의학과",null,"재활의학과","2182"],["육안병리실","2212","응급의학과","2103","진료실1~4                     7141~4",null," 간호부 ",null,"복막투석실","2790","접수, 수납","2330","조직은행","2237","안내실(1층)","7365","진민선","7093","김지훈","7203","영상의학과","2207"],["분자병리실","2274","준중증 B구역(1-7)","2104","협진실","7145","병동간호1팀장","2271",null,null,"병실배정, 입원수속","2341",null,null,null,null," 비뇨기과 ",null,"입원의학과",null,"전공의당직실(1)","2281"],["세포병리실","2270","환자분류소(간호사)","2402","호흡기관리실","7146","병동간호2팀장","2273"," 전문진료지원팀 ",null,"퇴원업무","7379",null,null,"협력업체",null,"고준성","7070","이현정","7164","전공의당직실(2)","2037"],["면역병리실","2570","격리 P구역","2405","감염관리팀",null,"중환자간호팀장","2272","팀   장","2420","증명서발급","2324",null,null,"보 안(에스텍)","2345","김준철","7071","이비인후과",null,"전공의당직실(3)","2275"],["기록실","2283","경증 C,D구역(1-6)","2407","팀   장","2639","특수간호팀장","2151","전담간호사","2421","영상자료 Copy","7329","연구윤리사무국",null,"미화부","2633","조강준","7730","강준명","7051","전공의당직실(4)","7785"],[" 비뇨기과 ",null,"NEDIS담당간호사","2408","수술, 외래(A), 진료지원, ","2626","외래간호팀장","7535","연명의료상담실","2019","진료기록사본","7377","7540, 7489",null,"주차관리","2630","최진봉","7538","정준희","7043","전공의당직실(5)","7233"],["접   수","2120",null,null,"손위생, 법정감염병",null,"간호행정교육팀장","2431","장기이식코디네이터","7137","법무 Unit",null,null,null,"엔젤스태프㈜","7367","산부인과",null,"주영훈","7090","인턴숙소(1)","7786"],["1..2진료          2121~2",null,"이비인후과",null,"중환자, HD, 연구부, 교육","2627","교육담당 RN","2432",null,null,"U   M","2320",null,null,"미셸푸드          2466~7",null,"김민정","7041","황세환","7044","인턴숙소(2)","7781"],["충격파쇄석기","2123","접   수  ","2110","병동2, 외래(C), 영성부, 직원감염","2628","간호정보담당 RN","7342"," 중앙공급실 ",null,"법무,신체감정,간병업체","2349",null,null,null,null,"박성은","7152",null,null,"인턴숙소(3)","7782"],["산부인과",null,"1진료","2113","병동1, 외래(B), 행정부, 협력업체","2629","행정담당 RN","2433","U M","2252","응급원무 Unit",null,null,null,"편의시설",null,"신재은","7544"," 재활의학과 ",null,"인턴숙소(4)","7783"],["접   수","2060","2진료","2108",null,null,null,null,"병동전용","2253","U   M","2298",null,null,"신   협","2632","이경은","7162","김혜원","7079","인턴숙소(5)","7784"],["1 … 4 진료        2061~4",null,"공통진료          2111~2",null,"수련교육 Unit",null,"DSC                7744~5",null,"수술실 전용","2852","응급원무        2333, 2327",null,null,null,"우리은행","7324","이대우","7068","박근영","7004","인턴숙소(6)","7398"],["태동검사(외래)","2076","청각검사","2109","전공의 업무              2288, 2009",null,"항암주사실","7429",null,null,null,null,null,null,"편의점(세븐일레븐)","2244","이아라","7069","박지수","7154","전공의휴게실","2282"],["SONO(외래)","2077","음성검사실","2429",null,null,null,null,null,null,null,null,null,null,null,null,"이해남","7083","임선","7018",null,null]];
+// ===== 원내 전화번호부(병원 배치형) 파서 =====
+function cleanText(s){
+  if(s==null) return '';
+  s=String(s).replace(/ /g,' ').replace(/\s+/g,' ').trim();
+  const t=s.split(' ');
+  if(t.length>1 && t.every(x=>x.length===1 && x!=='…' && x!=='〃')) s=t.join('');
+  return s;
+}
+const NUM_RE=/(?:^|\s)(\d{4}(?:\s*[~,.]\s*\d{1,4})*)\s*(\([^)]*\))?\s*$/;
+function splitNumber(text){ // "회복실 2156, 2145" -> {name, num, note}
+  const raw=String(text).replace(/ /g,' ');
+  const m=raw.match(NUM_RE);
+  if(!m) return null;
+  return {name:cleanText(raw.slice(0,m.index)), num:m[1], note:m[2]?m[2].replace(/[()]/g,'').trim():''};
+}
+function parseNumbers(str){ // "2011~8" / "2287. 2091" / "7633,7393"
+  const out=[];
+  String(str).split(/[,.]/).map(s=>s.trim()).filter(Boolean).forEach(p=>{
+    const m=p.match(/^(\d{4})\s*~\s*(\d{1,4})$/);
+    if(m){
+      const a=m[1], b=a.slice(0,4-m[2].length)+m[2];
+      const s=+a, e=+b, list=[];
+      if(e>s && e-s<=30){ for(let i=s;i<=e;i++) list.push(String(i)); out.push({disp:a+'~'+b, list}); }
+      else out.push({disp:p, list:[a]});
+    } else if(/^\d{3,}$/.test(p)) out.push({disp:p, list:[p]});
+    else out.push({disp:p, list:[]});
+  });
+  return out;
+}
+function isLayoutGrid(grid){
+  return grid.some(row=>row.some(v=>v && /^\s*\[.+\]\s*$/.test(v)));
+}
+function parseLayoutGrid(grid){
+  const info=[]; let baseDate='';
+  (grid[0]||[]).forEach(v=>{ if(v){ info.push(cleanText(v)); const d=String(v).match(/(\d{2,4})\.\s*(\d{1,2})\.\s*(\d{1,2})\s*기준/); if(d) baseDate=d[0].replace(/\s*기준/,''); }});
+  const nCols=Math.max(...grid.map(r=>r.length));
+  const pairs=Math.ceil(nCols/2);
+  const divAt=[]; // divAt[p] = [{row, name}]
+  for(let p=0;p<pairs;p++){
+    divAt[p]=[];
+    for(let r=1;r<grid.length;r++){
+      const a=grid[r][2*p];
+      if(a && /^\s*\[.+\]\s*$/.test(a)) divAt[p].push({row:r,name:cleanText(a.replace(/[\[\]]/g,''))});
+      else if(a && /^기타$/.test(cleanText(a))) divAt[p].push({row:r,name:'기타'});
+    }
+  }
+  function divisionFor(p,r){
+    for(let q=p;q>=0;q--){
+      const list=divAt[q].filter(d=>d.row<=r);
+      if(list.length) return list[list.length-1].name;
+    }
+    return '';
+  }
+  const entries=[]; let carry=null; // 이전 열 마지막 부서 이어받기
+  for(let p=0;p<pairs;p++){
+    let div='', dept='', sub='', hasSubs=false, prev='start', last=null, pending=null, lastBase='';
+    let started=false;
+    const ctx=()=>({div,dept,sub,hasSubs});
+    const add=(name,numStr,note)=>{
+      let nm=cleanText(name);
+      if(nm.includes('〃')){
+        const base=lastBase||'';
+        nm = nm.replace(/〃/g,'').trim()==='' ? base : cleanText(nm.replace('〃', (base.split(' ')[0]||''))) ;
+      } else lastBase=nm;
+      const nums=numStr!=null? parseNumbers(numStr):[];
+      let nt=note||'';
+      if(numStr!=null && nums.every(n=>n.list.length===0) && !/\d/.test(numStr)){ nt=(nt?nt+' · ':'')+cleanText(numStr); nums.length=0; }
+      const e={name:nm, div, dept, sub, nums, note:nt};
+      entries.push(e); last=e; prev='entry'; return e;
+    };
+    for(let r=1;r<grid.length;r++){
+      const a=grid[r][2*p], b=grid[r][2*p+1];
+      const at=a!=null && String(a).trim()!=='' ? String(a) : null;
+      const bt=b!=null && String(b).trim()!=='' ? String(b) : null;
+      if(!at && !bt){ if(prev!=='header') prev='blank'; continue; }
+      const d=divisionFor(p,r);
+      if(!started){
+        started=true;
+        if(carry && d===carry.div && !(at && (/^\s*\[.+\]\s*$/.test(at)))){ dept=carry.dept; sub=carry.sub; hasSubs=carry.hasSubs; }
+      }
+      if(d!==div){ div=d; }
+      if(at && /^\s*\[.+\]\s*$/.test(at)){ div=cleanText(at.replace(/[\[\]]/g,'')); dept=sub=''; hasSubs=false; prev='div'; pending=null; continue; }
+      if(at && cleanText(at)==='기타'){ div='기타'; dept=sub=''; hasSubs=false; prev='div'; pending=null; continue; }
+      if(bt){ // 번호 칸 있음
+        if(!at){
+          if(prev==='header' && pending){ if(!(pending.prevKind==='blank'||pending.prevKind==='div')) applyCtx(pending.before); add(pending.text,bt,''); pending=null; }
+          else if(last){ last.nums.push(...parseNumbers(bt)); }
+          continue;
+        }
+        add(at,bt,''); pending=null; continue;
+      }
+      // 이름 칸만 있음
+      const sp=splitNumber(at);
+      if(sp && sp.name===''){ // 번호만 있는 줄
+        if(prev==='header' && pending){
+          if(/대표/.test(sp.note)){ add(pending.text+' (대표)', sp.num, ''); }
+          else if(pending.prevKind==='blank'||pending.prevKind==='div'){ add(pending.text, sp.num, sp.note); }
+          else { applyCtx(pending.before); add(pending.text, sp.num, sp.note); }
+          pending=null;
+        } else if(last){ last.nums.push(...parseNumbers(sp.num)); if(sp.note) last.note=(last.note?last.note+' · ':'')+sp.note; }
+        continue;
+      }
+      if(sp){ add(sp.name, sp.num, sp.note); pending=null; continue; }
+      const txt=cleanText(at);
+      if(/^\(.*\)$/.test(txt) && last){ last.note=(last.note?last.note+' · ':'')+txt.replace(/[()]/g,''); continue; }
+      if(prev==='entry' && last && /,\s*$/.test(last.name+' ') && /,$/.test(last.name)){ last.name=cleanText(last.name+' '+txt); continue; }
+      // 머리글(부서)
+      const before=ctx(); const prevKind=prev;
+      if(prev==='header'){ sub=txt; hasSubs=true; }
+      else if(hasSubs && /unit|병동|중환자실/i.test(txt)){ sub=txt; }
+      else { dept=txt; sub=''; hasSubs=false; }
+      pending={text:txt,before,prevKind}; prev='header';
+    }
+    carry={div,dept,sub,hasSubs};
+    function applyCtx(c){ div=c.div; dept=c.dept; sub=c.sub; hasSubs=c.hasSubs; }
+  }
+  return {info, baseDate, entries};
+}
+if(typeof module!=='undefined') module.exports={parseLayoutGrid,parseNumbers,cleanText,isLayoutGrid};
+
+// ===== 저장소 =====
+const LS={ok:true,mem:{},
+  get(k,d){try{const v=localStorage.getItem('telbook.'+k);return v==null?d:JSON.parse(v);}catch(e){this.ok=false;return k in this.mem?this.mem[k]:d;}},
+  set(k,v){try{localStorage.setItem('telbook.'+k,JSON.stringify(v));}catch(e){this.ok=false;this.mem[k]=v;}},
+  del(k){try{localStorage.removeItem('telbook.'+k);}catch(e){delete this.mem[k];}}
+};
+const $=id=>document.getElementById(id);
+try{localStorage.setItem('telbook.__t','1');localStorage.removeItem('telbook.__t');}catch(e){LS.ok=false;}
+
+// ===== 상태 =====
+let base=null;
+let favs=new Set(LS.get('favs',[]));
+let usage=LS.get('usage',{});            // key -> [횟수, 마지막시각]
+let recent=LS.get('recent',[]);          // 최근 검색어
+const userAliasText='';
+let view=LS.get('view','rel');           // rel | group
+let filter='전체';
+let all=[];
+let selIdx=-1;
+
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s||'').toLowerCase().replace(/\s+/g,'');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+// ===== 한글 도구 =====
+const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+const JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ';
+const JONG=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+function cho(s){let o='';for(const ch of s){const c=ch.charCodeAt(0);o+=(c>=0xAC00&&c<=0xD7A3)?CHO[Math.floor((c-0xAC00)/588)]:ch;}return o;}
+function jamo(s){let o='';for(const ch of s){const c=ch.charCodeAt(0);
+  if(c>=0xAC00&&c<=0xD7A3){const i=c-0xAC00;o+=CHO[Math.floor(i/588)]+JUNG[Math.floor(i%588/28)]+JONG[i%28];}else o+=ch;}return o;}
+const isCho=s=>/^[ㄱ-ㅎ]+$/.test(s);
+// 영문 자판으로 친 글자 → 한글 (두벌식)
+const KEYMAP={r:'ㄱ',R:'ㄲ',s:'ㄴ',e:'ㄷ',E:'ㄸ',f:'ㄹ',a:'ㅁ',q:'ㅂ',Q:'ㅃ',t:'ㅅ',T:'ㅆ',d:'ㅇ',w:'ㅈ',W:'ㅉ',c:'ㅊ',z:'ㅋ',x:'ㅌ',v:'ㅍ',g:'ㅎ',
+  k:'ㅏ',o:'ㅐ',i:'ㅑ',O:'ㅒ',j:'ㅓ',p:'ㅔ',u:'ㅕ',P:'ㅖ',h:'ㅗ',y:'ㅛ',n:'ㅜ',b:'ㅠ',m:'ㅡ',l:'ㅣ'};
+const DV={'ㅗㅏ':'ㅘ','ㅗㅐ':'ㅙ','ㅗㅣ':'ㅚ','ㅜㅓ':'ㅝ','ㅜㅔ':'ㅞ','ㅜㅣ':'ㅟ','ㅡㅣ':'ㅢ'};
+const DJ={'ㄱㅅ':'ㄳ','ㄴㅈ':'ㄵ','ㄴㅎ':'ㄶ','ㄹㄱ':'ㄺ','ㄹㅁ':'ㄻ','ㄹㅂ':'ㄼ','ㄹㅅ':'ㄽ','ㄹㅌ':'ㄾ','ㄹㅍ':'ㄿ','ㄹㅎ':'ㅀ','ㅂㅅ':'ㅄ'};
+const DJsplit=Object.fromEntries(Object.entries(DJ).map(([k,v])=>[v,[k[0],k[1]]]));
+function engToKor(str){
+  let out='',c=null,v=null,f=null;
+  const flush=()=>{ if(c&&v){ out+=String.fromCharCode(0xAC00+CHO.indexOf(c)*588+JUNG.indexOf(v)*28+Math.max(0,JONG.indexOf(f||''))); }
+    else { if(c) out+=c; if(v) out+=v; } c=v=f=null; };
+  for(const ch of str){
+    const k=KEYMAP[ch]||KEYMAP[ch.toLowerCase()];
+    if(!k){ flush(); out+=ch; continue; }
+    const vowel=JUNG.includes(k);
+    if(!vowel){
+      if(c&&v&&!f){ if(JONG.includes(k)) f=k; else { flush(); c=k; } }
+      else if(c&&v&&f){ const d=DJ[f+k]; if(d) f=d; else { flush(); c=k; } }
+      else { flush(); c=k; }
+    } else {
+      if(c&&v&&f){ if(DJsplit[f]){ const [a,b]=DJsplit[f]; f=a; flush(); c=b; v=k; } else { const nf=f; f=null; flush(); c=nf; v=k; } }
+      else if(c&&v){ const d=DV[v+k]; if(d) v=d; else { flush(); v=k; } }
+      else if(c){ if(CHO.includes(c)) v=k; else { flush(); v=k; } }
+      else if(v){ const d=DV[v+k]; if(d) v=d; else { flush(); v=k; } }
+      else v=k;
+    }
+  }
+  flush(); return out;
+}
+// 근사 부분문자열 거리 (오타 허용)
+function approxDist(p,t){
+  const m=p.length; if(!m) return 0;
+  let prev=new Array(m+1); for(let i=0;i<=m;i++) prev[i]=i;
+  let best=prev[m];
+  for(let j=0;j<t.length;j++){ const ch=t[j]; const cur=new Array(m+1); cur[0]=0;
+    for(let i=1;i<=m;i++) cur[i]=Math.min(prev[i]+1,cur[i-1]+1,prev[i-1]+(p[i-1]===ch?0:1));
+    if(cur[m]<best) best=cur[m]; prev=cur; }
+  return best;
+}
+
+// ===== 별칭 사전 =====
+const BUILTIN_ALIASES=`원무과 = 원무팀
+응급실, er, 응급센터 = 응급의료센터, 응급원무
+약국, 약제과 = 약제팀, 외래투약구
+진단서, 소견서, 확인서, 서류발급, 서류 = 증명서발급
+의무기록, 기록사본, 사본, 차트 = 진료기록사본, 의무기록팀
+cd, 영상cd, 필름, 영상복사 = 영상자료
+pc, 컴퓨터, 전산, 프린터, 프로그램 = pc고장문의, nu콜센터, nu운영
+산재 = 산업재해
+교통사고, 자보 = 자동차보험
+보험 = 건강보험, 자동차보험
+입원수속, 입원 = 입원수속, 병실배정, 입원원무
+퇴원 = 퇴원업무
+계산, 수납 = 수납
+주차, 주차장 = 주차관리
+보안, 경비 = 보안
+청소, 미화 = 미화부
+식당, 밥 = 직원식당
+식사, 환자식, 식이 = 식사변경, 영양팀
+엑스레이, xray, x-ray, 촬영 = 촬영실
+피검사, 혈액검사 = 채혈실, 진단검사의학과
+심전도, ecg, ekg = 심전도검사실
+초음파, 소노 = 초음파, sono
+icu, 중환자 = 중환자실
+nicu = 미숙아실, 신생아실
+수술방, or = 수술실
+마취과 = 마취통증의학과
+정신과 = 정신건강의학과
+소아과 = 소아청소년과
+비뇨의학과 = 비뇨기과, 비뇨의학과
+재활 = 재활의학과
+물리치료, pt = 운동치료, 전기통증치료
+작업치료, ot = 작업치료
+투석, 혈액투석, hd = 인공신장실
+영안실, 장례 = 장례식장
+신부, 신부님, 원목 = 원목, 영성부
+사회복지, 의료사회복지 = 사회사업팀
+노조 = 노동조합
+월급 = 급여
+감염 = 감염관리팀
+전공의, 레지던트 = 의국, 전공의
+검진, 건강검진 = 건강증진팀, 종합검진센터, 일반검진실
+외국인, 통역 = 국제진료팀, 통역
+회송, 의뢰, 협력병원 = 진료협력
+민원, 불만, 고객 = voc, cs팀, 민원상담
+연명, 연명의료 = 연명의료상담실
+이식 = 장기이식, 이식
+분만, 출산 = 분만실
+은행, atm = 우리은행, 신협
+안내데스크 = 안내
+소송, 의료분쟁, 신체감정, 법원 = 법무
+간병, 간병인 = 간병업체
+고장, 수리 = 시설팀, 기관unit, 전기unit, pc고장문의
+장비고장, 의료장비수리 = 의공학팀
+irb = 연구윤리사무국
+도서관 = 의학정보unit, 사서`;
+const STOP=new Set(['문의','전화','번호','전화번호','내선','담당','담당자','어디','연락처','하는곳','곳','좀']);
+let aliasMap=new Map();
+function parseAliasText(txt){
+  const out=[];
+  String(txt||'').split(/\r?\n/).forEach(line=>{
+    const m=line.split('='); if(m.length<2) return;
+    const keys=m[0].split(',').map(norm).filter(Boolean), vals=m.slice(1).join('=').split(',').map(norm).filter(Boolean);
+    if(keys.length&&vals.length) out.push({keys,vals});
+  });
+  return out;
+}
+function buildAliases(){
+  aliasMap=new Map();
+  [...parseAliasText(BUILTIN_ALIASES),...parseAliasText(userAliasText)].forEach(({keys,vals})=>{
+    keys.forEach(k=>{ const cur=aliasMap.get(k)||new Set(); vals.forEach(v=>cur.add(v)); aliasMap.set(k,cur); });
+  });
+}
+
+// ===== 원내 자료 =====
+function fmtBaseDate(d){
+  if(!d) return '';
+  const m=d.match(/(\d{2,4})\.\s*(\d{1,2})\.\s*(\d{1,2})/); if(!m) return d;
+  const y=m[1].length===2?'20'+m[1]:m[1];
+  return `${y}. ${m[2].padStart(2,'0')}. ${m[3].padStart(2,'0')}. 기준`;
+}
+function keyEntries(entries){
+  const seen={};
+  return entries.map(e=>{ let k=[e.div,e.dept,e.sub,e.name].join('|'); seen[k]=(seen[k]||0)+1; if(seen[k]>1) k+='#'+seen[k]; return Object.assign({},e,{key:k}); });
+}
+function loadBase(){
+  const saved=null;
+  const grid=saved&&saved.grid?saved.grid:DEFAULT_GRID;
+  const r=parseLayoutGrid(grid);
+  r.srcName=saved&&saved.name?saved.name:'기본 내장 자료';
+  r.loadedAt=saved&&saved.at?saved.at:'';
+  r.ts=saved&&saved.ts?saved.ts:0;
+  r.by=saved&&saved.by?saved.by:'';
+  r.entries=keyEntries(r.entries);
+  base=r;
+}
+function customNums(str){
+  return String(str||'').split(/[,\/]|\s{2,}/).map(s=>s.trim()).filter(Boolean).map(p=>{
+    const r=parseNumbers(p);
+    if(r.length===1 && r[0].list.length) return r[0];
+    const digits=p.replace(/\D/g,'');
+    return {disp:p,list:digits?[digits]:[]};
+  });
+}
+const joinNums=e=>e.nums.map(n=>n.disp).join(', ')+(e.note&&!e.nums.length?e.note:'');
+
+// ===== 목록 만들기 =====
+function build(){
+  all=base.entries.map(e=>Object.assign({},e,{src:'base',badge:''}));
+  all.forEach(e=>{
+    e.memo='';
+    e.nName=norm(e.name); e.nDept=norm([e.dept,e.sub].join(' ')); e.nDiv=norm(e.div); e.nMemo=norm([e.memo,e.note,e.by].join(' '));
+    e.hay=e.nName+'|'+e.nDept+'|'+e.nDiv+'|'+e.nMemo;
+    e.cName=cho(e.nName); e.hayCho=cho(e.hay);
+    e.jName=jamo(e.nName); e.jAll=jamo(e.nName+'|'+e.nDept+'|'+e.nMemo);
+    e.numHay=e.nums.flatMap(n=>[n.disp.replace(/\D/g,''),...n.list]);
+    e.group=[e.div,e.dept,e.sub].filter(Boolean).join(' › ');
+  });
+  $('baseLbl').textContent=fmtBaseDate(base.baseDate)||'기준일 미상';
+  const head=base.info[0]||'';
+  const rep=(head.match(/대표전화\s*[:：]?\s*([\d\-\)\s]+?)(?=\s*FAX|$)/i)||[])[1];
+  const fax=(head.match(/FAX\s*[:：]?\s*([\d\-\)\s]+)/i)||[])[1];
+  const h=[];
+  if(rep) h.push(`<button class="pill" data-copy="${esc(rep.trim())}">대표전화 <b class="tnum">${esc(rep.trim())}</b></button>`);
+  if(fax){ const fx=fax.trim().replace(/\)\s*/,'-'); h.push(`<button class="pill" data-copy="${esc(fx)}">FAX <b class="tnum">${esc(fx)}</b></button>`); }
+  $('hinfo').innerHTML=h.join('');
+  const cmc=base.info.slice(1).join(' ').replace(/^\(|\)$/g,'').replace(/\(?\d{2}\.\d{1,2}\.\d{1,2}\s*기준\)?/,'').trim();
+  $('cmcLbl').textContent=cmc?cmc.replace(/\s*:\s*/,' : '):'';
+  renderChips(); render();
+}
+function divisions(){ const o=[]; all.forEach(e=>{ if(e.src==='base'&&e.div&&!o.includes(e.div)) o.push(e.div); }); return o; }
+function inFilter(e,f){
+  if(f==='전체') return true;
+  if(f==='★ 즐겨찾기') return favs.has(e.key);
+  if(f==='추가 번호') return e.src==='mine';
+  if(f==='공용 번호') return e.src==='share';
+  if(f==='최근 변경') return !!e.badge;
+  return e.src==='base'&&e.div===f;
+}
+function renderChips(){
+  const list=['전체','★ 즐겨찾기',...divisions()];
+  if(!list.includes(filter)) filter='전체';
+  $('chips').innerHTML=list.map(d=>`<button class="chip${d===filter?' on':''}${d==='최근 변경'?' chg':''}" data-f="${esc(d)}">${esc(d)}<span class="c">${all.filter(e=>inFilter(e,d)).length}</span></button>`).join('');
+}
+
+// ===== 검색 =====
+// 한 낱말이 한 항목에 맞는 점수 (0 = 안 맞음)
+function termScore(e,t){
+  if(/^\d+$/.test(t)){
+    if(e.numHay.includes(t)) return 95;
+    if(e.numHay.some(n=>n.includes(t))) return 45;
+    return e.hay.includes(t)?20:0;
+  }
+  if(isCho(t)){
+    if(e.cName===t) return 70; if(e.cName.startsWith(t)) return 55; if(e.cName.includes(t)) return 40;
+    return e.hayCho.includes(t)?18:0;
+  }
+  if(e.nName===t) return 100; if(e.nName.startsWith(t)) return 72; if(e.nName.includes(t)) return 52;
+  if(e.nDept===t) return 46; if(e.nDept.includes(t)) return 32;
+  if(e.nDiv.includes(t)) return 16;
+  if(e.nMemo.includes(t)) return 14;
+  if(e.hayCho.includes(t)) return 8;
+  return 0;
+}
+// 낱말 하나에 대한 대안(원래·별칭·자판변환) → 가장 높은 점수
+function termVariants(t){
+  const v=[{t,w:1,how:''}];
+  const al=aliasMap.get(t); if(al) al.forEach(x=>{ if(x!==t) v.push({t:x,w:.85,how:'alias'}); });
+  return v;
+}
+function scoreWith(e,variants){ let best=0; for(const v of variants){ const s=termScore(e,v.t)*v.w; if(s>best) best=s; } return best; }
+let searchNote='';
+function search(q,pool){
+  searchNote='';
+  let raw=q.toLowerCase().split(/\s+/).filter(Boolean);
+  if(!raw.length) return null;
+  // 통째 별칭 (예: '의무기록 사본')
+  const joined=norm(q);
+  if(raw.length>1&&aliasMap.has(joined)) raw=[joined];
+  let terms=raw.filter(t=>!STOP.has(t)); if(!terms.length) terms=raw;
+  const conv=[];
+  let tv=terms.map(t=>termVariants(t));
+  const run=tvs=>{ const out=[]; for(const e of pool){ let sum=0,ok=true; for(const vs of tvs){ const s=scoreWith(e,vs); if(!s){ok=false;break;} sum+=s; } if(ok) out.push({e,s:sum}); } return out; };
+  // 영문 자판 낱말 중 아무 데도 안 맞는 것은 한글로 바꿔 보기
+  tv=tv.map((vs,i)=>{
+    const t=terms[i];
+    if(/^[a-z]+$/i.test(t) && !all.some(e=>scoreWith(e,vs))){
+      const k=norm(engToKor(t));
+      if(/[가-힣ㄱ-ㅎ]/.test(k)){ conv.push([t,k]); return termVariants(k).map(x=>Object.assign(x,{how:x.how||'kbd'})); }
+    }
+    return vs;
+  });
+  let res=run(tv);
+  if(conv.length) searchNote=`한/영 자판 자동 변환: ${conv.map(([a,b])=>`‘${a}’→‘${b}’`).join(', ')}`;
+  if(!res.length){ // 오타 허용 — 낱말을 붙여 자모 단위로 비슷한 것 찾기
+    const p=jamo(norm(conv.length?terms.map(t=>{const c=conv.find(x=>x[0]===t);return c?c[1]:t;}).join(''):q));
+    if(p.length>=3){
+      const k=p.length<=4?1:p.length<=9?2:3;
+      const fz=[];
+      for(const e of pool){ const dn=approxDist(p,e.jName); const d=dn<=k?dn:approxDist(p,e.jAll); if(d<=k) fz.push({e,s:(k+1-d)*20-(dn<=k?0:5),fz:true}); }
+      if(fz.length){ res=fz; searchNote=(searchNote?searchNote+' · ':'')+'정확히 맞는 결과가 없어 비슷한 이름을 보여 줍니다'; }
+    }
+  }
+  // 자주 쓰는 번호·즐겨찾기 가산
+  res.forEach(r=>{ const u=usage[r.e.key]; if(u) r.s+=Math.min(30,u[0]*4); if(favs.has(r.e.key)) r.s+=10; });
+  res.sort((a,b)=>b.s-a.s);
+  return {res,terms:tv.flat().map(v=>v.t)};
+}
+
+// ===== 그리기 =====
+function hl(text,terms){
+  let s=esc(text);
+  const ts=[...new Set(terms)].filter(t=>t&&!isCho(t)&&!/^\d+$/.test(t)).sort((a,b)=>b.length-a.length);
+  ts.forEach(t=>{
+    const pat=[...t].map(c=>esc(c).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('\\s*');
+    try{ s=s.replace(new RegExp('('+pat+')(?![^<]*>)','gi'),'<mark>$1</mark>'); }catch(e){}
+  });
+  return s;
+}
+function rowHTML(e,terms,showPath){
+  const nums=e.nums.length?e.nums.map(n=>`<button class="num" data-copy="${esc(n.disp)}" title="눌러서 복사">${esc(n.disp)}</button>`).join(''):`<span class="num none">${e.note?esc(e.note):'번호 없음'}</span>`;
+  const path=showPath?`<div class="sub">${esc(e.group)}</div>`:'';
+  const note=e.note&&e.nums.length?`<span class="note">${esc(e.note)}</span>`:'';
+  const tag=e.badge==='a'?'<span class="tag new">신규</span>':e.badge==='c'?'<span class="tag chg">변경</span>':e.badge==='m'?'<span class="tag new">이동</span>':'';
+  const src=showPath?'':'';
+  const by=e.src==='share'&&e.by?` · ${esc(e.by)} 추가`:'';
+  const memo=e.memo||by?`<div class="memo">${e.memo?'✎ '+hl(e.memo,terms):''}${by?`<span style="color:var(--muted)">${e.memo?by:by.slice(3)}</span>`:''}</div>`:'';
+  return `<div class="row" data-key="${esc(e.key)}">
+    <button class="star${favs.has(e.key)?' on':''}" data-star="${esc(e.key)}" title="즐겨찾기">${favs.has(e.key)?'★':'☆'}</button>
+    <div class="nm"><div class="n">${hl(e.name,terms)}${note}${tag}${src}</div>${path}${memo}</div>
+    <div class="nums">${nums}</div>
+  </div>`;
+}
+function groupClass(g){ return g.startsWith('추가 번호')?' mine':g.startsWith('공용 번호')?' share':(g.startsWith('★')||g.startsWith('🔥'))?' hot':''; }
+function groupHTML(g,items,terms,showPath){
+  const parts=g.split(' › ');
+  const path=parts.map((p,i)=>i===0&&parts.length>1?`<span class="div">${esc(p)}</span>`:esc(p)).join('<span class="sep">›</span>');
+  return `<section class="group"><div class="gh${groupClass(g)}"><span class="path" title="${esc(g)}">${path}</span><span class="cnt">${items.length}</span></div>${items.map(e=>rowHTML(e,terms,showPath)).join('')}</section>`;
+}
+const QUICK=[['증명서·진단서','증명서발급'],['진료기록 사본','진료기록사본'],['영상 CD','영상자료'],['입원 수속','입원수속'],['퇴원','퇴원업무'],['산재','산업재해'],['자동차보험','자동차보험'],['응급원무','응급원무'],['PC 고장','pc고장'],['주차','주차관리'],['시설 고장','시설팀'],['보안','보안'],['장례식장','장례식장'],['종합안내','종합안내']];
+let lastResults=[];
+function render(){
+  const q=$('q').value.trim();
+  $('qclear').style.display=q?'block':'none';
+  const pool=all.filter(e=>inFilter(e,filter));
+  const sr=search(q,pool);
+  const terms=sr?sr.terms:[];
+  $('notice').innerHTML=searchNote?`<span class="notice">${esc(searchNote)}</span>`:'';
+  let html='';
+  const list=$('list');
+  if(sr){
+    const res=sr.res.map(r=>r.e);
+    lastResults=res;
+    $('statusL').textContent=`검색 결과 ${res.length}건`;
+    $('statusR').innerHTML=`<span class="seg"><button data-view="rel" class="${view==='rel'?'on':''}">관련도순</button><button data-view="group" class="${view==='group'?'on':''}">부서별</button></span>`;
+    if(!res.length){
+      list.className='grid';
+      list.innerHTML=`<div class="empty"><b>‘${esc(q)}’</b>에 맞는 번호가 없습니다.<br><br>부서 이름이나 업무(예: 증명서, 산재)로 찾아보거나,<br>초성(예: ㅇㅁㅌ)으로도 찾아보세요.</div>`;
+      selIdx=-1; return;
+    }
+    if(view==='rel'){
+      list.className='grid flat';
+      html=`<section class="group">${res.slice(0,300).map(e=>rowHTML(e,terms,true)).join('')}</section>`;
+      if(res.length>300) html+=`<div class="empty" style="padding:16px">결과가 많아 300건만 보여 줍니다. 검색어를 더 넣어 보세요.</div>`;
+    } else {
+      list.className='grid';
+      const groups=new Map(); res.forEach(e=>{ if(!groups.has(e.group)) groups.set(e.group,[]); groups.get(e.group).push(e); });
+      groups.forEach((items,g)=>html+=groupHTML(g,items,terms,false));
+    }
+  } else {
+    list.className='grid';
+    lastResults=pool;
+    $('statusL').textContent=`${filter} ${pool.length}건`;
+    $('statusR').textContent='번호를 누르면 복사 · ↑↓ 고르고 Enter 복사 · Esc 지우기';
+    if(filter==='전체'){
+      html+=`<div class="quick"><div class="lb">업무로 찾기</div><div class="qs">${QUICK.filter(([,k])=>all.some(e=>e.hay.includes(norm(k)))).map(([l,k])=>`<button class="qb" data-q="${esc(k)}">${esc(l)}</button>`).join('')}</div>`
+        +(recent.length?`<div class="lb">최근 검색</div><div class="qs">${recent.map(r=>`<button class="qb rc" data-q="${esc(r)}">${esc(r)}<span class="xx" data-rmrecent="${esc(r)}" title="지우기">✕</span></button>`).join('')}</div>`:'')+`</div>`;
+      const fv=all.filter(e=>favs.has(e.key));
+      if(fv.length) html+=groupHTML('★ 즐겨찾기',fv,[],true);
+      const hot=all.filter(e=>!favs.has(e.key)&&usage[e.key]&&usage[e.key][0]>=2).sort((a,b)=>usage[b.key][0]-usage[a.key][0]).slice(0,8);
+      if(hot.length) html+=groupHTML('🔥 자주 쓰는 번호',hot,[],true);
+    }
+    if(!pool.length){
+      html+=`<div class="empty">${filter==='★ 즐겨찾기'?'즐겨찾기한 번호가 없습니다.<br>번호 왼쪽의 ☆를 누르면 여기에 모입니다.':filter==='공용 번호'?'아직 공용 번호가 없습니다.<br><b>＋ 번호 추가</b>에서 저장 위치를 ‘팀 공용’으로 고르세요.':'추가한 번호가 없습니다.<br><b>＋ 번호 추가</b>로 원내 전화번호부에 없는 번호를 넣어 보세요.'}</div>`;
+    } else if(filter==='★ 즐겨찾기'){ html=groupHTML('★ 즐겨찾기',pool,[],true); }
+    else {
+      const groups=new Map(); pool.forEach(e=>{ if(!groups.has(e.group)) groups.set(e.group,[]); groups.get(e.group).push(e); });
+      groups.forEach((items,g)=>html+=groupHTML(g,items,[],filter==='최근 변경'));
+    }
+  }
+  list.innerHTML=html;
+  selIdx=-1;
+}
+function moveSel(d){
+  const rows=[...document.querySelectorAll('#list .row')]; if(!rows.length) return;
+  rows.forEach(r=>r.classList.remove('sel'));
+  selIdx=Math.max(0,Math.min(rows.length-1,selIdx+d));
+  rows[selIdx].classList.add('sel'); rows[selIdx].scrollIntoView({block:'nearest'});
+}
+
+// ===== 복사·사용 기록 =====
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2400);}
+function copy(text,key){
+  const done=()=>toast(`${text}  복사됨`);
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(done,fallback);}else fallback();
+  function fallback(){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');done();}catch(e){toast(text);}ta.remove();}
+  if(key){ const u=usage[key]||[0,0]; usage[key]=[u[0]+1,Date.now()]; LS.set('usage',usage); }
+  const q=$('q').value.trim();
+  if(q){ recent=[q,...recent.filter(r=>r!==q)].slice(0,8); LS.set('recent',recent); }
+}
+
+// ===== 이벤트 =====
+let tmr; $('q').addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(render,70);});
+$('q').addEventListener('keydown',ev=>{
+  if(ev.key==='Escape'){ $('q').value=''; render(); }
+  else if(ev.key==='ArrowDown'){ ev.preventDefault(); moveSel(1); }
+  else if(ev.key==='ArrowUp'){ ev.preventDefault(); moveSel(-1); }
+  else if(ev.key==='Enter'){
+    const rows=[...document.querySelectorAll('#list .row')];
+    const row=selIdx>=0?rows[selIdx]:rows.find(r=>r.querySelector('.num:not(.none)'));
+    const b=row&&row.querySelector('.num:not(.none)'); if(b) copy(b.dataset.copy,row.dataset.key);
+  }
+});
+$('qclear').onclick=()=>{$('q').value='';render();$('q').focus();};
+document.addEventListener('keydown',ev=>{
+  const a=document.activeElement;
+  if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')) return;
+  if(ev.ctrlKey||ev.metaKey||ev.altKey) return;
+  if(ev.key.length===1||ev.key==='Process'){ $('q').focus(); }
+  if(ev.key==='Escape'){ $('q').value=''; render(); }
+});
+$('chips').addEventListener('click',ev=>{const b=ev.target.closest('[data-f]');if(!b)return;filter=b.dataset.f;renderChips();render();});
+document.addEventListener('click',ev=>{
+  const rr=ev.target.closest('[data-rmrecent]'); if(rr){ ev.stopPropagation(); recent=recent.filter(r=>r!==rr.dataset.rmrecent); LS.set('recent',recent); render(); return; }
+  const qb=ev.target.closest('[data-q]'); if(qb){ $('q').value=qb.dataset.q; render(); $('q').focus(); return; }
+  const vw=ev.target.closest('[data-view]'); if(vw){ view=vw.dataset.view; LS.set('view',view); render(); return; }
+  const c=ev.target.closest('[data-copy]'); if(c){ const row=c.closest('.row'); copy(c.dataset.copy,row&&row.dataset.key); return; }
+  const s=ev.target.closest('[data-star]'); if(s){const k=s.dataset.star;favs.has(k)?favs.delete(k):favs.add(k);LS.set('favs',[...favs]);renderChips();render();return;}
+});
+
+// ===== 시작 =====
+buildAliases();
+loadBase(); build();
+if(!matchMedia('(max-width:640px)').matches) setTimeout(()=>$('q').focus(),50);
+
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>

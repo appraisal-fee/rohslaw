@@ -11,4 +11,5 @@
 - 아나운서 읽어주기(병원 안내방송): https://appraisal-fee.github.io/rohslaw/announcer-hospital/ (`announcer-hospital/` 폴더, 홈 화면 설치 가능)
 - 아나운서 읽어주기(아파트 안내방송): https://appraisal-fee.github.io/rohslaw/announcer-apt/ (`announcer-apt/` 폴더, 홈 화면 설치 가능)
 - 진료일정 검색(보기 전용, 휴대폰용): https://appraisal-fee.github.io/rohslaw/jinryo/ (`jinryo/` 폴더, 홈 화면 설치 가능) — 자료는 `jinryo/data.json`만 바꾸면 갱신(관리 앱에서 생성, 휴진은 날짜·오전/오후만)
+- 원내 전화번호 검색(보기 전용, 휴대폰용): https://appraisal-fee.github.io/rohslaw/phone/ (`phone/` 폴더, 홈 화면 설치 가능) — 전화번호부가 바뀌면 `phone/index.html`을 새로 만들어 교체
 - 개발자: 노상엽
