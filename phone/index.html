@@ -775,18 +775,23 @@ loadBase(); build();
 if(!matchMedia('(max-width:640px)').matches) setTimeout(()=>$('q').focus(),50);
 
 // ===== 뒤로가기 두 번 눌러야 종료 =====
-// 크롬은 사용자가 화면을 실제로 누른(손을 뗀) 뒤에 만든 단계만 뒤로가기로 인정하므로,
-// 앱을 열 때가 아니라 탭·클릭·키 입력 때 한 단계를 걸어 둔다.
+// 안드로이드 크롬(120 이상): CloseWatcher가 휴대폰 뒤로 버튼을 먼저 받아 주므로 앱을 열자마자 눌러도 바로 꺼지지 않음.
+// 그 밖의 브라우저: 탭·클릭(사용자 활성화) 때 뒤로가기 칸을 하나 걸어 둠.
 (function(){
+  const inApp=()=>{ const q=document.getElementById('q'); if(q&&q.value){ q.value=''; render(); window.scrollTo(0,0); return '검색어를 지웠습니다'; } return ''; };
+  const EXIT='뒤로 버튼을 한 번 더 누르면 종료됩니다';
+  const touch=matchMedia('(pointer:coarse)').matches;
+  if(typeof CloseWatcher==='function' && touch){
+    let w=null;
+    const make=()=>{ if(w) return; try{ w=new CloseWatcher(); w.onclose=()=>{ w=null; const m=inApp(); if(m){ toast(m); make(); } else toast(EXIT); }; }catch(e){ w=null; } };
+    make();
+    ['click','touchend','pointerup','keydown'].forEach(t=>addEventListener(t,()=>{ if(!w) make(); },{capture:true,passive:true}));
+    return;
+  }
   const guarded=()=>!!(history.state&&history.state.telguard);
   const arm=()=>{ if(!guarded()){ try{ history.pushState({telguard:1},''); }catch(e){} } };
   ['click','touchend','pointerup','keydown'].forEach(t=>addEventListener(t,arm,{capture:true,passive:true}));
-  addEventListener('popstate',()=>{
-    if(guarded()) return;
-    const q=document.getElementById('q');
-    if(q&&q.value){ q.value=''; render(); window.scrollTo(0,0); toast('검색어를 지웠습니다 · 한 번 더 누르면 종료됩니다'); return; }
-    toast('뒤로 버튼을 한 번 더 누르면 종료됩니다');
-  });
+  addEventListener('popstate',()=>{ if(guarded()) return; const m=inApp(); toast(m?m+' · 한 번 더 누르면 종료됩니다':EXIT); });
 })();
 if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>

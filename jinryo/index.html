@@ -2489,18 +2489,28 @@ $('#tdNow').onchange=renderToday;
 
 /* ===== 뒤로 두 번 눌러야 종료 ===== */
 if(VIEW_ONLY){
-  /* 크롬은 사용자가 화면을 실제로 누른(손을 뗀) 뒤에 만든 칸만 뒤로가기로 인정함.
-     그래서 앱을 열 때·손가락이 닿을 때가 아니라 탭·클릭·키 입력 때 칸을 하나 걸어 둠 */
-  const guarded=()=>!!(history.state&&history.state.jr);
-  const arm=()=>{ if(!guarded()){ try{ history.pushState({jr:1},'',location.href); }catch(e){} } };
-  ['click','touchend','pointerup','keydown'].forEach(ev=>window.addEventListener(ev,arm,{capture:true,passive:true}));
-  window.addEventListener('popstate',()=>{
-    if(guarded()) return;
+  /* 안드로이드 크롬(120 이상): CloseWatcher가 휴대폰 뒤로 버튼을 먼저 받아 주므로 앱을 열자마자 눌러도 바로 꺼지지 않음.
+     그 밖의 브라우저: 탭·클릭(사용자 활성화) 때 뒤로가기 칸을 하나 걸어 둠 */
+  const inApp=()=>{
     const open=[...document.querySelectorAll('.modal.on')];
-    if(open.length){ open.forEach(m=>m.classList.remove('on')); arm(); return; }
-    const cur=document.querySelector('nav button.on'); const home=S.startTab||'today'; if(cur && cur.dataset.tab!==home){ showTab(home); arm(); return; }
-    toast('뒤로 버튼을 한 번 더 누르면 종료됩니다.');
-  });
+    if(open.length){ open.forEach(m=>m.classList.remove('on')); return true; }
+    const cur=document.querySelector('nav button.on'); const home=S.startTab||'today';
+    if(cur && cur.dataset.tab!==home){ showTab(home); return true; }
+    return false;
+  };
+  const EXIT='뒤로 버튼을 한 번 더 누르면 종료됩니다.';
+  const touch=matchMedia('(pointer:coarse)').matches;
+  if(typeof CloseWatcher==='function' && touch){
+    let w=null;
+    const make=()=>{ if(w) return; try{ w=new CloseWatcher(); w.onclose=()=>{ w=null; if(inApp()) make(); else toast(EXIT); }; }catch(e){ w=null; } };
+    make();
+    ['click','touchend','pointerup','keydown'].forEach(ev=>window.addEventListener(ev,()=>{ if(!w) make(); },{capture:true,passive:true}));
+  } else {
+    const guarded=()=>!!(history.state&&history.state.jr);
+    const arm=()=>{ if(!guarded()){ try{ history.pushState({jr:1},'',location.href); }catch(e){} } };
+    ['click','touchend','pointerup','keydown'].forEach(ev=>window.addEventListener(ev,arm,{capture:true,passive:true}));
+    window.addEventListener('popstate',()=>{ if(guarded()) return; if(inApp()) arm(); else toast(EXIT); });
+  }
 }
 
 /* 설정(검색 앱) */
