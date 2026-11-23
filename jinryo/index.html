@@ -2489,19 +2489,17 @@ $('#tdNow').onchange=renderToday;
 
 /* ===== 뒤로 두 번 눌러야 종료 ===== */
 if(VIEW_ONLY){
-  let lastBack=0, gArmed=false;
-  /* 크롬은 '화면을 누르기 전'에 만든 뒤로가기 칸을 건너뛰므로, 화면을 누를 때마다 칸을 다시 확인해 채움 */
-  const arm=()=>{ try{ history.pushState({jr:1},'',location.href); }catch(e){} };
-  const gesture=()=>{ if(!gArmed){ arm(); gArmed=true; } };
-  arm();
-  ['pointerdown','touchstart','keydown'].forEach(ev=>window.addEventListener(ev,gesture,{capture:true,passive:true}));
+  /* 크롬은 사용자가 화면을 실제로 누른(손을 뗀) 뒤에 만든 칸만 뒤로가기로 인정함.
+     그래서 앱을 열 때·손가락이 닿을 때가 아니라 탭·클릭·키 입력 때 칸을 하나 걸어 둠 */
+  const guarded=()=>!!(history.state&&history.state.jr);
+  const arm=()=>{ if(!guarded()){ try{ history.pushState({jr:1},'',location.href); }catch(e){} } };
+  ['click','touchend','pointerup','keydown'].forEach(ev=>window.addEventListener(ev,arm,{capture:true,passive:true}));
   window.addEventListener('popstate',()=>{
-    gArmed=false;
+    if(guarded()) return;
     const open=[...document.querySelectorAll('.modal.on')];
     if(open.length){ open.forEach(m=>m.classList.remove('on')); arm(); return; }
     const cur=document.querySelector('nav button.on'); const home=S.startTab||'today'; if(cur && cur.dataset.tab!==home){ showTab(home); arm(); return; }
-    const now=Date.now(); if(now-lastBack<2000){ history.back(); return; }
-    lastBack=now; toast('뒤로 버튼을 한 번 더 누르면 종료됩니다.'); arm();
+    toast('뒤로 버튼을 한 번 더 누르면 종료됩니다.');
   });
 }
 
