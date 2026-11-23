@@ -466,6 +466,15 @@ nicu = 미숙아실, 신생아실
 irb = 연구윤리사무국
 도서관 = 의학정보unit, 사서`;
 const STOP=new Set(['문의','전화','번호','전화번호','내선','담당','담당자','어디','연락처','하는곳','곳','좀']);
+// 병동 줄임말: 나사·나4·나04·가육·가십 → 나04병동·가06병동·가10병동
+const WARD_NUM={'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'륙':6,'칠':7,'팔':8,'구':9,'십':10};
+function wardAlias(t){
+  const m=String(t).match(/^([가나])(?:병동)?(\d{1,2}|십|[일이삼사오육륙칠팔구])(?:병동)?$/);
+  if(!m) return null;
+  const n=/^\d+$/.test(m[2])?+m[2]:WARD_NUM[m[2]];
+  if(!n||n>19) return null;
+  return m[1]+String(n).padStart(2,'0')+'병동';
+}
 let aliasMap=new Map();
 function parseAliasText(txt){
   const out=[];
@@ -587,7 +596,10 @@ function search(q,pool){
   if(!raw.length) return null;
   // 통째 별칭 (예: '의무기록 사본')
   const joined=norm(q);
-  if(raw.length>1&&aliasMap.has(joined)) raw=[joined];
+  if(raw.length>1&&(aliasMap.has(joined)||wardAlias(joined))) raw=[joined];
+  const wards=[];
+  const wardMiss=[];
+  raw=raw.map(t=>{ const w=wardAlias(t); if(w){ if(all.some(e=>e.hay.includes(w))){ wards.push([t,w]); return w; } wardMiss.push([t,w]); } return t; });
   let terms=raw.filter(t=>!STOP.has(t)); if(!terms.length) terms=raw;
   const conv=[];
   let tv=terms.map(t=>termVariants(t));
@@ -597,16 +609,23 @@ function search(q,pool){
     const t=terms[i];
     if(/^[a-z]+$/i.test(t) && !all.some(e=>scoreWith(e,vs))){
       const k=norm(engToKor(t));
+      const wk=wardAlias(k); if(wk&&all.some(e=>e.hay.includes(wk))){ conv.push([t,wk]); return [{t:wk,w:1,how:'kbd'}]; }
       if(/[가-힣ㄱ-ㅎ]/.test(k)){ conv.push([t,k]); return termVariants(k).map(x=>Object.assign(x,{how:x.how||'kbd'})); }
     }
     return vs;
   });
   let res=run(tv);
   if(conv.length) searchNote=`한/영 자판 자동 변환: ${conv.map(([a,b])=>`‘${a}’→‘${b}’`).join(', ')}`;
+  if(wards.length) searchNote=(searchNote?searchNote+' · ':'')+wards.map(([a,b])=>`‘${a}’→${b}`).join(', ');
+  if(!res.length && wardMiss.length){
+    const have=[...new Set(all.map(e=>(e.name.match(/^[가나]\d{2}병동$/)||[])[0]).filter(Boolean))].sort();
+    searchNote=wardMiss.map(([a,w])=>`‘${a}’→${w}은(는) 전화번호부에 없습니다`).join(', ')+(have.length?` (있는 병동: ${have.join(', ')})`:'');
+    return {res:[],terms:[]};
+  }
   if(!res.length){ // 오타 허용 — 낱말을 붙여 자모 단위로 비슷한 것 찾기
     const p=jamo(norm(conv.length?terms.map(t=>{const c=conv.find(x=>x[0]===t);return c?c[1]:t;}).join(''):q));
-    if(p.length>=3){
-      const k=p.length<=4?1:p.length<=9?2:3;
+    if(p.length>=4){
+      const k=p.length<=6?1:p.length<=10?2:3;
       const fz=[];
       for(const e of pool){ const dn=approxDist(p,e.jName); const d=dn<=k?dn:approxDist(p,e.jAll); if(d<=k) fz.push({e,s:(k+1-d)*20-(dn<=k?0:5),fz:true}); }
       if(fz.length){ res=fz; searchNote=(searchNote?searchNote+' · ':'')+'정확히 맞는 결과가 없어 비슷한 이름을 보여 줍니다'; }
