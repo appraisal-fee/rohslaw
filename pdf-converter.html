@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- PDF 만능 도구 v2.6 (개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-11 -->
+<!-- PDF 만능 도구 v2.7 (개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-23 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PDF 만능 도구 v2.6 (개발자 노상엽)</title>
+<title>PDF 만능 도구 v2.7 (개발자 노상엽)</title>
 <style>
 /* 레이아웃: 상단 작업대(불러오기·설정·실행) + 아래 쪽 순서 격자 */
 :root{
@@ -313,6 +313,10 @@ input.num{width:100%;font:inherit;padding:7px 9px;border:1px solid var(--line);b
 .vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
 h1 .hver{font-size:.62em;font-weight:700;color:var(--accent);vertical-align:.12em}
 h1 .hdev{font-size:.62em;font-weight:600;color:var(--muted)}
+.pwmodal{position:fixed;inset:0;z-index:2000;background:rgba(15,25,35,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.pwbox{background:var(--surface);color:var(--ink);border-radius:12px;padding:20px 22px;max-width:420px;width:100%;display:grid;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.pwbox b{font-size:17px}.pwbox p{margin:0;font-size:14px;line-height:1.55}
+.pwbox input{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)}
 .res .m.good{color:var(--ok);font-weight:700}
 footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -321,7 +325,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
 <body>
 <div class="wrap">
   <header>
-    <h1>PDF 만능 도구 <span class="hver">v2.6</span> <span class="hdev">(개발자 노상엽)</span></h1>
+    <h1>PDF 만능 도구 <span class="hver">v2.7</span> <span class="hdev">(개발자 노상엽)</span></h1>
     <span class="sub">이미지를 이 PC 안에서만 처리합니다. 인터넷 연결이 없어도 동작하며 파일이 외부로 전송되지 않습니다.</span>
   </header>
   <div class="updbar" id="updBar" role="status" hidden></div>
@@ -1256,7 +1260,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <footer>
     <span>개발자: 노상엽</span>
     <span>개발일자: 2026. 10. 16.</span>
-    <span>수정일자: 2026. 11. 11.</span>
+    <span>수정일자: 2026. 11. 23.</span>
     <span>버전 <b id="appVer"></b></span>
     <button type="button" class="linkbtn" id="updCheck">새 버전 확인</button>
     <span>HEIC(아이폰 사진)는 크롬·엣지에서 열리지 않으니 JPG로 저장해 올려 주세요.</span>
@@ -3458,9 +3462,262 @@ async function makeZip(files){
   return new Blob([...parts, ...cent, e.buffer], {type:"application/zip"});
 }
 
-/* PDF 열기: 암호 걸린 파일은 분명하게 알려 준다 */
-async function openPdf(file){
+/* =========================================================
+   잠긴 PDF 풀기: 편집·인쇄 제한(열람 암호 없음)은 자동으로 풀고,
+   열람 암호가 있으면 물어본 뒤 푼다. 모든 탭이 이 함수로 PDF를 연다.
+   (RC4 40·128, AES-128, AES-256 표준 보안 처리기)
+   ========================================================= */
+const AESJ = (() => {
+  const exp = new Uint8Array(512), log = new Uint8Array(256);
+  for(let i = 0, x = 1; i < 255; i++){ exp[i] = x; log[x] = i; x ^= ((x << 1) ^ (x & 0x80 ? 0x1b : 0)) & 0xff; }
+  for(let i = 255; i < 512; i++) exp[i] = exp[i - 255];
+  const mul = (a, b) => (a && b) ? exp[log[a] + log[b]] : 0;
+  const S = new Uint8Array(256), Si = new Uint8Array(256);
+  for(let a = 0; a < 256; a++){
+    const b = a ? exp[255 - log[a]] : 0;
+    const r = v => ((v << 1) | (v >> 7)) & 0xff;
+    const s = b ^ r(b) ^ r(r(b)) ^ r(r(r(b))) ^ r(r(r(r(b)))) ^ 0x63;
+    S[a] = s; Si[s] = a;
+  }
+  const M = k => { const t = new Uint8Array(256); for(let i = 0; i < 256; i++) t[i] = mul(i, k); return t; };
+  const m2 = M(2), m3 = M(3), m9 = M(9), m11 = M(11), m13 = M(13), m14 = M(14);
+  function expand(key){
+    const nk = key.length/4, nr = nk + 6, w = new Uint8Array(16*(nr + 1));
+    w.set(key);
+    let rcon = 1;
+    for(let i = nk; i < 4*(nr + 1); i++){
+      let t0 = w[4*i-4], t1 = w[4*i-3], t2 = w[4*i-2], t3 = w[4*i-1];
+      if(i % nk === 0){ const u = t0; t0 = S[t1] ^ rcon; t1 = S[t2]; t2 = S[t3]; t3 = S[u]; rcon = m2[rcon]; }
+      else if(nk > 6 && i % nk === 4){ t0 = S[t0]; t1 = S[t1]; t2 = S[t2]; t3 = S[t3]; }
+      const o = 4*i, p = 4*(i - nk);
+      w[o] = w[p] ^ t0; w[o+1] = w[p+1] ^ t1; w[o+2] = w[p+2] ^ t2; w[o+3] = w[p+3] ^ t3;
+    }
+    return {w, nr};
+  }
+  const st = new Uint8Array(16), tmp = new Uint8Array(16);
+  function encBlock(K, b){
+    const {w, nr} = K; for(let i = 0; i < 16; i++) st[i] = b[i] ^ w[i];
+    for(let r = 1; r <= nr; r++){
+      for(let i = 0; i < 16; i++) tmp[i] = S[st[(i + 4*(i & 3)) & 15]];           // SubBytes + ShiftRows
+      if(r < nr) for(let c = 0; c < 4; c++){
+        const a0 = tmp[4*c], a1 = tmp[4*c+1], a2 = tmp[4*c+2], a3 = tmp[4*c+3];
+        st[4*c] = m2[a0] ^ m3[a1] ^ a2 ^ a3; st[4*c+1] = a0 ^ m2[a1] ^ m3[a2] ^ a3; st[4*c+2] = a0 ^ a1 ^ m2[a2] ^ m3[a3]; st[4*c+3] = m3[a0] ^ a1 ^ a2 ^ m2[a3];
+      } else st.set(tmp);
+      for(let i = 0; i < 16; i++) st[i] ^= w[16*r + i];
+    }
+    return st;
+  }
+  function decBlock(K, b){
+    const {w, nr} = K; for(let i = 0; i < 16; i++) st[i] = b[i] ^ w[16*nr + i];
+    for(let r = nr - 1; r >= 0; r--){
+      for(let i = 0; i < 16; i++) tmp[(i + 4*(i & 3)) & 15] = Si[st[i]];          // InvShiftRows + InvSubBytes
+      for(let i = 0; i < 16; i++) tmp[i] ^= w[16*r + i];
+      if(r > 0) for(let c = 0; c < 4; c++){
+        const a0 = tmp[4*c], a1 = tmp[4*c+1], a2 = tmp[4*c+2], a3 = tmp[4*c+3];
+        st[4*c] = m14[a0] ^ m11[a1] ^ m13[a2] ^ m9[a3]; st[4*c+1] = m9[a0] ^ m14[a1] ^ m11[a2] ^ m13[a3];
+        st[4*c+2] = m13[a0] ^ m9[a1] ^ m14[a2] ^ m11[a3]; st[4*c+3] = m11[a0] ^ m13[a1] ^ m9[a2] ^ m14[a3];
+      } else st.set(tmp);
+    }
+    return st;
+  }
+  function cbcDec(key, iv, ct){
+    const K = expand(key), n = ct.length - ct.length % 16, out = new Uint8Array(n);
+    let prev = iv;
+    for(let o = 0; o < n; o += 16){
+      const blk = ct.subarray(o, o + 16), p = decBlock(K, blk);
+      for(let i = 0; i < 16; i++) out[o + i] = p[i] ^ prev[i];
+      prev = blk;
+    }
+    return out;
+  }
+  function cbcEnc(key, iv, pt){
+    const K = expand(key), out = new Uint8Array(pt.length), x = new Uint8Array(16);
+    let prev = iv;
+    for(let o = 0; o < pt.length; o += 16){
+      for(let i = 0; i < 16; i++) x[i] = pt[o + i] ^ prev[i];
+      out.set(encBlock(K, x), o); prev = out.subarray(o, o + 16);
+    }
+    return out;
+  }
+  // PDF 방식: 앞 16바이트가 IV, 끝은 PKCS#7 채움
+  function pdfDec(key, data){
+    if(data.length < 32) return new Uint8Array(0);
+    const p = cbcDec(key, data.subarray(0, 16), data.subarray(16)), n = p[p.length - 1];
+    if(n >= 1 && n <= 16 && n <= p.length){ let ok = true; for(let i = p.length - n; i < p.length; i++) if(p[i] !== n){ ok = false; break; } if(ok) return p.subarray(0, p.length - n); }
+    return p;
+  }
+  return {cbcDec, cbcEnc, pdfDec};
+})();
+
+const unlockCache = new WeakMap();
+const NEED_PW = "NEED_PW";
+async function makeDecryptor(ctx, enc, id0, password){
+  const get = k => ctx.lookup(enc.get(PDFName.of(k)));
+  const num = (k, d) => { const v = get(k); return v instanceof PDFNumber ? v.asNumber() : d; };
+  const raw = v => (v && v.asBytes) ? v.asBytes() : new Uint8Array(0);
+  if(String(get("Filter")) !== "/Standard") throw new Error("지원하지 않는 방식으로 잠긴 PDF라 열 수 없음");
+  const V = num("V", 0), R = num("R", 2), P = num("P", 0) | 0, O = raw(get("O")), U = raw(get("U"));
+  const em = get("EncryptMetadata"), encMeta = !(em && em.asBoolean && !em.asBoolean());
+  let len = V === 1 ? 5 : Math.max(5, Math.min(16, num("Length", 40) / 8));
+  let stm = "RC4", str = "RC4";
+  if(V >= 4){
+    const CF = get("CF");
+    const meth = nm => {
+      if(!nm || nm === "/Identity") return "None";
+      const d = CF && ctx.lookup(CF.get(PDFName.of(nm.slice(1))));
+      const m = d ? String(ctx.lookup(d.get(PDFName.of("CFM")))) : "/None";
+      return m === "/AESV2" ? "AESV2" : m === "/AESV3" ? "AESV3" : m === "/V2" ? "RC4" : "None";
+    };
+    stm = meth(get("StmF") ? String(get("StmF")) : ""); str = meth(get("StrF") ? String(get("StrF")) : "");
+    if(V === 4) len = 16;
+  }
+  const pwBytes = new TextEncoder().encode(password || "");
+  let fileKey = null;
+  const eq = (a, b, n) => { for(let i = 0; i < n; i++) if(a[i] !== b[i]) return false; return true; };
+  if(R <= 4){
+    const keyFrom = padded => {
+      const pb = new Uint8Array(4); new DataView(pb.buffer).setInt32(0, P, true);
+      let h = md5(cat(padded, O.subarray(0, 32), pb, id0, (R >= 4 && !encMeta) ? new Uint8Array([255,255,255,255]) : new Uint8Array(0)));
+      if(R >= 3) for(let i = 0; i < 50; i++) h = md5(h.subarray(0, len));
+      return h.slice(0, len);
+    };
+    const okUser = key => {
+      if(R === 2) return eq(rc4(key, PW_PAD), U, 32);
+      let x = rc4(key, md5(cat(PW_PAD, id0)));
+      for(let i = 1; i <= 19; i++) x = rc4(key.map(b => b ^ i), x);
+      return eq(x, U, 16);
+    };
+    const pad = b => { const o = new Uint8Array(32); const n = Math.min(32, b.length); o.set(b.subarray(0, n)); o.set(PW_PAD.subarray(0, 32 - n), n); return o; };
+    let k = keyFrom(pad(pwBytes));
+    if(okUser(k)) fileKey = k;
+    else {                                   // 소유자 암호로 시도
+      let h = md5(pad(pwBytes)); if(R >= 3) for(let i = 0; i < 50; i++) h = md5(h);
+      const ok = h.slice(0, len);
+      let x = O.slice(0, 32);
+      if(R === 2) x = rc4(ok, x); else for(let i = 19; i >= 0; i--) x = rc4(ok.map(b => b ^ i), x);
+      k = keyFrom(x);
+      if(okUser(k)) fileKey = k;
+    }
+  } else {
+    const sha = async (bits, d) => new Uint8Array(await crypto.subtle.digest("SHA-" + bits, d));
+    const pw = pwBytes.subarray(0, 127);
+    const hash = async (salt, udata) => {
+      let K = await sha(256, cat(pw, salt, udata));
+      if(R === 5) return K;
+      let i = 0, E = new Uint8Array(1);
+      while(i < 64 || E[E.length - 1] > i - 32){
+        const unit = cat(pw, K, udata), K1 = new Uint8Array(unit.length * 64);
+        for(let j = 0; j < 64; j++) K1.set(unit, j * unit.length);
+        E = AESJ.cbcEnc(K.subarray(0, 16), K.subarray(16, 32), K1);
+        let s = 0; for(let j = 0; j < 16; j++) s += E[j];
+        K = await sha([256, 384, 512][s % 3], E); i++;
+      }
+      return K.subarray(0, 32);
+    };
+    const UE = raw(get("UE")), OE = raw(get("OE")), z = new Uint8Array(16), U48 = U.subarray(0, 48);
+    if(eq(await hash(U.subarray(32, 40), new Uint8Array(0)), U, 32)) fileKey = AESJ.cbcDec(await hash(U.subarray(40, 48), new Uint8Array(0)), z, UE);
+    else if(eq(await hash(O.subarray(32, 40), U48), O, 32)) fileKey = AESJ.cbcDec(await hash(O.subarray(40, 48), U48), z, OE);
+  }
+  if(!fileKey) throw new Error(NEED_PW);
+  const salt = new Uint8Array([0x73, 0x41, 0x6c, 0x54]);
+  const objKey = (n, g, aes) => md5(cat(fileKey, new Uint8Array([n & 255, (n >> 8) & 255, (n >> 16) & 255, g & 255, (g >> 8) & 255]), aes ? salt : new Uint8Array(0))).slice(0, Math.min(len + 5, 16));
+  const dec = (m, data, n, g) => m === "None" ? data : m === "RC4" ? rc4(objKey(n, g, false), data) : m === "AESV2" ? AESJ.pdfDec(objKey(n, g, true), data) : AESJ.pdfDec(fileKey, data);
+  return {stm, str, encMeta, dec};
+}
+function findBytes(buf, pat){
+  const p = new TextEncoder().encode(pat), f = p[0];
+  for(let i = buf.indexOf(f); i >= 0 && i <= buf.length - p.length; i = buf.indexOf(f, i + 1)){
+    let ok = true; for(let j = 1; j < p.length; j++) if(buf[i + j] !== p[j]){ ok = false; break; }
+    if(ok) return true;
+  }
+  return false;
+}
+function askPdfPassword(name, again){
+  return new Promise(res => {
+    const w = document.createElement("div"); w.className = "pwmodal";
+    w.innerHTML = `<div class="pwbox" role="dialog" aria-modal="true" aria-labelledby="pwT"><b id="pwT">열람 암호가 걸린 PDF</b><p></p><input type="password" autocomplete="off" aria-label="PDF 암호"><p class="note warn" ${again ? "" : "hidden"}>암호가 맞지 않습니다. 다시 써 주세요.</p><div class="row"><button type="button" class="primary">열기</button><button type="button">건너뛰기</button></div></div>`;
+    w.querySelector("p").textContent = `'${name}'을(를) 열려면 암호가 필요합니다. 암호를 아시면 써 주세요. 이 PC 안에서만 쓰고 저장하지 않습니다.`;
+    const inp = w.querySelector("input"), [ok, no] = w.querySelectorAll("button");
+    const done = v => { w.remove(); res(v); };
+    ok.onclick = () => done(inp.value); no.onclick = () => done(null);
+    inp.addEventListener("keydown", e => { if(e.key === "Enter") done(inp.value); else if(e.key === "Escape") done(null); });
+    document.body.appendChild(w); inp.focus();
+  });
+}
+/* 잠긴 PDF면 푼 바이트를, 아니면 원래 바이트를 돌려준다 */
+let unlockChain = Promise.resolve();
+async function pdfBytes(file){
+  if(unlockCache.has(file)) return unlockCache.get(file);
   const buf = new Uint8Array(await file.arrayBuffer());
+  if(!findBytes(buf, "/Encrypt")){ unlockCache.set(file, buf); return buf; }
+  const job = unlockChain.then(() => unlockBuf(buf, file.name || "PDF"));
+  unlockChain = job.catch(() => {});
+  const out = await job;
+  unlockCache.set(file, out);
+  if(out !== buf) file._unlocked = true;
+  return out;
+}
+async function unlockBuf(buf, name){
+  try{ await PDFDocument.load(buf, {updateMetadata:false}); return buf; }
+  catch(e){ if(!/encrypt/i.test(String(e && e.message))) throw new Error("손상됐거나 읽을 수 없는 PDF"); }
+  const d1 = await PDFDocument.load(buf, {ignoreEncryption:true, updateMetadata:false});
+  const t1 = d1.context.trailerInfo, enc = d1.context.lookup(t1.Encrypt);
+  const idArr = t1.ID ? d1.context.lookup(t1.ID) : null, id0 = idArr instanceof PDFArray ? d1.context.lookup(idArr.get(0)).asBytes() : new Uint8Array(0);
+  if(!(enc instanceof PDFDict)) throw new Error("손상됐거나 읽을 수 없는 PDF");
+  let cr = null, pw = "", tries = 0;
+  while(!cr){
+    try{ cr = await makeDecryptor(d1.context, enc, id0, pw); }
+    catch(e){
+      if(e.message !== NEED_PW) throw e;
+      pw = await askPdfPassword(name, tries++ > 0);
+      if(pw == null) throw new Error("열람 암호를 몰라 열 수 없음");
+    }
+  }
+  // 다시 읽으면서 압축 묶음(ObjStm)은 읽기 전에 풀고, 나머지 객체는 다 읽은 뒤 푼다
+  const PP = PDFLib.PDFParser.prototype, OSP = PDFLib.PDFObjectStreamParser, oHdr = PP.parseIndirectObjectHeader, oFS = OSP.forStream;
+  const top = new Set(); let cur = null, myCtx = null;
+  PP.parseIndirectObjectHeader = function(){
+    const r = oHdr.apply(this, arguments);
+    if(this.bytes && this.bytes.bytes === buf){ myCtx = this.context; cur = r; top.add(r.tag); }
+    return r;
+  };
+  OSP.forStream = function(rs, ...a){
+    if(myCtx && rs.dict.context === myCtx && cur) rs.contents = cr.dec(cr.stm, rs.contents, cur.objectNumber, cur.generationNumber);
+    return oFS.call(this, rs, ...a);
+  };
+  let doc;
+  try{ doc = await PDFDocument.load(buf, {ignoreEncryption:true, updateMetadata:false}); }
+  finally{ PP.parseIndirectObjectHeader = oHdr; OSP.forStream = oFS; }
+  const ctx = doc.context, encRef = ctx.trailerInfo.Encrypt, encTag = encRef instanceof PDFRef ? encRef.tag : "";
+  const walk = (o, n, g) => {
+    if(o instanceof PDFString || o instanceof PDFHexString) return PDFHexString.of(toHex(cr.dec(cr.str, o.asBytes(), n, g)));
+    if(o instanceof PDFDict){ for(const [k, v] of o.entries()){ const nv = walk(v, n, g); if(nv !== v) o.set(k, nv); } return o; }
+    if(o instanceof PDFArray){ for(let i = 0; i < o.size(); i++){ const v = o.get(i), nv = walk(v, n, g); if(nv !== v) o.set(i, nv); } return o; }
+    return o;
+  };
+  for(const [ref, obj] of ctx.enumerateIndirectObjects()){
+    if(!top.has(ref.tag) || ref.tag === encTag) continue;
+    const n = ref.objectNumber, g = ref.generationNumber;
+    if(obj instanceof PDFRawStream){
+      const type = String(obj.dict.lookup(PDFName.of("Type")));
+      if(type === "/XRef") continue;
+      walk(obj.dict, n, g);
+      if(cr.stm !== "None" && !(type === "/Metadata" && !cr.encMeta)) ctx.assign(ref, PDFRawStream.of(obj.dict, cr.dec(cr.stm, obj.contents, n, g)));
+    } else {
+      const nv = walk(obj, n, g); if(nv !== obj) ctx.assign(ref, nv);
+    }
+  }
+  if(encRef instanceof PDFRef) ctx.delete(encRef);
+  ctx.trailerInfo.Encrypt = undefined;
+  doc.getPageCount();                         // 쪽 구조가 제대로 풀렸는지 확인
+  return await doc.save({useObjectStreams:false, updateFieldAppearances:false});
+}
+
+/* PDF 열기: 잠긴 파일은 풀어서 연다 */
+async function openPdf(file){
+  let buf;
+  try{ buf = await pdfBytes(file); }
+  catch(e){ console.error(e); throw new Error(/[가-힣]/.test(String(e && e.message)) ? e.message : "손상됐거나 읽을 수 없는 PDF"); }
   try{ return await PDFDocument.load(buf, {updateMetadata:false}); }
   catch(e){
     if(/encrypt/i.test(String(e && e.message))) throw new Error("암호가 걸린 PDF라 열 수 없음");
@@ -3529,7 +3786,14 @@ async function recompressImage(ctx, st, L){
   const D = st.dict, get = k => ctx.lookup(D.get(PDFName.of(k)));
   if(String(get("Subtype")) !== "/Image") return null;
   const im = get("ImageMask"); if(im instanceof PDFBool && im.asBoolean()) return null;
-  if(D.get(PDFName.of("Mask")) || D.get(PDFName.of("Decode"))) return null;
+  const mk = D.get(PDFName.of("Mask"));
+  if(mk && !(mk instanceof PDFRef)) return null;            // 색으로 정한 가림(배열)은 그대로 둔다
+  const dc = ctx.lookup(D.get(PDFName.of("Decode")));
+  let inv = false;
+  if(dc){                                                   // CMYK 사진의 뒤집힌 값 표시만 받아들인다
+    const a = dc instanceof PDFArray ? dc.asArray().map(x => numOf(ctx, x, -1)) : [];
+    if(a.length === 8 && a.every((v, i) => v === (i % 2 ? 0 : 1))) inv = true; else return null;
+  }
   if(st.contents.length < 20000) return null;                // 작은 이미지는 이득이 없다
   const w = numOf(ctx, D.get(PDFName.of("Width")), 0), h = numOf(ctx, D.get(PDFName.of("Height")), 0);
   if(!w || !h) return null;
@@ -3538,6 +3802,7 @@ async function recompressImage(ctx, st, L){
   let src;
   if(filters.length === 1 && filters[0] === "/DCTDecode"){
     if(!color) return null;
+    if(color === "cmyk" ? inv !== hasAdobe(st.contents) : inv) return null;   // 브라우저와 PDF가 색을 같게 읽는 경우만
     src = await createImageBitmap(new Blob([st.contents], {type:"image/jpeg"}));
   } else if(filters.length === 1 && filters[0] === "/FlateDecode"){
     if(color !== "rgb" && color !== "gray") return null;
@@ -3567,18 +3832,25 @@ async function recompressImage(ctx, st, L){
   if(bytes.length > st.contents.length * 0.9) return null;  // 별로 안 줄면 원래 것을 둔다
   const dict = {Type:"XObject", Subtype:"Image", Width:r.w, Height:r.h, ColorSpace:"DeviceRGB", BitsPerComponent:8, Filter:"DCTDecode", Length:bytes.length};
   const sm = D.get(PDFName.of("SMask")); if(sm) dict.SMask = sm;
+  if(mk) dict.Mask = mk;
   const ip = D.get(PDFName.of("Interpolate")); if(ip) dict.Interpolate = ip;
   return ctx.stream(bytes, dict);
 }
 
+function hasAdobe(b){                     // JPEG 머리에 Adobe 표시(APP14)가 있는지
+  const n = Math.min(b.length - 11, 65536);
+  for(let i = 2; i < n; i++) if(b[i] === 0xFF && b[i+1] === 0xEE && b[i+4] === 0x41 && b[i+5] === 0x64 && b[i+6] === 0x6F && b[i+7] === 0x62 && b[i+8] === 0x65) return true;
+  return false;
+}
 async function compressDoc(doc, level, onStep){
   const ctx = doc.context, L = CLEVEL[level];
   const imgs = ctx.enumerateIndirectObjects().filter(([, o]) => o instanceof PDFRawStream && String(ctx.lookup(o.dict.get(PDFName.of("Subtype")))) === "/Image");
   let changed = 0;
+  doc._cstat = {total:imgs.length, changed:0};
   for(let i = 0; i < imgs.length; i++){
     if(cancelReq) return changed;
     const [ref, st] = imgs[i];
-    try{ const ns = await recompressImage(ctx, st, L); if(ns){ ctx.assign(ref, ns); changed++; } }catch(_){}
+    try{ const ns = await recompressImage(ctx, st, L); if(ns){ ctx.assign(ref, ns); changed++; doc._cstat.changed = changed; } }catch(e){ console.warn(e); }
     if(onStep) onStep(i + 1, imgs.length);
     if(i % 4 === 3) await sleep(0);
   }
@@ -3595,7 +3867,7 @@ function makeFileList(listEl, arr, opts){
     r.querySelector(".fnm").textContent = it.file.name;
     const m = r.querySelector(".fmeta");
     if(it.err){ m.textContent = it.err; m.classList.add("bad"); }
-    else m.textContent = (it.pages == null ? "쪽수 확인 중" : `${it.pages.toLocaleString("ko-KR")}쪽`) + ` · ${fmtMB(it.file.size)} · 수정 ${fmtDate(it.mtime)}`;
+    else m.textContent = (it.pages == null ? "쪽수 확인 중" : `${it.pages.toLocaleString("ko-KR")}쪽`) + ` · ${fmtMB(it.file.size)} · 수정 ${fmtDate(it.mtime)}` + (it.file._unlocked ? " · 🔓 잠금 풂" : "");
     const cb = r.querySelector(".cbtn");
     const btn = (t, lab, fn) => { const b = document.createElement("button"); b.type = "button"; b.textContent = t; b.setAttribute("aria-label", lab); b.onclick = () => { if(!running) fn(); }; cb.appendChild(b); };
     if(opts.sortable){
@@ -3812,10 +4084,15 @@ $("compRun").onclick = async () => {
       before += f.size;
       const smaller = blob.size < f.size;
       after += smaller ? blob.size : f.size;
-      const pct = Math.round((1 - blob.size / f.size) * 100);
-      outs.push(smaller
-        ? {blob, name:`${stem(f.name)}_용량줄임.pdf`, meta:`${fmtMB(f.size)} → ${fmtMB(blob.size)} (${pct}% 줄어듦)`, good:pct >= 10}
-        : {blob:f, name:`${stem(f.name)}_용량줄임.pdf`, meta:`${fmtMB(f.size)} · 더 줄일 이미지가 없어 원본과 같음`});
+      const pct = Math.round((1 - blob.size / f.size) * 100), cs = doc._cstat || {total:0, changed:0};
+      const lock = f._unlocked ? " · 잠금을 풀어 저장" : "";
+      const why = !cs.total ? "글자·도형만 있는 문서라 줄일 사진·스캔 이미지가 없음"
+                : !cs.changed ? "이미지가 이미 충분히 압축돼 있음" + (level !== "strong" ? " · '강하게'로 다시 해 보세요" : "")
+                : "더 작아지지 않아 원본 그대로";
+      const hint = smaller && pct < 10 && level !== "strong" ? " · 더 줄이려면 '강하게'" : "";
+      outs.push(smaller || f._unlocked
+        ? {blob, name:`${stem(f.name)}_용량줄임.pdf`, meta:`${fmtMB(f.size)} → ${fmtMB(blob.size)} (${smaller ? pct + "% 줄어듦" : why})${hint}${lock}`, good:pct >= 10}
+        : {blob:f, name:`${stem(f.name)}_용량줄임.pdf`, meta:`${fmtMB(f.size)} · ${why}`});
     }catch(e){ errs.push(`${f.name}: ${errMsg(e)}`); }
   }
   const sec = fmtSec((performance.now()-t0)/1000);
@@ -3885,7 +4162,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "2.6", APP_NAME = "PDF 만능 도구", appFileName = v => `${APP_NAME} v${v} (개발자 노상엽).html`, APP_FILE = appFileName(APP_VERSION);
+const APP_VERSION = "2.7", APP_NAME = "PDF 만능 도구", appFileName = v => `${APP_NAME} v${v} (개발자 노상엽).html`, APP_FILE = appFileName(APP_VERSION);
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -4319,10 +4596,10 @@ async function loadTextPdf(file){
   const info = $("textInfo"); info.hidden = false; info.innerHTML = `<b></b><span>여는 중</span>`; info.querySelector("b").textContent = file.name;
   let doc;
   try{
-    T.bytes = new Uint8Array(await file.arrayBuffer());
+    T.bytes = await pdfBytes(file);
     doc = await PDFDocument.load(T.bytes, {updateMetadata:false});
   }catch(e){
-    info.querySelector("span").textContent = /encrypt/i.test(String(e && e.message)) ? "암호가 걸린 PDF라 열 수 없음" : "손상됐거나 읽을 수 없는 PDF";
+    info.querySelector("span").textContent = /[가-힣]/.test(String(e && e.message)) ? e.message : "손상됐거나 읽을 수 없는 PDF";
     info.querySelector("span").style.color = "var(--bad)"; return;
   }
   T.file = file; T.boxes = []; T.sel = null; T.imgs = []; T.isel = null; T.red = []; T.tables = []; T.tsel = null; $("ibRow").hidden = true;
@@ -7054,15 +7331,15 @@ dropHandlers.pages = async files => {
   const info = $("pgInfo"); info.hidden = false; info.innerHTML = `<b></b><span>여는 중</span>`; info.querySelector("b").textContent = f.name;
   $("pagesRes").replaceChildren(); $("pgBlankMsg").textContent = "";
   try{
-    const bytes = new Uint8Array(await f.arrayBuffer()), d = await PDFDocument.load(bytes, {updateMetadata:false});
+    const bytes = await pdfBytes(f), d = await PDFDocument.load(bytes, {updateMetadata:false});
     if(PG.js){ try{ PG.js.destroy(); }catch(_){} }
     PG.file = f; PG.bytes = bytes; PG.js = await TXT.pdfjs(bytes.slice());
     PG.list.forEach(pp => pp.el && pgIO.unobserve(pp.el));
     PG.list = Array.from({length:d.getPageCount()}, (_, i) => ({src:i, rot:0, el:null, blank:false, thumb:null})); PG.sel.clear(); PG.last = null;
     pgThumbQ = Promise.resolve();
-    info.querySelector("span").textContent = `${d.getPageCount().toLocaleString("ko-KR")}쪽 · ${fmtMB(f.size)}`;
+    info.querySelector("span").textContent = `${d.getPageCount().toLocaleString("ko-KR")}쪽 · ${fmtMB(f.size)}` + (f._unlocked ? " · 🔓 잠금을 풀어 엶" : "");
     $("pgName").value = `${stem(f.name)}_정리`;
-  }catch(e){ info.querySelector("span").textContent = /encrypt/i.test(String(e && e.message)) ? "암호가 걸린 PDF라 열 수 없음" : "손상됐거나 읽을 수 없는 PDF"; info.querySelector("span").style.color = "var(--bad)"; PG.list = []; }
+  }catch(e){ info.querySelector("span").textContent = /[가-힣]/.test(String(e && e.message)) ? e.message : "손상됐거나 읽을 수 없는 PDF"; info.querySelector("span").style.color = "var(--bad)"; PG.list = []; }
   pgRender();
 };
 $("pgPick").onclick = () => $("pgIn").click();
@@ -7333,7 +7610,7 @@ async function spLoad(f){
   $("spGrid").replaceChildren(); $("spPanel").hidden = true;
   if(!f || !splitPages) return;
   SP.file = f; SP.n = splitPages;
-  try{ SP.js = await TXT.pdfjs(new Uint8Array(await f.arrayBuffer())); }catch(_){ return; }
+  try{ SP.js = await TXT.pdfjs((await pdfBytes(f)).slice()); }catch(_){ return; }
   const frag = document.createDocumentFragment();
   for(let i = 0; i < SP.n; i++){
     const c = document.createElement("div"); c.className = "card"; c.dataset.i = i;
@@ -7432,7 +7709,7 @@ $("tiRun").onclick = async () => {
     if(cancelReq) break;
     let js = null;
     try{
-      js = await TXT.pdfjs(new Uint8Array(await it.file.arrayBuffer()));
+      js = await TXT.pdfjs((await pdfBytes(it.file)).slice());
       const n = js.numPages, pad = Math.max(2, String(n).length);
       let idx;
       if(which === "first") idx = [0];
