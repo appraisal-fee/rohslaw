@@ -162,6 +162,14 @@ table.diff col.k{width:64px}table.diff col.p{width:34%}table.diff col.n{width:22
   padding:11px 18px;border-radius:10px;font-size:14.5px;opacity:0;transition:.2s;z-index:70;pointer-events:none;max-width:90vw}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .warn{background:#fff4d6;color:#7a5200;font-size:13px;padding:8px 20px;text-align:center;display:none}
+.dsheet{position:fixed;inset:0;background:rgba(18,28,42,.45);display:none;align-items:flex-end;justify-content:center;z-index:65}
+.dsheet.show{display:flex}
+.dbox{background:#fff;width:min(520px,100%);border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.dbox .dt{font-weight:700;color:var(--navy);margin-bottom:12px;font-size:15px}
+.dbox .dl{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:55vh;overflow:auto}
+.dn{height:58px;border:1px solid #cfd8e3;background:#f2f6fa;border-radius:10px;font-size:18px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.dn small{font-size:11.5px;font-weight:500;color:var(--muted)}
+.dcopy{margin-top:12px;width:100%;height:46px;border:1px solid var(--line);background:#fff;border-radius:10px;font-weight:600;color:#3b4756}
 @media (max-width:640px){
   header{padding:14px 14px 12px}.swrap,main{padding-left:12px;padding-right:12px}
   .hinfo{margin-left:0;width:100%}
@@ -214,6 +222,7 @@ table.diff col.k{width:64px}table.diff col.p{width:34%}table.diff col.n{width:22
 <main><div class="grid" id="list"></div></main>
 <footer>개발자 노상엽</footer>
 
+<div class="dsheet" id="dialSheet"><div class="dbox"><div class="dt"></div><div class="dl"></div><button class="dcopy">닫기</button></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -541,7 +550,7 @@ function build(){
   const rep=(head.match(/대표전화\s*[:：]?\s*([\d\-\)\s]+?)(?=\s*FAX|$)/i)||[])[1];
   const fax=(head.match(/FAX\s*[:：]?\s*([\d\-\)\s]+)/i)||[])[1];
   const h=[];
-  if(rep) h.push(`<button class="pill" data-copy="${esc(rep.trim())}">대표전화 <b class="tnum">${esc(rep.trim())}</b></button>`);
+  if(rep) h.push(`<button class="pill" data-copy="${esc(rep.trim())}" data-tel="${esc(rep.trim())}">대표전화 <b class="tnum">${esc(rep.trim())}</b></button>`);
   if(fax){ const fx=fax.trim().replace(/\)\s*/,'-'); h.push(`<button class="pill" data-copy="${esc(fx)}">FAX <b class="tnum">${esc(fx)}</b></button>`); }
   $('hinfo').innerHTML=h.join('');
   const cmc=base.info.slice(1).join(' ').replace(/^\(|\)$/g,'').replace(/\(?\d{2}\.\d{1,2}\.\d{1,2}\s*기준\)?/,'').trim();
@@ -648,7 +657,7 @@ function hl(text,terms){
   return s;
 }
 function rowHTML(e,terms,showPath){
-  const nums=e.nums.length?e.nums.map(n=>`<button class="num" data-copy="${esc(n.disp)}" title="눌러서 복사">${esc(n.disp)}</button>`).join(''):`<span class="num none">${e.note?esc(e.note):'번호 없음'}</span>`;
+  const nums=e.nums.length?e.nums.map(n=>`<button class="num" data-copy="${esc(n.disp)}" title="${CAN_DIAL?'눌러서 전화':'눌러서 복사'}">${esc(n.disp)}</button>`).join(''):`<span class="num none">${e.note?esc(e.note):'번호 없음'}</span>`;
   const path=showPath?`<div class="sub">${esc(e.group)}</div>`:'';
   const note=e.note&&e.nums.length?`<span class="note">${esc(e.note)}</span>`:'';
   const tag=e.badge==='a'?'<span class="tag new">신규</span>':e.badge==='c'?'<span class="tag chg">변경</span>':e.badge==='m'?'<span class="tag new">이동</span>':'';
@@ -701,7 +710,7 @@ function render(){
     list.className='grid';
     lastResults=pool;
     $('statusL').textContent=`${filter} ${pool.length}건`;
-    $('statusR').textContent='번호를 누르면 복사 · ↑↓ 고르고 Enter 복사 · Esc 지우기';
+    $('statusR').textContent=CAN_DIAL?'번호를 누르면 032-340-내선으로 전화 연결':'번호를 누르면 복사 · ↑↓ 고르고 Enter 복사 · Esc 지우기';
     if(filter==='전체'){
       html+=`<div class="quick"><div class="lb">업무로 찾기</div><div class="qs">${QUICK.filter(([,k])=>all.some(e=>e.hay.includes(norm(k)))).map(([l,k])=>`<button class="qb" data-q="${esc(k)}">${esc(l)}</button>`).join('')}</div>`
         +(recent.length?`<div class="lb">최근 검색</div><div class="qs">${recent.map(r=>`<button class="qb rc" data-q="${esc(r)}">${esc(r)}<span class="xx" data-rmrecent="${esc(r)}" title="지우기">✕</span></button>`).join('')}</div>`:'')+`</div>`;
@@ -765,10 +774,48 @@ document.addEventListener('click',ev=>{
   const rr=ev.target.closest('[data-rmrecent]'); if(rr){ ev.stopPropagation(); recent=recent.filter(r=>r!==rr.dataset.rmrecent); LS.set('recent',recent); render(); return; }
   const qb=ev.target.closest('[data-q]'); if(qb){ $('q').value=qb.dataset.q; render(); $('q').focus(); return; }
   const vw=ev.target.closest('[data-view]'); if(vw){ view=vw.dataset.view; LS.set('view',view); render(); return; }
-  const c=ev.target.closest('[data-copy]'); if(c){ const row=c.closest('.row'); copy(c.dataset.copy,row&&row.dataset.key); return; }
+  const c=ev.target.closest('[data-copy]'); if(c){ const row=c.closest('.row'); if(c.classList.contains('num')) pressNumber(c.dataset.copy,row&&row.dataset.key,row&&row.querySelector('.n')&&row.querySelector('.n').innerText); else if(c.dataset.tel&&CAN_DIAL) dial(c.dataset.tel); else copy(c.dataset.copy,row&&row.dataset.key); return; }
   const s=ev.target.closest('[data-star]'); if(s){const k=s.dataset.star;favs.has(k)?favs.delete(k):favs.add(k);LS.set('favs',[...favs]);renderChips();render();return;}
 });
 
+// ===== 번호 누르면 전화 연결 (휴대폰) =====
+// 4자리 내선은 032-340-내선으로, 그 밖의 번호는 적힌 그대로 건다. PC에서는 복사.
+const CAN_DIAL=matchMedia('(pointer:coarse)').matches;
+function dialList(disp){
+  const s=String(disp).trim();
+  const m=s.match(/^(\d{4})\s*~\s*(\d{4})$/);
+  if(m){ const a=+m[1], b=+m[2], out=[]; for(let i=a;i<=b&&out.length<31;i++) out.push(String(i)); return out; }
+  return [s];
+}
+function telOf(n){
+  const d=String(n).replace(/[^\d]/g,'');
+  if(/^\d{4}$/.test(d)) return '032340'+d;
+  return d.length>=7?d:'';
+}
+const fmtTel=t=>t.startsWith('032340')?'032-340-'+t.slice(6):t.replace(/^(02|0\d{2}|1\d{3})(\d{3,4})(\d{4})$/,'$1-$2-$3');
+function dial(n,key){
+  const t=telOf(n); if(!t){ copy(n,key); return; }
+  if(key){ const u=usage[key]||[0,0]; usage[key]=[u[0]+1,Date.now()]; LS.set('usage',usage); }
+  const q=$('q').value.trim(); if(q){ recent=[q,...recent.filter(r=>r!==q)].slice(0,8); LS.set('recent',recent); }
+  location.href='tel:'+t;
+}
+function pressNumber(disp,key,title){
+  if(!CAN_DIAL){ copy(disp,key); return; }
+  const list=dialList(disp);
+  if(list.length===1){ dial(list[0],key); return; }
+  // 여러 번호(예: 2011~2018) → 고르기
+  const sh=$('dialSheet');
+  sh.querySelector('.dt').textContent=(title||'')+' — 걸 번호를 고르세요';
+  sh.querySelector('.dl').innerHTML=list.map(n=>`<button class="dn" data-dial="${esc(n)}">${esc(n)}<small>${esc(fmtTel(telOf(n)))}</small></button>`).join('');
+  sh.dataset.key=key||''; sh.classList.add('show');
+}
+document.addEventListener('click',ev=>{
+  const sh=$('dialSheet'); if(!sh||!sh.classList.contains('show')) return;
+  const b=ev.target.closest('[data-dial]');
+  if(b){ ev.stopPropagation(); sh.classList.remove('show'); dial(b.dataset.dial,sh.dataset.key); return; }
+  if(ev.target.closest('.dcopy')){ ev.stopPropagation(); sh.classList.remove('show'); return; }
+  if(ev.target===sh){ sh.classList.remove('show'); }
+},true);
 // ===== 시작 =====
 buildAliases();
 loadBase(); build();
@@ -778,7 +825,7 @@ if(!matchMedia('(max-width:640px)').matches) setTimeout(()=>$('q').focus(),50);
 // 안드로이드 크롬(120 이상): CloseWatcher가 휴대폰 뒤로 버튼을 먼저 받아 주므로 앱을 열자마자 눌러도 바로 꺼지지 않음.
 // 그 밖의 브라우저: 탭·클릭(사용자 활성화) 때 뒤로가기 칸을 하나 걸어 둠.
 (function(){
-  const inApp=()=>{ const q=document.getElementById('q'); if(q&&q.value){ q.value=''; render(); window.scrollTo(0,0); return '검색어를 지웠습니다'; } return ''; };
+  const inApp=()=>{ const ds=document.getElementById('dialSheet'); if(ds&&ds.classList.contains('show')){ ds.classList.remove('show'); return '번호 고르기를 닫았습니다'; } const q=document.getElementById('q'); if(q&&q.value){ q.value=''; render(); window.scrollTo(0,0); return '검색어를 지웠습니다'; } return ''; };
   const EXIT='뒤로 버튼을 한 번 더 누르면 종료됩니다';
   const touch=matchMedia('(pointer:coarse)').matches;
   if(typeof CloseWatcher==='function' && touch){
