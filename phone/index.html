@@ -176,6 +176,11 @@ table.diff col.k{width:64px}table.diff col.p{width:34%}table.diff col.n{width:22
 .staff .st i{font-style:normal;color:var(--muted);font-size:11.5px}
 .nm .ttl{font-size:12px;color:var(--muted);font-weight:500;margin-left:6px}
 .gh.staffg{background:#eef7f1}.gh.staffg .path{color:#1f6b44}
+.stbtn{margin-top:4px;border:1px solid #cfe3e1;background:#f0f8f7;color:#0b6d67;border-radius:12px;padding:2px 10px;font-size:12px;cursor:pointer}
+.relbox{column-span:all;margin:4px 0 14px;text-align:center}
+.relbtn{width:100%;border:1px dashed #9fcfca;background:#f4fbfa;color:#0b6d67;border-radius:10px;padding:11px 14px;font-size:14px;cursor:pointer;line-height:1.5;word-break:keep-all}
+.relbtn b{color:#1f3a5f}
+.grid.flat .relbox{margin-top:0}
 @media (max-width:640px){
   header{padding:14px 14px 12px}.swrap,main{padding-left:12px;padding-right:12px}
   .hinfo{margin-left:0;width:100%}
@@ -969,6 +974,22 @@ function staffLineHTML(e,terms){
   return `<div class="staff">${items.join('')}${more}</div>`;
 }
 
+
+// ===== 찾은 것만 먼저, 연결 정보는 접어서 =====
+let showRel=false, relQ='';
+const openStaff=new Set();
+function termScoreDirect(e,t){
+  if(t==='pa'||t==='sa') return termScore(e,t);
+  if(/^\d+$/.test(t)) return e.numHay.some(n=>n.includes(t))?1:0;
+  if(isCho(t)) return (e.cName.includes(t)||cho(e.nDept).includes(t))?1:0;
+  return (e.nName.includes(t)||e.nDept.includes(t)||e.nDiv.includes(t))?1:0;
+}
+function staffToggleHTML(e,terms){
+  if(!e.staff||!e.staff.length) return '';
+  const open=openStaff.has(e.key);
+  return `<button class="stbtn" data-staffkey="${esc(e.key)}">${open?'관련 담당자 접기 ▴':`관련 담당자 ${e.staff.length}명 보기 ▾`}</button>${open?staffLineHTML(e,terms):''}`;
+}
+
 function build(){
   all=base.entries.map(e=>Object.assign({},e,{src:'base',badge:''}));
   all.push(...staffEntries());
@@ -1083,6 +1104,7 @@ function search(q,pool){
   }
   // 자주 쓰는 번호·즐겨찾기 가산
   res.forEach(r=>{ const u=usage[r.e.key]; if(u) r.s+=Math.min(30,u[0]*4); if(favs.has(r.e.key)) r.s+=10; });
+  res.forEach(r=>{ r.direct=r.fz||tv.every(vs=>vs.some(v=>termScoreDirect(r.e,v.t)>0)); });
   res.sort((a,b)=>b.s-a.s);
   return {res,terms:tv.flat().map(v=>v.t)};
 }
@@ -1107,7 +1129,7 @@ function rowHTML(e,terms,showPath){
   const memo=e.memo||by?`<div class="memo">${e.memo?(e.src==='staff'?'':'✎ ')+hl(e.memo,terms):''}${by?`<span style="color:var(--muted)">${e.memo?by:by.slice(3)}</span>`:''}</div>`:'';
   return `<div class="row" data-key="${esc(e.key)}">
     <button class="star${favs.has(e.key)?' on':''}" data-star="${esc(e.key)}" title="즐겨찾기">${favs.has(e.key)?'★':'☆'}</button>
-    <div class="nm"><div class="n">${hl(e.name,terms)}${e.title?`<span class="ttl">${esc(e.title)}</span>`:''}${note}${tag}${src}</div>${path}${memo}${staffLineHTML(e,terms)}</div>
+    <div class="nm"><div class="n">${hl(e.name,terms)}${e.title?`<span class="ttl">${esc(e.title)}</span>`:''}${note}${tag}${src}</div>${path}${memo}${staffToggleHTML(e,terms)}</div>
     <div class="nums">${nums}</div>
   </div>`;
 }
@@ -1129,9 +1151,12 @@ function render(){
   let html='';
   const list=$('list');
   if(sr){
-    const res=sr.res.map(r=>r.e);
+    if(relQ!==q){ relQ=q; showRel=false; }
+    const hasDirect=sr.res.some(r=>r.direct);
+    const res=sr.res.filter(r=>!hasDirect||r.direct).map(r=>r.e);
+    const relRes=hasDirect?sr.res.filter(r=>!r.direct).map(r=>r.e):[];
     lastResults=res;
-    $('statusL').textContent=`검색 결과 ${res.length}건`;
+    $('statusL').textContent=`검색 결과 ${res.length}건`+(relRes.length?` · 관련 ${relRes.length}건`:'');
     $('statusR').innerHTML=`<span class="seg"><button data-view="rel" class="${view==='rel'?'on':''}">관련도순</button><button data-view="group" class="${view==='group'?'on':''}">부서별</button></span>`;
     if(!res.length){
       list.className='grid';
@@ -1146,6 +1171,10 @@ function render(){
       list.className='grid';
       const groups=new Map(); res.forEach(e=>{ if(!groups.has(e.group)) groups.set(e.group,[]); groups.get(e.group).push(e); });
       groups.forEach((items,g)=>html+=groupHTML(g,items,terms,false));
+    }
+    if(relRes.length){
+      html+=`<div class="relbox"><button class="relbtn" data-showrel>💡 이 정보도 필요하신가요? ‘${esc(q)}’ 관련 담당자·연결 정보 <b>${relRes.length}건</b> ${showRel?'접기 ▴':'보기 ▾'}</button></div>`;
+      if(showRel) html+=`<section class="group">${relRes.slice(0,200).map(e=>rowHTML(e,terms,true)).join('')}</section>`;
     }
   } else {
     list.className='grid';
@@ -1212,6 +1241,8 @@ document.addEventListener('keydown',ev=>{
 });
 $('chips').addEventListener('click',ev=>{const b=ev.target.closest('[data-f]');if(!b)return;filter=b.dataset.f;renderChips();render();});
 document.addEventListener('click',ev=>{
+  const sk=ev.target.closest('[data-staffkey]'); if(sk){ const k=sk.dataset.staffkey; openStaff.has(k)?openStaff.delete(k):openStaff.add(k); render(); return; }
+  const sr0=ev.target.closest('[data-showrel]'); if(sr0){ showRel=!showRel; render(); return; }
   const rr=ev.target.closest('[data-rmrecent]'); if(rr){ ev.stopPropagation(); recent=recent.filter(r=>r!==rr.dataset.rmrecent); LS.set('recent',recent); render(); return; }
   const qb=ev.target.closest('[data-q]'); if(qb){ $('q').value=qb.dataset.q; render(); $('q').focus(); return; }
   const vw=ev.target.closest('[data-view]'); if(vw){ view=vw.dataset.view; LS.set('view',view); render(); return; }
