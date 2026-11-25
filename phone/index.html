@@ -170,6 +170,12 @@ table.diff col.k{width:64px}table.diff col.p{width:34%}table.diff col.n{width:22
 .dn{height:58px;border:1px solid #cfd8e3;background:#f2f6fa;border-radius:10px;font-size:18px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
 .dn small{font-size:11.5px;font-weight:500;color:var(--muted)}
 .dcopy{margin-top:12px;width:100%;height:46px;border:1px solid var(--line);background:#fff;border-radius:10px;font-weight:600;color:#3b4756}
+.staff{margin-top:3px;display:flex;flex-direction:column;gap:2px}
+.staff .st{font-size:12.5px;color:#2f4a63;line-height:1.45}
+.staff .st b{font-weight:700;color:#1f3a5f}
+.staff .st i{font-style:normal;color:var(--muted);font-size:11.5px}
+.nm .ttl{font-size:12px;color:var(--muted);font-weight:500;margin-left:6px}
+.gh.staffg{background:#eef7f1}.gh.staffg .path{color:#1f6b44}
 @media (max-width:640px){
   header{padding:14px 14px 12px}.swrap,main{padding-left:12px;padding-right:12px}
   .hinfo{margin-left:0;width:100%}
@@ -534,16 +540,167 @@ function customNums(str){
 const joinNums=e=>e.nums.map(n=>n.disp).join(', ')+(e.note&&!e.nums.length?e.note:'');
 
 // ===== 목록 만들기 =====
+// ===== 담당자 업무 (메신저 조직도 기준, 2026. 11. 25.) =====
+// [부서, 하위조직, 이름, 직책/직급, 내선, 담당업무, 상태]  — 휴대폰 번호·이메일은 넣지 않음
+const STAFF_DATE='2026. 11. 25.';
+const STAFF=[
+ ['기획팀','','김용민','팀장/차장','2006','',''],
+ ['기획팀','','고혜선','과장','2313','예산, 인센티브, 위원회, 연보, 임상정보',''],
+ ['기획팀','','김형진','과장','2256','투자심의, 원가, 공간기획',''],
+ ['기획팀','','엄희성','과장','2007','직원정원, 조직, 감사',''],
+ ['기획팀','','박상화','대리','2350','사업계획, 영성',''],
+ ['기획팀','','진초롱','대리','2300','교원정원, 규정, 회의',''],
+ ['홍보팀','','장효은','팀장/부장','2008','',''],
+ ['홍보팀','','이예원','과장','2284','','휴직 중'],
+ ['홍보팀','','이정수','책임','2311','',''],
+ ['홍보팀','','손유정','사원','2284','',''],
+ ['총무팀','','장보영','팀장/차장','2305','',''],
+ ['총무팀','','원창덕','JM/부장','2312','임상사진 빅데이터 표준화, 청도관리',''],
+ ['총무팀','','장은영','차장','2307','',''],
+ ['총무팀','','안정욱','대리','2003','병원장, 행정부원장, 간호부장 비서',''],
+ ['총무팀','','최윤아','책임','2306','진료부원장, 수련교육부장 비서, 스텝코디',''],
+ ['총무팀','','곽민석','사원','2308','행사, 대관, 예비군/민방위, 우편물',''],
+ ['총무팀','','이성열','사원','2310','',''],
+ ['인사팀','','최훈','팀장/부장','2277','',''],
+ ['인사팀','','최성현','JM/차장','2280','인사/노무, 고충상담',''],
+ ['인사팀','','윤한네','과장','2381','교원인사, 교원채용, 교원휴가, 교원학회',''],
+ ['인사팀','','김세욱','책임','2299','채용, 입/퇴사, 재계약, 외부포상',''],
+ ['인사팀','','정예원','책임','2279','교직원 교육(의료원·외부·사이버·법정 등)',''],
+ ['인사팀','','허재호','책임','2278','직원 인사, 급여, 복무, 제수당, 노무, 사학연금',''],
+ ['재무팀','','김정숙','팀장/부장','2315','',''],
+ ['재무팀','','유행심','차장','2318','급여',''],
+ ['재무팀','','변명환','과장','2317','업무추진비',''],
+ ['재무팀','','최희민','책임','2316','출납, 외국운영비, 임상연구비, 국고보조금, 미수금',''],
+ ['재무팀','','김예린','사원','','지출 결의서, 부서운영비, 협진센터 운영비, 세금',''],
+ ['원무팀','입원원무Unit','박찬명','UM/과장','2321','입원원무Unit 총괄',''],
+ ['원무팀','입원원무Unit','강임순','차장','2323','장기재원관리, 전원상담, 나4',''],
+ ['원무팀','입원원무Unit','이기성','책임','2222','산재, 가6~8, 뇌졸중집중치료실',''],
+ ['원무팀','입원원무Unit','최민현','책임','2220','자보, 나8~10, 진료일정 ITC',''],
+ ['원무팀','입원원무Unit','권혁광','사원','2325','건강보험, 통계, 재원관리(가9~가10, ICU)',''],
+ ['원무팀','입원원무Unit','정세빈','사원','2334','진료일정, 나5~7, 긴급지원청구',''],
+ ['원무팀','응급원무Unit','이창모','UM/과장','2327','응급원무Unit 총괄','3교대'],
+ ['원무팀','응급원무Unit','응급원무(공용)','','2327','응급원무, 주말·공휴일 병실배정','3교대'],
+ ['원무팀','외래원무Unit','김진경','UM/차장','2340','외래원무 총괄',''],
+ ['원무팀','외래원무Unit','김미순','차장','2330','수납',''],
+ ['원무팀','외래원무Unit','최승순','차장','7329','',''],
+ ['원무팀','외래원무Unit','박정미','과장','2330','수납창구',''],
+ ['원무팀','외래원무Unit','최미영','과장','2330','',''],
+ ['원무팀','외래원무Unit','김유화','대리','2330','직원수납문의, 청구담당, 교육담당',''],
+ ['원무팀','외래원무Unit','오정은','대리','2330','증명서창구',''],
+ ['원무팀','외래원무Unit','이경아','대리','2330','외래원무Unit 사무실',''],
+ ['원무팀','외래원무Unit','이대용','대리','2341','입원 담당, 병상운영 담당',''],
+ ['원무팀','외래원무Unit','구용범','책임','7377','증명서·사본발행 ITC 통합, 증명서창구',''],
+ ['원무팀','외래원무Unit','조준휘','책임','7376','병실배정',''],
+ ['원무팀','외래원무Unit','김한진','사원','2330','2번창구, 접수, 수납',''],
+ ['원무팀','외래원무Unit','배지윤','사원','2330','ITC(외래원무, 환자용앱), 외래원무Unit 사무실',''],
+ ['원무팀','외래원무Unit','윤영빈','사원','','외래수납, 3번창구',''],
+ ['원무팀','외래원무Unit','이상현','사원','','병실배정',''],
+ ['원무팀','외래원무Unit','이아인','사원','','외래수납(9~18시)',''],
+ ['원무팀','외래원무Unit','병실배정(공용)','','2341','병상 조율, 병실배정',''],
+ ['원무팀','법무Unit','이찬규','UM/과장','2320','',''],
+ ['원무팀','법무Unit','노상엽','과장','2349','법무, 법원감정, 보험회사자문, 간병업체, 구급차관리, 의료윤리',''],
+ ['시설팀','','장재규','팀장/부장','2363','',''],
+ ['시설팀','','황정윤','수석','2364','시설행정, 도면',''],
+ ['시설팀','','문용원','책임','2302','(건축) 공사 관리',''],
+ ['시설팀','','성심관 소장','','7456','성심관 시설물 유지보수',''],
+ ['시설팀','전기Unit','박경덕','UM/선임','2373','',''],
+ ['시설팀','전기Unit','고범규','수석','2374','',''],
+ ['시설팀','전기Unit','염희웅','선임','2374','전기안전관리원, 수변전계통, 비상발전계통, 무정전전원설비',''],
+ ['시설팀','전기Unit','이용민','책임','2303','소방안전관리자, 석면건축물안전관리자',''],
+ ['시설팀','전기Unit','홍진우','책임','2374','배전기사',''],
+ ['시설팀','시설Unit','정종원','UM/선임','2370','',''],
+ ['시설팀','시설Unit','김태천','선임','2369','',''],
+ ['시설팀','기관Unit','윤여홍','수석','2367','',''],
+ ['시설팀','기관Unit','박수철','선임','2367','',''],
+ ['시설팀','기관Unit','백승훈','책임','2368','기계설비 공사·유지보수 관리',''],
+ ['시설팀','기관Unit','정관수','책임','2367','',''],
+ ['시설팀','기관Unit','하재혁','책임','2368','',''],
+ ['적정진료관리팀','','김원정','팀장/차장','2336','업무총괄',''],
+ ['적정진료관리팀','','김혜진','수석','2339','심사(IMN, HM, OS 하지)',''],
+ ['적정진료관리팀','','김민정','선임','2656','',''],
+ ['적정진료관리팀','','김수연','선임','2655','심사(IMP, CS, NU)',''],
+ ['적정진료관리팀','','김슬기','선임','2657','심사(IMG 위장관, URO)',''],
+ ['적정진료관리팀','','박은지','선임','2624','심사(OS 상지·척추, IMH, ENT)',''],
+ ['적정진료관리팀','','박현희','선임','2662','심사(GS 유방·갑상선·간담도, PS, IMR)',''],
+ ['적정진료관리팀','','전미경','선임','2654','평가(영상·폐렴·혈액투석), DM, IMI',''],
+ ['적정진료관리팀','','차혜리','선임','2659','심사(NS, IME, ED, FM)',''],
+ ['적정진료관리팀','수가 및 평가 Unit','김효신','UM/선임','2337','수가 ITC, 평가(마취), 시범사업수가, 수가위원회',''],
+ ['적정진료관리팀','수가 및 평가 Unit','김지연','선임','2625','수가(기본진료, 진검·병리, 처치수술, 치료재료, 신의료기술, 비급여 등)',''],
+ ['적정진료관리팀','수가 및 평가 Unit','박지인','선임','2653','적정성평가(혈액투석, 폐렴, 영상평가 제외)',''],
+ ['적정진료관리팀','수가 및 평가 Unit','배일남','선임','2660','수가(약제, 영상, 내시경, 초음파), IRB, 미수',''],
+ ['구매관리팀','','김진','팀장/부장','2356','구매관리팀 업무 총괄',''],
+ ['구매관리팀','','서치영','JM/차장','2360','의료장비(E)',''],
+ ['구매관리팀','','최수진','대리','2359','의료소모품(Y) 청구/발주',''],
+ ['구매관리팀','','정장미','선임','2358','신규코드생성(의료비품 U, 의료소모품 Y) 및 관리',''],
+ ['구매관리팀','','이예림','책임','2357','일반소모품(Z), 전산비품(컴퓨터/모니터 청구)',''],
+ ['구매관리팀','','김명준','사원','','의류정리, 린넨실',''],
+ ['구매관리팀','','이권경','사원','2394','일반비품(G), 계약업무',''],
+ ['구매관리팀','','임광혁','사원','2393','세탁물관리(월~금 07:00~16:30)',''],
+ ['정보보호팀','','강희찬','팀장/과장','2375','전산 관련',''],
+ ['정보보호팀','','박선영','과장','2378','',''],
+ ['정보보호팀','','PC 유지보수','','7315','PC 고장, 유지보수',''],
+ ['의공학팀','','서정충','팀장/차장','2361','의료장비 총괄, 의료장비 안전관리',''],
+ ['의공학팀','','박상준','수석','2362','',''],
+ ['의공학팀','','이선연','선임','2361','',''],
+ ['의공학팀','','김성현','책임','2361','',''],
+ ['간호행정교육팀','','이재은','팀장/부장','2431','행정교육 총괄, HELP팀, 가정간호',''],
+ ['간호행정교육팀','','신미진','차장','2433','',''],
+ ['간호행정교육팀','','김지연','수석','2433','행정(간호·간병), HELP Team',''],
+ ['간호행정교육팀','간호교육 Unit','남은미','UM/수석','7342','간호교육, 교대제, 간호ITC, 간호학생실습, 논문',''],
+ ['간호행정교육팀','간호교육 Unit','권순정','선임','7344','필수의료간호사양성지원사업 교육전담간호사',''],
+ ['간호행정교육팀','간호교육 Unit','최미란','선임','2433','간호간병 교육전담간호사',''],
+ ['병동간호1팀','','조수진','팀장/부장','2426','성모관 병동 담당',''],
+ ['병동간호2팀','','정유희','팀장/차장','2426','',''],
+];
+// 담당 업무 속 병동 표기(나4, 가6~8, 가9~가10) → 나04병동, 가06병동 … 검색어로 펼침
+function wardKw(text){
+  const out=[]; const re=/([가나])\s*(\d{1,2})(?:\s*~\s*[가나]?\s*(\d{1,2}))?(?!\d)/g; let m;
+  while((m=re.exec(String(text||'')))){ const a=+m[2], b=m[3]?+m[3]:a; if(a<1||b>19||b<a) continue; for(let i=a;i<=b;i++) out.push(m[1]+String(i).padStart(2,'0')+'병동'); }
+  return [...new Set(out)];
+}
+function staffEntries(){
+  return STAFF.map(([dept,sub,name,title,ext,duty,status],i)=>({
+    key:'p:'+dept+'|'+sub+'|'+name, src:'staff', div:'담당자', dept, sub, name, title, ext,
+    nums:ext?[{disp:ext,list:[ext]}]:[], note:status||'', memo:duty||'', kw:wardKw(duty).join(' ')
+  }));
+}
+function attachStaff(list){
+  const byExt=new Map(), byWard=new Map();
+  list.filter(e=>e.src==='staff').forEach(s=>{
+    if(s.ext){ if(!byExt.has(s.ext)) byExt.set(s.ext,[]); byExt.get(s.ext).push(s); }
+    wardKw(s.memo).forEach(w=>{ if(!byWard.has(w)) byWard.set(w,[]); byWard.get(w).push(s); });
+  });
+  list.forEach(e=>{
+    if(e.src!=='base') return;
+    const seen=new Set(), people=[];
+    (e.nums||[]).forEach(n=>n.list.forEach(x=>(byExt.get(x)||[]).forEach(s=>{ if(!seen.has(s)){ seen.add(s); people.push({s,why:'ext'}); } })));
+    const wm=String(e.name).match(/^[가나]\d{2}병동$/);
+    if(wm) (byWard.get(wm[0])||[]).forEach(s=>{ if(!seen.has(s)){ seen.add(s); people.push({s,why:'ward'}); } });
+    e.staff=people;
+    if(/응급원무/.test([e.dept,e.sub,e.name].join(' ')) && !/3교대/.test(e.note||'')) e.note=(e.note?e.note+' · ':'')+'3교대';
+  });
+}
+function staffLineHTML(e,terms){
+  if(!e.staff||!e.staff.length) return '';
+  const items=e.staff.slice(0,4).map(({s,why})=>`<span class="st">${why==='ward'?'원무 ':''}<b>${hl(s.name,terms)}</b>${s.title?` <i>${esc(s.title)}</i>`:''}${s.note?` <span class="note">${esc(s.note)}</span>`:''}${s.memo?` · ${hl(s.memo,terms)}`:''}${why==='ward'&&s.ext?` · ${esc(s.ext)}`:''}</span>`);
+  const more=e.staff.length>4?`<span class="st">외 ${e.staff.length-4}명</span>`:'';
+  return `<div class="staff">${items.join('')}${more}</div>`;
+}
+
 function build(){
   all=base.entries.map(e=>Object.assign({},e,{src:'base',badge:''}));
+  all.push(...staffEntries());
   all.forEach(e=>{
-    e.memo='';
-    e.nName=norm(e.name); e.nDept=norm([e.dept,e.sub].join(' ')); e.nDiv=norm(e.div); e.nMemo=norm([e.memo,e.note,e.by].join(' '));
+    if(e.src==='base') e.memo='';
+    e.nName=norm(e.name); e.nDept=norm([e.dept,e.sub].join(' ')); e.nDiv=norm(e.div); e.nMemo=norm([e.memo,e.note,e.by,e.title,e.kw].join(' '));
     e.hay=e.nName+'|'+e.nDept+'|'+e.nDiv+'|'+e.nMemo;
     e.cName=cho(e.nName); e.hayCho=cho(e.hay);
     e.jName=jamo(e.nName); e.jAll=jamo(e.nName+'|'+e.nDept+'|'+e.nMemo);
     e.numHay=e.nums.flatMap(n=>[n.disp.replace(/\D/g,''),...n.list]);
     e.group=[e.div,e.dept,e.sub].filter(Boolean).join(' › ');
+  });
+  attachStaff(all);
+  all.forEach(e=>{ if(e.staff&&e.staff.length){ e.nMemo+='|'+norm(e.staff.map(x=>x.s.name).join(' ')); e.hay+='|'+norm(e.staff.map(x=>x.s.name).join(' ')); }
   });
   $('baseLbl').textContent=fmtBaseDate(base.baseDate)||'기준일 미상';
   const head=base.info[0]||'';
@@ -564,10 +721,11 @@ function inFilter(e,f){
   if(f==='추가 번호') return e.src==='mine';
   if(f==='공용 번호') return e.src==='share';
   if(f==='최근 변경') return !!e.badge;
+  if(f==='담당자 업무') return e.src==='staff';
   return e.src==='base'&&e.div===f;
 }
 function renderChips(){
-  const list=['전체','★ 즐겨찾기',...divisions()];
+  const list=['전체','★ 즐겨찾기','담당자 업무',...divisions()];
   if(!list.includes(filter)) filter='전체';
   $('chips').innerHTML=list.map(d=>`<button class="chip${d===filter?' on':''}${d==='최근 변경'?' chg':''}" data-f="${esc(d)}">${esc(d)}<span class="c">${all.filter(e=>inFilter(e,d)).length}</span></button>`).join('');
 }
@@ -663,20 +821,20 @@ function rowHTML(e,terms,showPath){
   const tag=e.badge==='a'?'<span class="tag new">신규</span>':e.badge==='c'?'<span class="tag chg">변경</span>':e.badge==='m'?'<span class="tag new">이동</span>':'';
   const src=showPath?'':'';
   const by=e.src==='share'&&e.by?` · ${esc(e.by)} 추가`:'';
-  const memo=e.memo||by?`<div class="memo">${e.memo?'✎ '+hl(e.memo,terms):''}${by?`<span style="color:var(--muted)">${e.memo?by:by.slice(3)}</span>`:''}</div>`:'';
+  const memo=e.memo||by?`<div class="memo">${e.memo?(e.src==='staff'?'':'✎ ')+hl(e.memo,terms):''}${by?`<span style="color:var(--muted)">${e.memo?by:by.slice(3)}</span>`:''}</div>`:'';
   return `<div class="row" data-key="${esc(e.key)}">
     <button class="star${favs.has(e.key)?' on':''}" data-star="${esc(e.key)}" title="즐겨찾기">${favs.has(e.key)?'★':'☆'}</button>
-    <div class="nm"><div class="n">${hl(e.name,terms)}${note}${tag}${src}</div>${path}${memo}</div>
+    <div class="nm"><div class="n">${hl(e.name,terms)}${e.title?`<span class="ttl">${esc(e.title)}</span>`:''}${note}${tag}${src}</div>${path}${memo}${staffLineHTML(e,terms)}</div>
     <div class="nums">${nums}</div>
   </div>`;
 }
-function groupClass(g){ return g.startsWith('추가 번호')?' mine':g.startsWith('공용 번호')?' share':(g.startsWith('★')||g.startsWith('🔥'))?' hot':''; }
+function groupClass(g){ if(g.startsWith('담당자')) return ' staffg'; return g.startsWith('추가 번호')?' mine':g.startsWith('공용 번호')?' share':(g.startsWith('★')||g.startsWith('🔥'))?' hot':''; }
 function groupHTML(g,items,terms,showPath){
   const parts=g.split(' › ');
   const path=parts.map((p,i)=>i===0&&parts.length>1?`<span class="div">${esc(p)}</span>`:esc(p)).join('<span class="sep">›</span>');
   return `<section class="group"><div class="gh${groupClass(g)}"><span class="path" title="${esc(g)}">${path}</span><span class="cnt">${items.length}</span></div>${items.map(e=>rowHTML(e,terms,showPath)).join('')}</section>`;
 }
-const QUICK=[['증명서·진단서','증명서발급'],['진료기록 사본','진료기록사본'],['영상 CD','영상자료'],['입원 수속','입원수속'],['퇴원','퇴원업무'],['산재','산업재해'],['자동차보험','자동차보험'],['응급원무','응급원무'],['PC 고장','pc고장'],['주차','주차관리'],['시설 고장','시설팀'],['보안','보안'],['장례식장','장례식장'],['종합안내','종합안내']];
+const QUICK=[['증명서·진단서','증명서발급'],['진료기록 사본','진료기록사본'],['영상 CD','영상자료'],['입원 수속','입원수속'],['퇴원','퇴원업무'],['산재','산업재해'],['자동차보험','자동차보험'],['응급원무','응급원무'],['PC 고장','pc고장'],['급여','급여'],['주차','주차관리'],['시설 고장','시설팀'],['보안','보안'],['장례식장','장례식장'],['종합안내','종합안내']];
 let lastResults=[];
 function render(){
   const q=$('q').value.trim();
