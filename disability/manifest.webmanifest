@@ -1,0 +1,25 @@
+{
+  "name": "장애정도 판정기준 길잡이",
+  "short_name": "장애판정",
+  "description": "보건복지부 고시 장애정도판정기준 — 의사용·직원용(민원 상담)",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f4c8f",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
