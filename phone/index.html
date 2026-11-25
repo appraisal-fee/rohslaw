@@ -181,6 +181,7 @@ table.diff col.k{width:64px}table.diff col.p{width:34%}table.diff col.n{width:22
 .relbtn{width:100%;border:1px dashed #9fcfca;background:#f4fbfa;color:#0b6d67;border-radius:10px;padding:11px 14px;font-size:14px;cursor:pointer;line-height:1.5;word-break:keep-all}
 .relbtn b{color:#1f3a5f}
 .grid.flat .relbox{margin-top:0}
+.sub.why{color:#0b6d67}
 @media (max-width:640px){
   header{padding:14px 14px 12px}.swrap,main{padding-left:12px;padding-right:12px}
   .hinfo{margin-left:0;width:100%}
@@ -985,7 +986,7 @@ function termScoreDirect(e,t){
   return (e.nName.includes(t)||e.nDept.includes(t)||e.nDiv.includes(t))?1:0;
 }
 function staffToggleHTML(e,terms){
-  if(!e.staff||!e.staff.length) return '';
+  if(!e.staff||!e.staff.length||(terms&&terms.length)) return '';
   const open=openStaff.has(e.key);
   return `<button class="stbtn" data-staffkey="${esc(e.key)}">${open?'관련 담당자 접기 ▴':`관련 담당자 ${e.staff.length}명 보기 ▾`}</button>${open?staffLineHTML(e,terms):''}`;
 }
@@ -1121,7 +1122,7 @@ function hl(text,terms){
 }
 function rowHTML(e,terms,showPath){
   const nums=e.nums.length?e.nums.map(n=>`<button class="num" data-copy="${esc(n.disp)}" title="${CAN_DIAL?'눌러서 전화':'눌러서 복사'}">${esc(n.disp)}</button>`).join(''):`<span class="num none">${e.note&&e.src!=='staff'?esc(e.note):'번호 없음'}</span>`;
-  const path=showPath?`<div class="sub">${esc(e.group)}</div>`:'';
+  const path=(showPath?`<div class="sub">${esc(e.group)}</div>`:'')+(e._why?`<div class="sub why">🔗 ${esc(e._why)}</div>`:'');
   const note=e.note&&(e.nums.length||e.src==='staff')?`<span class="note">${esc(e.note)}</span>`:'';
   const tag=e.badge==='a'?'<span class="tag new">신규</span>':e.badge==='c'?'<span class="tag chg">변경</span>':e.badge==='m'?'<span class="tag new">이동</span>':'';
   const src=showPath?'':'';
@@ -1154,7 +1155,10 @@ function render(){
     if(relQ!==q){ relQ=q; showRel=false; }
     const hasDirect=sr.res.some(r=>r.direct);
     const res=sr.res.filter(r=>!hasDirect||r.direct).map(r=>r.e);
-    const relRes=hasDirect?sr.res.filter(r=>!r.direct).map(r=>r.e):[];
+    const relRes=[]; const seenRel=new Set(res.map(e=>e.key));
+    const labOf=s=>s.dept==='원무팀'?'원무 담당':s.dept==='원목팀'?'원목 담당':s.dept==='외래간호팀'?'외래 담당':s.dept==='전문진료지원팀'?(/PA/.test(s.note||'')?'PA':'전담간호사'):s.dept==='CRC'?'CRC':s.dept==='수술간호팀'?'수술':'담당';
+    res.forEach(e=>(e.staff||[]).forEach(({s})=>{ if(!seenRel.has(s.key)){ seenRel.add(s.key); relRes.push(Object.assign({},s,{_why:`${e.name} ${labOf(s)}`})); } }));
+    if(hasDirect) sr.res.filter(r=>!r.direct).forEach(r=>{ if(!seenRel.has(r.e.key)){ seenRel.add(r.e.key); relRes.push(r.e); } });
     lastResults=res;
     $('statusL').textContent=`검색 결과 ${res.length}건`+(relRes.length?` · 관련 ${relRes.length}건`:'');
     $('statusR').innerHTML=`<span class="seg"><button data-view="rel" class="${view==='rel'?'on':''}">관련도순</button><button data-view="group" class="${view==='group'?'on':''}">부서별</button></span>`;
