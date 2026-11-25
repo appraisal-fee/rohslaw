@@ -29,7 +29,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .wrap{max-width:1240px;margin:0 auto}
 header{background:var(--blueBg);color:#fff}
 header .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between}
-header h1{margin:0;font-size:clamp(24px,3.4vw,36px);line-height:1.1;font-weight:700;text-wrap:balance}
+header h1{cursor:pointer;margin:0;font-size:clamp(24px,3.4vw,36px);line-height:1.1;font-weight:700;text-wrap:balance}
 header p{margin:6px 0 0;opacity:.85;font-size:14px}
 .modeSw{display:flex;border:1px solid rgba(255,255,255,.5);border-radius:10px;overflow:hidden}
 .modeSw button{border:0;background:transparent;color:#fff;padding:0 18px;min-height:44px;cursor:pointer;font-weight:600}
@@ -198,9 +198,9 @@ table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-bl
 </head>
 <body>
 <header class="band"><div class="wrap">
-  <div><h1>장애정도 판정기준 길잡이</h1>
+  <div><h1 id="homeTitle" title="첫 화면으로">장애정도 판정기준 길잡이</h1>
   <p>보건복지부 고시 제2025-228호 「장애정도판정기준」 · 16개 장애유형(2026. 7. 1. 췌장장애 신설 반영)</p></div>
-  <div class="tools hidden" id="tools"><button type="button" id="bigBtn" aria-pressed="false">큰 글씨</button><button type="button" id="ttsBtn" aria-pressed="false">읽어 주기</button></div>
+  <div class="tools hidden" id="tools"><button type="button" id="homeBtn" title="첫 화면으로 (Esc)">처음으로</button><button type="button" id="bigBtn" aria-pressed="false">큰 글씨</button><button type="button" id="ttsBtn" aria-pressed="false">읽어 주기</button></div>
   <div class="modeSw hidden" id="modeSw" role="group" aria-label="사용자 선택">
     <button type="button" data-mode="doctor" aria-pressed="false">의사용</button>
     <button type="button" data-mode="family" aria-pressed="false">직원용</button>
@@ -555,7 +555,7 @@ const $=s=>document.querySelector(s);
 const TABS={doctor:[['calc','판정 계산'],['crit','판정기준·중복'],['cert','진단서·보완 점검'],['time','진단 시기 계산'],['docs','준비 서류·QR'],['hist','판정 이력']],
  family:[['find','유형 찾기'],['easy','쉬운 설명'],['calc','예상 정도'],['time','언제 진단?'],['sym','증상 정리'],['card','상담 안내문'],['docs','준비물 안내'],['appeal','판정 절차'],['log','상담 기록']]};
 
-function setMode(m){mode=m;store.set('mode',m);$('#start').classList.add('hidden');$('#app').classList.remove('hidden');$('#modeSw').classList.remove('hidden');$('#tools').classList.remove('hidden');
+function setMode(m){mode=m;store.set('mode',m);$('#start').classList.add('hidden');$('#app').classList.remove('hidden');$('#modeSw').classList.remove('hidden');$('#tools').classList.remove('hidden');$('#homeBtn').classList.remove('hidden');
  document.querySelectorAll('#modeSw button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m));tab=TABS[m][0][0];$('#procBtn').classList.toggle('hidden',m!=='doctor');$('#showBtn').classList.toggle('hidden',m==='doctor');sessLabel();if(m!=='doctor'&&!$('#procSec').classList.contains('hidden'))toggleProc();if(!$('#rec').classList.contains('hidden')){const tx=$('#recTxt').value;$('#rec').innerHTML=recHTML();bindRec();$('#recTxt').value=tx}try{if(location.hash!=='#'+m)history.replaceState(null,'','#'+m)}catch(e){}render()}
 function ty(){return T.find(t=>t.id===cur)||T[0]}
 
@@ -1020,7 +1020,12 @@ function bindViewer(){const v=$('#viewer');v.querySelectorAll('[data-vl]').forEa
   try{const r=await SAMPLE('Translate each line of this Korean list of hospital documents for disability registration into '+{en:'English',zh:'Simplified Chinese',vi:'Vietnamese'}[l]+'. Keep medical test names accurate. Return only the translated lines, one per line, same order, no numbering.\n\n'+src.join('\n'),{modelTier:'quick'});
    const lines=String(r.text).split('\n').map(x=>x.replace(/^[-•\d.\s]+/,'').trim()).filter(Boolean);if(lines.length)vTr[t.id+l]=lines.slice(0,src.length);openViewer()}
   catch(e){tr.disabled=false;tr.textContent='이 목록 번역(Claude)';toast(e&&e.code==='rate_limited'?'잠시 후 다시 시도하세요.':'번역하지 못했습니다.')}}}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('.modal'))$('.modal').remove();else closeViewer()}});
+function goHome(){if($('.modal'))$('.modal').remove();closeViewer();stopTTS();
+ if(!$('#rec').classList.contains('hidden'))toggleRec();if(!$('#procSec').classList.contains('hidden'))toggleProc();
+ $('#qRes').classList.add('hidden');$('#app').classList.add('hidden');$('#start').classList.remove('hidden');$('#modeSw').classList.add('hidden');$('#homeBtn').classList.add('hidden');
+ mode='';store.set('mode','');try{if(location.hash)history.replaceState(null,'',location.pathname+location.search)}catch(e){}scrollTo(0,0)}
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.isComposing)return;if($('.modal')){$('.modal').remove();return}if($('#viewer')){closeViewer();return}if(!$('#start').classList.contains('hidden'))return;e.preventDefault();goHome()});
+$('#homeBtn').onclick=goHome;$('#homeTitle').onclick=()=>{if($('#start').classList.contains('hidden'))goHome()};
 
 /* 문자 길이 맞춤 */
 function smsHTML(t){const tm=store.get('tim_'+t.id,null),c=['[장애등록 안내] '+t.name+': 병원 진단서·서류 발급 후 주소지 주민센터 신청. 문의 1355',t.name+': 진단서·서류 발급 후 주민센터 신청. 문의1355','장애등록: 진단서 발급 후 주민센터 신청, 문의1355'];
