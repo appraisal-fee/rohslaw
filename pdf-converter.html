@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- PDF 만능 도구 v2.9 (개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-26 -->
+<!-- PDF 만능 도구 v3.0 (개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-27 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PDF 만능 도구 v2.9 (개발자 노상엽)</title>
+<title>PDF 만능 도구 v3.0 (개발자 노상엽)</title>
 <style>
 /* 레이아웃: 상단 작업대(불러오기·설정·실행) + 아래 쪽 순서 격자 */
 :root{
@@ -242,7 +242,7 @@ select,input[type=text]{font:inherit;width:100%;padding:7px 9px;border:1px solid
 .redbar{display:grid;gap:6px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--sunk)}
 .redv{position:absolute;z-index:3;opacity:.82;outline:1.5px solid #e0302a;pointer-events:none}
 .redv.drawing{background:rgba(0,0,0,.35)!important;outline:1.5px dashed #1f6fd1}
-.redmode .ov{cursor:crosshair}
+.redmode .ov{cursor:crosshair}.hlv{position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;pointer-events:none;mix-blend-mode:multiply;overflow:visible}.hlmode .pg .ov{cursor:crosshair;touch-action:none}.hlmode .ov>:not(.hlv){pointer-events:none!important}.hlmode.hlerase .pg .ov{cursor:cell}.hlrow .sep{width:1px;align-self:stretch;background:var(--line)}.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}.toolrow .seg label{padding:5px 11px;gap:5px;cursor:pointer;border-left:1px solid var(--line);position:relative}.toolrow .seg label:first-child{border-left:0}.seg input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}.seg label:has(input:checked){background:var(--accent);color:var(--on-accent);font-weight:700}.seg label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:-3px}.hlsw{display:inline-flex;gap:6px;align-items:center}.hlc{width:26px;height:26px;padding:0;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line);cursor:pointer;flex:none}.hlc.on{box-shadow:0 0 0 2px var(--accent)}.hlrow input[type=color]{width:34px;height:28px;padding:1px 2px;border:1px solid var(--line);border-radius:7px;background:var(--surface);cursor:pointer}.hlrow #hlClear{margin-left:auto}.hlrow input[type=range]{width:80px}.hlrow .hlv-val{min-width:2.8em;font-variant-numeric:tabular-nums;color:var(--muted)}
 .redmode .redv{pointer-events:auto;cursor:pointer}
 .redmode .redv:hover{outline:3px solid #e0302a;opacity:.6}
 .mini{padding:3px 7px;font-size:12px}
@@ -325,7 +325,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
 <body>
 <div class="wrap">
   <header>
-    <h1>PDF 만능 도구 <span class="hver">v2.9</span> <span class="hdev">(개발자 노상엽)</span></h1>
+    <h1>PDF 만능 도구 <span class="hver">v3.0</span> <span class="hdev">(개발자 노상엽)</span></h1>
     <span class="sub">이미지를 이 PC 안에서만 처리합니다. 인터넷 연결이 없어도 동작하며 파일이 외부로 전송되지 않습니다.</span>
   </header>
   <div class="updbar" id="updBar" role="status" hidden></div>
@@ -882,6 +882,23 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
           <button type="button" id="tblTplSave">표 보관함에 저장</button>
           <span class="note" style="flex-basis:100%">칸을 눌러 글자를 쓰고 Tab으로 다음 칸으로 갑니다. 표 위 ✥ 옮기기로 옮기고 모서리 ■로 크기를 바꿉니다. 보관함에 저장한 표는 다음에 열어도 남아 있고, '도장을 프로그램에 담아 저장'에도 함께 담깁니다.</span>
         </div>
+        <div class="ibrow hlrow" id="hlRow" hidden>
+          <b>형광펜</b>
+          <span class="seg" role="radiogroup" aria-label="칠하는 방법">
+            <label title="마우스를 끄는 대로 곡선으로 칠합니다 (Shift를 누르고 시작하면 직선)"><input type="radio" name="hlTool" value="pen">〰 자유 곡선</label>
+            <label title="누른 곳부터 뗀 곳까지 곧게 칠합니다 (Shift: 가로·세로·45°로 맞춤)"><input type="radio" name="hlTool" value="line">― 직선</label>
+            <label title="끌어서 만든 네모 칸을 칠합니다"><input type="radio" name="hlTool" value="rect">▭ 네모</label>
+            <label title="칠한 곳을 누르거나 문지르면 지워집니다"><input type="radio" name="hlTool" value="erase">⌫ 지우개</label>
+          </span>
+          <span class="sep"></span>
+          <span class="hlsw" id="hlSw" role="group" aria-label="형광펜 색"></span>
+          <label title="원하는 색을 직접 고릅니다">다른 색 <input type="color" id="hlPick" value="#ffe600"></label>
+          <span class="sep"></span>
+          <label>굵기 <input type="range" id="hlW" min="1" max="20" step="0.5" value="5"> <span class="hlv-val" id="hlWV">5mm</span></label>
+          <label>진하기 <input type="range" id="hlOp" min="15" max="90" step="5" value="40"> <span class="hlv-val" id="hlOpV">40%</span></label>
+          <button type="button" id="hlClear" class="danger" title="이 PDF에 칠한 형광펜을 모두 지웁니다">모두 지우기</button>
+          <span class="note" style="flex-basis:100%">쪽 위를 끌어 칠합니다. 형광펜은 글자 아래에 비치는 방식으로 들어가 칠한 곳의 글자가 그대로 읽힙니다. 지우개를 고르고 칠한 곳을 누르거나 문지르면 한 줄씩 지워지고, 잘못 지웠으면 ↶ 되돌리기(Ctrl+Z)를 누르세요.</span>
+        </div>
         <div class="ibrow" id="ibRow" hidden>
           <b>고른 이미지</b>
           <label>도장 위에 겹쳐 쓸 글자(선택) <textarea id="ibText" rows="1" placeholder="예: {날짜} (Enter) {시간}"></textarea></label>
@@ -1165,6 +1182,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         <div class="label">PDF 글자 넣기</div>
         <ul>
           <li>쪽을 누르면 그 자리에 글자 상자가 생깁니다. 크기(가−/가+)·정렬·색·흰 바탕·테두리·세로쓰기를 고릅니다.</li>
+          <li><b>형광펜</b>: '누르면 넣을 것'에서 '형광펜 칠하기'를 고르고 색·굵기·진하기를 정해 자유 곡선·직선·네모로 칠합니다. 지우개로 칠한 곳을 문지르면 지워집니다.</li>
           <li>'누르면 넣을 것'에서 도장·이미지·표를 고르면 누른 자리에 들어갑니다. 표는 보일 선을 미리 고르고 보관함에 저장해 다시 씁니다.</li>
           <li><b>일괄 문구</b>: 쪽번호, 갑/을 제○호증, 사본, 날짜 등을 여러 쪽에 한 번에 넣습니다.</li>
           <li><b>개인정보 가리기</b>: 찾아서 가리고, 저장할 때 그 쪽을 그림으로 바꿔 원래 글자를 지웁니다.</li>
@@ -1265,7 +1283,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <footer>
     <span>개발자: 노상엽</span>
     <span>개발일자: 2026. 10. 16.</span>
-    <span>수정일자: 2026. 11. 26.</span>
+    <span>수정일자: 2026. 11. 27.</span>
     <span>버전 <b id="appVer"></b></span>
     <button type="button" class="linkbtn" id="updCheck">새 버전 확인</button>
     <span>HEIC(아이폰 사진)는 크롬·엣지에서 열리지 않으니 JPG로 저장해 올려 주세요.</span>
@@ -4167,7 +4185,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "2.9", APP_NAME = "PDF 만능 도구", appFileName = v => `${APP_NAME} v${v} (개발자 노상엽).html`, APP_FILE = appFileName(APP_VERSION);
+const APP_VERSION = "3.0", APP_NAME = "PDF 만능 도구", appFileName = v => `${APP_NAME} v${v} (개발자 노상엽).html`, APP_FILE = appFileName(APP_VERSION);
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -4614,7 +4632,7 @@ async function loadTextPdf(file){
     info.querySelector("span").textContent = /[가-힣]/.test(String(e && e.message)) ? e.message : "손상됐거나 읽을 수 없는 PDF";
     info.querySelector("span").style.color = "var(--bad)"; return;
   }
-  T.file = file; T.boxes = []; T.sel = null; T.imgs = []; T.isel = null; T.red = []; T.tables = []; T.tsel = null; $("ibRow").hidden = true;
+  T.file = file; T.boxes = []; T.sel = null; T.imgs = []; T.isel = null; T.red = []; T.hl = []; T.tables = []; T.tsel = null; $("ibRow").hidden = true;
   $("rdProg").textContent = "";
   if(T.pdfjs){ try{ T.pdfjs.destroy(); }catch(_){} }
   T.pdfjs = await pdfjsLib.getDocument({data:T.bytes.slice(), CMapReaderFactory:LocalCMapFactory, cMapUrl:"local/", cMapPacked:true, useWorkerFetch:false, isEvalSupported:false}).promise;
@@ -4687,7 +4705,7 @@ function renderAllOverlays(){
     }
     for(const ib of T.imgs) if(ib.page === pg.i) placeImg(ib);
     for(const t of T.tables) if(t.page === pg.i) placeTable(t);
-    renderRed(pg);
+    renderRed(pg); renderHl(pg);
     for(const bx of T.boxes) if(bx.page === pg.i) placeBox(bx);
   }
 }
@@ -4697,7 +4715,7 @@ function renderAllOverlays(){
    상자 클릭 → 글자 고치기 / 상자를 끌기 → 옮기기 */
 const ghost = document.createElement("div"); ghost.className = "ghost"; ghost.hidden = true; ghost.textContent = "여기에 글자 넣기";
 function ghostMove(e, pg){
-  if(running || !T.font || e.target !== pg.ov || T.sel || T.isel || T.tsel){ ghost.hidden = true; return; }
+  if(running || !T.font || e.target !== pg.ov || T.sel || T.isel || T.tsel || $("tbPut").value === "hl"){ ghost.hidden = true; return; }
   ghost.textContent = {text:"여기에 글자 넣기", redact:"끌어서 가릴 칸 그리기", table:"여기에 표 넣기"}[$("tbPut").value] || "여기에 이미지 넣기";
   const r = pg.ov.getBoundingClientRect(), d = T.defaults, s = pg.s;
   if(ghost.parentNode !== pg.ov) pg.ov.appendChild(ghost);
@@ -4778,6 +4796,7 @@ function dragBox(e, bx, handle, done){
 }
 function onPagePointer(e, pg){
   if(running || e.button !== 0 || e.target !== pg.ov) return;
+  if($("tbPut").value === "hl"){ e.preventDefault(); if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); selectBox(null); selectImg(null); selectTable(null); hlDraw(e, pg); return; }
   if($("tbPut").value === "redact"){ e.preventDefault(); selectBox(null); selectImg(null); drawRedBox(e, pg); return; }
   if(!T.font){ flashFontNote(); return; }
   e.preventDefault();
@@ -4889,9 +4908,9 @@ $("tbSize").addEventListener("input", readTool);
 function updateTextUI(){
   const n = T.boxes.filter(b => b.text.trim()).length, ni = T.imgs.length, ns = T.stamps.filter(stampLive).length;
   const nr = (T.red || []).reduce((s, pg) => s + (pg ? pg.length : 0), 0);
-  const nt = (T.tables || []).length;
-  $("tbCount").textContent = `글자 상자 ${n}개 · 이미지 ${ni}개` + (nt ? ` · 표 ${nt}개` : "") + ` · 일괄 문구·도장 ${ns}개` + (nr ? ` · 가림 ${nr}곳` : "");
-  $("textRun").disabled = running || !T.pages.length || (!n && !ni && !ns && !nr && !nt);
+  const nt = (T.tables || []).length, nh = (T.hl || []).reduce((s, pg) => s + (pg ? pg.length : 0), 0);
+  $("tbCount").textContent = `글자 상자 ${n}개 · 이미지 ${ni}개` + (nt ? ` · 표 ${nt}개` : "") + ` · 일괄 문구·도장 ${ns}개` + (nh ? ` · 형광펜 ${nh}줄` : "") + (nr ? ` · 가림 ${nr}곳` : "");
+  $("textRun").disabled = running || !T.pages.length || (!n && !ni && !ns && !nr && !nt && !nh);
 }
 
 /* ---------- 도장·이미지 보관함 (이 PC의 브라우저에 기억) ---------- */
@@ -4909,10 +4928,12 @@ function drawLib(){
   const put = $("tbPut"), cur = put.value;
   let tpls = []; try{ tpls = TPL; }catch(_){}
   put.innerHTML = `<option value="text">글자 상자</option><option value="table">표 넣기 (새 표)</option>` + tpls.map((x, i) => `<option value="tpl:${i}">표: ${esc(x.name)}</option>`).join("")
-    + `<option value="redact">가릴 칸 그리기 (개인정보)</option>` + T.lib.map(im => `<option value="${im.id}">이미지: ${esc(im.name)}</option>`).join("");
-  put.value = (cur === "redact" || cur === "table" || (/^tpl:\d+$/.test(cur) && tpls[+cur.slice(4)]) || T.lib.some(im => im.id === cur)) ? cur : "text";
+    + `<option value="hl">형광펜 칠하기</option><option value="redact">가릴 칸 그리기 (개인정보)</option>` + T.lib.map(im => `<option value="${im.id}">이미지: ${esc(im.name)}</option>`).join("");
+  put.value = (cur === "redact" || cur === "hl" || cur === "table" || (/^tpl:\d+$/.test(cur) && tpls[+cur.slice(4)]) || T.lib.some(im => im.id === cur)) ? cur : "text";
   if(typeof tblRowShow === "function") tblRowShow();
   pagesEl.classList.toggle("redmode", put.value === "redact");
+  pagesEl.classList.toggle("hlmode", put.value === "hl");
+  if($("hlRow")) $("hlRow").hidden = put.value !== "hl";
   const box = $("imgLib"); box.replaceChildren();
   T.lib.forEach(im => {
     const r = document.createElement("div"); r.className = "libitem" + (put.value === im.id ? " on" : "");
@@ -4930,7 +4951,8 @@ function drawLib(){
 function onPutChange(){
   selectBox(null); selectImg(null); drawLib();
   try{ localStorage.setItem("i2p.put", $("tbPut").value); }catch(_){}
-  if($("tbPut").value === "redact" && activeTab === "text") toast("쪽 위를 끌면 그 자리가 가려집니다. 가린 칸을 누르면 빠집니다.");
+  if($("tbPut").value === "hl" && activeTab === "text") toast("쪽 위를 끌어 형광펜으로 칠합니다. 지우개를 고르고 칠한 곳을 문지르면 지워집니다.");
+  else if($("tbPut").value === "redact" && activeTab === "text") toast("쪽 위를 끌면 그 자리가 가려집니다. 가린 칸을 누르면 빠집니다.");
   else if($("tbPut").value === "table" && activeTab === "text") toast("아래 표 설정을 고른 뒤 쪽을 누르면 그 자리에 표가 들어갑니다.");
   else if($("tbPut").value.startsWith("tpl:")){ const x = TPL[+$("tbPut").value.slice(4)]; if(x){ T.tdef = Object.assign({}, x); tblToUI(T.tdef); $("tblTpl").value = $("tbPut").value.slice(4); if(activeTab === "text") toast(`쪽을 누르면 '${x.name}' 표가 들어갑니다.`); } }
   else if($("tbPut").value !== "text" && activeTab === "text"){ const im = libGet($("tbPut").value); toast(`쪽을 누르면 '${im.name}' 이미지가 그 자리에 들어갑니다.`); }
@@ -5326,6 +5348,7 @@ $("textRun").onclick = async () => {
     const fonts = needFont ? {reg: await doc.embedFont(shrink(T.font.reg), {subset:false}), bold: T.font.bold ? await doc.embedFont(shrink(T.font.bold), {subset:false}) : null, asc:T.font.asc, desc:T.font.desc} : null;
     for(let i = 0; i < n; i++){
       const P = flatP[i] || T.pages[i];
+      if(T.hl[i] && T.hl[i].length) drawHl(pages[i], P, T.hl[i]);   // 형광펜은 넣는 글자·도장보다 먼저(아래에)
       for(const [st, map] of maps) if(map.has(i)){
         const b = stampBlock(st, map.get(i), P);
         if(b.img) drawImg(pages[i], P, b.img.id, b.ix, b.iy, b.iw, b.ih, b.op);
@@ -5622,6 +5645,143 @@ function drawRedBox(e, pg){
   };
   ov.addEventListener("pointermove", mv); ov.addEventListener("pointerup", up); ov.addEventListener("pointercancel", up);
 }
+/* =========================================================
+   형광펜: 색·굵기·진하기를 골라 자유 곡선·직선·네모로 칠하고, 지우개로 문질러 지운다.
+   T.hl[쪽] = [{t:"pen"|"line"|"rect", c:"#rrggbb", w:굵기 pt, op:0~1, p:[[x,y], ...]}] (화면에 보이는 쪽 기준 pt)
+   PDF에는 곱하기(Multiply) 방식으로 넣어 칠한 곳 아래 글자가 그대로 진하게 보인다
+   ========================================================= */
+T.hl = [];
+const HL_COLORS = [["#ffe600","노랑"],["#7ee84b","연두"],["#4fd2ff","하늘"],["#ff7ad1","분홍"],["#ffa53d","주황"],["#b493ff","보라"]];
+const HL = {tool:"line", c:"#ffe600", wmm:5, op:40};
+try{ const d = JSON.parse(localStorage.getItem("i2p.hl") || "null"); if(d) for(const k of Object.keys(HL)) if(d[k] != null) HL[k] = d[k]; }catch(_){}
+const hlSave = () => { try{ localStorage.setItem("i2p.hl", JSON.stringify(HL)); }catch(_){} };
+const SVGNS = "http://www.w3.org/2000/svg", hlN = v => Math.round(v*100)/100, hlXY = q => hlN(q[0]) + " " + hlN(q[1]);
+function hlPath(m){
+  const p = m.p;
+  if(m.t === "rect"){
+    if(p.length < 2) return `M${hlXY(p[0])}Z`;
+    const x = Math.min(p[0][0], p[1][0]), y = Math.min(p[0][1], p[1][1]), x2 = Math.max(p[0][0], p[1][0]), y2 = Math.max(p[0][1], p[1][1]);
+    return `M${hlN(x)} ${hlN(y)}H${hlN(x2)}V${hlN(y2)}H${hlN(x)}Z`;
+  }
+  if(p.length === 1) return `M${hlXY(p[0])}L${hlN(p[0][0] + 0.01)} ${hlN(p[0][1])}`;
+  if(m.t === "line" || p.length === 2) return `M${hlXY(p[0])}L${hlXY(p[p.length - 1])}`;
+  let d = `M${hlXY(p[0])}`;                          // 점과 점 사이를 부드러운 곡선으로 잇는다
+  for(let i = 1; i < p.length - 1; i++) d += `Q${hlXY(p[i])} ${hlN((p[i][0] + p[i+1][0])/2)} ${hlN((p[i][1] + p[i+1][1])/2)}`;
+  return d + `L${hlXY(p[p.length - 1])}`;
+}
+function hlEl(m){
+  const e = document.createElementNS(SVGNS, "path"); e.setAttribute("d", hlPath(m));
+  if(m.t === "rect"){ e.setAttribute("fill", m.c); e.setAttribute("fill-opacity", m.op); }
+  else for(const [k, v] of [["fill","none"],["stroke",m.c],["stroke-opacity",m.op],["stroke-width",m.w],["stroke-linecap","round"],["stroke-linejoin","round"]]) e.setAttribute(k, v);
+  return e;
+}
+function hlSvg(pg){
+  let sv = pg.ov.querySelector(":scope > svg.hlv");
+  if(!sv){ sv = document.createElementNS(SVGNS, "svg"); sv.setAttribute("class", "hlv"); sv.setAttribute("preserveAspectRatio", "none"); sv.setAttribute("aria-hidden", "true"); pg.ov.prepend(sv); }
+  sv.setAttribute("viewBox", `0 0 ${pg.W} ${pg.H}`);
+  return sv;
+}
+function renderHl(pg){
+  const list = T.hl[pg.i] || [];
+  if(!list.length && !pg.ov.querySelector(":scope > svg.hlv")) return;
+  hlSvg(pg).replaceChildren(...list.map(hlEl));
+}
+function hlCount(){ return T.hl.reduce((s, p) => s + (p ? p.length : 0), 0); }
+// Shift: 가로·세로·45°로 맞춤
+function hlSnap(a, q){
+  const dx = q[0] - a[0], dy = q[1] - a[1], L = Math.hypot(dx, dy), k = Math.round(Math.atan2(dy, dx)/(Math.PI/4))*(Math.PI/4);
+  return [a[0] + L*Math.cos(k), a[1] + L*Math.sin(k)];
+}
+const hlSegD = (x, y, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], L = dx*dx + dy*dy; const t = L ? Math.max(0, Math.min(1, ((x - a[0])*dx + (y - a[1])*dy)/L)) : 0; return Math.hypot(x - a[0] - t*dx, y - a[1] - t*dy); };
+function hlHit(m, a, b, rad){
+  const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1])/rad));
+  for(let k = 0; k <= n; k++){
+    const x = a[0] + (b[0] - a[0])*k/n, y = a[1] + (b[1] - a[1])*k/n, P = m.p;
+    if(m.t === "rect"){
+      if(x >= Math.min(P[0][0], P[1][0]) - rad && x <= Math.max(P[0][0], P[1][0]) + rad && y >= Math.min(P[0][1], P[1][1]) - rad && y <= Math.max(P[0][1], P[1][1]) + rad) return true;
+      continue;
+    }
+    const lim = m.w/2 + rad;
+    if(P.length === 1){ if(Math.hypot(x - P[0][0], y - P[0][1]) <= lim) return true; continue; }
+    for(let i = 0; i < P.length - 1; i++) if(hlSegD(x, y, P[i], P[i+1]) <= lim) return true;
+  }
+  return false;
+}
+function hlErase(pg, a, b){
+  const list = T.hl[pg.i]; if(!list || !list.length) return false;
+  const keep = list.filter(m => !hlHit(m, a, b, 4/pg.s));
+  if(keep.length === list.length) return false;
+  T.hl[pg.i] = keep; renderHl(pg); return true;
+}
+function hlDraw(e, pg){
+  const ov = pg.ov, r = ov.getBoundingClientRect(), s = pg.s;
+  const at = ev => [Math.max(0, Math.min(pg.W, (ev.clientX - r.left)/s)), Math.max(0, Math.min(pg.H, (ev.clientY - r.top)/s))];
+  try{ ov.setPointerCapture(e.pointerId); }catch(_){}
+  const evs = ev => (ev.getCoalescedEvents && ev.getCoalescedEvents().length) ? ev.getCoalescedEvents() : [ev];
+  const listen = (mv, up) => {
+    const end = () => { ov.removeEventListener("pointermove", mv); ov.removeEventListener("pointerup", end); ov.removeEventListener("pointercancel", end); up(); };
+    ov.addEventListener("pointermove", mv); ov.addEventListener("pointerup", end); ov.addEventListener("pointercancel", end);
+  };
+  let last = at(e);
+  if(HL.tool === "erase"){
+    let hit = hlErase(pg, last, last);
+    listen(ev => { for(const x of evs(ev)){ const q = at(x); if(hlErase(pg, last, q)) hit = true; last = q; } }, () => { if(hit) updateTextUI(); });
+    return;
+  }
+  const kind = HL.tool === "pen" && e.shiftKey ? "line" : HL.tool;
+  const m = {t:kind, c:HL.c, w:hlN(HL.wmm*PT_MM), op:HL.op/100, p:[last]};
+  const tmp = hlEl(m); hlSvg(pg).appendChild(tmp);
+  listen(ev => {
+    if(kind === "pen"){
+      for(const x of evs(ev)){ const q = at(x), l = m.p[m.p.length - 1]; if(Math.hypot(q[0] - l[0], q[1] - l[1])*s >= 2) m.p.push(q); }
+    } else {
+      let q = at(ev);
+      if(kind === "line" && ev.shiftKey) q = hlSnap(m.p[0], q).map((v, i) => Math.max(0, Math.min(i ? pg.H : pg.W, v)));
+      m.p = [m.p[0], q];
+    }
+    tmp.setAttribute("d", hlPath(m));
+  }, () => {
+    tmp.remove();
+    const a = m.p[0], b = m.p[m.p.length - 1];
+    const ok = kind === "rect" ? (m.p.length === 2 && Math.abs(b[0] - a[0])*s > 3 && Math.abs(b[1] - a[1])*s > 3)
+             : m.p.length > 1 && m.p.some(q => Math.hypot(q[0] - a[0], q[1] - a[1])*s > 3);
+    if(ok){ m.p = m.p.map(q => [hlN(q[0]), hlN(q[1])]); (T.hl[pg.i] = T.hl[pg.i] || []).push(m); }
+    renderHl(pg); updateTextUI();
+  });
+}
+// PDF에 쓰기: 화면 좌표 그대로의 SVG 경로를 쪽 회전·잘림에 맞춰 넣는다
+function drawHl(page, P, list){
+  const [ox, oy] = toUser(P, 0, 0), L = PDFLib;
+  page.pushOperators(L.pushGraphicsState(), L.setLineJoin(L.LineJoinStyle.Round));
+  for(const m of list){
+    const o = {x:ox, y:oy, rotate:degrees(P.rot), blendMode:L.BlendMode.Multiply};
+    if(m.t === "rect") Object.assign(o, {color:hexRgb(m.c), opacity:m.op});
+    else Object.assign(o, {borderColor:hexRgb(m.c), borderWidth:m.w, borderOpacity:m.op, borderLineCap:L.LineCapStyle.Round});
+    page.drawSvgPath(hlPath(m), o);
+  }
+  page.pushOperators(L.popGraphicsState());
+}
+function hlUI(){
+  document.querySelectorAll("input[name=hlTool]").forEach(x => { x.checked = x.value === HL.tool; });
+  $("hlSw").replaceChildren(...HL_COLORS.map(([c, nm]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "hlc" + (HL.c === c ? " on" : "");
+    b.style.background = c; b.title = nm; b.setAttribute("aria-label", nm + " 형광펜"); b.setAttribute("aria-pressed", HL.c === c);
+    b.onclick = () => { HL.c = c; if(HL.tool === "erase") HL.tool = "line"; hlSave(); hlUI(); };
+    return b;
+  }));
+  $("hlPick").value = HL.c; $("hlW").value = HL.wmm; $("hlWV").textContent = HL.wmm + "mm"; $("hlOp").value = HL.op; $("hlOpV").textContent = HL.op + "%";
+  pagesEl.classList.toggle("hlerase", HL.tool === "erase");
+}
+document.querySelectorAll("input[name=hlTool]").forEach(x => x.addEventListener("change", () => { if(x.checked){ HL.tool = x.value; hlSave(); hlUI(); } }));
+$("hlPick").addEventListener("input", e => { HL.c = e.target.value; if(HL.tool === "erase") HL.tool = "line"; hlSave(); hlUI(); });
+$("hlW").addEventListener("input", e => { HL.wmm = +e.target.value; hlSave(); hlUI(); });
+$("hlOp").addEventListener("input", e => { HL.op = +e.target.value; hlSave(); hlUI(); });
+$("hlClear").onclick = () => {
+  if(running || !hlCount()) return;
+  T.hl = []; T.pages.forEach(renderHl); updateTextUI();
+  toast("형광펜을 모두 지웠습니다. 되돌리려면 ↶ 되돌리기를 누르세요.");
+};
+hlUI();
 function redSummary(){
   const n = redCount(), pages = T.red.filter(p => p && p.length).length;
   $("rdSum").textContent = n ? `${pages}쪽에서 ${n}곳을 가립니다. 가린 쪽은 저장할 때 그림으로 바뀝니다.` : "";
@@ -5728,7 +5888,7 @@ $("rdClear").onclick = () => { if(running || redBusy) return; T.red = []; T.page
 resetters.text = () => {
   if(T.pdfjs){ try{ T.pdfjs.destroy(); }catch(_){} }
   pio.disconnect(); renderQ = [];
-  Object.assign(T, {file:null, bytes:null, pdfjs:null, pages:[], boxes:[], sel:null, imgs:[], isel:null, red:[], tables:[], tsel:null});
+  Object.assign(T, {file:null, bytes:null, pdfjs:null, pages:[], boxes:[], sel:null, imgs:[], isel:null, red:[], hl:[], tables:[], tsel:null});
   tblRowShow();
   redStop = true; $("rdProg").textContent = "";
   $("ibRow").hidden = true;
@@ -5736,7 +5896,7 @@ resetters.text = () => {
   $("textInfo").hidden = true; $("textInfo").replaceChildren(); $("textName").value = "";
   clearOutput("text"); updateTextUI(); histReset();
 };
-hasWork.text = () => !!T.file && (T.boxes.some(b => b.text.trim()) || T.imgs.length > 0 || T.tables.length > 0 || T.red.some(p => p && p.length)) && !saved("text");
+hasWork.text = () => !!T.file && (T.boxes.some(b => b.text.trim()) || T.imgs.length > 0 || T.tables.length > 0 || T.red.some(p => p && p.length) || T.hl.some(p => p && p.length)) && !saved("text");
 $("stampClear").onclick = () => { if(running) return; T.stamps.length = 0; drawStamps(); scheduleOverlay(); updateTextUI(); };
 /* =========================================================
    이미지 → PDF 탭: 저장할 때 첫 장(또는 고른 쪽)에 도장 찍기
@@ -6019,7 +6179,7 @@ isToUI(); itToUI();
 /* ---------- 되돌리기(Ctrl+Z)·다시 하기(Ctrl+Y) ---------- */
 const H = {stack:[], idx:-1, lock:false, t:null};
 const plain = o => { const c = Object.assign({}, o); delete c.el; delete c._lastTap; return c; };
-const snapState = () => JSON.stringify({b:T.boxes.map(plain), i:T.imgs.map(plain), t:T.tables.map(plain), r:T.red});
+const snapState = () => JSON.stringify({b:T.boxes.map(plain), i:T.imgs.map(plain), t:T.tables.map(plain), r:T.red, h:T.hl});
 function histReset(){ H.stack = T.file ? [snapState()] : []; H.idx = H.stack.length - 1; histUI(); }
 function commit(){
   clearTimeout(H.t);
@@ -6038,8 +6198,8 @@ function restore(st){
   T.sel = null; T.isel = null; T.tsel = null; $("ibRow").hidden = true;
   const d = JSON.parse(st);
   T.boxes = d.b.map(o => Object.assign(o, {el:null})); T.imgs = d.i.map(o => Object.assign(o, {el:null})); T.tables = d.t.map(o => Object.assign(o, {el:null}));
-  T.red = d.r || [];
-  T.boxes.forEach(placeBox); T.imgs.forEach(placeImg); T.tables.forEach(placeTable); T.pages.forEach(renderRed);
+  T.red = d.r || []; T.hl = d.h || [];
+  T.boxes.forEach(placeBox); T.imgs.forEach(placeImg); T.tables.forEach(placeTable); T.pages.forEach(pg => { renderRed(pg); renderHl(pg); });
   tblRowShow(); redSummary(); updateTextUI();
   H.lock = false; histUI();
 }
