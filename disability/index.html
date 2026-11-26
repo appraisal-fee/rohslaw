@@ -1067,7 +1067,7 @@ function attachMics(){if(!DICT)return;['#lgT','#lgN','#lgW','#recTxt','#cdMemo',
   b.onclick=()=>{if(micBtn===b){DICT.stop().catch(()=>{});return}micEl=el;micBtn=b;DICT.start().catch(e=>{micBtn=null;micSet(false);toast(e&&e.code==='not_granted'?'마이크 사용이 허용되지 않았습니다. 글로 입력하세요.':'음성 입력을 시작하지 못했습니다.')});micSet(true)};
   const w=document.createElement('div');w.className='micwrap';el.parentNode.insertBefore(w,el);w.appendChild(el);w.appendChild(b)})}
 (async()=>{try{if(window.claude&&typeof claude.use==='function'){DICT=await claude.use('dictation');if(DICT){
- DICT.onFinal(({text})=>{if(VX.on&&VX.eng==='dict'){handleVoice(text);return}if(!micEl||!text)return;micEl.value=(micEl.value&&!/\s$/.test(micEl.value)?micEl.value+' ':micEl.value)+text;micEl.dispatchEvent(new Event('input',{bubbles:true}))});
+ DICT.onFinal(({text})=>{if(VX.on&&VX.eng==='dict'){srFinal(text);return}if(!micEl||!text)return;micEl.value=(micEl.value&&!/\s$/.test(micEl.value)?micEl.value+' ':micEl.value)+text;micEl.dispatchEvent(new Event('input',{bubbles:true}))});
  DICT.onPartial(({text})=>{if(VX.on&&VX.eng==='dict')vHeard(text,true)});
  DICT.onState(({state})=>{if(state!=='listening'){micBtn=null;micSet(false);if(VX.on&&VX.eng==='dict'){VX.on=false;voiceSet(false)}}});attachMics();$('#vfab').classList.remove('hidden')}}}catch(e){DICT=null}})();
 
@@ -1126,6 +1126,17 @@ function setVal(e,v){if(!e)return;e.value=v;e.dispatchEvent(new Event('input',{b
 const CMDW=['기록으로찾기','기록으로유형찾기','판정절차','순서도','상담시작','상담종료','새환자','민원인화면','큰글씨','결과읽어','읽어주기','즐겨찾기','맨위로','맨아래로','도움말','처음으로','닫기'];
 function exactCmd(s){if(!s)return false;if(CMDW.includes(s))return true;const tabs=[].concat(...Object.values(TAB_AL));if(tabs.includes(s))return true;
  for(const t2 of T){const st=[nz(t2.name),nz(t2.name).replace(/장애$/,'')].concat(STEM[t2.id]);for(const a of st){if(s===a)return true;if(s.startsWith(a)&&tabs.includes(s.slice(a.length).replace(/^장애/,'')))return true}}return false}
+function cleanSpoken(s){let w=String(s||'').replace(/([가-힣])\1{2,}/g,'$1').replace(/\s+/g,' ').trim().split(' ').filter(Boolean);const ns=a=>a.join('');
+ let again=true;while(again&&w.length>1){again=false;for(let k=1;k<w.length;k++){const p=ns(w.slice(0,k)),r=ns(w.slice(k));if(p.length<=4&&r.startsWith(p)){w=w.slice(k);again=true;break}}}
+ const o=[];for(let i=0;i<w.length;i++){const a=w[i],b=w[i+1];if(b!==undefined&&(b===a||(b.length>a.length&&b.startsWith(a))))continue;o.push(a)}return o.join(' ')}
+function insertSpoken(fe,t){const prev=VX.ins&&VX.ins.el===fe&&Date.now()-VX.ins.at<6000?VX.ins.text:null;let v=fe.value;
+ if(prev&&v.endsWith(prev)&&(t===prev||prev.startsWith(t))){VX.ins.at=Date.now();return}
+ if(prev&&t.startsWith(prev)&&v.endsWith(prev))v=v.slice(0,v.length-prev.length)+t;
+ else v=(v&&!/\s$/.test(v)?v+' ':v)+t;
+ fe.value=v;VX.ins={el:fe,text:t,at:Date.now()};fe.dispatchEvent(new Event('input',{bubbles:true}))}
+function srFinal(raw){const t=cleanSpoken(raw);if(!t)return;const now=Date.now(),L=VX.lf;
+ if(L&&now-L.at<4000){const fe0=document.activeElement,cleared=VX.ins&&VX.ins.el===fe0&&!fe0.value.endsWith(VX.ins.text);if(!cleared&&(t===L.text||L.text.startsWith(t))&&now-L.at<1200){L.at=now;return}if(t.startsWith(L.text)){const fe=document.activeElement;if(VX.ins&&VX.ins.el===fe&&VX.ins.text===L.text){insertSpoken(fe,t);vHeard(t);VX.lf={text:t,at:now};return}}}
+ VX.lf={text:t,at:now};handleVoice(t)}
 function handleVoice(text){const t=String(text||'').trim();if(!t)return;vHeard(t);const n=nz(t),s=strip(t);const ok=m=>{vSay(m,true);return true};
  const has=(...w)=>w.some(x=>n.includes(x));
  if(has('도움말','명령어','뭐라고말해','사용법'))return ok(showVoiceHelp()||'도움말을 열었습니다');
@@ -1135,7 +1146,7 @@ function handleVoice(text){const t=String(text||'').trim();if(!t)return;vHeard(t
  if($('.modal')){const b=[...document.querySelectorAll('.modal [data-mb]')].find(x=>n.includes(nz(x.textContent))||(has('확인','예','네','지워')&&x.classList.contains('btn')&&!x.classList.contains('ghost')));if(b){b.click();return ok(b.textContent.trim())}if(has('취소','아니'))return $('.modal').remove(),ok('취소했습니다')}
  const fe=document.activeElement,txt=fe&&fe.id!=='q'&&(fe.tagName==='TEXTAREA'||(fe.tagName==='INPUT'&&fe.type==='text'&&!fe.dataset.date&&!/^20\d{6}$/.test(fe.placeholder||'')));
  if(has('적기끝','그만적기','받아적기끝','입력끝')&&fe&&fe.blur){fe.blur();VX.last=null;return ok('받아 적기를 마쳤습니다. 이제 말은 명령으로 처리합니다.')}
- if(txt&&!has('듣기중지','다음탭','이전탭','의사용','직원용','복사','저장','분석해')&&!exactCmd(s)){fe.value=(fe.value&&!/\s$/.test(fe.value)?fe.value+' ':fe.value)+t;fe.dispatchEvent(new Event('input',{bubbles:true}));return ok('입력 칸에 적었습니다')}
+ if(txt&&!has('듣기중지','다음탭','이전탭','의사용','직원용','복사','저장','분석해')&&!exactCmd(s)){insertSpoken(fe,t);return ok('입력 칸에 적었습니다')}
  if(has('의사용'))return setMode('doctor'),ok('의사용 화면');if(has('직원용','민원상담용'))return setMode('family'),ok('직원용 화면');
  if($('#viewer')){const L={한국어:'ko',영어:'en',중국어:'zh',베트남어:'vi'};for(const k in L)if(n.includes(k)){vLang=L[k];store.set('vlang',vLang);openViewer();return ok(k+' 안내로 바꿨습니다')}if(has('복사')){$('#vCopy').click();return ok('안내를 복사했습니다')}}
  const sm=t.match(/^(?:검색|찾기)\s*(.+)$/)||t.match(/^(.+?)\s*(?:검색해\s*줘|검색해\s*주세요|검색해|검색|찾아\s*줘|찾아\s*주세요|찾아)$/);
@@ -1166,7 +1177,7 @@ function handleVoice(text){const t=String(text||'').trim();if(!t)return;vHeard(t
   const r=fillField(t);if(r)return ok(r+' — '+($('#out .stamp')?.innerText.split('\n')[0]||''))}
  if(tk){goTab(tk);return ok(TABS[mode].find(x=>x[0]===tk)?.[1]||'')}
  if(tid){pickType(tid);return ok(T.find(x=>x.id===tid).name)}
- if(fe&&(fe.tagName==='TEXTAREA'||(fe.tagName==='INPUT'&&/text|search/.test(fe.type)))){fe.value=(fe.value&&!/\s$/.test(fe.value)?fe.value+' ':fe.value)+t;fe.dispatchEvent(new Event('input',{bubbles:true}));return ok('입력 칸에 적었습니다')}
+ if(fe&&(fe.tagName==='TEXTAREA'||(fe.tagName==='INPUT'&&/text|search/.test(fe.type)))){insertSpoken(fe,t);return ok('입력 칸에 적었습니다')}
  vSay('알아듣지 못했습니다. "도움말"이라고 말하면 쓸 수 있는 말을 보여 줍니다.',false);return false}
 function showVoiceHelp(){modal('<h3 style="margin-top:0">이렇게 말해 보세요</h3><table class="vhelp"><tbody>'+[
  ['이동','처음으로 · 의사용 · 직원용 · 닫기 · 맨 위로 · 아래로'],['유형','신장장애 · 뇌병변 · 간장애 판정 계산 · 다음 유형'],['탭','판정 계산 · 판정기준 · 진단 시기 · 준비 서류 · 상담 안내문 · 다음 탭'],
@@ -1184,8 +1195,8 @@ function voiceSet(on){VX.on=on;if(on)kbOff();else kbOn();$('#vfab').setAttribute
 function voiceStop(){VX.on=false;try{if(VX.eng==='dict'&&DICT)DICT.stop().catch(()=>{});if(VX.eng==='sr'&&VX.rec)VX.rec.stop()}catch(e){}voiceSet(false)}
 function voiceToggle(){if(VX.on){voiceStop();return}
  if(DICT){VX.eng='dict';micEl=null;micBtn=null;voiceSet(true);DICT.start().catch(e=>{voiceSet(false);toast(e&&e.code==='not_granted'?'마이크 사용이 허용되지 않았습니다.':'음성 인식을 시작하지 못했습니다.')});return}
- if(SR){VX.eng='sr';const r=new SR();VX.rec=r;r.lang='ko-KR';r.continuous=true;r.interimResults=true;
-  r.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal)handleVoice(x[0].transcript);else vHeard(x[0].transcript,true)}};
+ if(SR){VX.eng='sr';const r=new SR();VX.rec=r;r.lang='ko-KR';const android=/Android/i.test(navigator.userAgent);r.continuous=!android;r.interimResults=true;r.maxAlternatives=1;VX.done=new Set();r.onstart=()=>{VX.done=new Set()};
+  r.onresult=e=>{let interim='';for(let i=0;i<e.results.length;i++){const x=e.results[i];if(x.isFinal){const key=i+'|'+x[0].transcript;if(VX.done.has(key))continue;VX.done.add(key);srFinal(x[0].transcript)}else if(i>=e.resultIndex)interim=x[0].transcript}if(interim)vHeard(cleanSpoken(interim),true)};
   r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){VX.on=false;voiceSet(false);toast('마이크 사용이 막혀 있습니다. 주소창의 마이크 권한을 허용하세요.')}else if(e.error==='network'){VX.on=false;voiceSet(false);toast('음성 인식 서버에 연결하지 못했습니다(인터넷 필요).')}};
   r.onend=()=>{if(VX.on){try{r.start()}catch(e){voiceSet(false)}}};
   try{r.start();voiceSet(true)}catch(e){toast('음성 인식을 시작하지 못했습니다.')}return}
