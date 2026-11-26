@@ -1,0 +1,15 @@
+{
+  "name": "의료광고 검토 도우미",
+  "short_name": "의료광고검토",
+  "description": "의료광고 문구 점검·심의 대상 판단·판례 검색 — 가톨릭대학교 부천성모병원",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f3a5f",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
