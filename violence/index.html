@@ -2961,8 +2961,8 @@ function fmtDate8(el){
   if(v!==el.value) el.value=v;
   el.classList.toggle("bad", !!el.value && !validISO(el.value) && el.value.replace(/\D/g,"").length>=8);
 }
-document.addEventListener("input",function(e){ var el=e.target; if(el.classList&&el.classList.contains("date8")){ var d=el.value.replace(/\D/g,""); if(d.length>=8||/[.\-\/]/.test(el.value)) fmtDate8(el); else el.classList.remove("bad"); } },true);
-document.addEventListener("blur",function(e){ var el=e.target; if(el.classList&&el.classList.contains("date8")){ fmtDate8(el); el.dispatchEvent(new Event("input",{bubbles:true})); } },true);
+document.addEventListener("input",function(e){ var el=e.target; if(el.classList&&el.classList.contains("date8")){ var d=el.value.replace(/\D/g,""); if(/^\d{8}$/.test(el.value.trim())||/^\d{4}[.\-\/ ]\d{2}[.\-\/ ]\d{2}\.?$/.test(el.value.trim())) fmtDate8(el); else el.classList.remove("bad"); } },true);
+document.addEventListener("blur",function(e){ var el=e.target; if(el.classList&&el.classList.contains("date8")){ var was=el.value; fmtDate8(el); if(el.value!==was) el.dispatchEvent(new Event("input",{bubbles:true})); if(el.classList.contains("bad")&&typeof toast==="function") toast("없는 날짜입니다 — 숫자 8자리로 다시 넣어 주세요 (예: 20261126)"); } },true);
 
 /* ============================================================
    자료
@@ -3352,6 +3352,10 @@ function addDays(iso,d){var p=iso.split("-"),t=new Date(+p[0],+p[1]-1,+p[2]+d);r
 function addMonths(iso,m){var p=iso.split("-"),y=+p[0],mo=+p[1]-1+m,d=+p[2];var t=new Date(y,mo,1);var last=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();t.setDate(Math.min(d,last));return t.getFullYear()+"-"+pad(t.getMonth()+1)+"-"+pad(t.getDate());}
 function addYears(iso,y){return addMonths(iso,12*y);}
 function dday(iso){var p=iso.split("-"),t=new Date(+p[0],+p[1]-1,+p[2]),n=new Date();n=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.round((t-n)/86400000);}
+var FIXHOL=["01-01","03-01","05-05","06-06","08-15","10-03","10-09","12-25"];
+function bizEnd(iso){ var p=iso.split("-"), t=new Date(+p[0],+p[1]-1,+p[2]), moved=false; for(var i=0;i<10;i++){ var w=t.getDay(), md=pad(t.getMonth()+1)+"-"+pad(t.getDate()); if(w===0||w===6||FIXHOL.indexOf(md)>=0){ t.setDate(t.getDate()+1); moved=true; } else break; }
+  return {d:t.getFullYear()+"-"+pad(t.getMonth()+1)+"-"+pad(t.getDate()),moved:moved}; }
+function DL(n,s,d,done){ var b=bizEnd(d); return {n:n,s:s+(b.moved?" · 말일이 토·일·공휴일이라 다음 날로 넘김":""),d:b.d,done:done}; }
 function ddayTxt(n){return n===0?"D-day":(n>0?"D-"+n:"D+"+(-n));}
 function fsize(b){return b<1024?b+"B":b<1048576?(b/1024).toFixed(0)+"KB":(b/1048576).toFixed(1)+"MB";}
 var BLANK2=function(c){c.stmts=c.stmts||[];c.cam=c.cam||[];c.att=c.att||[];c.prog=c.prog||{ev:[]};c.prog.ev=c.prog.ev||[];c.el=c.el||{};c.checks=c.checks||{};c.tl=c.tl||[];return c;};
@@ -3637,16 +3641,16 @@ function dlFor(c){
   var ev=(c.prog&&c.prog.ev||[]).slice().sort(function(a,b){return a.d.localeCompare(b.d);}), out=[], has=function(t,after){return ev.some(function(e){return e.type===t&&e.d>=after;});};
   var st=stageOf(c);
   ev.forEach(function(e){
-    if(e.type==="불송치 통지") out.push({n:"불송치 이의신청",s:"불송치 통지를 받은 날부터 3개월 (정당한 사유가 있으면 6개월)",d:addMonths(e.d,3),done:has("이의신청",e.d)});
-    if(e.type==="불기소 통지") out.push({n:"불기소 항고",s:"불기소 처분 통지를 받은 날부터 30일",d:addDays(e.d,30),done:has("항고",e.d)});
-    if(e.type==="항고 기각 통지") out.push({n:"재정신청",s:"항고 기각 통지를 받은 날부터 10일 — 통지서 기재 기한을 꼭 확인",d:addDays(e.d,10),done:has("재정신청",e.d)});
+    if(e.type==="불송치 통지") out.push(DL("불송치 이의신청","불송치 통지를 받은 날부터 3개월 (정당한 사유가 있으면 6개월)",addMonths(e.d,3),has("이의신청",e.d)));
+    if(e.type==="불기소 통지") out.push(DL("불기소 항고","불기소 처분 통지를 받은 날부터 30일",addDays(e.d,30),has("항고",e.d)));
+    if(e.type==="항고 기각 통지") out.push(DL("재정신청","항고 기각 통지를 받은 날부터 10일 — 통지서 기재 기한을 꼭 확인",addDays(e.d,10),has("재정신청",e.d)));
     if(e.type==="약식명령 청구") {}
   });
   var base=c.f.date&&validISO(c.f.date)?c.f.date:null;
   if(base&&c.sits.indexOf("verbal")>=0){ var k=c.f.known&&validISO(c.f.known)?c.f.known:base;
-    out.push({n:"모욕죄 고소기간",s:"범인을 안 날부터 6개월 — 모욕은 고소가 있어야 처벌할 수 있음",d:addMonths(k,6),done:ev.some(function(e){return e.type==="고소장 제출";})}); }
+    out.push(DL("모욕죄 고소기간","범인을 안 날부터 6개월 — 모욕은 고소가 있어야 처벌할 수 있음",addMonths(k,6),ev.some(function(e){return e.type==="고소장 제출";}))); }
   if(base&&!st.end){ var g={}; lawsFor(c).forEach(function(i){var y=SIHYO[i];(g[y]=g[y]||[]).push(LAWS[i][0].replace(/·제87조의2|·제60조|제12조·/g,""));});
-    Object.keys(g).sort(function(a,b){return a-b;}).forEach(function(y){out.push({n:"공소시효 "+y+"년",s:g[y].filter(function(v,i,a){return a.indexOf(v)===i;}).join(", "),d:addYears(base,+y),done:false,far:true});}); }
+    Object.keys(g).sort(function(a,b){return a-b;}).forEach(function(y){out.push({n:"공소시효 "+y+"년",s:g[y].filter(function(v,i,a){return a.indexOf(v)===i;}).join(", "),d:addDays(addYears(base,+y),-1),done:false,far:true});}); }
   return out;
 }
 function dlRow(x,extra){ var n=dday(x.d), cls=x.done?"past":(n<0?"past":(n<=7?"urgent":(n<=30?"soon":"")));
@@ -3657,7 +3661,7 @@ function renderProg(){
   var ev=cur.prog.ev.slice().sort(function(a,b){return a.d.localeCompare(b.d);});
   $("#pg-list").innerHTML=ev.map(function(e){return '<div><time>'+esc(kd(e.d))+'</time><b>'+esc(e.type)+'</b><span class="m">'+esc(e.m||"")+'</span><button type="button" data-pgd="'+e.id+'" aria-label="삭제">×</button></div>';}).join("");
   var dl=dlFor(cur);
-  $("#pg-dl").innerHTML=dl.length?dl.map(function(x){return dlRow(x);}).join(""):'<div class="nodata">발생 날짜와 상황을 넣으면 공소시효가 계산되고, 진행을 추가하면 불복 기한이 나옵니다.</div>';
+  $("#pg-dl").innerHTML=dl.length?dl.map(function(x){return dlRow(x);}).join("")+'<p class="foot">기간은 첫날을 빼고 셉니다(공소시효는 범행일을 첫날로 셈). 말일이 토·일요일이나 양력 공휴일이면 다음 날로 넘겼지만, 설·추석·대체공휴일은 반영하지 않으니 통지서에 적힌 기한을 함께 확인하세요.</p>':'<div class="nodata">발생 날짜와 상황을 넣으면 공소시효가 계산되고, 진행을 추가하면 불복 기한이 나옵니다.</div>';
 }
 $("#pg-add").addEventListener("click",function(){
   var d=$("#pg-d"); fmtDate8(d); if(!validISO(d.value)){toast("날짜를 숫자 8자리로 넣어주세요");d.focus();return;}
@@ -4717,7 +4721,7 @@ function rrnInfo(v){ var d=(v||"").replace(/\D/g,""); if(d.length<7) return null
   var iso=c+d.slice(0,2)+"-"+d.slice(2,4)+"-"+d.slice(4,6); if(!validISO(iso)) return null; return {birth:iso,sex:(g%2===1?"남":"여"),foreign:g>=5&&g<=8}; }
 function rrnFmt(el){ var d=el.value.replace(/\D/g,"").slice(0,13); var nv=d.length>6?d.slice(0,6)+"-"+d.slice(6):d; if(nv!==el.value) el.value=nv; }
 /* 사용자가 직접 고치면 자동 표시 해제 */
-document.addEventListener("input",function(e){ var el=e.target; if(!e.isTrusted||!el.dataset||!el.dataset.auto) return; unchip(el);
+document.addEventListener("input",function(e){ var el=e.target; if(e.isTrusted&&el.dataset&&el.dataset.k&&LF.S.mode&&typeof FILLED!=="undefined"&&FILLED[LF.S.mode+":"+el.dataset.k]!=null){ delete FILLED[LF.S.mode+":"+el.dataset.k]; ls.set("lfv_filled",FILLED); } if(!e.isTrusted||!el.dataset||!el.dataset.auto) return; unchip(el);
   if(el.dataset.s&&ST.src) delete ST.src[el.dataset.s]; if(el.dataset.r&&cur.asrc) delete cur.asrc[el.dataset.r]; if(el.dataset.sb&&cur.sb&&cur.sb.src) delete cur.sb.src[el.dataset.sb]; },true);
 document.addEventListener("change",function(e){ var el=e.target; if(!e.isTrusted||el.type!=="radio") return; var f=el.closest(".f"); if(f&&f.querySelector(".srcchip")){ f.querySelector(".srcchip").remove(); if(el.name==="st-sex"&&ST.src) delete ST.src.sex; } },true);
 document.addEventListener("click",function(e){ if(e.target.classList&&e.target.classList.contains("srcchip")){ e.preventDefault(); e.stopPropagation(); $("#m-auto").classList.remove("hidden"); } },true);
@@ -4725,8 +4729,8 @@ document.addEventListener("click",function(e){ if(e.target.classList&&e.target.c
 /* ---------- 진술서 ---------- */
 if(!ST.src) ST.src={};
 function stUser(name){ return USERS.filter(function(u){return u.name===name;})[0]||null; }
-var _stFill=stFillForm; stFillForm=function(){ _stFill(); paint("#v-stmt [data-s]","s",ST.src); var sx=$('#v-stmt input[name="st-sex"]'); if(sx){ if(ST.src.sex) chip(sx,ST.src.sex); else unchip(sx); } };
-var _openStmt=openStmt; openStmt=function(){
+var _stFill=stFillForm; stFillForm=function(){ if(!ST.src) ST.src={}; _stFill(); paint("#v-stmt [data-s]","s",ST.src); var sx=$('#v-stmt input[name="st-sex"]'); if(sx){ if(ST.src.sex) chip(sx,ST.src.sex); else unchip(sx); } };
+var _openStmt=openStmt; openStmt=function(){ if(!ST.src) ST.src={}; if(ST.src.suspect==="사건 기록"){ ST.info.suspect=""; } if(ST.src.crime==="현장 대응 상황"){ ST.info.crime=""; }
   var had={wphone:!!ST.info.wphone,waddr:!!ST.info.waddr,suspect:!!ST.info.suspect,crime:!!ST.info.crime};
   _openStmt();
   if(!had.wphone&&ST.info.wphone) ST.src.wphone="병원 정보"; if(!had.waddr&&ST.info.waddr) ST.src.waddr="병원 정보";
@@ -4734,13 +4738,13 @@ var _openStmt=openStmt; openStmt=function(){
   var ex=$$("#st-pick option").length-1;
   USERS.forEach(function(u,i){ if(stPeople().some(function(p){return p.name===u.name;})) return; var o=document.createElement("option"); o.value="u"+i; o.textContent="등록 직원: "+u.name+" ("+u.job+")"; $("#st-pick").appendChild(o); });
   stSave(); stFillForm(); };
-$("#st-pick").addEventListener("change",function(){ var v=this.value, u=null;
+$("#st-pick").addEventListener("change",function(){ var v=this.value, u=null; if(!ST.src) ST.src={};
   if(v.charAt(0)==="u"){ u=USERS[+v.slice(1)]; if(!u) return; ST.info.name=u.name; ST.info.job=u.job; ST.role="참고인"; }
   else { var p=stPeople()[+v]; if(!p) return; u=stUser(p.name); ST.src.name="사건 기록"; if(p.job) ST.src.job="사건 기록"; }
   if(u){ ST.src.name="사용자 설정"; ST.src.job="사용자 설정"; ST.info.job=u.job||ST.info.job; if(u.birth){ ST.info.birth=u.birth; ST.src.birth="사용자 설정"; } }
   stSave(); stFillForm(); });
 $("#v-stmt").addEventListener("input",function(e){ var el=e.target; if(el.dataset.s!=="rrn") return; rrnFmt(el); STsec.rrn=el.value;
-  var r=rrnInfo(el.value); if(!r) return;
+  var r=rrnInfo(el.value); if(!r) return; if(!ST.src) ST.src={};
   ST.info.birth=r.birth; ST.src.birth="주민등록번호"; ST.info.sex=r.sex; ST.src.sex="주민등록번호"; stSave(); stFillForm(); });
 
 /* ---------- 사건 기록 ---------- */
@@ -4765,6 +4769,8 @@ $("#r-uadd").addEventListener("change",function(){ var ta=$('[data-r="victims"]'
 
 /* ---------- 상병경위보고서 ---------- */
 var _sbInit=sbInit; sbInit=function(){
+  if(cur.sb&&cur.sb.src){ var AUTO=["사건 기록","사건 기록 피해 내용","사건 기록 피해 직원","상병일","입사일·상병일 계산","사용자 설정"];
+    Object.keys(cur.sb.src).forEach(function(k){ if(AUTO.indexOf(cur.sb.src[k])>=0){ delete cur.sb[k]; delete cur.sb.src[k]; } }); }
   var before=JSON.parse(JSON.stringify(cur.sb||{})); _sbInit(); var sb=cur.sb, u=uById(sb.uid); if(!sb.src) sb.src={};
   if(!sb.cdate&&sb.date){ sb.cdate=sb.date; sb.src.cdate="상병일"; }
   Object.keys(sb).forEach(function(k){ if(k==="src"||before[k]===sb[k]||sb.src[k]) return;
@@ -4777,8 +4783,11 @@ $("#sb-form").addEventListener("change",function(e){ if(e.target.id!=="sb-user")
 
 /* ---------- 법률지원 서식 ---------- */
 var FILLSRC="";
-var _setK=setK; setK=function(k,v){ var el=$('[data-k="'+k+'"]',LF.pane()); var was=el?el.value:""; _setK(k,v); if(el&&v&&el.value===v&&was!==v) chip(el,FILLSRC||"사건 기록"); };
-var _fillForm=fillForm; fillForm=function(mode,safe){ _fillForm(mode,safe);
+var FILLED=ls.get("lfv_filled",{});
+var _setK=setK; setK=function(k,v){ var el=$('[data-k="'+k+'"]',LF.pane()); var was=el?el.value:""; _setK(k,v); if(el&&v&&el.value===v){ if(was!==v||FILLED[LF.S.mode+":"+k]===v) chip(el,FILLSRC||"사건 기록"); FILLED[LF.S.mode+":"+k]=v; ls.set("lfv_filled",FILLED); } };
+/* 자동으로 채웠던 값을 사용자가 고치지 않았으면, 사건 기록이 바뀔 때 새 값으로 다시 채움 */
+function fillReset(mode){ Object.keys(FILLED).forEach(function(key){ var p=key.split(":"); if(p[0]!==mode) return; var el=$('[data-k="'+p[1]+'"]',LF.pane()); if(el&&el.value===FILLED[key]){ el.value=""; } }); }
+var _fillForm=fillForm; fillForm=function(mode,safe){ if(safe) fillReset(mode); _fillForm(mode,safe);
   if(mode==="A"){ FILLSRC="현장 대응"; var sv=FILLSAFE; FILLSAFE=true;
     if(cur.checks.v2){ setR("d_care","시행함"); var dc=$('input[name="d_care"]:checked',LF.pane()); if(dc) chip(dc,"현장 대응"); }
     if(cur.sb){ FILLSRC="상병경위보고서"; setK("m_subject",cur.sb.clinic); setK("m_date",cur.sb.cdate); if(cur.sb.dx) setK("d_body",cur.sb.dx); }
@@ -4882,7 +4891,10 @@ function kDate(t){ t=(t||"").trim(); var n=new Date(), d=null;
   var m=/(\d{4})\s*[년.\-\/]\s*(\d{1,2})\s*[월.\-\/]\s*(\d{1,2})/.exec(t)||null; if(m) d=new Date(+m[1],+m[2]-1,+m[3]);
   else { m=/(\d{1,2})\s*월\s*(\d{1,2})\s*일/.exec(t); if(m){ d=new Date(n.getFullYear(),+m[1]-1,+m[2]); if(d>n) d=new Date(n.getFullYear()-1,+m[1]-1,+m[2]); } }
   var g=t.replace(/\D/g,""); if(!d&&g.length===8) d=new Date(+g.slice(0,4),+g.slice(4,6)-1,+g.slice(6));
-  return d&&!isNaN(d)?d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()):""; }
+  if(!d||isNaN(d)) return ""; var r=d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  var want=(m&&m.length===4)?[+m[1],+m[2],+m[3]]:(m?[null,+m[1],+m[2]]:(g.length===8&&!/어제|오늘|그제|그저께|방금|지금|아까/.test(t)?[+g.slice(0,4),+g.slice(4,6),+g.slice(6)]:null));
+  if(want&&((want[0]!=null&&want[0]!==d.getFullYear())||want[1]!==d.getMonth()+1||want[2]!==d.getDate())) return "";
+  return r; }
 function kTime(t){ t=(t||"").trim(); var n=new Date(); if(/^(지금|방금)/.test(t)) return pad(n.getHours())+":"+pad(n.getMinutes());
   var m=/(\d{1,2})\s*[:시]\s*(\d{1,2})?\s*(분|반)?/.exec(t); if(!m){ var g=t.replace(/\D/g,""); if(g.length===4) return g.slice(0,2)+":"+g.slice(2); if(g.length===3) return "0"+g[0]+":"+g.slice(1); return ""; }
   var h=+m[1], mi=m[3]==="반"&&!m[2]?30:+(m[2]||0); if(/반/.test(t)&&!m[2]) mi=30;
@@ -4997,7 +5009,7 @@ $("#ev-cam").addEventListener("change",function(){ var fs=Array.prototype.slice.
 /* ---------- 보고 문자 ---------- */
 function smsText(kind){
   var f=cur.f, me=uMe(), sitn=cur.sits.map(function(id){var s=SIT.filter(function(x){return x.id===id;})[0];return s?s.t:"";}).filter(Boolean);
-  var wd=["일","월","화","수","목","금","토"], dt=validISO(f.date)?kd(f.date)+"("+wd[new Date(f.date).getDay()]+")":"";
+  var wd=["일","월","화","수","목","금","토"], dt=validISO(f.date)?kd(f.date)+"("+wd[new Date(+f.date.slice(0,4),+f.date.slice(5,7)-1,+f.date.slice(8,10)).getDay()]+")":"";
   var vic=victims().map(function(v){return v.name+(v.job||v.dept?"("+[v.job,v.dept].filter(Boolean).join(", ")+")":"");}).join(", ");
   var act=[]; if(cur.checks.r1||cur.checks.r1b) act.push("112 신고("+(cur.checks.r1||cur.checks.r1b)+")"); cur.tl.forEach(function(x){ if(/보안요원|경찰 도착|피해 직원 분리|퇴거|진료 중단/.test(x.x)) act.push(x.x+"("+x.t+")"); });
   var L=["[원내 폭력 발생 보고]","일시: "+(dt+" "+(f.time||"")).trim(),"장소: "+(f.place||""),
