@@ -1,0 +1,15 @@
+{
+  "name": "의료기관 폭행 등 해결도우미",
+  "short_name": "폭행해결도우미",
+  "description": "원내 폭력·진료방해 현장 대응, 사건 기록, 진술서, 교직원 법률지원 서식 — 가톨릭대학교 부천성모병원",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f3a68",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
