@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- PDF 만능 도구 v2.7 (개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-23 -->
+<!-- PDF 만능 도구 v2.8 (개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-26 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PDF 만능 도구 v2.7 (개발자 노상엽)</title>
+<title>PDF 만능 도구 v2.8 (개발자 노상엽)</title>
 <style>
 /* 레이아웃: 상단 작업대(불러오기·설정·실행) + 아래 쪽 순서 격자 */
 :root{
@@ -325,7 +325,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
 <body>
 <div class="wrap">
   <header>
-    <h1>PDF 만능 도구 <span class="hver">v2.7</span> <span class="hdev">(개발자 노상엽)</span></h1>
+    <h1>PDF 만능 도구 <span class="hver">v2.8</span> <span class="hdev">(개발자 노상엽)</span></h1>
     <span class="sub">이미지를 이 PC 안에서만 처리합니다. 인터넷 연결이 없어도 동작하며 파일이 외부로 전송되지 않습니다.</span>
   </header>
   <div class="updbar" id="updBar" role="status" hidden></div>
@@ -771,7 +771,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         <div class="field">
           <label for="dateBase">{날짜}에 들어갈 날짜</label>
           <div class="row">
-            <input type="text" id="dateBase" inputmode="numeric" maxlength="10" placeholder="예: 20261109" autocomplete="off" title="숫자만 눌러도 됩니다 (예: 20261109)" style="width:9.5em"><input type="date" id="datePick" class="vh" tabindex="-1" aria-hidden="true"><button type="button" id="dateCal" title="달력에서 고르기" aria-label="달력에서 고르기">📅</button>
+            <input type="text" id="dateBase" inputmode="numeric" maxlength="16" placeholder="예: 20261109" autocomplete="off" title="숫자만 눌러도 됩니다 (예: 20261109)" style="width:9.5em"><input type="date" id="datePick" class="vh" tabindex="-1" aria-hidden="true"><button type="button" id="dateCal" title="달력에서 고르기" aria-label="달력에서 고르기">📅</button>
             <select id="dateFmt" aria-label="날짜 형식" style="width:auto"></select>
             <button type="button" id="dateToday">오늘</button>
           </div>
@@ -1260,7 +1260,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
   <footer>
     <span>개발자: 노상엽</span>
     <span>개발일자: 2026. 10. 16.</span>
-    <span>수정일자: 2026. 11. 23.</span>
+    <span>수정일자: 2026. 11. 26.</span>
     <span>버전 <b id="appVer"></b></span>
     <button type="button" class="linkbtn" id="updCheck">새 버전 확인</button>
     <span>HEIC(아이폰 사진)는 크롬·엣지에서 열리지 않으니 JPG로 저장해 올려 주세요.</span>
@@ -3229,7 +3229,7 @@ function buildPdf(pages, set, title){
   put(`2 0 obj\n<< /Type /Pages /Count ${n} /Kids [${kids.join(" ")}] >>\nendobj\n`);
   const d = new Date(), p2 = v => String(v).padStart(2,"0");
   offs[infoNo] = pos;
-  put(`${infoNo} 0 obj\n<< /Title ${pdfString(title)} /Producer (Image to PDF) /CreationDate (D:${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}) >>\nendobj\n`);
+  put(`${infoNo} 0 obj\n<< /Title ${pdfString(title)} /Producer (Image to PDF) /CreationDate (D:${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}${(() => { const o = -d.getTimezoneOffset(), a = Math.abs(o); return (o >= 0 ? "+" : "-") + p2(Math.floor(a/60)) + "'" + p2(a%60) + "'"; })()}) >>\nendobj\n`);
   const xref = pos;
   let x = `xref\n0 ${total}\n0000000000 65535 f \n`;
   for(let i = 1; i < total; i++) x += String(offs[i]).padStart(10,"0") + " 00000 n \n";
@@ -4162,7 +4162,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "2.7", APP_NAME = "PDF 만능 도구", appFileName = v => `${APP_NAME} v${v} (개발자 노상엽).html`, APP_FILE = appFileName(APP_VERSION);
+const APP_VERSION = "2.8", APP_NAME = "PDF 만능 도구", appFileName = v => `${APP_NAME} v${v} (개발자 노상엽).html`, APP_FILE = appFileName(APP_VERSION);
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -4455,7 +4455,9 @@ function blockGeom(lines, size, bold, boxed, vertical){
 const DFMT = [["dot","2026. 10. 22."],["dot2","2026.10.22"],["dash","2026-10-22"],["ko","2026년 10월 22일"],["short","26.10.22"]];
 function isoToday(){ const t = new Date(), p = n => String(n).padStart(2,"0"); return `${t.getFullYear()}-${p(t.getMonth()+1)}-${p(t.getDate())}`; }
 function today(){
-  const v = $("dateBase").value || isoToday(), [y, m, d] = v.split("-").map(Number), p = n => String(n).padStart(2,"0");
+  // 직접 고른 날짜가 없으면 '쓰는 순간의 오늘'을 쓴다 (프로그램을 켠 채 자정을 넘겨도 날짜가 따라감)
+  const v = dateAuto ? isoToday() : (normDate($("dateBase").value) || dateLast || isoToday());
+  const [y, m, d] = v.split("-").map(Number), p = n => String(n).padStart(2,"0");
   switch($("dateFmt").value){
     case "dot2": return `${y}.${p(m)}.${p(d)}`;
     case "dash": return `${y}-${p(m)}-${p(d)}`;
@@ -4468,7 +4470,7 @@ function today(){
 const TFMT = [["hm","14:30"],["ko","14시 30분"],["ampm","오후 2:30"],["kampm","오후 2시 30분"]];
 function nowHM(){ const t = new Date(), p = n => String(n).padStart(2,"0"); return `${p(t.getHours())}:${p(t.getMinutes())}`; }
 function nowTime(){
-  const v = $("timeBase").value || nowHM(), [H, M] = v.split(":").map(Number), p = n => String(n).padStart(2,"0");
+  const v = timeAuto ? nowHM() : ($("timeBase").value || nowHM()), [H, M] = v.split(":").map(Number), p = n => String(n).padStart(2,"0");
   const ap = H < 12 ? "오전" : "오후", h12 = H % 12 === 0 ? 12 : H % 12;
   switch($("timeFmt").value){
     case "ko": return `${H}시 ${p(M)}분`;
@@ -4486,7 +4488,11 @@ const timeChanged = () => { try{ localStorage.setItem("i2p.timeFmt", $("timeFmt"
 $("timeFmt").addEventListener("change", timeChanged);
 $("timeBase").addEventListener("change", () => { timeAuto = false; timeChanged(); });
 $("timeNow").onclick = () => { timeAuto = true; $("timeBase").value = nowHM(); timeChanged(); };
-setInterval(() => { if(timeAuto && !running && $("timeBase").value !== nowHM()){ $("timeBase").value = nowHM(); timeChanged(); } }, 15000);
+setInterval(() => {
+  if(running) return;
+  if(timeAuto && $("timeBase").value !== nowHM()){ $("timeBase").value = nowHM(); timeChanged(); }
+  if(dateAuto && document.activeElement !== $("dateBase") && $("dateBase").value !== isoToday()){ $("dateBase").value = dateLast = isoToday(); dateChanged(); }   // 자정이 지나면 오늘로
+}, 15000);
 $("dateFmt").innerHTML = DFMT.map(([k, l]) => `<option value="${k}">${l}</option>`).join("");
 try{ const f = localStorage.getItem("i2p.dateFmt"); if(f) $("dateFmt").value = f; }catch(_){}
 $("dateBase").value = isoToday();
@@ -4498,16 +4504,17 @@ function normDate(v){
   if((g = t.match(/^(\d{4})(\d{2})(\d{2})$/))) [, y, m, d] = g;
   else if((g = t.match(/^(\d{2})(\d{2})(\d{2})$/))) { [, y, m, d] = g; y = "20" + y; }
   else if((g = t.match(/^(\d{4})\s*[.\-/년]\s*(\d{1,2})\s*[.\-/월]\s*(\d{1,2})\s*[.일]?$/))) [, y, m, d] = g;
+  else if((g = t.match(/^(\d{2})\s*[.\-/]\s*(\d{1,2})\s*[.\-/]\s*(\d{1,2})\s*\.?$/))) { [, y, m, d] = g; y = "20" + y; }
   else return null;
   y = +y; m = +m; d = +d;
   const dt = new Date(y, m - 1, d);
   if(dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
   return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
-let dateLast = $("dateBase").value;
+let dateLast = $("dateBase").value, dateAuto = true;     // dateAuto: 오늘을 따라감 (직접 다른 날을 고르면 꺼짐)
 function dateCommit(){
   const el = $("dateBase"), n = normDate(el.value);
-  if(n){ el.value = n; if(n !== dateLast){ dateLast = n; dateChanged(); } }
+  if(n){ el.value = n; dateAuto = n === isoToday(); if(n !== dateLast){ dateLast = n; dateChanged(); } }
   else if(el.value.trim()){ toast("날짜를 알아볼 수 없습니다. 예: 20261109"); el.value = dateLast; }
   else el.value = dateLast;
 }
