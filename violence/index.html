@@ -883,6 +883,7 @@ body.locked .vffab{display:none}
 .sitvoice i{width:10px;height:10px;border-radius:50%;background:#ff6b6b;box-shadow:0 0 0 3px rgba(255,107,107,.3)}
 .sitvoice small{font-weight:400;opacity:.85;font-size:12.5px;justify-self:end}
 @media (max-width:760px){.sitvoice{grid-template-columns:auto 1fr}.sitvoice small{grid-column:1/-1;justify-self:start}}
+.appver{font-size:12px;color:var(--ink2);margin-top:4px}
 </style>
 <meta name="theme-color" content="#1f3a68">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4002,6 +4003,7 @@ function docFile(name,html){
 /* ============================================================
    음성 받아쓰기 (말로 쓰기)
    ============================================================ */
+var APPVER="2026.11.27-2";
 function isTouch(){ try{ return window.matchMedia("(pointer:coarse)").matches||("ontouchstart" in window&&navigator.maxTouchPoints>0); }catch(e){ return false; } }
 function kbHide(){ if(!isTouch()) return; var a=document.activeElement; if(a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA")) try{ a.blur(); }catch(e){} }
 var SRC=window.SpeechRecognition||window.webkitSpeechRecognition, SRrec=null, SRtarget=null, SRbtn=null, SRwant=false, SRbase="";
@@ -5144,6 +5146,7 @@ $("#u-lockmin").addEventListener("change",function(){ LOCK.min=+this.value; ls.s
 $("#u-locknow").addEventListener("click",function(){ if(!lockable()){ toast("앱 잠금을 켜고 PIN을 정해야 잠글 수 있습니다"); return; } $("#m-user").classList.add("hidden"); lockNow(); });
 (function(){ var b=document.createElement("button"); b.type="button"; b.id="lockbtn"; b.className="lockbtn hidden"; b.title="지금 잠그기"; b.innerHTML="<i></i>잠금"; $(".hdr-r").insertBefore(b,$("#ubtn")); b.addEventListener("click",lockNow); })();
 uRender(); if(lockable()) lockNow();
+(function(){ var f=$(".credit")||$("footer"); if(f){ var s=document.createElement("div"); s.className="appver"; s.textContent="버전 "+APPVER; f.appendChild(s); } var uf=$("#m-user .ufoot"); if(uf){ var v=document.createElement("span"); v.className="appver"; v.textContent="앱 버전 "+APPVER; uf.appendChild(v); } })();
 /*PLUSEND*/
 /*VFJS*//* ============================================================
    말로 칸 채우기 — 반짝이는 칸에 말하면 쉬는 순간 넣고 다음 칸으로
