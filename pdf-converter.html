@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- PDF 만능 도구 v2.8 (개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-26 -->
+<!-- PDF 만능 도구 v2.9 (개발자 노상엽) | 개발자: 노상엽 | 개발일자: 2026-10-16 | 수정일자: 2026-11-26 -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PDF 만능 도구 v2.8 (개발자 노상엽)</title>
+<title>PDF 만능 도구 v2.9 (개발자 노상엽)</title>
 <style>
 /* 레이아웃: 상단 작업대(불러오기·설정·실행) + 아래 쪽 순서 격자 */
 :root{
@@ -211,7 +211,7 @@ select,input[type=text]{font:inherit;width:100%;padding:7px 9px;border:1px solid
 .stampbox input[type=number]{width:100%;font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)}
 .stampbox input[type=range]{width:100%}
 .stampbox .check.full{grid-column:1/-1}
-.isgrid{display:grid;grid-template-columns:174px minmax(0,1fr);gap:14px;align-items:start}
+.isgrid{display:grid;grid-template-columns:174px minmax(0,1fr);gap:14px;align-items:start}.isteps{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.isteps .st{display:inline-flex;align-items:center;gap:7px;padding:4px 12px 4px 5px;border-radius:999px;border:1px solid var(--line);background:var(--sunk);color:var(--muted);font-size:13px;line-height:1.4}.isteps .st b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--line);color:var(--ink);font-size:12px}.isteps .st.cur{border-color:var(--accent);background:var(--accent-soft);color:var(--ink);font-weight:700}.isteps .st.cur b{background:var(--accent);color:var(--on-accent)}.isteps .st.done{color:var(--ink)}.isteps .st.done b{background:var(--ok);color:#fff}.isteps .st.off{opacity:.7}.isteps .ar{color:var(--muted)}.issum{display:flex;align-items:center;gap:10px;font-size:13px;padding-left:24px;min-width:0}.issum span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}.isnav{justify-content:flex-end;border-top:1px dashed var(--line);padding-top:10px}
 @media (max-width:620px){.isgrid{grid-template-columns:minmax(0,1fr)}}
 .isprev{margin:0;display:grid;gap:4px;justify-items:center}
 .isprev canvas{width:170px;max-width:100%;background:#fff;border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.18)}
@@ -325,7 +325,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
 <body>
 <div class="wrap">
   <header>
-    <h1>PDF 만능 도구 <span class="hver">v2.8</span> <span class="hdev">(개발자 노상엽)</span></h1>
+    <h1>PDF 만능 도구 <span class="hver">v2.9</span> <span class="hdev">(개발자 노상엽)</span></h1>
     <span class="sub">이미지를 이 PC 안에서만 처리합니다. 인터넷 연결이 없어도 동작하며 파일이 외부로 전송되지 않습니다.</span>
   </header>
   <div class="updbar" id="updBar" role="status" hidden></div>
@@ -495,8 +495,10 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
         </div>
       </div>
       <div class="presetbar" data-preset="img"></div>
+      <div class="isteps" id="isSteps" role="group" aria-label="도장·글자 넣는 순서"><button type="button" class="st off" data-s="s"><b>1</b>도장 넣기</button><span class="ar" aria-hidden="true">›</span><button type="button" class="st off" data-s="t"><b>2</b>글자 넣기</button><span class="ar" aria-hidden="true">›</span><button type="button" class="st" data-s="r"><b>3</b>PDF 만들기</button><span class="note">차례대로 정하고, 필요 없는 단계는 건너뛰면 됩니다.</span></div>
       <div class="stampbox" id="isBox">
-        <label class="check"><input type="checkbox" id="isOn"> <b>저장할 때 도장 넣기</b></label>
+        <label class="check"><input type="checkbox" id="isOn"> <b>1단계 · 저장할 때 도장 넣기</b></label>
+        <div class="issum" id="isSum" hidden><span id="isSumT"></span><button type="button" id="isEdit">고치기</button></div>
         <div class="isbody" id="isBody" hidden>
           <div class="isgrid">
             <figure class="isprev"><canvas id="isCanvas" aria-label="도장 넣은 모습 미리보기"></canvas><figcaption id="isCap">첫 장 미리보기</figcaption></figure>
@@ -533,10 +535,12 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
             <button type="button" id="isFontFile">글꼴 파일 선택</button>
           </div>
           <p class="note" id="isNote"></p>
+          <div class="row isnav"><button type="button" id="isDone">글자 없이 마치기</button><button type="button" class="primary" id="isNext">다음 단계: 글자 넣기 ›</button></div>
         </div>
       </div>
       <div class="stampbox" id="itBox">
-        <label class="check"><input type="checkbox" id="itOn"> <b>저장할 때 글자 넣기</b> <span class="note">(도장과 따로, 원하는 자리에)</span></label>
+        <label class="check"><input type="checkbox" id="itOn"> <b>2단계 · 저장할 때 글자 넣기</b> <span class="note">(도장과 따로, 원하는 자리에)</span></label>
+        <div class="issum" id="itSum" hidden><span id="itSumT"></span><button type="button" id="itEdit">고치기</button></div>
         <div class="isbody" id="itBody" hidden>
           <div class="isgrid">
             <figure class="isprev"><canvas id="itCanvas" aria-label="글자 넣은 모습 미리보기"></canvas><figcaption id="itCap">첫 장 미리보기</figcaption></figure>
@@ -563,6 +567,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
             <button type="button" id="itFontFile">글꼴 파일 선택</button>
           </div>
           <p class="note" id="itNote"></p>
+          <div class="row isnav"><button type="button" id="itBack">‹ 도장 고치기</button><button type="button" class="primary" id="itDone">마치기: PDF 만들기로</button></div>
         </div>
       </div>
       <div class="row">
@@ -1135,7 +1140,7 @@ footer{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 16p
           <li><b>스캔 정리</b>: 비뚤어진 장 반듯하게, 검은 테두리 지우기, 옆으로 눕거나 거꾸로 된 장 바로 돌리기, 빈 장 빼기, 흑백 선명하게·순수 흑백(용량 최소).</li>
           <li><b>검색되는 PDF</b>: 글자를 읽어 Ctrl+F로 찾을 수 있게 합니다. 1장에 몇 초씩 더 걸립니다.</li>
           <li><b>개인정보 가리기</b>: 주민번호·전화·이름·주소 등을 찾아 칠합니다. 카드의 ▣ 단추로 확인·수정합니다.</li>
-          <li><b>저장할 때 도장 넣기</b>: 첫 장(또는 모든 장)에 도장과 날짜·시간을 찍습니다.</li>
+          <li><b>도장·글자 넣기</b>: ① 도장 → ② 글자 → ③ PDF 만들기 차례로 진행합니다. 한 단계를 마치면 한 줄로 접히고 다음 단계가 열리며, 미리보기에는 앞 단계 도장까지 함께 보입니다. 필요 없는 단계는 건너뜁니다.</li>
         </ul>
       </section>
       <section class="panel help">
@@ -4162,7 +4167,7 @@ document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () =>
    (보내는 정보 없음, 인터넷이 안 되거나 막혀 있으면 조용히 넘어감)
    version.json 예: {"version":"1.1","date":"2026-11-02","notes":["…"],"download":"https://…/index.html"}
    ========================================================= */
-const APP_VERSION = "2.8", APP_NAME = "PDF 만능 도구", appFileName = v => `${APP_NAME} v${v} (개발자 노상엽).html`, APP_FILE = appFileName(APP_VERSION);
+const APP_VERSION = "2.9", APP_NAME = "PDF 만능 도구", appFileName = v => `${APP_NAME} v${v} (개발자 노상엽).html`, APP_FILE = appFileName(APP_VERSION);
 const UPDATE_URL = "https://appraisal-fee.github.io/rohslaw/pdf-converter-version.json";
 $("appVer").textContent = "v" + APP_VERSION;
 const updUrl = () => { try{ return localStorage.getItem("i2p.updUrl") || UPDATE_URL; }catch(_){ return UPDATE_URL; } };
@@ -5819,8 +5824,44 @@ $("isBody").addEventListener("input", () => isFromUI());
 $("isBody").addEventListener("change", e => { if(e.target.id === "isImg") isPickNew = false; isFromUI(); });
 $("itBody").addEventListener("input", () => itFromUI());
 $("itBody").addEventListener("change", () => itFromUI());
-$("isOn").addEventListener("change", () => { IS.on = $("isOn").checked; $("isBody").hidden = !IS.on; if(IS.on) isToUI(); isPreview(); });
-$("itOn").addEventListener("change", () => { IT.on = $("itOn").checked; $("itBody").hidden = !IT.on; if(IT.on) itToUI(); isPreview(); });
+/* 도장 → 글자 → PDF 만들기를 차례로: 한 번에 한 단계만 펼치고, 마친 단계는 한 줄 요약으로 접는다 */
+let isOpen = "";
+const isPosName = k => (POS.find(p => p[0] === k) || ["", ""])[1];
+const isPgName = p => p === "all" ? "모든 장" : p === "last" ? "마지막 장" : "첫 장";
+const isLine = s => { const t = fillVars(s).replace(/\s*\n\s*/g, " / ").trim(); return t.length > 28 ? t.slice(0, 28) + "…" : t; };
+function isStepUI(){
+  $("isBody").hidden = !(IS.on && isOpen === "s");
+  $("itBody").hidden = !(IT.on && isOpen === "t");
+  $("isSum").hidden = !(IS.on && isOpen !== "s");
+  $("itSum").hidden = !(IT.on && isOpen !== "t");
+  if(IS.on){
+    const im = IS.img && libGet(IS.img), tx = isLine(IS.text);
+    $("isSumT").textContent = [im ? im.name : "도장 없이 글자만", isPgName(IS.pages), isPosName(IS.pos), tx ? `“${tx}”` : ""].filter(Boolean).join(" · ");
+  }
+  if(IT.on){ const tx = isLine(IT.text); $("itSumT").textContent = [tx ? `“${tx}”` : "글자 없음", isPgName(IT.pages), isPosName(IT.pos)].join(" · "); }
+  const st = {s: IS.on ? (isOpen === "s" ? "cur" : "done") : "off", t: IT.on ? (isOpen === "t" ? "cur" : "done") : "off", r: (IS.on || IT.on) && !isOpen ? "cur" : ""};
+  document.querySelectorAll("#isSteps .st").forEach(b => {
+    b.className = "st " + st[b.dataset.s];
+    b.title = st[b.dataset.s] === "off" ? "건너뜀 · 누르면 이 단계를 켭니다" : st[b.dataset.s] === "done" ? "마침 · 누르면 다시 고칩니다" : "";
+  });
+}
+function isGo(s){
+  if(running) return;
+  if(s === "s" && !IS.on){ $("isOn").checked = IS.on = true; isToUI(); }
+  if(s === "t" && !IT.on){ $("itOn").checked = IT.on = true; itToUI(); }
+  isOpen = s === "r" ? "" : s;
+  isPreview();
+  const tgt = s === "s" ? $("isBox") : s === "t" ? $("itBox") : $("runBtn");
+  tgt.scrollIntoView({block: s === "r" ? "center" : "nearest", behavior:"smooth"});
+  if(s === "r" && !$("runBtn").disabled) $("runBtn").focus({preventScroll:true});
+}
+$("isOn").addEventListener("change", () => { IS.on = $("isOn").checked; if(IS.on){ isToUI(); isOpen = "s"; } else if(isOpen === "s") isOpen = ""; isPreview(); });
+$("itOn").addEventListener("change", () => { IT.on = $("itOn").checked; if(IT.on){ itToUI(); isOpen = "t"; } else if(isOpen === "t") isOpen = ""; isPreview(); });
+$("isNext").onclick = () => isGo("t");
+$("isDone").onclick = $("itDone").onclick = () => isGo("r");
+$("itBack").onclick = $("isEdit").onclick = () => isGo("s");
+$("itEdit").onclick = () => isGo("t");
+$("isSteps").addEventListener("click", e => { const b = e.target.closest(".st"); if(b) isGo(b.dataset.s); });
 const insAt = (id, v, after) => { const t = $(id), a = t.selectionStart ?? t.value.length, b = t.selectionEnd ?? a; t.value = t.value.slice(0, a) + v + t.value.slice(b); t.focus(); t.setSelectionRange(a + v.length, a + v.length); after(); };
 $("isDate").onclick = () => insAt("isText", "{날짜}", isFromUI);
 $("isTime").onclick = () => insAt("isText", "{시간}", isFromUI);
@@ -5896,6 +5937,7 @@ function isDrawOn(cv){
   }
 }
 function isPreview(){
+  isStepUI();
   const first = items[0], cap = !first ? "이미지를 넣으면 첫 장이 보입니다" : "첫 장 미리보기";
   const vars = `{날짜} = ${today()}, {시간} = ${nowTime()}` + (timeAuto ? " (저장하는 순간의 시각)" : "") + ". 날짜·시간 형식은 '글자 넣기' 탭에서 바꿀 수 있습니다.";
   const pagesTxt = p => p === "all" ? " · 모든 장" : p === "last" ? " · 마지막 장" : "";
