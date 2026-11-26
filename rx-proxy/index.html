@@ -646,9 +646,10 @@ mark.hl{background:var(--warn-soft);color:inherit;padding:0 1px;border-radius:2p
 /* ---------------- 버전 ---------------- */
 const CFG_DEFAULT={vKin:3,vEmp:1,vJail:1,vAdmit:1,noticeUrl:"https://appraisal-fee.github.io/rohslaw/rx-proxy-notice.json",configUrl:"https://appraisal-fee.github.io/rohslaw/rx-proxy-config.json"};
 let CFG=Object.assign({},CFG_DEFAULT);
-const APP_VERSION={ver:"v1.5.0",date:"2026. 11. 27.",name:"처방전대리수령 검토앱",dev:"노상엽"};
+const APP_VERSION={ver:"v1.5.1",date:"2026. 11. 27.",name:"처방전대리수령 검토앱",dev:"노상엽"};
 const UPD_DEFAULT="https://appraisal-fee.github.io/rohslaw/rx-proxy-version.json";
 const CHANGELOG=[
+ {v:"v1.5.1",d:"2026. 11. 27.",items:["말로 입력: 휴대폰(안드로이드)에서 같은 말이 여러 번 겹쳐 적히던 문제 해결 (예: \"사실은 사실은 … 사실혼 배우자\" → \"사실혼 배우자\")","말로 입력: 고쳐 들은 말·반복된 말은 마지막 것만 남기고 정리"]},
  {v:"v1.5.0",d:"2026. 11. 27.",items:["웹앱으로 배포: 휴대폰·PC에 설치해 앱처럼 사용, 인터넷이 끊겨도 마지막 화면으로 열림","말로 찾기: 위쪽 🎤 단추로 말하면 요건 판단·질문·시설·등록번호 중 알맞은 곳으로 찾아 줌","검색칸마다 🎤 단추, 말로 찾는 동안 휴대폰 키보드가 올라오지 않음","질문·시설 검색을 낱말 단위로 찾도록 개선"]},
  {v:"v1.4.1",d:"2026. 11. 2.",items:["다시 오신 분: 환자 등록번호만으로 이전 판단 조회, 등록번호를 기록 대장·HIS 붙여넣기에 추가","보행상 장애 표준 기준표: 마우스를 올리면 장애 유형 설명·세부 기준, 누르면 표 안에 펼쳐 보기"]},
  {v:"v1.4.0",d:"2026. 11. 1.",items:["생년월일로 나이 자동 판단(미성년·17세 미만·14세 미만)","이전 판단과 달라진 점 표시, 판단 경위서 출력, 신분증 진위확인 바로가기","곧 만료되는 서류·다음 방문 예정 관리","보호자 셀프 체크 화면(태블릿), 음성 입력, 외국어(영·중·베) 보호자 안내문","공유 폴더 기록 대장, 원격 공지, 관리자 기준 편집"]},
@@ -2157,7 +2158,7 @@ function showModal(title,html,buttons){
   const last=bg.querySelector(".mrow .btn.primary")||bg.querySelector(".mrow .btn"); last&&last.focus();
   return bg;
 }
-function closeModal(){const m=$("#gmodal");if(m){m.remove();if(rec&&recBtn&&recBtn.id==="voiceAll")rec.abort();clearTimeout(window._vhT);}}
+function closeModal(){const m=$("#gmodal");if(m){m.remove();if(rec&&recBtn&&recBtn.id==="voiceAll"){rec._user=true;rec.abort();}clearTimeout(window._vhT);}}
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#gmodal"))closeModal();},true);
 
 function askIdReal(ids,ok){
@@ -2501,17 +2502,74 @@ function hideKeyboard(){ // 말로 찾는 동안 휴대폰 키보드가 올라�
   const a=document.activeElement; if(a&&a.matches&&a.matches("input,textarea,select")) a.blur();
 }
 function setNoKb(el,on){ if(!el) return; if(on){el.dataset.im=el.getAttribute("inputmode")||"";el.setAttribute("inputmode","none");} else {if(el.dataset.im)el.setAttribute("inputmode",el.dataset.im);else el.removeAttribute("inputmode");delete el.dataset.im;} }
-function listen(opt){ // opt: {btn, label, onPart(text), onDone(text), target}
+// 음성 인식 결과 정리: 안드로이드 크롬은 중간 결과를 누적해 다시 보내므로 겹친 말을 걸러낸다
+const IS_ANDROID=/Android/i.test(navigator.userAgent||"");
+function vNorm(x){return String(x||"").replace(/\s+/g," ").trim();}
+function vMerge(segs){ // 누적·중복 조각 합치기
+  const out=[];
+  segs.map(vDedupe).filter(Boolean).forEach(t=>{
+    const last=out.length?out[out.length-1]:"";
+    const tn=t.replace(/\s/g,""), ln=last.replace(/\s/g,"");
+    if(!last){out.push(t);return;}
+    if(tn.includes(ln)){out[out.length-1]=t;return;}       // 앞 조각을 포함해 늘어난 결과 → 교체
+    if(ln.includes(tn)) return;                              // 이미 들어 있는 조각 → 버림
+    const lw=last.split(" "), tw=t.split(" ");               // 앞 조각 끝과 새 조각 앞이 겹치면 이어 붙임
+    const near=(a,b)=>a===b||b.startsWith(a)||a.startsWith(b);
+    for(let k=Math.min(lw.length,tw.length);k>=1;k--){
+      let ok=true; for(let j=0;j<k;j++){ if(!near(lw[lw.length-k+j],tw[j])){ok=false;break;} }
+      if(ok){ out[out.length-1]=lw.slice(0,lw.length-k).concat(tw).join(" "); return; }
+    }
+    out.push(t);
+  });
+  return vDedupe(out.join(" "));
+}
+function vDedupe(txt){ // 같은 말·비슷한 말 반복 제거
+  let w=vNorm(txt).split(" ").filter(Boolean), r=[];
+  w.forEach(t=>{
+    const p=r.length?r[r.length-1]:null;
+    if(p!==null){
+      if(p===t) return;                                                    // 같은 낱말 반복
+      if(t.length>p.length&&t.startsWith(p)){r[r.length-1]=t;return;}      // 사실 → 사실혼
+      if(p.length>=2&&p.length===t.length&&p.slice(0,-1)===t.slice(0,-1)){r[r.length-1]=t;return;} // 사실은 → 사실혼(고쳐 들은 말)
+    }
+    r.push(t);
+  });
+  // 여러 낱말 묶음 반복(예: "사실혼 배우자 사실혼 배우자") 제거
+  for(let n=Math.floor(r.length/2);n>=2;n--){
+    for(let i=0;i+2*n<=r.length;i++){
+      if(r.slice(i,i+n).join(" ")===r.slice(i+n,i+2*n).join(" ")){r.splice(i+n,n);i--;}
+    }
+  }
+  return r.join(" ");
+}
+function listen(opt){ // opt: {btn, onPart(text), onDone(text), target, continuous}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(rec){ const same=recBtn===opt.btn; rec.stop(); if(same) return; }
+  if(rec){ const same=recBtn===opt.btn; rec._user=true; rec.stop(); if(same) return; }
   if(!SR||framed){toast("이 화면에서는 말로 찾기를 쓸 수 없습니다 · 웹앱 주소나 크롬·엣지에서 열어 쓰세요");return;}
   hideKeyboard(); if(opt.target) setNoKb(opt.target,true);
-  rec=new SR(); rec.lang="ko-KR"; rec.interimResults=true; rec.continuous=!!opt.continuous; rec.maxAlternatives=1;
-  recBtn=opt.btn; recLabel=opt.btn?opt.btn.textContent:""; let fin="";
-  rec.onresult=e=>{let tmp="";for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)fin+=r[0].transcript+" ";else tmp+=r[0].transcript;}opt.onPart&&opt.onPart((fin+tmp).trim());};
-  rec.onerror=e=>{if(e.error==="no-speech"){toast("말소리가 들리지 않았습니다 · 다시 눌러 말해 주세요");return;}toast(e.error==="not-allowed"||e.error==="service-not-allowed"?"마이크 사용이 막혀 있습니다 · 주소창의 자물쇠(또는 앱 설정)에서 마이크를 허용하세요":e.error==="network"?"말로 찾기는 인터넷 연결이 필요합니다":"말로 찾기가 멈췄습니다 ("+e.error+")");};
-  rec.onend=()=>{const b=recBtn; rec=null; recBtn=null; if(b){b.classList.remove("on");b.textContent=recLabel;} if(opt.target) setNoKb(opt.target,false); hideKeyboard(); opt.onDone&&opt.onDone(fin.trim());};
-  try{rec.start(); if(opt.btn){opt.btn.classList.add("on");opt.btn.textContent=opt.btn.classList.contains("vbtn")?"●":"● 듣는 중 · 누르면 멈춤";}}catch(e){rec=null;toast("말로 찾기를 시작하지 못했습니다");}
+  const wantCont=!!opt.continuous;
+  let done="", cur="", stopped=false; const t0=Date.now();
+  recBtn=opt.btn; recLabel=opt.btn?opt.btn.textContent:"";
+  const finish=()=>{const b=recBtn; rec=null; recBtn=null; if(b){b.classList.remove("on");b.textContent=recLabel;} if(opt.target) setNoKb(opt.target,false); hideKeyboard(); opt.onDone&&opt.onDone(vDedupe(done));};
+  const start=()=>{
+    const r=new SR(); rec=r; r.lang="ko-KR"; r.interimResults=true; r.maxAlternatives=1;
+    r.continuous=wantCont&&!IS_ANDROID; // 안드로이드는 한 번씩 끊어 듣고 자동으로 다시 시작
+    cur="";
+    r.onresult=e=>{
+      const fins=[]; let tmp=[];
+      for(let i=0;i<e.results.length;i++){const x=e.results[i]; (x.isFinal?fins:tmp).push(x[0].transcript);}
+      cur=vMerge(fins); const live=vMerge([cur].concat(tmp));
+      opt.onPart&&opt.onPart(vDedupe((done+" "+live).trim()));
+    };
+    r.onerror=e=>{if(e.error==="no-speech"){ stopped=true; if(!done&&!cur) toast("말소리가 들리지 않았습니다 · 다시 눌러 말해 주세요"); return;} stopped=true; if(e.error==="aborted") return; toast(e.error==="not-allowed"||e.error==="service-not-allowed"?"마이크 사용이 막혀 있습니다 · 주소창의 자물쇠(또는 앱 설정)에서 마이크를 허용하세요":e.error==="network"?"말로 찾기는 인터넷 연결이 필요합니다":"말로 찾기가 멈췄습니다 ("+e.error+")");};
+    r.onend=()=>{
+      done=vDedupe((done+" "+cur).trim()); cur="";
+      if(wantCont&&IS_ANDROID&&!r._user&&!stopped&&rec===r&&Date.now()-t0<90000){ try{start();return;}catch(err){} }
+      finish();
+    };
+    r.start();
+  };
+  try{start(); if(opt.btn){opt.btn.classList.add("on");opt.btn.textContent=opt.btn.classList.contains("vbtn")?"●":"● 듣는 중 · 누르면 멈춤";}}catch(e){rec=null;toast("말로 찾기를 시작하지 못했습니다");}
 }
 const HNUM={"공":"0","영":"0","일":"1","이":"2","삼":"3","사":"4","오":"5","육":"6","륙":"6","칠":"7","팔":"8","구":"9"};
 function spokenDigits(s){return String(s||"").replace(/[공영일이삼사오육륙칠팔구]/g,c=>HNUM[c]).replace(/\D/g,"");}

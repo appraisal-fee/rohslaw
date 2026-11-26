@@ -1,10 +1,9 @@
 {
-  "version": "1.5.0",
-  "date": "2026-11-27",
-  "notes": [
-    "웹앱으로 배포: 휴대폰·PC에 설치해 앱처럼 사용",
-    "말로 찾기: 🎤로 말하면 요건 판단·질문·시설·등록번호로 찾아 줌 (말하는 동안 키보드 숨김)",
-    "등록번호로 이전 판단 조회, 기준표 상세 설명"
-  ],
-  "download": "https://appraisal-fee.github.io/rohslaw/rx-proxy/"
+ "version": "v1.5.1",
+ "date": "2026. 11. 27.",
+ "notes": [
+  "말로 입력: 휴대폰(안드로이드)에서 같은 말이 여러 번 겹쳐 적히던 문제 해결",
+  "말로 입력: 고쳐 들은 말·반복된 말은 마지막 것만 남기고 정리"
+ ],
+ "download": "https://appraisal-fee.github.io/rohslaw/rx-proxy/"
 }
