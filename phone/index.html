@@ -182,6 +182,8 @@ table.diff col.k{width:64px}table.diff col.p{width:34%}table.diff col.n{width:22
 .relbtn b{color:#1f3a5f}
 .grid.flat .relbox{margin-top:0}
 .sub.why{color:#0b6d67}
+footer .dates{font-size:11.5px;color:var(--muted);margin:0 0 4px;line-height:1.6}
+footer .dates span{white-space:nowrap}
 footer .disc{color:#8a5a00;background:#fff8e6;border:1px solid #f3dca6;border-radius:8px;padding:8px 12px;margin:0 auto 10px;max-width:640px;line-height:1.5;word-break:keep-all}
 @media (max-width:640px){
   header{padding:14px 14px 12px}.swrap,main{padding-left:12px;padding-right:12px}
@@ -233,7 +235,7 @@ footer .disc{color:#8a5a00;background:#fff8e6;border:1px solid #f3dca6;border-ra
 </div>
 
 <main><div class="grid" id="list"></div></main>
-<footer><div class="disc">⚠ 연락처 정보는 사용자가 입력한 대로 보여주기에 실제와 다를 수 있습니다.</div>개발자 노상엽</footer>
+<footer><div class="disc">⚠ 연락처 정보는 사용자가 입력한 대로 보여주기에 실제와 다를 수 있습니다.</div><div class="dates" id="dateLbl"></div>개발자 노상엽</footer>
 
 <div class="dsheet" id="dialSheet"><div class="dbox"><div class="dt"></div><div class="dl"></div><button class="dcopy">닫기</button></div></div>
 <div class="toast" id="toast"></div>
@@ -916,6 +918,7 @@ function wardKw(text){
   return [...new Set(out)];
 }
 const PA_DATE='2025. 4. 28.';
+const PA_SHORT=PA_DATE.replace(/\s/g,'').replace(/^20/,'').replace(/\.$/,'');
 // 진료과 약어 → 과 이름 (검색용)
 const CODE_KW={IMG:'소화기내과',IMN:'신장내과',IMP:'호흡기내과',IMC:'순환기내과',IMO:'혈액종양내과',IME:'내분비내과',IMI:'감염내과',IMR:'류마티스내과',NU:'신경과',NS:'신경외과',OS:'정형외과',PS:'성형외과',URO:'비뇨의학과 비뇨기과',ENT:'이비인후과',OBGY:'산부인과',DT:'치과',GS:'외과',CS:'흉부외과',RM:'재활의학과',PED:'소아청소년과',FM:'가정의학과',ED:'응급의학과',DM:'피부과',SN:'전담간호사',ICU:'중환자실',NP:'정신건강의학과',OG:'산부인과',OB:'산부인과',PD:'소아청소년과',GU:'비뇨의학과 비뇨기과',IM:'내과',IRB:'연구윤리',CRC:'임상연구코디네이터 연구간호사',VOC:'고객의소리 민원',NSICU:'신경외과중환자실',MSICU:'내외과중환자실',NICU:'신생아중환자실',ER:'응급실',DR:'분만실',NR:'신생아실'};
 const NO_LINK=new Set(['전문진료지원팀','중환자간호팀','외래간호팀','수술간호팀']);   // 간호사 공용전화는 번호부 항목과 잇지 않음
@@ -926,12 +929,29 @@ function staffEntries(){
     if(pa){ const [kind,pdept,prof,ward,etc]=pa.split('|'); p={kind,dept:pdept,prof,ward,etc}; }
     const notes=[]; if(p) notes.push(p.kind); if(status) notes.push(status);
     let memo=duty||'';
-    if(p){ const w=p.ward?(/^[가나]\d+$/.test(p.ward)?p.ward.replace(/(\d+)/,d=>d.padStart(2,'0'))+'병동':p.ward):p.etc; const bits=[p.dept,p.prof&&!/이동|업무|사업|검사|교육/.test(p.prof)?p.prof+' 교수':p.prof,w].filter(Boolean); memo=(memo?memo+' / ':'')+`${p.kind} 명단: `+bits.join(' · '); }
+    let paProfs=[];
+    if(p){
+      const parts=String(p.prof||'').split(',').map(x=>x.trim()).filter(Boolean);
+      const moved=/이동/.test(p.prof||'');
+      paProfs=parts.filter(x=>/^[가-힣]{2,4}$/.test(x));
+      const others=parts.filter(x=>!paProfs.includes(x));
+      let profTxt;
+      if(moved){ const mm=String(p.prof).match(/(\d{4})\.(\d{1,2})\.(\d{1,2})\s*\(?\s*(.+?)\s*이동/); profTxt=mm?`→ ${mm[4]} 이동(${mm[1]}. ${+mm[2]}. ${+mm[3]}.)`:p.prof; }
+      else if(paProfs.length&&!/업무|사업|검사|교육/.test(p.prof)) profTxt=[paProfs.join(', ')+' 교수',...others].join(', ');
+      else profTxt=parts.join(', ');
+      const w=moved?'':p.ward?(/^[가나]\d+$/.test(p.ward)?p.ward.replace(/(\d+)/,d=>d.padStart(2,'0'))+'병동':p.ward):p.etc;
+      const bits=[p.dept+(moved?' '+profTxt:''),moved?'':profTxt,w].filter(Boolean);
+      memo=(memo?memo+' / ':'')+`${p.kind} 명단(${PA_SHORT} 기준): `+bits.join(' · ');
+      if(moved) p.ward='';
+    }
     const kw=[...(p&&p.ward?wardKw(p.ward):[]), ...codeKw(duty), p?(p.kind==='PA'?'PA 진료지원 전담간호사':'SA 수술보조'):'', /SN|전담/.test(duty||'')?'전담간호사':''].filter(Boolean).join(' ');
     return {key:'p:'+dept+'|'+sub+'|'+name, src:'staff', div:'담당자', dept, sub, name, title, ext,
-      nums:ext?[{disp:ext,list:[ext]}]:[], note:notes.join(' · '), memo, kw, nolink:NO_LINK.has(dept)};
+      nums:ext?[{disp:ext,list:[ext]}]:[], note:notes.join(' · '), memo, kw, nolink:NO_LINK.has(dept), paProfs, ctx:[p?p.dept:'',duty].join(' ')};
   });
 }
+// 글 속 진료과 → 교수 연구실 과 이름
+const FAM=[['흉부외과',/흉부외과|\bCS\b/],['신경외과',/신경외과|\bNS\b/],['성형외과',/성형외과|\bPS\b/],['정형외과',/정형외과|\bOS\b/],['신경과',/신경과|\bNU\b/],['비뇨기과',/비뇨|\bURO\b/],['산부인과',/산부인과|OBGY/],['소아청소년과',/소아청소년|\bPED\b/],['이비인후과',/이비인후|\bENT\b/],['재활의학과',/재활|\bRM\b/],['정신건강의학과',/정신건강/],['가정의학과',/가정의학/],['안과',/안과|안센터/],['피부과',/피부과/],['내과',/내과|\bIM[A-Z]?\b|감염|류마|혈액종양|호흡기|순환기|신장내|내분비|당뇨/],['외과',/외과|\bGS\b|대장항문|유방|갑상선|간담|위장관|이식혈관/]];
+function deptFam(t){ const out=new Set(); t=String(t||''); FAM.forEach(([d,re])=>{ const x=d==='외과'?t.replace(/흉부외과|신경외과|성형외과|정형외과/g,''):t; if(re.test(x)) out.add(d); }); return out; }
 function attachStaff(list){
   const byExt=new Map(), byWard=new Map();
   list.filter(e=>e.src==='staff'&&!e.nolink).forEach(s=>{
@@ -941,9 +961,9 @@ function attachStaff(list){
   // 담당업무에 적힌 교수 이름 → 교수 연구실 항목과 잇기
   const staffNames=new Set(list.filter(e=>e.src==='staff').map(e=>e.name));
   const profs=new Map(); list.filter(e=>e.src==='base'&&e.div==='교수 연구실'&&/^[가-힣]{2,4}$/.test(e.name)).forEach(e=>{ if(!profs.has(e.name)) profs.set(e.name,[]); profs.get(e.name).push(e); });
-  const byProf=new Map();
+  const byProf=new Map();   // 교수 연구실 항목 → 담당자들
   list.filter(e=>e.src==='staff'&&e.memo).forEach(s=>{
-    const m=s.memo;
+    const m=s.memo, hits=[];
     profs.forEach((_,pn)=>{
       let i=m.indexOf(pn);
       while(i>=0){
@@ -951,19 +971,35 @@ function attachStaff(list){
         const okB=!/[가-힣]/.test(before);
         const okA=pn.length>=3||!/[가-힣]/.test(after)||/^(교|선)/.test(m.slice(i+pn.length));
         const inParen=(m.slice(0,i).split('(').length-1)>(m.slice(0,i).split(')').length-1);
-        const okCtx=!staffNames.has(pn)||(inParen&&/pf|교수|prof/i.test(m));
-        if(okB&&okA&&okCtx){ if(!byProf.has(pn)) byProf.set(pn,[]); if(!byProf.get(pn).includes(s)) byProf.get(pn).push(s); s.profs=(s.profs||[]); if(!s.profs.includes(pn)) s.profs.push(pn); break; }
+        const viaPA=(s.paProfs||[]).includes(pn);
+        const okCtx=!staffNames.has(pn)||(inParen&&/pf|교수|prof/i.test(m))||viaPA;
+        if(okB&&okA&&okCtx){ hits.push({pn,strict:staffNames.has(pn)&&viaPA&&!(inParen&&/pf|교수|prof/i.test(m))}); break; }
         i=m.indexOf(pn,i+1);
       }
+    });
+    // 같은 이름 교수가 여러 과에 있거나(예: 내과·외과 김영민) 직원과 이름이 같으면 과를 따져 고름
+    const f=deptFam(s.ctx||'');
+    const uniq=hits.filter(h=>profs.get(h.pn).length===1).map(h=>profs.get(h.pn)[0].dept);
+    hits.forEach(({pn,strict})=>{
+      let c=profs.get(pn);
+      if(c.length>1||strict){
+        const c2=f.size?c.filter(x=>f.has(x.dept)):c;
+        if(strict&&f.size&&!c2.length) return;      // 과가 맞지 않으면 잇지 않음
+        c=c2.length?c2:c;
+        if(c.length>1&&uniq.length){ const cnt=x=>uniq.filter(d=>d===x.dept).length; const mx=Math.max(...c.map(cnt)); if(mx>0) c=c.filter(x=>cnt(x)===mx); }
+      }
+      c.forEach(pe=>{ if(!byProf.has(pe)) byProf.set(pe,[]); if(!byProf.get(pe).includes(s)) byProf.get(pe).push(s); });
+      s.profs=(s.profs||[]); if(!s.profs.includes(pn)) s.profs.push(pn);
     });
   });
   list.forEach(e=>{
     if(e.src!=='base') return;
     const seen=new Set(), people=[];
-    if(e.div==='교수 연구실') (byProf.get(e.name)||[]).forEach(s=>{ if(!seen.has(s)){ seen.add(s); people.push({s,why:'prof'}); } });
-    (e.nums||[]).forEach(n=>n.list.forEach(x=>(byExt.get(x)||[]).forEach(s=>{ if(!seen.has(s)){ seen.add(s); people.push({s,why:'ext'}); } })));
+    const sk=s=>s.name+'|'+(s.ext||'');   // 같은 사람이 두 부서에 올라 있으면 한 번만
+    if(e.div==='교수 연구실') (byProf.get(e)||[]).forEach(s=>{ if(!seen.has(sk(s))){ seen.add(sk(s)); people.push({s,why:'prof'}); } });
+    (e.nums||[]).forEach(n=>n.list.forEach(x=>(byExt.get(x)||[]).forEach(s=>{ if(!seen.has(sk(s))){ seen.add(sk(s)); people.push({s,why:'ext'}); } })));
     const wm=String(e.name).match(/^[가나]\d{2}병동$/);
-    if(wm) (byWard.get(wm[0])||[]).forEach(s=>{ if(!seen.has(s)){ seen.add(s); people.push({s,why:'ward'}); } });
+    if(wm) (byWard.get(wm[0])||[]).forEach(s=>{ if(!seen.has(sk(s))){ seen.add(sk(s)); people.push({s,why:'ward'}); } });
     e.staff=people;
     if(/응급원무/.test([e.dept,e.sub,e.name].join(' ')) && !/3교대/.test(e.note||'')) e.note=(e.note?e.note+' · ':'')+'3교대';
   });
@@ -1008,6 +1044,7 @@ function build(){
   all.forEach(e=>{ if(e.staff&&e.staff.length){ e.nMemo+='|'+norm(e.staff.map(x=>x.s.name).join(' ')); e.hay+='|'+norm(e.staff.map(x=>x.s.name).join(' ')); }
   });
   $('baseLbl').textContent=fmtBaseDate(base.baseDate)||'기준일 미상';
+  { const dl=$('dateLbl'); if(dl) dl.innerHTML=['자료 기준일',`원내 번호 ${(fmtBaseDate(base.baseDate)||'미상').replace(/\s*기준$/,'')}`,`담당자 업무 ${STAFF_DATE}`,`PA 명단 ${PA_DATE}`].map(x=>`<span>${esc(x)}</span>`).join(' · '); }
   const head=base.info[0]||'';
   const rep=(head.match(/대표전화\s*[:：]?\s*([\d\-\)\s]+?)(?=\s*FAX|$)/i)||[])[1];
   const fax=(head.match(/FAX\s*[:：]?\s*([\d\-\)\s]+)/i)||[])[1];
@@ -1015,7 +1052,7 @@ function build(){
   if(rep) h.push(`<button class="pill" data-copy="${esc(rep.trim())}" data-tel="${esc(rep.trim())}">대표전화 <b class="tnum">${esc(rep.trim())}</b></button>`);
   if(fax){ const fx=fax.trim().replace(/\)\s*/,'-'); h.push(`<button class="pill" data-copy="${esc(fx)}">FAX <b class="tnum">${esc(fx)}</b></button>`); }
   $('hinfo').innerHTML=h.join('');
-  const cmc=base.info.slice(1).join(' ').replace(/^\(|\)$/g,'').replace(/\(?\d{2}\.\d{1,2}\.\d{1,2}\s*기준\)?/,'').trim();
+  const cmc=base.info.slice(1).join(' ').replace(/^\(|\)$/g,'').replace(/\(?\s*\d{2,4}\.\s*\d{1,2}\.\s*\d{1,2}\.?\s*기준\s*\)?/,'').trim();
   $('cmcLbl').textContent=cmc?cmc.replace(/\s*:\s*/,' : '):'';
   renderChips(); render();
 }
@@ -1158,7 +1195,7 @@ function render(){
     const res=sr.res.filter(r=>!hasDirect||r.direct).map(r=>r.e);
     const relRes=[]; const seenRel=new Set(res.map(e=>e.key));
     const labOf=s=>s.dept==='원무팀'?'원무 담당':s.dept==='원목팀'?'원목 담당':s.dept==='외래간호팀'?'외래 담당':s.dept==='전문진료지원팀'?(/PA/.test(s.note||'')?'PA':'전담간호사'):s.dept==='CRC'?'CRC':s.dept==='수술간호팀'?'수술':'담당';
-    res.forEach(e=>(e.staff||[]).forEach(({s})=>{ if(!seenRel.has(s.key)){ seenRel.add(s.key); relRes.push(Object.assign({},s,{_why:`${e.name} ${labOf(s)}`})); } }));
+    res.forEach(e=>(e.staff||[]).forEach(({s})=>{ if(!seenRel.has(s.key)){ seenRel.add(s.key); relRes.push(Object.assign({},s,{_why:`${e.div==='교수 연구실'?e.dept+' ':''}${e.name}${e.div==='교수 연구실'?' 교수':''} ${labOf(s)}`})); } }));
     if(hasDirect) sr.res.filter(r=>!r.direct).forEach(r=>{ if(!seenRel.has(r.e.key)){ seenRel.add(r.e.key); relRes.push(r.e); } });
     lastResults=res;
     $('statusL').textContent=`검색 결과 ${res.length}건`+(relRes.length?` · 관련 ${relRes.length}건`:'');
