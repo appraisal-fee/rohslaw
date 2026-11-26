@@ -1912,7 +1912,7 @@ function ledgerSearch(q){if(!go('ledger'))return;$('#lQ').value=q;renderLedger()
 /* ---- 받아쓰기 ---- */
 function dictTarget(){const a=document.activeElement;if(a&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&a.type==='text'))&&a.id!=='vType'&&!a.closest('.tab:not(.on)'))return a;
   const tab=curTab();if(tab==='form')return $('#fStory');if(tab!=='case')go('case');return $('#caseText')}
-function startDict(){const el=dictTarget();V.dict=el;el.focus();flash(el);setBtn();say('받아쓰기를 시작합니다. 끝내려면 「받아쓰기 끝」이라고 말하세요');if(!V.on)listen(true)}
+function startDict(){const el=dictTarget();V.dict=el;if(!matchMedia('(pointer:coarse)').matches)el.focus();else if(document.activeElement)document.activeElement.blur();flash(el);setBtn();say('받아쓰기를 시작합니다. 끝내려면 「받아쓰기 끝」이라고 말하세요');if(!V.on)listen(true)}
 function stopDict(){if(!V.dict)return false;V.dict=null;setBtn();if(!$('#vCont').checked)stopListen(true);else stat('듣는 중… 말씀하세요');say('받아쓰기를 끝냈습니다');return true}
 function dictate(text){const el=V.dict;let s=text.trim().replace(/\s*(마침표|점 찍어)$/,'.').replace(/\s*쉼표$/,',');
   if(/^(줄 ?바꿈|다음 줄|엔터)$/.test(s)){el.value+='\n';}else{s=s.replace(/\s*(줄 ?바꿈|다음 줄)\s*/g,'\n');el.value=(el.value&&!/[\s\n]$/.test(el.value)?el.value+' ':el.value)+s}
