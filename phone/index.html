@@ -1288,6 +1288,12 @@ function voiceClean(t){
   s=s.replace(/([가나])\s+(\d{1,2})\s*(병동)?/g,'$1$2$3').replace(/(\d)\s+병동/g,'$1병동');
   return s.replace(/\s+/g,' ').trim();
 }
+function voiceDedupe(t){
+  let w=String(t||'').trim().split(/\s+/).filter(Boolean);
+  // 앞 낱말이 다음 낱말의 앞부분이면(술 술취한) 앞 것을 버리고, 같은 낱말이 잇달아 나오면 하나만
+  w=w.filter((x,i)=>!(i+1<w.length&&(w[i+1]===x||w[i+1].startsWith(x))));
+  return w.join(' ').replace(/(.)\1{2,}/g,'$1');   // 같은 글자 3번 이상 반복(술술술술) → 한 번
+}
 let rec=null, recOn=false;
 function setMic(on){ recOn=on; const qi=$('q');
   // 듣는 동안 휴대폰 키보드가 올라오지 않게: 입력칸 포커스를 빼고 잠시 읽기 전용으로
@@ -1300,7 +1306,13 @@ function startVoice(){
   try{
     rec=new SR(); rec.lang='ko-KR'; rec.interimResults=true; rec.continuous=false; rec.maxAlternatives=1;
     let finalText='';
-    rec.onresult=ev=>{ let txt=''; for(let i=0;i<ev.results.length;i++){ txt+=ev.results[i][0].transcript; if(ev.results[i].isFinal) finalText=txt; }
+    // 안드로이드 크롬은 중간 결과마다 앞부분을 되풀이해 보내므로(술 → 술취 → 술 취한…) 되풀이된 부분은 겹치지 않게 합침
+    rec.onresult=ev=>{ let acc='', fin=false;
+      for(let i=0;i<ev.results.length;i++){ const t=ev.results[i][0].transcript.trim(); if(!t) continue;
+        const a=acc.replace(/\s/g,''), b=t.replace(/\s/g,'');
+        if(b.startsWith(a)) acc=t; else if(!a.includes(b)) acc=(acc+' '+t).trim();   // 되풀이는 덮어쓰고, 새 말만 이어 붙임
+        fin=ev.results[i].isFinal; }
+      const txt=voiceDedupe(acc); if(fin) finalText=txt;
       $('q').value=voiceClean(txt); render(); };
     rec.onerror=ev=>{ setMic(false);
       toast(ev.error==='not-allowed'||ev.error==='service-not-allowed'?'마이크 사용을 허용해 주세요 (주소창 왼쪽 자물쇠 → 마이크 허용)':ev.error==='no-speech'?'말소리가 들리지 않았습니다. 다시 눌러 말씀해 주세요.':ev.error==='network'?'인터넷 연결이 있어야 말로 찾기를 쓸 수 있습니다.':ev.error==='audio-capture'?'마이크를 찾지 못했습니다.':ev.error==='aborted'?'':'말로 찾기를 하지 못했습니다 ('+ev.error+')'); };
