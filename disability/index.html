@@ -670,7 +670,7 @@ function bindStatic(){
 /* ───────── 고도화 기능 ───────── */
 const LVN={S:'심한 장애',M:'심하지 않은 장애',N:'해당 없음',P:'입력 대기',X:'계산값'};
 function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
-async function copyText(s,el){try{await navigator.clipboard.writeText(s);toast('복사했습니다.')}catch(e){if(el){el.focus();el.select()}toast('글이 선택되었습니다. Ctrl+C로 복사하세요.')}}
+async function copyText(s,el){try{await navigator.clipboard.writeText(s);toast('복사했습니다.')}catch(e){if(el&&!VX.on){el.focus();el.select()}toast('글이 선택되었습니다. Ctrl+C로 복사하세요.')}}
 
 /* 1. NU 붙여넣기 */
 const IQRE=/(?:FSIQ|전체\s*지능지수|지능지수|\bIQ\b)[^\d\n]{0,15}(\d{2,3})/i;
@@ -920,7 +920,7 @@ function bindRec(){setTimeout(attachMics,0);$('#recGo').onclick=()=>recShow(recL
  const a=$('#aiBtn');if(a)a.onclick=()=>{const src=$('#recTxt').value.trim();if(!src){toast('기록을 먼저 붙여 넣으세요.');return}const d=deid(src),B=$('#aiBox');
   B.innerHTML='<div class="edge"><b>보내기 전 확인</b>개인정보로 보이는 '+d.n+'곳을 가렸습니다. 아래 글을 직접 확인하고, 남은 이름·번호·주소가 있으면 지운 뒤 보내세요. 이 글만 Claude에게 전송됩니다.</div><textarea id="aiTxt" style="margin-top:8px;min-height:180px"></textarea><label class="chk"><input type="checkbox" id="aiOk"><span>개인을 알아볼 수 있는 정보가 남아 있지 않음을 확인했습니다</span></label><div class="btns"><button type="button" class="btn" id="aiGo">Claude에게 보내기</button></div>';
   $('#aiTxt').value=d.s;attachMics();$('#aiGo').onclick=()=>{if(!$('#aiOk').checked){toast('확인란에 체크하세요.');return}aiRun($('#aiTxt').value)}}}
-function toggleRec(){const S=$('#rec');const open=S.classList.contains('hidden');S.classList.toggle('hidden',!open);$('#recBtn').setAttribute('aria-pressed',open);if(open){S.innerHTML=recHTML();bindRec();$('#recTxt').focus()}else S.innerHTML=''}
+function toggleRec(){const S=$('#rec');const open=S.classList.contains('hidden');S.classList.toggle('hidden',!open);$('#recBtn').setAttribute('aria-pressed',open);if(open){S.innerHTML=recHTML();bindRec();if(!VX.on)$('#recTxt').focus()}else S.innerHTML=''}
 let SAMPLE=null;
 (async()=>{try{if(window.claude&&typeof claude.use==='function'){SAMPLE=await claude.use('sample');if(SAMPLE&&!$('#rec').classList.contains('hidden')&&!$('#aiBtn')){const txt=$('#recTxt').value;$('#rec').innerHTML=recHTML();bindRec();$('#recTxt').value=txt}}}catch(e){SAMPLE=null}})();
 
@@ -1123,6 +1123,9 @@ function fillField(raw){const form=$('#form');if(!form)return null;const n=nz(ra
   const num=firstNum(rest);if(num!==null){setVal(e,num);return c.a+' '+num}}
  return null}
 function setVal(e,v){if(!e)return;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}))}
+const CMDW=['기록으로찾기','기록으로유형찾기','판정절차','순서도','상담시작','상담종료','새환자','민원인화면','큰글씨','결과읽어','읽어주기','즐겨찾기','맨위로','맨아래로','도움말','처음으로','닫기'];
+function exactCmd(s){if(!s)return false;if(CMDW.includes(s))return true;const tabs=[].concat(...Object.values(TAB_AL));if(tabs.includes(s))return true;
+ for(const t2 of T){const st=[nz(t2.name),nz(t2.name).replace(/장애$/,'')].concat(STEM[t2.id]);for(const a of st){if(s===a)return true;if(s.startsWith(a)&&tabs.includes(s.slice(a.length).replace(/^장애/,'')))return true}}return false}
 function handleVoice(text){const t=String(text||'').trim();if(!t)return;vHeard(t);const n=nz(t),s=strip(t);const ok=m=>{vSay(m,true);return true};
  const has=(...w)=>w.some(x=>n.includes(x));
  if(has('도움말','명령어','뭐라고말해','사용법'))return ok(showVoiceHelp()||'도움말을 열었습니다');
@@ -1131,7 +1134,8 @@ function handleVoice(text){const t=String(text||'').trim();if(!t)return;vHeard(t
  if(/^(닫기|닫아|닫아줘|창닫기)/.test(s)||s==='닫'){if($('.modal')){$('.modal').remove();return ok('창을 닫았습니다')}if($('#viewer')){closeViewer();return ok('민원인 화면을 닫았습니다')}if(!$('#procSec').classList.contains('hidden')){toggleProc();return ok('판정 절차를 닫았습니다')}if(!$('#rec').classList.contains('hidden')){toggleRec();return ok('기록으로 찾기를 닫았습니다')}}
  if($('.modal')){const b=[...document.querySelectorAll('.modal [data-mb]')].find(x=>n.includes(nz(x.textContent))||(has('확인','예','네','지워')&&x.classList.contains('btn')&&!x.classList.contains('ghost')));if(b){b.click();return ok(b.textContent.trim())}if(has('취소','아니'))return $('.modal').remove(),ok('취소했습니다')}
  const fe=document.activeElement,txt=fe&&fe.id!=='q'&&(fe.tagName==='TEXTAREA'||(fe.tagName==='INPUT'&&fe.type==='text'&&!fe.dataset.date&&!/^20\d{6}$/.test(fe.placeholder||'')));
- if(txt&&!has('듣기중지','다음탭','이전탭','의사용','직원용','복사','저장','분석해')){fe.value=(fe.value&&!/\s$/.test(fe.value)?fe.value+' ':fe.value)+t;fe.dispatchEvent(new Event('input',{bubbles:true}));return ok('입력 칸에 적었습니다')}
+ if(has('적기끝','그만적기','받아적기끝','입력끝')&&fe&&fe.blur){fe.blur();VX.last=null;return ok('받아 적기를 마쳤습니다. 이제 말은 명령으로 처리합니다.')}
+ if(txt&&!has('듣기중지','다음탭','이전탭','의사용','직원용','복사','저장','분석해')&&!exactCmd(s)){fe.value=(fe.value&&!/\s$/.test(fe.value)?fe.value+' ':fe.value)+t;fe.dispatchEvent(new Event('input',{bubbles:true}));return ok('입력 칸에 적었습니다')}
  if(has('의사용'))return setMode('doctor'),ok('의사용 화면');if(has('직원용','민원상담용'))return setMode('family'),ok('직원용 화면');
  if($('#viewer')){const L={한국어:'ko',영어:'en',중국어:'zh',베트남어:'vi'};for(const k in L)if(n.includes(k)){vLang=L[k];store.set('vlang',vLang);openViewer();return ok(k+' 안내로 바꿨습니다')}if(has('복사')){$('#vCopy').click();return ok('안내를 복사했습니다')}}
  const sm=t.match(/^(?:검색|찾기)\s*(.+)$/)||t.match(/^(.+?)\s*(?:검색해\s*줘|검색해\s*주세요|검색해|검색|찾아\s*줘|찾아\s*주세요|찾아)$/);
@@ -1167,10 +1171,16 @@ function handleVoice(text){const t=String(text||'').trim();if(!t)return;vHeard(t
 function showVoiceHelp(){modal('<h3 style="margin-top:0">이렇게 말해 보세요</h3><table class="vhelp"><tbody>'+[
  ['이동','처음으로 · 의사용 · 직원용 · 닫기 · 맨 위로 · 아래로'],['유형','신장장애 · 뇌병변 · 간장애 판정 계산 · 다음 유형'],['탭','판정 계산 · 판정기준 · 진단 시기 · 준비 서류 · 상담 안내문 · 다음 탭'],
  ['검색','투석 검색 · 검색 바델 · 근력등급 찾아 줘'],['값 넣기','아이큐 65 · 빌리루빈 3.2 · 알부민 2.7 · 최초 투석일 2026년 3월 15일 · 오른귀 60 70 80 90 · 심한 3호 · 폐이식 체크'],
- ['버튼','기록으로 찾기 · 분석해 · 판정 절차 · 상담 시작 · 상담 종료 · 민원인 화면 · 영어로 · 복사 · 이력 저장 · 즐겨찾기'],['읽기','결과 읽어 줘 · 읽어 줘 · 멈춰 · 큰 글씨'],['끄기','듣기 중지 (또는 마이크 단추, Alt+M)']].map(r=>'<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>').join('')+'</tbody></table><p class="note">입력 칸에 커서가 있을 때 명령이 아닌 말을 하면 그 칸에 적습니다.</p>',[['닫기',null,1]]);return '도움말을 열었습니다'}
-function voiceUI(){if($('#vfab'))return;const f=document.createElement('button');f.id='vfab';f.type='button';f.className='vfab';f.setAttribute('aria-pressed','false');f.title='말로 조작 (Alt+M)';f.innerHTML='<span class="vdot"></span><span class="vlab">말로 조작</span>';f.onclick=voiceToggle;document.body.appendChild(f);
+ ['버튼','기록으로 찾기 · 분석해 · 판정 절차 · 상담 시작 · 상담 종료 · 민원인 화면 · 영어로 · 복사 · 이력 저장 · 즐겨찾기'],['읽기','결과 읽어 줘 · 읽어 줘 · 멈춰 · 큰 글씨'],['받아 적기','글 칸을 누르고 말하면 그 칸에 적음 · 적기 끝'],['끄기','듣기 중지 (또는 마이크 단추, Alt+M)']].map(r=>'<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>').join('')+'</tbody></table><p class="note">음성 기능을 켜 두면 휴대폰 키보드가 올라오지 않습니다. 글 칸을 누르면 그 칸에 말로 받아 적고, 「신장장애 예상 정도」처럼 명령만 말하면 그대로 이동합니다.</p>',[['닫기',null,1]]);return '도움말을 열었습니다'}
+function voiceUI(){if($('#vfab'))return;const f=document.createElement('button');f.id='vfab';f.type='button';f.className='vfab';f.setAttribute('aria-pressed','false');f.title='말로 조작 (Alt+M)';f.innerHTML='<span class="vdot"></span><span class="vlab">말로 조작</span>';f.onclick=voiceToggle;f.addEventListener('pointerdown',e=>e.preventDefault());f.addEventListener('mousedown',e=>e.preventDefault());document.body.appendChild(f);
  const b=document.createElement('div');b.id='vbar';b.className='vbar2 hidden';b.setAttribute('aria-live','polite');b.innerHTML='<span class="vheard"></span><span class="vmsg">듣고 있습니다. 예) "신장장애 판정 계산", "도움말"</span><button type="button" class="btn ghost" id="vHelp">도움말</button>';document.body.appendChild(b);$('#vHelp').onclick=showVoiceHelp}
-function voiceSet(on){VX.on=on;$('#vfab').setAttribute('aria-pressed',on);$('#vfab .vlab').textContent=on?'듣는 중':'말로 조작';$('#vbar').classList.toggle('hidden',!on)}
+const KB_SEL='input[type=text],input[type=search],input[type=number],input:not([type]),textarea';
+function kbApply(root){(root.querySelectorAll?root:document).querySelectorAll(KB_SEL).forEach(e=>{if(e.dataset.kbim===undefined){e.dataset.kbim=e.getAttribute('inputmode')||'';e.setAttribute('inputmode','none')}})}
+const KB_OBS=new MutationObserver(ms=>{if(!VX.on)return;ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType===1){if(n.matches&&n.matches(KB_SEL))kbApply(n.parentNode||document);else kbApply(n)}}))});
+function kbOff(){let a=document.activeElement;if(!(a&&a.matches&&a.matches(KB_SEL))&&VX.last&&document.contains(VX.last))a=VX.last;if(a&&a.matches&&a.matches(KB_SEL))a.blur();kbApply(document);KB_OBS.observe(document.body,{childList:true,subtree:true});if(a&&a.matches&&a.matches(KB_SEL)&&!a.readOnly&&a.offsetParent!==null){VX.target=a;setTimeout(()=>{try{a.focus({preventScroll:true})}catch(e){}},60)}}
+function kbOn(){KB_OBS.disconnect();document.querySelectorAll('[data-kbim]').forEach(e=>{const v=e.dataset.kbim;if(v)e.setAttribute('inputmode',v);else e.removeAttribute('inputmode');delete e.dataset.kbim})}
+document.addEventListener('focusin',e=>{const el0=e.target;if(el0.matches&&el0.matches('input[type=text],textarea')&&el0.id!=='q')VX.last=el0;else if(el0.matches&&el0.matches('input,select,button')&&el0.id!=='vfab'&&el0.id!=='vHelp')VX.last=null;if(!VX.on)return;const el=e.target;if(el.matches&&el.matches('input[type=text],textarea')&&el.id!=='q'&&!el.readOnly){const lab=(el.closest('.row')?.querySelector('label')?.textContent||el.closest('.box,.card')?.querySelector('h2,h3')?.textContent||'입력').trim();vSay('「'+lab+'」 칸에 받아 적습니다. 끝내려면 "적기 끝"이라고 말하세요.',true)}});
+function voiceSet(on){VX.on=on;if(on)kbOff();else kbOn();$('#vfab').setAttribute('aria-pressed',on);$('#vfab .vlab').textContent=on?'듣는 중':'말로 조작';$('#vbar').classList.toggle('hidden',!on)}
 function voiceStop(){VX.on=false;try{if(VX.eng==='dict'&&DICT)DICT.stop().catch(()=>{});if(VX.eng==='sr'&&VX.rec)VX.rec.stop()}catch(e){}voiceSet(false)}
 function voiceToggle(){if(VX.on){voiceStop();return}
  if(DICT){VX.eng='dict';micEl=null;micBtn=null;voiceSet(true);DICT.start().catch(e=>{voiceSet(false);toast(e&&e.code==='not_granted'?'마이크 사용이 허용되지 않았습니다.':'음성 인식을 시작하지 못했습니다.')});return}
