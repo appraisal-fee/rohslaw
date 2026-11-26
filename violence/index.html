@@ -884,6 +884,7 @@ body.locked .vffab{display:none}
 .sitvoice small{font-weight:400;opacity:.85;font-size:12.5px;justify-self:end}
 @media (max-width:760px){.sitvoice{grid-template-columns:auto 1fr}.sitvoice small{grid-column:1/-1;justify-self:start}}
 .appver{font-size:12px;color:var(--ink2);margin-top:4px}
+@media (pointer:coarse){.mic.mini{padding:6px 12px;font-size:13px;margin-left:10px}.mic.mini::before{width:8px;height:8px}}
 </style>
 <meta name="theme-color" content="#1f3a68">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4003,18 +4004,21 @@ function docFile(name,html){
 /* ============================================================
    음성 받아쓰기 (말로 쓰기)
    ============================================================ */
-var APPVER="2026.11.27-2";
+var APPVER="2026.11.27-3";
 function isTouch(){ try{ return window.matchMedia("(pointer:coarse)").matches||("ontouchstart" in window&&navigator.maxTouchPoints>0); }catch(e){ return false; } }
+/* 음성 입력 중 휴대폰 키보드 막기: 칸을 잠시 읽기 전용 + inputmode none */
+function kbLock(el,tag){ tag=tag||"sr"; kbHide(); if(!isTouch()||!el||el.dataset.kbl) return; el.dataset.kbl=tag; el.dataset.kbro=el.readOnly?"1":""; el.dataset.kbim=el.getAttribute("inputmode")||""; el.setAttribute("inputmode","none"); el.readOnly=true; }
+function kbUnlock(tag){ $$("[data-kbl]").forEach(function(e){ if(tag&&e.dataset.kbl!==tag) return; e.readOnly=e.dataset.kbro==="1"; if(e.dataset.kbim) e.setAttribute("inputmode",e.dataset.kbim); else e.removeAttribute("inputmode"); delete e.dataset.kbl; delete e.dataset.kbro; delete e.dataset.kbim; }); }
 function kbHide(){ if(!isTouch()) return; var a=document.activeElement; if(a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA")) try{ a.blur(); }catch(e){} }
 var SRC=window.SpeechRecognition||window.webkitSpeechRecognition, SRrec=null, SRtarget=null, SRbtn=null, SRwant=false, SRbase="";
 function srNote(msg){var w=$("#sr-warn"); w.innerHTML=msg; w.classList.toggle("hidden",!msg);}
 function srFix(t){return t.replace(/\s*(마침표|온점)\s*/g,". ").replace(/\s*쉼표\s*/g,", ").replace(/\s*물음표\s*/g,"? ").replace(/\s*느낌표\s*/g,"! ").replace(/\s*(줄 ?바꿈|다음 ?줄|엔터)\s*/g,"\n").replace(/ +\n/g,"\n");}
 function srStatus(t){ if(!SRtarget) return; var st=document.getElementById(SRtarget.id+"-st")||(SRbtn&&SRbtn.parentNode.querySelector(".micst")); if(st) st.innerHTML=t; }
-function srStop(){ $$("[data-srim]").forEach(function(e){ if(e.dataset.srim) e.setAttribute("inputmode",e.dataset.srim); else e.removeAttribute("inputmode"); delete e.dataset.srim; }); SRwant=false; if(SRrec){try{SRrec.stop();}catch(e){}} if(SRbtn){SRbtn.classList.remove("on");SRbtn.textContent=SRbtn.dataset.lab||"말하기";} srStatus(""); var was=SRtarget; SRtarget=null; SRbtn=null; if(was) was.dispatchEvent(new Event("input",{bubbles:true})); return was; }
+function srStop(){ kbUnlock("sr"); SRwant=false; if(SRrec){try{SRrec.stop();}catch(e){}} if(SRbtn){SRbtn.classList.remove("on");SRbtn.textContent=SRbtn.dataset.lab||"말하기";} srStatus(""); var was=SRtarget; SRtarget=null; SRbtn=null; if(was) was.dispatchEvent(new Event("input",{bubbles:true})); return was; }
 function srStart(btn,ta){
   if(!SRC){ srNote("<b>이 브라우저는 음성 받아쓰기를 지원하지 않습니다</b>크롬이나 엣지로 열어 주세요. 또는 입력 칸을 누른 뒤 Windows 음성 입력(Win+H)을 써도 됩니다."); return; }
   if(SRtarget) srStop();
-  kbHide(); if(isTouch()&&ta&&ta.dataset.srim==null){ ta.dataset.srim=ta.getAttribute("inputmode")||""; ta.setAttribute("inputmode","none"); }
+  kbLock(ta);
   SRrec=new SRC(); SRrec.lang="ko-KR"; SRrec.continuous=true; SRrec.interimResults=true;
   SRtarget=ta; SRbtn=btn; SRwant=true; btn.dataset.lab=btn.dataset.lab||btn.textContent; btn.classList.add("on"); btn.textContent="멈춤";
   SRbase=ta.value; if(SRbase&&!/[\s\n]$/.test(SRbase)) SRbase+=" ";
@@ -5186,7 +5190,7 @@ function sitApplySaid(t){ var r=sitParse(t), added=[];
   if((cur.sits.length||added.length)&&t.trim()){ quick("상황(말): "+t.trim().slice(0,60),[]); }
   return {added:added, all:r.ids}; }
 function vfRoot(){ var ms=$$(".modal:not(.hidden)"); if(ms.length) return ms[ms.length-1]; if(!$("#sos").classList.contains("hidden")) return null; return $$(".main .view").filter(function(v){return !v.classList.contains("hidden");})[0]||$(".main"); }
-function vfVisible(el){ if(!el||el.disabled||el.readOnly) return false; var r=el.getBoundingClientRect(); if(el.type==="radio"){ var s=el.nextElementSibling; r=s?s.getBoundingClientRect():r; } return r.width>0&&r.height>0&&!el.closest(".hidden"); }
+function vfVisible(el){ if(!el||el.disabled||(el.readOnly&&!el.dataset.kbl)) return false; var r=el.getBoundingClientRect(); if(el.type==="radio"){ var s=el.nextElementSibling; r=s?s.getBoundingClientRect():r; } return r.width>0&&r.height>0&&!el.closest(".hidden"); }
 function vfLabel(el){ var f=el.closest(".f"), t="";
   if(f){ var l=f.querySelector("label.l"); if(l){ var c=l.cloneNode(true); $$(".srcchip,.mic,small,button,select,.r",c).forEach(function(x){x.remove();}); t=c.textContent.replace(/[*\s]+/g," ").trim(); } }
   if(!t&&el.type==="radio"){ var g=el.closest(".opts"); var pl=g&&g.previousElementSibling; if(pl) t=pl.textContent.trim(); }
@@ -5250,9 +5254,9 @@ function vfStart(){ if(!SRC){ toast("이 브라우저는 음성 받아쓰기를 
   if(typeof srStop==="function") srStop(); VF.list=vfCollect(); if(!VF.list.length){ toast("이 화면에는 채울 칸이 없습니다"); return; }
   var a=document.activeElement, s=-1; VF.list.forEach(function(x,i){ if(x.el===a) s=i; });
   if(s<0){ s=0; if(VF.empty){ while(s<VF.list.length&&vfFilled(VF.list[s])) s++; if(s>=VF.list.length){ toast("빈 칸이 없습니다 — ‘빈 칸만’을 끄면 모든 칸을 차례로 돕니다"); s=0; } } }
-  kbHide(); if(isTouch()) VF.list.forEach(function(x){ var e=x.el; if(e.tagName==="INPUT"||e.tagName==="TEXTAREA"){ if(e.dataset.vfim==null) e.dataset.vfim=e.getAttribute("inputmode")||""; e.setAttribute("inputmode","none"); } });
+  kbHide(); VF.list.forEach(function(x){ var e=x.el; if(e.tagName==="INPUT"||e.tagName==="TEXTAREA") kbLock(e,"vf"); });
   VF.on=true; VF.i=s; $("#vf").classList.remove("hidden"); $("#vf-open").classList.add("on"); document.body.classList.add("vfing"); vfMark(); vfListen(); VF.raf=requestAnimationFrame(vfTick); }
-function vfStop(done){ VF.on=false; $$("[data-vfim]").forEach(function(e){ if(e.dataset.vfim) e.setAttribute("inputmode",e.dataset.vfim); else e.removeAttribute("inputmode"); delete e.dataset.vfim; }); cancelAnimationFrame(VF.raf); if(VF.rec){ var r=VF.rec; VF.rec=null; try{ r.stop(); }catch(e){} }
+function vfStop(done){ VF.on=false; kbUnlock("vf"); cancelAnimationFrame(VF.raf); if(VF.rec){ var r=VF.rec; VF.rec=null; try{ r.stop(); }catch(e){} }
   $$(".vf-on").forEach(function(e){e.classList.remove("vf-on");}); $("#vf").classList.add("hidden"); $("#vf-open").classList.remove("on"); document.body.classList.remove("vfing");
   if(done) toast("마지막 칸까지 채웠습니다"); }
 $("#sit-voice").addEventListener("click",function(){ if(VF.on) vfStop(); var e=VF.empty; VF.empty=false; tab("field"); setTimeout(function(){ vfStart(); VF.empty=e; VF.i=0; vfMark(); },50); });
