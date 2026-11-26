@@ -136,6 +136,7 @@ footer a{color:inherit}
 .tools button{border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;border-radius:10px;min-height:44px;padding:0 14px;cursor:pointer;font-weight:600}
 .tools button[aria-pressed=true]{background:#fff;color:#1f4c8f}
 .big main{zoom:1.22}
+.bad{outline:3px solid var(--red)!important;outline-offset:1px}
 .edge{border:2px dashed var(--blue);border-radius:8px;padding:8px 12px;font-size:14px;background:var(--blueSoft)}
 .edge b{display:block;color:var(--blue)}
 .nu{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--paper);display:grid;gap:8px;margin-bottom:6px}
@@ -540,11 +541,16 @@ function pickEval(sc,idx){if(idx==null||idx==='')return R('P',['해당하는 항
 function pd(s){const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return null;const d=new Date(+m[1],+m[2]-1,+m[3]);return d.getMonth()===+m[2]-1?d:null}
 function today(){const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
 function fd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function months(a,b){let m=(b.getFullYear()-a.getFullYear())*12+b.getMonth()-a.getMonth();if(b.getDate()<a.getDate())m--;return m}
-function addMonths(a,n){return new Date(a.getFullYear(),a.getMonth()+n,a.getDate())}
+function months(a,b){let m=(b.getFullYear()-a.getFullYear())*12+b.getMonth()-a.getMonth();const lastB=new Date(b.getFullYear(),b.getMonth()+1,0).getDate();if(b.getDate()<a.getDate()&&b.getDate()!==lastB)m--;return m}
+function addMonths(a,n){const y=a.getFullYear(),m=a.getMonth()+n,last=new Date(y,m+1,0).getDate();return new Date(y,m,Math.min(a.getDate(),last))}
+function nextWeekday(d){const x=new Date(d);while(x.getDay()===0||x.getDay()===6)x.setDate(x.getDate()+1);return x}
 function addDays(a,n){return new Date(a.getFullYear(),a.getMonth(),a.getDate()+n)}
-function dateFmt(el){const d=el.value.replace(/\D/g,'').slice(0,8);el.value=d.length>6?d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6):d.length>4?d.slice(0,4)+'-'+d.slice(4):d}
+function dateFmt(el,force){const v=el.value;
+ if(/[.\/년월일\s]/.test(v)){if(!force)return;const m=v.match(/^\s*(\d{2}|\d{4})\s*[.\/\-년]\s*(\d{1,2})\s*[.\/\-월]\s*(\d{1,2})\s*[.일]?\s*$/);if(m)el.value=(m[1].length===2?'20'+m[1]:m[1])+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0')}
+ else{const d=v.replace(/\D/g,'').slice(0,8);el.value=d.length>6?d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6):d.length>4?d.slice(0,4)+'-'+d.slice(4):d}
+ const bad=/^\d{4}-\d{2}-\d{2}$/.test(el.value)&&!pd(el.value);el.classList.toggle('bad',bad);el.title=bad?'없는 날짜입니다. 다시 확인하세요.':''}
 
+document.addEventListener('change',e=>{const el=e.target;if(el.tagName==='INPUT'&&/^20\d{6}$/.test(el.placeholder||'')&&/[.\/년월일\s]/.test(el.value)){dateFmt(el,true);el.dispatchEvent(new Event('input',{bubbles:true}))}},true);
 /* ───────── 저장 ───────── */
 const store={get(k,d){try{const v=localStorage.getItem('dg_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('dg_'+k,JSON.stringify(v))}catch(e){}}};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -601,7 +607,7 @@ function bindCalc(){const F=$('#form');
  F.addEventListener('input',e=>{const el=e.target;if(!el.dataset.k)return;if(el.dataset.date)dateFmt(el);vals[el.dataset.k]=el.type==='checkbox'?el.checked:el.value;
   if(el.dataset.k==='part'){vals.item='';render();return}evalCalc(true)});
  F.addEventListener('change',e=>{const el=e.target;if(el.type==='radio'||el.type==='checkbox'||el.tagName==='SELECT'){vals[el.dataset.k]=el.type==='checkbox'?el.checked:el.value;if(el.dataset.k==='part'){vals.item='';render();return}evalCalc(true)}});
- $('#reset').onclick=()=>{vals={};render()};
+ $('#reset').onclick=()=>{vals={};try{localStorage.removeItem('dg_res_'+ty().id)}catch(e){}lastRes=null;render()};
  const ng=$('#nuGo');if(ng)ng.onclick=()=>{const key=ty().calcs[calcIdx];const got=nuParse(key,$('#nuTxt').value);const ks=Object.keys(got);const txt=$('#nuTxt').value;
   if(!ks.length){$('#nuMsg').textContent='찾은 수치가 없습니다. 항목 이름과 숫자가 함께 있는지 확인하세요.';return}
   Object.assign(vals,got);render();$('#nuTxt').value=txt;ks.forEach(k=>{const e=document.querySelector('[data-k="'+k+'"]');if(e)e.classList.add('filled')});$('#nuMsg').textContent=ks.length+'개 칸을 채웠습니다(빨간 테두리). 원본과 꼭 대조하세요.'};
@@ -614,9 +620,9 @@ function evalCalc(anim){const c=C[ty().calcs[calcIdx]];const v={};c.f.forEach(f=
   '<ul class="basis">'+r.basis.map(b=>'<li>'+esc(b)+'</li>').join('')+'</ul>'+r.warn.map(w=>'<div class="warn">'+esc(w)+'</div>').join('')+
   edgeList(ty().calcs[calcIdx],v,r).map(m=>'<div class="edge"><b>경계선 알림</b>'+esc(m)+'</div>').join('')+
   (mode==='family'?'<p class="note">민원인에게는 「예상」으로만 안내하세요. 「상담 안내문」에 자동으로 담깁니다.</p>':'<p class="note">최종 판정은 국민연금공단 심사에서 결정됩니다.</p>'+(r.lv==='P'?'':'<div class="save"><input id="pid" placeholder="환자 구분(이니셜·등록번호 끝자리)" value="'+esc(store.get('lastPid',''))+'" aria-label="환자 구분"><button type="button" class="btn" id="saveH">이력 저장</button></div><span class="note" id="saveMsg"></span>'));
- store.set('res_'+ty().id,{calc:c.t,lv:r.lv,basis:r.basis,big:r.big||''});
+ if(['S','M','N'].includes(r.lv))store.set('res_'+ty().id,{calc:c.t,lv:r.lv,basis:r.basis,big:r.big||''});
  const sb=$('#saveH');if(sb)sb.onclick=()=>saveHist($('#pid').value.trim())}
-function certHTML(t){const r=lastRes&&lastRes.type===t.name&&['S','M','N'].includes(lastRes.r.lv)?lastRes:null;
+function certHTML(t){const sv=store.get('res_'+t.id,null);const r=lastRes&&lastRes.type===t.name&&['S','M','N'].includes(lastRes.r.lv)?lastRes:(sv&&['S','M','N'].includes(sv.lv)?{type:t.name,calc:sv.calc,r:{lv:sv.lv,basis:sv.basis}}:null);
  const lvTxt=r?{S:'장애의 정도가 심한 장애인',M:'장애의 정도가 심하지 않은 장애인',N:'장애정도 기준 미해당'}[r.r.lv]:'(판정 계산 탭에서 먼저 계산하세요)';
  const draft=t.name+' 장애정도 진단 소견\n- 판정 근거: '+(r?r.r.basis.join(' / '):'')+'\n- 판정: '+lvTxt+'\n- 적용 기준: 장애정도판정기준(보건복지부 고시 제2025-228호) '+t.name+' 장애정도기준\n- 원인 상병명: \n- 발병(수술)일 및 치료 경과: \n- 장애 고착 여부 및 재판정 필요 의견: ';
  const groups=[['진단서 기재사항','c',t.cert,3],['검사결과지','t',t.tests,2],['진료기록지',' r',t.recs,2]].map(g=>[g[0],g[1].trim(),g[2],g[3]]);
@@ -639,7 +645,7 @@ function commonHTML(){return '<h3>판정 원칙</h3><ul class="clean"><li>장애
 function procHTML(){return '<ol class="steps"><li><div><b>병원에서 진단받기</b><br>해당 과 전문의에게 장애 진단을 받고 「장애정도심사용 진단서」와 검사결과지·진료기록 사본을 발급받습니다.</div></li><li><div><b>주민센터에 신청</b><br>주소지 읍·면·동 주민센터에 신청서, 사진 1장, 진단서와 구비서류를 냅니다.</div></li><li><div><b>국민연금공단 심사</b><br>주민센터가 서류를 공단으로 보내고, 공단이 2인 이상 전문의가 참여하는 자문회의로 심사합니다. 자료가 부족하면 보완 요청이 오고, 필요하면 직접 진단을 받을 수도 있습니다.</div></li><li><div><b>결과 통보와 등록</b><br>주민센터를 통해 결과를 받고, 장애인으로 등록되면 장애인등록증(복지카드)을 받습니다.</div></li></ol><p class="note">진행 상황은 국민연금공단 장애심사 포털의 「장애정도심사 진행상태 조회」나 국민연금 전자민원에서 확인할 수 있습니다. 문의: 국민연금 콜센터 1355</p>'}
 function appealHTML(){const d=store.get('notice','');const nd=pd(d);
  return '<div class="cols"><div class="box"><h3>이의신청</h3><ul class="clean"><li>결과를 통보받은 날부터 <b>90일 이내</b>에 1회 신청할 수 있습니다.</li><li>신청서는 주민센터에 내고, 추가 증빙자료를 함께 낼 수 있습니다.</li><li>처음 심사에 참여하지 않은 의사들로 자문회의를 다시 구성해 심사합니다.</li><li>이의신청 결과에도 동의하지 않으면 90일 이내에 행정심판 또는 행정소송을 제기할 수 있습니다.</li></ul></div><div class="box"><h3>기한 계산</h3><div class="row"><label for="notice">결과 통보일</label><input id="notice" type="text" inputmode="numeric" placeholder="20240814" value="'+esc(d)+'"></div><p id="dl" style="font-size:18px;margin:12px 0 0">'+deadline(nd)+'</p><p class="note">통보받은 날을 넣으면 90일째 되는 날을 계산합니다. 정확한 기산일은 통지서와 주민센터 안내로 확인하세요.</p></div></div><h3>재판정</h3><p>장애 상태가 바뀔 수 있다고 판단되면 재판정 시기가 정해집니다. 시기가 되면 시·군·구에서 안내하며, 안내받은 기간 안에 다시 진단서를 내야 합니다. 재판정 안내를 받으면 「진행 기록」 탭에 날짜를 적어 두세요.</p>'}
-function deadline(nd){if(!nd)return '통보일을 입력하세요.';const e=addDays(nd,90),left=Math.round((e-today())/864e5);return '이의신청 기한: <b>'+fd(e)+'</b> 까지 '+(left>=0?'(오늘부터 '+left+'일 남음)':'(기한이 지났습니다)')}
+function deadline(nd){if(!nd)return '통보일을 입력하세요.';const e0=addDays(nd,90),e=nextWeekday(e0),left=Math.round((e-today())/864e5);return '이의신청 기한: <b>'+fd(e)+'</b> 까지 '+(left>=0?'(오늘부터 '+left+'일 남음)':'(기한이 지났습니다)')+(e-e0?'<br><span class="note">90일째('+fd(e0)+')가 주말이라 다음 평일로 미뤘습니다(민법 제161조). 공휴일이면 하루 더 미루세요.</span>':'<br><span class="note">마지막 날이 공휴일이면 그다음 날까지입니다(민법 제161조).</span>')}
 function logHTML(){const L=store.get('log',[]);
  return '<p class="sub">장애 진단·등록 민원 상담 내용을 남겨 두세요. 이 기기의 브라우저에만 저장되므로 민원인 이름 대신 이니셜이나 번호 일부를 쓰세요.</p><div class="box form"><div class="row"><label for="lgD">상담일</label><input id="lgD" type="text" inputmode="numeric" placeholder="20240814" value="'+fd(today())+'"></div><div class="row"><label for="lgW">민원인 구분</label><input id="lgW" type="text" placeholder="예) 김OO 보호자, 등록번호 끝 4자리"></div><div class="row"><span class="lab">장애유형</span><span>'+ty().name+'</span></div><div class="row"><label for="lgT">상담 내용</label><input id="lgT" type="text" placeholder="예) 뇌병변 진단 시기 문의, 발병 후 6개월 이후 가능 안내"></div><div class="row"><label for="lgN">후속 조치</label><input id="lgN" type="text" placeholder="예) 재활의학과 외래 예약 안내, 준비물 문자 발송"></div><div class="btns"><button class="btn" type="button" id="lgAdd">상담 기록 추가</button><button class="btn ghost" type="button" id="lgCopy">전체 기록 복사</button></div></div><div style="margin-top:14px">'+
  (L.length?[...L].map((x,i)=>[x,i]).reverse().map(([x,i])=>'<div class="logrow"><span>'+esc(x.d)+'</span><span><b>'+esc(x.who||'')+(x.ty?' · '+esc(x.ty):'')+'</b><br>'+esc(x.t)+(x.next?' → '+esc(x.next):'')+'</span><button type="button" data-del="'+i+'" aria-label="삭제">✕</button></div>').join(''):'<p class="note">아직 상담 기록이 없습니다.</p>')+'</div>'}
@@ -675,7 +681,7 @@ const NU={
 function nuParse(key,txt){const out={},m=NU[key];if(!m||!txt.trim())return out;
  if(key==='ear')return parseEar(txt);
  if(key==='mbi'){['개인\\s*위생','목욕','식사','용변','계단','옷','대변','소변','보행|휠체어','이동|의자|침대'].forEach((l,i)=>{const r=txt.match(new RegExp('(?:'+l+')[^\\d\\n]{0,12}(\\d{1,2})'));if(r&&MBI[i][1].includes(+r[1]))out['b'+i]=r[1]});return out}
- if(key==='kidney'){const r=txt.match(/(?:최초\s*투석|투석\s*시작|first\s*dialysis)[^\d\n]{0,15}(\d{4})[.\-\/년\s]*(\d{1,2})[.\-\/월\s]*(\d{1,2})/i);if(r)out.d0=r[1]+'-'+r[2].padStart(2,'0')+'-'+r[3].padStart(2,'0');return out}
+ if(key==='kidney'){const r=txt.match(/(?:최초\s*투석|투석\s*시작|first\s*dialysis)[^\d\n]{0,15}(\d{4})[.\-\/년\s]*(\d{1,2})[.\-\/월\s]*(\d{1,2})/i);if(r){const s=r[1]+'-'+r[2].padStart(2,'0')+'-'+r[3].padStart(2,'0');if(pd(s))out.d0=s}return out}
  Object.keys(m).forEach(k=>{if(k[0]==='_')return;const re=typeof m[k]==='string'?new RegExp('(?:'+m[k]+')[^0-9\\n]{0,30}?(\\d+(?:\\.\\d+)?)','i'):m[k];const r=txt.match(re);if(r)out[k]=r[1]});return out}
 function parseEar(txt){if(!/dB|Hz|청력|PTA|순음|audiogram/i.test(txt))return {};const out={},F=[125,250,500,750,1000,1500,2000,3000,4000,6000,8000];
  const t=txt.replace(/\bNR\b|무반응|scale\s*out|S\/O/gi,' 100 '),lines=t.split(/\n/);let head=null;
@@ -740,13 +746,13 @@ function timeHTML(t){const [bl,rs]=TIM[t.id],tv=store.get('tv_'+t.id,{r:0,b:'',b
  '<div class="row"><label for="tmB">'+bl+'</label><input id="tmB" type="text" inputmode="numeric" placeholder="20240814" value="'+esc(tv.b)+'"></div>'+
  '<div class="row"><label for="tmD">생년월일</label><input id="tmD" type="text" inputmode="numeric" placeholder="20200105" value="'+esc(tv.bd)+'"></div><p class="note">기간은 최소 기준입니다. 그 뒤에도 장애가 고착되지 않았으면 진단을 미뤄야 합니다.</p></div><div class="stampBox" id="tmOut" aria-live="polite"></div></div>'+
  '<div class="cols" style="margin-top:20px"><div class="box"><h3>장애진단 시기(고시)</h3><p>'+t.timing+'</p></div><div class="box"><h3>진단서 발급 가능 전문의</h3><p>'+t.doc+'</p></div></div><h3>바로 진단할 수 있는 경우</h3><p>'+COMMON.instant+'</p><h3>재판정</h3><p>앞으로 장애 상태가 바뀔 것으로 예상되면 국민연금공단이 재판정 필요성과 시기를 정하고, 시·군·구가 대상자에게 알립니다.</p>'}
-function timeCalc(){const t=ty(),[bl,rs]=TIM[t.id],tv={r:$('#tmR').value,b:$('#tmB').value,bd:$('#tmD').value};store.set('tv_'+t.id,tv);const [lab,mo,age]=rs[+tv.r],b=pd(tv.b),bd=pd(tv.bd),O=$('#tmOut');
- if(!mo&&!age){store.set('tim_'+t.id,{date:'즉시',wait:false});O.innerHTML='<div class="stamp M">바로 가능<span>시행 후 즉시</span></div><p>'+esc(lab)+'</p>';return}
+function timeCalc(user){const t=ty(),[bl,rs]=TIM[t.id],tv={r:$('#tmR').value,b:$('#tmB').value,bd:$('#tmD').value};const keep=user===true||!!store.get('tim_'+t.id,null)||!!(tv.b||tv.bd);if(keep)store.set('tv_'+t.id,tv);const saveT=x=>{if(keep)store.set('tim_'+t.id,x)};const [lab,mo,age]=rs[+tv.r],b=pd(tv.b),bd=pd(tv.bd),O=$('#tmOut');
+ if(!mo&&!age){saveT({date:'즉시',wait:false});O.innerHTML='<div class="stamp M">바로 가능<span>시행 후 즉시</span></div><p>'+esc(lab)+'</p>';return}
  const need=[];if(mo&&!b)need.push(bl);if(age&&!bd)need.push('생년월일');if(need.length){O.innerHTML='<div class="stamp P">입력 대기<span>'+need.join(', ')+'</span></div>';return}
  const c=[];if(mo)c.push([addMonths(b,mo),bl+'부터 '+(mo%12?mo+'개월':mo/12+'년')]);if(age)c.push([new Date(bd.getFullYear()+age,bd.getMonth(),bd.getDate()),'만 '+age+'세']);c.sort((x,y)=>y[0]-x[0]);
- const d=c[0][0],left=Math.round((d-today())/864e5),wait=left>0;store.set('tim_'+t.id,{date:fd(d),wait});
+ const d=c[0][0],left=Math.round((d-today())/864e5),wait=left>0;saveT({date:fd(d),wait});
  O.innerHTML='<div class="stamp '+(wait?'S':'M')+'">'+(wait?left+'일 남음':'진단 가능')+'<span>'+fd(d)+(wait?' 부터':' 부터 가능')+'</span></div><ul class="basis">'+c.map(x=>'<li>'+esc(x[1])+' → '+fd(x[0])+'</li>').join('')+'</ul>'+(t.id==='lung'||t.id==='liver'?'<p class="note">최근 2개월 이상 지속 치료(직전 2개월 이상 진료한 전문의)도 함께 필요합니다.</p>':'')}
-function bindTime(){['#tmB','#tmD'].forEach(s=>$(s).addEventListener('input',e=>{dateFmt(e.target);timeCalc()}));$('#tmR').onchange=timeCalc;timeCalc()}
+function bindTime(){['#tmB','#tmD'].forEach(s=>$(s).addEventListener('input',e=>{dateFmt(e.target);timeCalc(true)}));$('#tmR').onchange=()=>timeCalc(true);timeCalc(false)}
 
 /* 4. 유형 찾기 */
 const FIND=[['팔이나 다리, 손가락·발가락을 잃었다','limb'],['관절이 굳어 잘 안 움직이거나, 팔다리에 마비가 있거나, 척추가 굳었다','limb'],['한쪽 다리가 짧거나, 척추가 많이 휘었거나, 키가 매우 작다','limb'],['뇌졸중·뇌손상·뇌성마비·파킨슨병으로 걷기나 일상생활이 어렵다','brain'],['안경을 써도 잘 안 보이거나, 보이는 범위가 좁거나, 물체가 두 개로 보인다','vis'],['잘 들리지 않거나, 어지러워 똑바로 걷기 힘들다','ear'],['목소리가 안 나오거나, 말을 심하게 더듬거나, 발음이 매우 부정확하다','speech'],['얼굴에 큰 흉터·변형·코 결손이 있다','face'],['신장 투석을 받고 있거나 신장 이식을 받았다','kidney'],['심장병으로 조금만 움직여도 숨차거나 가슴이 아프다(심장 이식·폰탄수술 포함)','heart'],['폐 질환으로 숨이 차서 산소치료를 받거나 인공호흡기를 쓴다','lung'],['간경변·간암 등으로 간 기능이 많이 나쁘다(간 이식 포함)','liver'],['배에 장루·요루·방광루가 있다','ostomy'],['약을 먹어도 발작(경련)이 자주 있다','epi'],['1형 당뇨 등으로 6개월 이상 매일 여러 번 인슐린 주사나 펌프를 쓴다','pan'],['지능검사 점수가 낮거나 또래보다 발달이 많이 늦다','intel'],['자폐 진단을 받았거나 자폐가 의심된다','autism'],['조현병·조울병·우울증·강박장애·투렛·기면증으로 1~2년 이상 치료 중이다','mental']];
@@ -869,7 +875,7 @@ function recLocal(txt){const out=[];
     if(NEG_AFTER.test(after)||NEG_BEFORE.test(before)){if(!seen.has('n'+key)){seen.add('n'+key);neg.push(snip(txt,m.index,m[0].length))}continue}
     if(seen.has(key))continue;seen.add(key);score+=w;ev.push({k:kind,w:m[0],s:snip(txt,m.index,m[0].length)});if(m[0].length===0)re.lastIndex++}};
   kw.c.forEach(c=>scan(c,3,'c'));kw.k.forEach(k=>scan(k,2,'k'));
-  const vals={};if(score>0)t.calcs.forEach((ck,ci)=>{if(NU[ck]){const g=nuParse(ck,txt);if(Object.keys(g).length&&!vals.ci){vals.ci=ci;vals.v=g;score+=Object.keys(g).length}}});
+  const vals={};if(score>0)t.calcs.forEach((ck,ci)=>{if(NU[ck]){const g=nuParse(ck,txt);if(Object.keys(g).length&&!vals.v){vals.ci=ci;vals.v=g;score+=Object.keys(g).length}}});
   if(score>=2)out.push({t,score,ev,neg,vals})});
  return out.sort((a,b)=>b.score-a.score)}
 function recHTML(){const doc=mode==='doctor';
@@ -1064,7 +1070,7 @@ const LAW={goshi:['장애정도판정기준 고시 원문','https://www.law.go.k
  rule:['장애인복지법 시행규칙','https://www.law.go.kr/법령/장애인복지법시행규칙','장애인 등록 신청 서식 등 · 국가법령정보센터'],
  nps:['국민연금 장애심사 포털','https://nps.or.kr/das/main.do','진행상태 조회·구비서류·FAQ']};
 const NPSN={limb:9,brain:10,vis:11,ear:12,speech:13,intel:14,mental:15,autism:16,kidney:17,heart:18,lung:19,liver:20,face:21,ostomy:22,epi:23,pan:24};
-const npsUrl=id=>'https://nps.or.kr/das/crtr/getOHAO00'+NPSN[id]+'M0.do';
+const npsUrl=id=>'https://nps.or.kr/das/crtr/getOHAO'+String(NPSN[id]).padStart(4,'0')+'M0.do';
 const lk=(u,t,s)=>'<a class="src" href="'+u+'" target="_blank" rel="noopener noreferrer"><b>'+t+' ↗</b>'+(s?'<span>'+s+'</span>':'')+'</a>';
 function srcHTML(t){return '<div class="srcs"><span class="ql">원문 바로가기</span>'+lk(LAW.goshi[1],LAW.goshi[0],LAW.goshi[2])+lk(npsUrl(t.id),'공단 '+t.name+' 기준','국민연금공단 게시본')+'</div>'}
 function srcProcHTML(){return '<div class="srcs"><span class="ql">원문 바로가기</span>'+['simsa','goshi','rule','nps'].map(k=>lk(LAW[k][1],LAW[k][0],LAW[k][2])).join('')+'</div>'}
