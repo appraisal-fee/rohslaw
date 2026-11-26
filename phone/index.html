@@ -918,6 +918,7 @@ function wardKw(text){
   return [...new Set(out)];
 }
 const PA_DATE='2025. 4. 28.';
+const RETIRED=new Set(['김희열','조광욱']);   // 퇴직 교수 — PA 명단에서 뺌
 const PA_SHORT=PA_DATE.replace(/\s/g,'').replace(/^20/,'').replace(/\.$/,'');
 // 진료과 약어 → 과 이름 (검색용)
 const CODE_KW={IMG:'소화기내과',IMN:'신장내과',IMP:'호흡기내과',IMC:'순환기내과',IMO:'혈액종양내과',IME:'내분비내과',IMI:'감염내과',IMR:'류마티스내과',NU:'신경과',NS:'신경외과',OS:'정형외과',PS:'성형외과',URO:'비뇨의학과 비뇨기과',ENT:'이비인후과',OBGY:'산부인과',DT:'치과',GS:'외과',CS:'흉부외과',RM:'재활의학과',PED:'소아청소년과',FM:'가정의학과',ED:'응급의학과',DM:'피부과',SN:'전담간호사',ICU:'중환자실',NP:'정신건강의학과',OG:'산부인과',OB:'산부인과',PD:'소아청소년과',GU:'비뇨의학과 비뇨기과',IM:'내과',IRB:'연구윤리',CRC:'임상연구코디네이터 연구간호사',VOC:'고객의소리 민원',NSICU:'신경외과중환자실',MSICU:'내외과중환자실',NICU:'신생아중환자실',ER:'응급실',DR:'분만실',NR:'신생아실'};
@@ -931,7 +932,7 @@ function staffEntries(){
     let memo=duty||'';
     let paProfs=[];
     if(p){
-      const parts=String(p.prof||'').split(',').map(x=>x.trim()).filter(Boolean);
+      const parts=String(p.prof||'').split(',').map(x=>x.trim()).filter(x=>x&&!RETIRED.has(x));
       const moved=/이동/.test(p.prof||'');
       paProfs=parts.filter(x=>/^[가-힣]{2,4}$/.test(x));
       const others=parts.filter(x=>!paProfs.includes(x));
@@ -1013,6 +1014,7 @@ function staffLineHTML(e,terms){
 }
 
 
+
 // ===== 찾은 것만 먼저, 연결 정보는 접어서 =====
 let showRel=false, relQ='';
 const openStaff=new Set();
@@ -1027,7 +1029,6 @@ function staffToggleHTML(e,terms){
   const open=openStaff.has(e.key);
   return `<button class="stbtn" data-staffkey="${esc(e.key)}">${open?'관련 담당자 접기 ▴':`관련 담당자 ${e.staff.length}명 보기 ▾`}</button>${open?staffLineHTML(e,terms):''}`;
 }
-
 function build(){
   all=base.entries.map(e=>Object.assign({},e,{src:'base',badge:''}));
   all.push(...staffEntries());
