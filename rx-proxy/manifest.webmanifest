@@ -1,0 +1,25 @@
+{
+  "name": "처방전 대리수령 요건 검토",
+  "short_name": "대리수령 검토",
+  "description": "의료법 제17조의2 처방전 대리수령 요건 판단·구비서류 확인·신청서 출력 — 가톨릭대학교 부천성모병원 원무팀",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f6f7",
+  "theme_color": "#164a5c",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

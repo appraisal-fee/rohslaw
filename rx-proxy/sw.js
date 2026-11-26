@@ -1,0 +1,16 @@
+// 처방전 대리수령 요건 검토 - 서비스 워커: 페이지는 최신 우선, 인터넷이 끊기면 저장본
+const CACHE = 'rx-proxy-v1-5-0';
+const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
+self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('rx-proxy') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
+self.addEventListener('fetch', e => {
+  const req = e.request; if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;
+  if (req.mode === 'navigate' || url.pathname.endsWith('/rx-proxy/') || url.pathname.endsWith('/index.html')) {
+    e.respondWith(fetch(req, {cache:'no-cache'}).then(r => { const cp = r.clone(); caches.open(CACHE).then(c => c.put('./index.html', cp)); return r; }).catch(() => caches.match('./index.html')));
+    return;
+  }
+  if (url.pathname.endsWith('.json')) return; // 버전·공지·기준 파일은 늘 새로 받음
+  e.respondWith(caches.match(req).then(hit => hit || fetch(req)));
+});
