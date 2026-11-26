@@ -500,7 +500,7 @@ body.hc{--sub:#2b3442;--line:#8a94a6;--ink:#0b0f17}body.hc .muted{color:#2b3442!
     <button class="btn" id="bAddAnnex">+ 별첨 대조표 추가</button>
   </div>
 </section>
-<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.17. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
+<div class="foot-info">신·구조문 대조표 작성 도구 <b id="appVer"></b> · 개발자 노상엽 · 개발일자 2026.11.26. · <span id="privNote">문서는 인터넷으로 보내지 않고 이 PC 안에서만 처리됩니다</span> · <a href="#" id="updCheck">새 버전 확인</a></div>
 </main>
 
 <!-- 설정 서랍 -->
@@ -4428,7 +4428,11 @@ window.__authGate=true;
   const isAddenda = (b) => b.type === 'p' && /^부칙$/.test(norm((b.num || '') + b.text));
 
   /* ---------- 문서의 머리 정보표(내규번호·제정일 …) ---------- */
-  function toISO(s) { const m = String(s || '').match(/(\d{4})\s*[.\-년/]\s*(\d{1,2})\s*[.\-월/]\s*(\d{1,2})/); return m ? m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0') : ''; }
+  const DRE = /(\d{4})\s*[.\-년/]\s*(\d{1,2})\s*[.\-월/]\s*(\d{1,2})/g;
+  const okYMD = (y, m, d) => { const t = new Date(y, m - 1, d); return y >= 1900 && y <= 2100 && t.getFullYear() === y && t.getMonth() === m - 1 && t.getDate() === d; };
+  function toISOAll(s) { const out = []; let m; DRE.lastIndex = 0; while ((m = DRE.exec(String(s || '')))) if (okYMD(+m[1], +m[2], +m[3])) out.push(m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0')); return out; }
+  function toISO(s) { return toISOAll(s)[0] || ''; }
+  RG.toISOAll = toISOAll;
   RG.toISO = toISO;
   RG.docMeta = function (doc) {
     const meta = {}; if (!doc) return meta;
@@ -4441,7 +4445,7 @@ window.__authGate=true;
         for (const [k, re] of LAB) if (re.test(t) && t.length < 14 && meta[k] == null) { const v = r[i + 1]; if (v) meta[k] = soft(v.text); }
       }));
     }
-    ['enacted', 'revised', 'reviewed'].forEach(k => { if (meta[k]) meta[k + 'ISO'] = toISO(meta[k]); });
+    ['enacted', 'revised', 'reviewed'].forEach(k => { if (meta[k]) { const all = toISOAll(meta[k]).sort(); meta[k + 'ISO'] = k === 'enacted' ? (all[0] || '') : (all[all.length - 1] || ''); } });
     if (meta.cycle) { const m = meta.cycle.match(/(\d+)\s*(년|개월)/); if (m) meta.cycleMonths = m[2] === '년' ? +m[1] * 12 : +m[1]; }
     let t = RG.guessTitle ? RG.guessTitle(doc) : '';
     if (!t || /^[(\[]?[\d.\-\s]+[)\]]?$/.test(t)) { const c = doc.blocks.slice(0, 8).find(b => b.type === 'p' && !b.num && /[가-힣]{2,}/.test(b.text) && soft(b.text).length <= 40 && !/^[(\[]?[\d.\-\s]+[)\]]?$/.test(soft(b.text))); t = c ? soft(c.text) : t; }
@@ -4558,6 +4562,10 @@ window.__authGate=true;
   const dotDate = (iso) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? m[1] + '. ' + (+m[2]) + '. ' + (+m[3]) + '.' : ''; };
   const korDate = (iso) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? m[1] + '년 ' + (+m[2]) + '월 ' + (+m[3]) + '일' : ''; };
   RG.dotDate = dotDate; RG.korDate = korDate;
+  function likeDate(sample, iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); if (!m) return iso; const ex = String(sample || '').match(/(\d{4})(\s*)([.\-/년])(\s*)(\d{1,2})\s*[.\-/월]\s*(\d{1,2})(\s*[.일])?/); if (!ex) return dotDate(iso);
+    const pad = ex[5].length === 2 || ex[6].length === 2; const mo = pad ? m[2] : String(+m[2]), da = pad ? m[3] : String(+m[3]);
+    if (ex[3] === '년') return m[1] + '년 ' + (+m[2]) + '월 ' + (+m[3]) + '일'; const a = ex[2] || '', b = ex[4] || '', sep = ex[3]; return m[1] + a + sep + b + mo + a + sep + b + da + (ex[7] && /\./.test(ex[7]) ? '.' : ''); }
+  RG.likeDate = likeDate;
   function bgm(s) { const m = new Map(); for (let i = 0; i < s.length - 1; i++) { const g = s.substr(i, 2); m.set(g, (m.get(g) || 0) + 1); } return m; }
   function simT(a, b) { a = norm(a); b = norm(b); if (a === b) return 1; if (a.length < 2 || b.length < 2) return 0; const A = bgm(a), B = bgm(b); let x = 0; A.forEach((v, k) => x += Math.min(v, B.get(k) || 0)); return 2 * x / (a.length + b.length - 2); }
   // 문서 영역(본문/부칙/별첨) 표시
@@ -4611,7 +4619,8 @@ window.__authGate=true;
     if (mk) mk.dels.filter(d => d.before >= blocks.length).forEach(d => { const ab = A.blocks[d.a]; if (ab.type === 'p' && ab.num && o.marks) out.push({ type: 'p', num: ab.num, text: '삭제', mark: date ? '<' + dotDate(date) + '>' : '' }); });
     doc.blocks = out;
     // 머리표 개정일자
-    if (date && o.headDate !== false) doc.blocks.slice(0, 12).forEach(b => { if (b.type !== 'table') return; b.rows.forEach(r => r.forEach((c, i) => { if (/개\s*정\s*일/.test(c.text) && soft(c.text).length < 10 && r[i + 1]) { const old = r[i + 1].text || ''; const m = date.match(/^(\d{4})-(\d{2})-(\d{2})$/); r[i + 1] = Object.assign({}, r[i + 1], { text: /\d{4}\.\s*\d{2}\./.test(old) ? m[1] + '. ' + m[2] + '. ' + m[3] + '.' : dotDate(date) }); } })); });
+    if (date && o.headDate !== false) doc.blocks.slice(0, 12).forEach(b => { if (b.type !== 'table') return; b.rows.forEach(r => r.forEach((c, i) => { if (/개\s*정\s*일/.test(c.text) && soft(c.text).length < 10 && r[i + 1]) { const old = r[i + 1].text || ''; const nd = likeDate(old, date); const n = toISOAll(old).length; if (n && toISOAll(old).indexOf(date) >= 0) return;
+      const text = n >= 2 ? old.replace(/\s+$/, '') + (/\n/.test(old) ? '\n' : ', ') + nd : nd; r[i + 1] = Object.assign({}, r[i + 1], { text }); } })); });
     // 전면개정 표시(제목 아래)
     if (full && date && o.marks !== false) { const ti = doc.blocks.findIndex(b => b.type === 'p'); doc.blocks.splice(ti >= 0 ? ti + 1 : 0, 0, { type: 'p', num: '', text: '[전면개정 ' + dotDate(date) + ']', align: 'right' }); }
     // 부칙
@@ -4784,6 +4793,7 @@ window.__authGate=true;
   const AKEY = () => 'sinkujomun_autosave' + (window.__auth && window.__auth.user ? '_' + window.__auth.user.id : '');
 
   /* ---------- 날짜 칸: 숫자만 눌러도(예: 20261201) 날짜가 들어가게 ---------- */
+  function localToday() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function fmtDateTyped(v) {
     const d = String(v || '').replace(/\D/g, '').slice(0, 8);
     if (d.length <= 4) return d; if (d.length <= 6) return d.slice(0, 4) + '-' + d.slice(4); return d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6);
@@ -4842,7 +4852,7 @@ window.__authGate=true;
   function showTitlePrev() { const el = $('#mTitlePrev'); if (el) el.textContent = '첫 쪽 제목: ' + RG.secTitle({ titleSuffix: '' }, state.meta, state.settings); const cb = $('#mTitleName'); if (cb) cb.checked = state.settings.titleWithName !== false; }
   function syncRevUI() { const M = state.meta; if (!M.revDate) M.revDate = defRevDate(); if (!M.revKind) M.revKind = '일부개정'; $('#mRevKind').value = M.revKind; $('#mRevDate').value = M.revDate; $('#mAutoAdd').checked = M.autoAddenda !== false; $('#mRevPrev').textContent = M.autoAddenda !== false ? '부칙 예: ' + RG.addendaLine(M.revDate, M.revKind, (state.docs.new || state.docs.old) ? RG.addendaInfo(state.docs.new || state.docs.old, M.revDate).lastText : '') : ''; }
   $('#mRevKind').addEventListener('change', e => { state.meta.revKind = e.target.value; syncRevUI(); autosave(); });
-  $('#mRevDate').addEventListener('change', e => { state.meta.revDate = e.target.value || defRevDate(); syncRevUI(); autosave(); });
+  $('#mRevDate').addEventListener('change', e => { const v = e.target.value; if (v && !validISO(v)) { e.target.classList.add('bad'); toast('없는 날짜입니다. 개정(시행)일을 다시 적어 주세요. 예) 20261201', 4000); return; } state.meta.revDate = v || defRevDate(); syncRevUI(); autosave(); });
   $('#mAutoAdd').addEventListener('change', e => { state.meta.autoAddenda = e.target.checked; syncRevUI(); autosave(); });
   setTimeout(syncRevUI, 0);
   $('#mTitleName').addEventListener('change', e => { state.settings.titleWithName = e.target.checked; showTitlePrev(); autosave(); if ($('#step2').style.display !== 'none') renderSections(); });
@@ -5579,7 +5589,7 @@ window.__authGate=true;
       <div class="foot"><button class="btn" id="x">취소</button><button class="btn pri" id="ok">넣기</button></div>`, m => {
       $('#x', m).onclick = closeModal;
       $('#ok', m).onclick = () => {
-        const N = +$('#adN', m).value || 0, dt = new Date($('#adD', m).value || def);
+        const N = +$('#adN', m).value || 0, dv = $('#adD', m).value || def; if (!validISO(dv)) { toast('시행일을 바르게 적어 주세요. 예) 20261201'); return; } const [yy, mm, dd] = dv.split('-').map(Number), dt = { getFullYear: () => yy, getMonth: () => mm - 1, getDate: () => dd };
         const line = (N + 1) + '. 이 내규는 ' + dt.getFullYear() + '년 ' + (dt.getMonth() + 1) + '월 ' + dt.getDate() + '일부 ' + (state.meta.revKind === '전면개정' ? '전면개정' : '개정') + ', 시행한다.' + ($('#adR', m).checked && $('#adRt', m).value.trim() ? ' ' + $('#adRt', m).value.trim() : '');
         addAddendaRow(sec, N, line);
         closeModal(); renderSections(); autosave();
@@ -6100,7 +6110,7 @@ window.__authGate=true;
     flushCells();
     if (!state.sections.length || !state.sections.some(s => (s.rows && s.rows.length) || s.type === 'annex')) { toast('먼저 대조표를 만들어 주세요.'); return; }
     const B = state.lastResult && state.lastResult.B; const meta = B ? RG.docMeta(B) : {};
-    const reasons = usedReasons(); const nl = noteLines(); const today = new Date().toISOString().slice(0, 10);
+    const reasons = usedReasons(); const nl = noteLines(); const today = localToday();
     const minor = reasons.some(r => /경미/.test(r));
     const main = nl.map((x, i) => '- ' + (x.head ? x.head.replace(/\s+/g, ' ').slice(0, 40) + (x.notes.length ? ': ' : '') : '') + x.notes.join(', ')).join('\n');
     modal(`<h3>사유서 · 상정 자료 만들기</h3><div class="muted">대조표의 비고와 개정 사유로 <b>개정 사유서</b> 초안을 만들고, 대조표·개정 전문과 함께 한 번에 받습니다. 내용은 고친 뒤 만드세요.</div>
@@ -6122,6 +6132,7 @@ window.__authGate=true;
       $('#x', m).onclick = closeModal;
       $('#ok', m).onclick = async () => {
         const v = (id) => $(id, m).value.trim(); const fmt = $('input[name=sbf]:checked', m).value;
+        for (const [id, lab] of [['#sbE', '시행(예정)일'], ['#sbW', '작성일']]) if (v(id) && !validISO(v(id))) { toast(lab + '이 없는 날짜입니다. 다시 적어 주세요. 예) 20261201', 4000); $(id, m).focus(); return; }
         const info = { name: v('#sbN'), no: v('#sbNo'), dept: v('#sbD'), eff: v('#sbE'), kind: v('#sbK'), gubun: $('#sbG', m).value, wrote: v('#sbW'), reasons: v('#sbR').split('\n').map(s => s.trim()).filter(Boolean), mains: v('#sbM').split('\n').map(s => s.replace(/^[-·•\s]+/, '').trim()).filter(Boolean), basis: v('#sbB') };
         const want = { r: $('#oR', m).checked, t: $('#oT', m).checked, f: $('#oF', m).checked && !!B, fc: $('#oFc', m).value };
         if (!want.r && !want.t && !want.f) { toast('받을 자료를 하나 이상 고르세요.'); return; }
@@ -6235,7 +6246,7 @@ window.__authGate=true;
         const head = '일괄 비교 결과 (' + new Date().toLocaleString('ko-KR') + ')\n\n';
         zip.file('00 결과 요약.txt', head + report.join('\n') + (lintTxt.length ? '\n\n형식 검사\n' + lintTxt.join('\n\n') : ''));
         busy(true, '압축 파일 만드는 중…');
-        download(await zip.generateAsync({ type: 'blob' }), '일괄 신구조문 대조표 ' + new Date().toISOString().slice(0, 10) + '.zip');
+        download(await zip.generateAsync({ type: 'blob' }), '일괄 신구조문 대조표 ' + localToday() + '.zip');
         busy(false); LOG('일괄 비교', jobs.length + '건');
         modal(`<h3>일괄 비교 끝</h3><div class="muted">압축 파일을 받았습니다. 각 대조표는 한글·워드에서 열어 다듬을 수 있습니다.</div><pre class="rep">${esc(report.join('\n'))}</pre><div class="foot"><button class="btn pri" id="x">닫기</button></div>`, mm => $('#x', mm).onclick = closeModal);
       };
@@ -6278,7 +6289,7 @@ window.__authGate=true;
           } catch (e) { console.error(e); rep.push('✕ ' + f.name + ': 실패 — ' + (e.message || e)); }
         }
         zip.file('00 결과 요약.txt', '이름 일괄 변경 결과\n바꾼 이름: ' + pairs.map(p => p[0] + ' → ' + p[1]).join(', ') + '\n\n' + rep.join('\n'));
-        busy(true, '압축 파일 만드는 중…'); download(await zip.generateAsync({ type: 'blob' }), '이름 일괄 변경 ' + new Date().toISOString().slice(0, 10) + '.zip'); busy(false);
+        busy(true, '압축 파일 만드는 중…'); download(await zip.generateAsync({ type: 'blob' }), '이름 일괄 변경 ' + localToday() + '.zip'); busy(false);
         LOG('이름 일괄 변경', st.files.length + '건 · ' + pairs.map(p => p[0] + '→' + p[1]).join(', '));
         modal(`<h3>이름 일괄 변경 끝</h3><pre class="rep">${esc(rep.join('\n'))}</pre><div class="foot"><button class="btn pri" id="x">닫기</button></div>`, mm => $('#x', mm).onclick = closeModal);
       };
@@ -6292,21 +6303,23 @@ window.__authGate=true;
   const regAll = () => { try { return JSON.parse(localStorage.getItem(REG_KEY) || '[]'); } catch (e) { return []; } };
   const regSave = (L) => { try { localStorage.setItem(REG_KEY, JSON.stringify(L)); } catch (e) { } updRegBadge(); };
   const ymd = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  const addMonths = (iso, n) => { if (!iso) return ''; const d = new Date(iso + 'T00:00:00'); if (isNaN(d)) return ''; d.setMonth(d.getMonth() + n); return ymd(d); };
+  const addMonths = (iso, n) => { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); if (!m) return ''; const t = +m[1] * 12 + (+m[2] - 1) + n; const y = Math.floor(t / 12), mo = t % 12; const last = new Date(y, mo + 1, 0).getDate(); return ymd(new Date(y, mo, Math.min(+m[3], last))); };
   const daysTo = (iso) => iso ? Math.round((new Date(iso + 'T00:00:00') - new Date(ymd(new Date()) + 'T00:00:00')) / 86400000) : null;
   function regCalc(x) {
-    const base = x.reviewed || x.revised || x.enacted || '';
+    if (x.planned && validISO(x.planned) && x.planned <= localToday() && x.planned > (x.revised || '')) { x.revised = x.planned; x.reviewed = ''; delete x.planned; }
+    const base = [x.reviewed, x.revised].filter(Boolean).sort().pop() || x.enacted || '';
     x.nextReview = x.nextReviewManual || (base ? addMonths(base, x.cycleMonths || 24) : '');
     x.keepUntil = x.revised ? addMonths(x.revised, 60) : (x.keepUntil || '');
     return x;
   }
   function registryUpsertFrom(A, B) {
     const mb = RG.docMeta(B), ma = RG.docMeta(A); const name = (mb.name || ma.name || '').replace(/\s*신[•·]?구조문.*$/, '').trim(); if (!name) return;
-    const L = regAll(); let x = L.find(r => (mb.no && r.no === mb.no) || r.name === name);
-    const today = new Date().toISOString().slice(0, 10);
+    const L = regAll(); const nk = (t) => String(t || '').replace(/^(가톨릭대학교\s*)?부천성모병원\s*/, '').replace(/[\s「」『』()\[\]·・]/g, ''); let x = L.find(r => mb.no && nk(r.no) === nk(mb.no)) || L.find(r => nk(r.name) === nk(name));
+    const today = localToday();
     if (!x) { x = { id: uid(), name, createdAt: today }; L.push(x); }
     x.name = name; x.no = mb.no || x.no || ''; x.dept = mb.dept || x.dept || ''; x.enacted = mb.enactedISO || x.enacted || '';
     x.revised = mb.revisedISO || x.revised || ''; x.reviewed = mb.reviewedISO || x.reviewed || ''; if (mb.cycleMonths) x.cycleMonths = mb.cycleMonths;
+    const pd = state.meta.revDate; if (pd && validISO(pd) && pd > (x.revised || '')) x.planned = pd;
     x.lastTable = today; x.updatedAt = new Date().toISOString(); regCalc(x); regSave(L);
   }
   function updRegBadge() {
@@ -6324,17 +6337,17 @@ window.__authGate=true;
           .filter(x => st.f === 'all' || (st.f === 'due' ? (daysTo(x.nextReview) != null && daysTo(x.nextReview) <= 60) : (daysTo(x.keepUntil) != null && daysTo(x.keepUntil) < 0)))
           .sort((a, b) => (a.nextReview || '9999').localeCompare(b.nextReview || '9999'));
         const dd = (iso) => { const d = daysTo(iso); if (d == null) return '<span class="muted">-</span>'; const c = d < 0 ? 'bad' : d <= 60 ? 'warn' : ''; return '<span class="' + c + '">' + iso.replace(/-/g, '.') + (d < 0 ? ' (' + (-d) + '일 지남)' : d <= 60 ? ' (' + d + '일 남음)' : '') + '</span>'; };
-        $('#rgB', m).innerHTML = L.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.no || '')}</td><td>${esc(x.dept || '')}</td><td>${(x.revised || '').replace(/-/g, '.')}</td><td>${(x.reviewed || '').replace(/-/g, '.')}</td><td>${x.cycleMonths ? (x.cycleMonths % 12 ? x.cycleMonths + '개월' : x.cycleMonths / 12 + '년') : '2년'}</td><td>${dd(x.nextReview)}</td><td>${dd(x.keepUntil)}</td><td style="white-space:nowrap"><button class="btn sm" data-e="${x.id}">고치기</button><button class="btn sm red" data-d="${x.id}">✕</button></td></tr>`).join('') || '<tr><td colspan="9" class="muted" style="padding:14px;text-align:center">올린 내규가 없습니다. 대조표를 만들면 자동으로 올라옵니다.</td></tr>';
+        $('#rgB', m).innerHTML = L.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.no || '')}</td><td>${esc(x.dept || '')}</td><td>${(x.revised || '').replace(/-/g, '.')}${x.planned ? '<div class="muted" style="font-size:11px" title="대조표를 만든 개정(시행) 예정일 — 그날이 지나면 최종 개정일로 바뀝니다">예정 ' + x.planned.replace(/-/g, '.') + '</div>' : ''}</td><td>${(x.reviewed || '').replace(/-/g, '.')}</td><td>${x.cycleMonths ? (x.cycleMonths % 12 ? x.cycleMonths + '개월' : x.cycleMonths / 12 + '년') : '2년'}</td><td>${dd(x.nextReview)}</td><td>${dd(x.keepUntil)}</td><td style="white-space:nowrap"><button class="btn sm" data-e="${x.id}">고치기</button><button class="btn sm red" data-d="${x.id}">✕</button></td></tr>`).join('') || '<tr><td colspan="9" class="muted" style="padding:14px;text-align:center">올린 내규가 없습니다. 대조표를 만들면 자동으로 올라옵니다.</td></tr>';
         $$('[data-e]', m).forEach(b => b.onclick = () => regEdit(regAll().find(x => x.id === b.dataset.e), registryDialog));
         $$('[data-d]', m).forEach(b => b.onclick = () => { if (!confirm('대장에서 지울까요?')) return; regSave(regAll().filter(x => x.id !== b.dataset.d)); draw(); });
       };
       $('#rgQ', m).oninput = (e) => { st.q = e.target.value; draw(); }; $('#rgF', m).onchange = (e) => { st.f = e.target.value; draw(); };
       $('#rgAdd', m).onclick = () => regEdit(null, registryDialog);
       $('#rgCsv', m).onclick = () => {
-        const L = regAll().map(regCalc); const cols = [['name', '내규명'], ['no', '내규번호'], ['dept', '담당부서'], ['enacted', '제정일'], ['revised', '개정일'], ['reviewed', '검토일'], ['cycleMonths', '검토주기(개월)'], ['nextReview', '다음 검토일'], ['keepUntil', '보존 기한'], ['memo', '메모']];
+        const L = regAll().map(regCalc); const cols = [['name', '내규명'], ['no', '내규번호'], ['dept', '담당부서'], ['enacted', '제정일'], ['revised', '개정일'], ['planned', '개정 예정일'], ['reviewed', '검토일'], ['cycleMonths', '검토주기(개월)'], ['nextReview', '다음 검토일'], ['keepUntil', '보존 기한'], ['memo', '메모']];
         const q = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
         const csv = '﻿' + cols.map(c => q(c[1])).join(',') + '\n' + L.map(x => cols.map(c => q(x[c[0]])).join(',')).join('\n');
-        download(new Blob([csv], { type: 'text/csv;charset=utf-8' }), '내규 대장 ' + new Date().toISOString().slice(0, 10) + '.csv');
+        download(new Blob([csv], { type: 'text/csv;charset=utf-8' }), '내규 대장 ' + localToday() + '.csv');
       };
       $('#rgImp', m).onclick = async () => {
         const [f] = await pickFiles(false, '.csv,text/csv'); if (!f) return;
@@ -6360,7 +6373,7 @@ window.__authGate=true;
       $('#x', m).onclick = back;
       $('#ok', m).onclick = () => {
         const v = (id) => $(id, m).value.trim(); if (!v('#eN')) { toast('내규명을 적어 주세요.'); return; }
-        Object.assign(x, { name: v('#eN'), no: v('#eNo'), dept: v('#eD'), cycleMonths: +v('#eC') || 24, enacted: v('#eE'), revised: v('#eR'), reviewed: v('#eV'), nextReviewManual: v('#eX'), memo: v('#eM'), updatedAt: new Date().toISOString() });
+        { const bad = [['#eE', '제정일'], ['#eR', '최종 개정일'], ['#eV', '최종 검토일'], ['#eX', '다음 검토일']].find(([id]) => v(id) && !validISO(v(id))); if (bad) { toast(bad[1] + '이 없는 날짜입니다. 다시 적어 주세요.', 4000); return; } } Object.assign(x, { name: v('#eN'), no: v('#eNo'), dept: v('#eD'), cycleMonths: +v('#eC') || 24, enacted: v('#eE'), revised: v('#eR'), reviewed: v('#eV'), nextReviewManual: v('#eX'), memo: v('#eM'), updatedAt: new Date().toISOString() });
         const L = regAll().filter(r => r.id !== x.id); L.push(regCalc(x)); regSave(L); back();
       };
     });
@@ -6511,7 +6524,7 @@ window.__authGate=true;
     ['서식', '제1항에 따른 서식은 별첨 1과 같다.'],
     ['보고', '주관부서는 연 1회 이상 이행 실태를 점검하고, 그 결과를 내규검토위원회에 보고한다.'],
     ['기록 보존', '관련 기록은 작성한 날부터 5년간 보존한다.'],
-    ['시행일', '이 내규는 ' + new Date().getFullYear() + '년 ' + (new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2) + '월 1일부터 시행한다.'],
+    ['시행일', '이 내규는 ' + RG.korDate(defRevDate()) + '부터 시행한다.'],
   ];
 
   /* --- 행 찾기·글 꺼내기·반영 --- */
@@ -6916,7 +6929,7 @@ ${ins || '알맞은 내규 문구로 다듬어 주세요.'}
       <div class="foot"><button class="btn" id="x">취소</button><button class="btn pri" id="ok">비교하기 ▶</button></div>`, m => {
       $('#x', m).onclick = closeModal;
       $('#ok', m).onclick = () => {
-        state.meta.title = $('#qN', m).value.trim(); $('#mTitle').value = state.meta.title; state.meta.revKind = $('#qK', m).value; state.meta.revDate = $('#qD', m).value || defRevDate(); state.meta.autoAddenda = $('#qA', m).checked; syncRevUI(); showTitlePrev();
+        state.meta.title = $('#qN', m).value.trim(); $('#mTitle').value = state.meta.title; state.meta.revKind = $('#qK', m).value; state.meta.revDate = validISO($('#qD', m).value) ? $('#qD', m).value : (state.meta.revDate || defRevDate()); state.meta.autoAddenda = $('#qA', m).checked; syncRevUI(); showTitlePrev();
         if ($('#qP', m).value !== (state.settings.preset === 'moleg' ? 'moleg' : 'bucheon')) applyPreset($('#qP', m).value);
         closeModal(); runCompare(state.docs.old, state.docs.new, { quick: true, onDone: () => quickStep2(stepper) });
       };
@@ -7778,12 +7791,19 @@ ${body}
   const lawURL = (name, art) => 'https://www.law.go.kr/법령/' + encodeURIComponent(lawFull(name)) + (art ? '/' + encodeURIComponent(art.replace(/\s+/g, '')) : '');
   const LAWART_RE = /「([^」]{2,60}?)」\s*(제\s*\d+\s*조(?:의\s*\d+)?)?|((?:[가-힣·]{2,30}\s?){0,4}(?:법률|시행규칙|시행령|법|규칙))\s*(제\s*\d+\s*조(?:의\s*\d+)?)/g;
   function lawRefs(text) {
-    const out = []; let m; LAWART_RE.lastIndex = 0;
-    while ((m = LAWART_RE.exec(String(text || '')))) {
-      const name = (m[1] || m[3] || '').replace(/\s+/g, ' ').trim(); const art = (m[2] || m[4] || '').replace(/\s+/g, '');
+    const out = []; let m, last = ''; LAWART_RE.lastIndex = 0; const src = String(text || '');
+    const SAME = /^(같은\s*법|동\s*법|같은법)(?:\s*(시행령|시행규칙))?$/;
+    while ((m = LAWART_RE.exec(src))) {
+      let name = (m[1] || m[3] || '').replace(/\s+/g, ' ').trim(); const art = (m[2] || m[4] || '').replace(/\s+/g, '');
+      const before = src.slice(Math.max(0, m.index - 6), m.index);
+      if (!m[1] && /^(시행령|시행규칙)$/.test(name) && /(같은\s*법|동\s*법)\s*$/.test(before)) name = '같은 법 ' + name;
+      const sm = name.match(SAME);
+      if (sm) { if (!last) continue; name = last.replace(/\s*(시행령|시행규칙)$/, '') + (sm[2] ? ' ' + sm[2] : ''); }
+      else if (/^(시행령|시행규칙)$/.test(name)) { if (!last) continue; name = last.replace(/\s*(시행령|시행규칙)$/, '') + ' ' + name; }
+      name = name.replace(/([가-힣])(시행령|시행규칙)$/, '$1 $2');
       if (!name || /내규|규정|지침|매뉴얼|이\s*법$/.test(name) || name.length < 3) continue;
       if (!/(법|법률|령|규칙)$/.test(name.replace(/\s/g, ''))) continue;
-      out.push({ name: lawFull(name), art });
+      const full = lawFull(name); out.push({ name: full, art }); last = full;
     }
     return out;
   }
@@ -8266,6 +8286,7 @@ ${body}
   async function histAll(key) { const all = await cAll('hist'); return key ? all.filter(v => v.key === key) : all; }
   async function histSave(doc, o) {
     if (!doc || !doc.blocks || doc.blocks.length < 3) return null; const K = histKeyOf(doc, o.name); if (!K.key) return null;
+    { const allv = await histAll(); if (!allv.some(v => v.key === K.key)) { const byName = allv.find(v => normKey(v.name) === normKey(K.name) || (K.no && normKey(v.no) === normKey(K.no))); if (byName) K.key = byName.key; } }
     const h = hstr(docText(doc)); const same = (await histAll(K.key)).find(v => v.h === h);
     if (same) { let ch = false; if (o.date && !same.date) { same.date = o.date; ch = true; } if (o.kind && !same.kind) { same.kind = o.kind; ch = true; } if (o.reasons) { same.reasons = o.reasons; ch = true; } if (ch) await cPut('hist', same); return same; }
     const v = { k: K.key + '|' + h, key: K.key, name: K.name, no: K.no, h, date: o.date || '', kind: o.kind || '', src: o.src || 'app', file: doc.name || '', blocks: slimBlocks(doc.blocks), kindDoc: doc.kind || '', reasons: o.reasons || null, at: Date.now() };
@@ -8400,7 +8421,7 @@ ${body}
       bindDate8(m); $('#x', m).onclick = closeModal;
       $('#ok', m).onclick = () => {
         const R = reviewRows($('#roI', m).checked); const title = nameOf();
-        const data = { app: 'sinkujomun-review', v: 1, reqId: 'rq' + Date.now().toString(36) + uid(), title, from: $('#roW', m).value.trim(), due: $('#roD', m).value, memo: $('#roM', m).value.trim(), made: ymdToday(), heads: [state.settings.headOld || '현 행', state.settings.headNew || '개 정 안'], rows: R.rows };
+        const reqId = 'rq' + Date.now().toString(36) + uid(); state.meta.reviewReqs = (state.meta.reviewReqs || []).concat(reqId).slice(-20); autosave(); const data = { app: 'sinkujomun-review', v: 1, reqId, title, from: $('#roW', m).value.trim(), due: $('#roD', m).value, memo: $('#roM', m).value.trim(), made: ymdToday(), heads: [state.settings.headOld || '현 행', state.settings.headNew || '개 정 안'], rows: R.rows };
         const html = reviewPageHTML(data); download(new Blob([html], { type: 'text/html;charset=utf-8' }), safe(title) + ' 검토 요청 (' + ymdToday() + ').html');
         closeModal(); toast('검토용 파일을 만들었습니다. 메일·메신저로 보내고, 돌아온 「검토의견」 파일은 「검토 의견 합치기」로 모으세요.', 7000); LOG('검토 요청 파일 만들기', R.rows.length + '행');
       };
@@ -8423,7 +8444,7 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
 @media print{.bar,.seg,details,.who input{display:none}body{background:#fff}.row{break-inside:avoid}}`;
     return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(data.title)} 검토 요청</title><style>${css}</style></head><body>
 <script type="application/json" id="rvdata">${json}<\/script>
-<header><h1>「${esc(data.title)}」 개정안 검토 요청</h1><div class="s">${esc(data.from || '')}${data.due ? ' · 회신 기한 ' + esc(data.due) : ''} · 작성 ${esc(data.made)} · 신·구조문 대조표 작성 도구</div></header>
+<header><h1>「${esc(data.title)}」 개정안 검토 요청</h1><div class="s">${esc(data.from || '')}${data.due ? ' · 회신 기한 ' + esc(dotD(data.due)) : ''} · 작성 ${esc(dotD(data.made))} · 신·구조문 대조표 작성 도구</div></header>
 <main><div class="card"><div style="white-space:pre-wrap">${esc(data.memo || '')}</div><div class="muted" style="margin-top:8px">조문마다 「동의 · 수정 필요 · 질문」을 고르고 의견을 적은 뒤, 아래 <b>「의견 파일 저장」</b>을 눌러 받은 파일을 요청한 분께 보내 주세요. 적던 내용은 이 PC 브라우저에 자동으로 보관됩니다.</div></div>
 <div class="card who"><label>검토자 이름<input id="wN" style="width:160px"></label><label>부서<input id="wD" style="width:180px"></label><label style="flex:1">전체 의견 (선택)<textarea id="wA" style="height:42px"></textarea></label></div>
 <div id="rows"></div></main>
@@ -8467,6 +8488,8 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
     const fs = await pickFiles(true); if (!fs.length) return; const reps = [];
     for (const f of fs) { try { const d = JSON.parse(await f.text()); if (d.app !== 'sinkujomun-review-reply') throw new Error('검토 의견 파일이 아닙니다'); reps.push(d); } catch (e) { toast(f.name + ': ' + e.message, 5000); } }
     if (!reps.length) return;
+    const mine = state.meta.reviewReqs || []; const other = reps.filter(d => (mine.length && mine.indexOf(d.reqId) < 0) || (d.title && normKey(d.title) !== normKey(nameOf())));
+    if (other.length && !confirm(other.map(d => d.by.name + ' — 「' + (d.title || '') + '」').join('\n') + '\n\n위 의견 파일은 지금 열린 대조표에서 보낸 검토 요청이 아닌 것 같습니다. 대조표를 다시 만들었거나 다른 내규의 의견일 수 있습니다. 그래도 합칠까요?')) return;
     const rowsAll = []; state.sections.forEach((s, si) => (s.rows || []).forEach((r, ri) => rowsAll.push({ r, s, si, ri, snip: (sideLines(r.new).join('') || sideLines(r.old).join('')).replace(/\s+/g, '').slice(0, 40) })));
     const byId = new Map(rowsAll.map(x => [x.r.id, x])); const items = []; const lost = [];
     reps.forEach(d => d.rows.forEach(o => { const hit = byId.get(o.id) || (o.snip && rowsAll.find(x => x.snip && (x.snip === o.snip || x.snip.slice(0, 20) === o.snip.slice(0, 20)))); const it = { o, by: d.by, hit }; if (hit) items.push(it); else lost.push(it); }));
@@ -9105,6 +9128,7 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   const now = () => new Date().toISOString();
+  const localToday = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
   const fmt = (iso) => { if (!iso) return ''; const d = new Date(iso); const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()); };
   const toLocalInput = (iso) => { const d = new Date(iso); const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); };
   const MINPW = 4;
@@ -9384,7 +9408,7 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
     $('#lCsv', body).onclick = () => {
       const rows = [['일시', '사용자', '부서', '작업', '대상', '메모', '수정 내역']].concat(view.map(e => [fmt(e.ts), e.userName, e.dept || '', e.action, e.target, e.memo, (e.edits || []).map(x => fmt(x.at) + ' ' + x.by).join(' / ')]));
       const csv = '﻿' + rows.map(r => r.map(c => '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"').join(',')).join('\r\n');
-      A().download(new Blob([csv], { type: 'text/csv;charset=utf-8' }), '대조표 작업 기록 ' + new Date().toISOString().slice(0, 10) + '.csv');
+      A().download(new Blob([csv], { type: 'text/csv;charset=utf-8' }), '대조표 작업 기록 ' + localToday() + '.csv');
     };
     $('#lAdd', body).onclick = () => editLog(null, body, redraw);
     $$('tr[data-id]', body).forEach(tr => {
@@ -9530,7 +9554,7 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
       <div class="card"><h2>가져오기</h2><div class="muted">다른 PC에서 내보낸 백업 파일(.zip 또는 .json)을 합칩니다. 같은 항목은 더 최근에 고친 쪽을 남기고, 지금 정보는 지우지 않습니다.${isAdmin() ? '' : ' <b>관리자만 가져올 수 있습니다.</b>'}</div>
         <button class="btn pri" id="iGo" style="margin-top:8px" ${isAdmin() ? '' : 'disabled'}>파일 가져오기</button></div></div>`;
     $('#xGo', body).onclick = async () => {
-      const fmtSel = (body.querySelector('input[name=xF]:checked') || {}).value || 'zip'; const ymd = new Date().toISOString().slice(0, 10); const base = '대조표 도구 백업 ' + ymd;
+      const fmtSel = (body.querySelector('input[name=xF]:checked') || {}).value || 'zip'; const ymd = localToday(); const base = '대조표 도구 백업 ' + ymd;
       const data = { app: 'sinkujomun-users', ver: 1, exportedAt: now(), exportedBy: AU.user.name, users: await users(), logs: await all('logs'), versions: $('#xV', body).checked ? await all('versions') : [], registry: window.__registry ? window.__registry.all() : [] };
       const app = A(); app.busy && app.busy(true, '백업 파일을 만드는 중…');
       try {
@@ -9555,7 +9579,7 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
   async function backupXlsx(data, extra) {
     const X = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g, '');
     const d10 = (v) => { if (!v) return ''; const t = new Date(v); if (!/T/.test(String(v)) || isNaN(t)) return String(v).slice(0, 16); const z = (n) => String(n).padStart(2, '0'); return t.getFullYear() + '-' + z(t.getMonth() + 1) + '-' + z(t.getDate()) + ' ' + z(t.getHours()) + ':' + z(t.getMinutes()); };
-    const RG_ = { name: '내규명', no: '번호', dept: '담당 부서', enacted: '제정일', revised: '최종 개정일', reviewed: '최종 검토일', cycleMonths: '검토 주기(개월)', nextReview: '다음 검토', keepUntil: '보존 기한', owner: '담당자', memo: '메모', createdAt: '등록일', updatedAt: '고친 날' };
+    const RG_ = { name: '내규명', no: '번호', dept: '담당 부서', enacted: '제정일', revised: '최종 개정일', planned: '개정 예정일', reviewed: '최종 검토일', cycleMonths: '검토 주기(개월)', nextReview: '다음 검토', keepUntil: '보존 기한', owner: '담당자', memo: '메모', createdAt: '등록일', updatedAt: '고친 날' };
     const reg = data.registry || []; const rk = Object.keys(RG_).filter(k => reg.some(r => r[k] != null && r[k] !== ''));
     const sheets = [
       ['요약', [['항목', '값'], ['백업한 날', d10(data.exportedAt)], ['백업한 사람', data.exportedBy], ['사용자', data.users.length + '명'], ['작업 기록', data.logs.length + '건'], ['대조표 버전', data.versions.length + '개'], ['내규 대장', reg.length + '건'], ['내규 서고', (extra.library || []).length + '건'], ['조문 변천사', (extra.hist || []).length + '판']], [16, 30]],
@@ -9641,7 +9665,7 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '3.5.1';
+  const APP_VERSION = '3.5.2';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
