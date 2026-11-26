@@ -17,4 +17,5 @@
 - 의료기관 폭행 등 해결도우미(현장 대응·사건 기록·진술서·법률지원 서식, 휴대폰 가능): https://appraisal-fee.github.io/rohslaw/violence/ (`violence/` 폴더, 홈 화면 설치 가능) — 앱이 바뀌면 `violence/index.html`을 교체하고 `sw.js`의 CACHE 번호를 올림
 - 진료거부 정당사유 판단 도우미(판단·요청서·사례 대장·판례 검색·음성 명령, 휴대폰 가능): https://appraisal-fee.github.io/rohslaw/refusal/ (`refusal/` 폴더, 홈 화면 설치 가능) — 앱이 바뀌면 `refusal/index.html`을 교체하고 `sw.js`의 CACHE 번호를 올림
 - 의료광고 검토 도우미(광고 문구 점검·심의 대상 판단·판례 검색·검토 대장·음성 명령, 휴대폰 가능): https://appraisal-fee.github.io/rohslaw/adreview/ (`adreview/` 폴더, 홈 화면 설치 가능) — 앱이 바뀌면 `adreview/index.html`을 교체하고 `sw.js`의 CACHE 번호를 올림
+- 수술실 CCTV 검토앱(촬영·녹음 요청 판정·열람·제공 점검·안내문·서식, 휴대폰 가능): https://appraisal-fee.github.io/rohslaw/cctv/ (`cctv/` 폴더, 홈 화면 설치 가능) — 앱이 바뀌면 `cctv/index.html`을 교체하고 `sw.js`의 CACHE 번호를 올림. 병원 설정·의료진 명단·원내 규정은 넣지 않음(각 PC에서 설정 파일로 불러오기)
 - 개발자: 노상엽

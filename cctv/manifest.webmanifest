@@ -1,0 +1,15 @@
+{
+  "name": "수술실 CCTV 검토앱",
+  "short_name": "수술실CCTV",
+  "description": "수술실 CCTV 촬영·녹음 요청과 영상 열람·제공 요건 점검, 안내문·서식 작성 — 가톨릭대학교 부천성모병원",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e3550",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
