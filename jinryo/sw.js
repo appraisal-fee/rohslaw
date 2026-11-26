@@ -1,11 +1,12 @@
 // 진료일정 검색(보기 전용) - 서비스 워커: 페이지·자료는 최신 우선, 끊기면 저장본
-const CACHE = 'jinryo-view-v19';
+const CACHE = 'jinryo-view-v20';
 const CORE = ['./', './index.html', './data.json', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
   const req = e.request; if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  if (url.pathname.includes('/tv/')) return; // 전자게시판 화면은 따로 둠
   const fresh = req.mode === 'navigate' || url.pathname.endsWith('/index.html') || url.pathname.endsWith('/data.json');
   if (fresh) {
     const key = url.pathname.endsWith('/data.json') ? './data.json' : './index.html';
