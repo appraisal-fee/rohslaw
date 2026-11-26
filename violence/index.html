@@ -785,6 +785,79 @@ select:focus{outline:2px solid var(--navy);border-color:var(--navy)}
 .mic.mini::before{width:7px;height:7px}
 .mic.mini.inl{margin:0;align-self:stretch;padding:0 14px;font-size:13px;min-height:40px;white-space:nowrap}
 @media (max-width:600px){.ugrid{grid-template-columns:1fr}}
+/* ===== 비상 원터치 ===== */
+.sosfab{position:fixed;right:18px;bottom:18px;z-index:900;width:64px;height:64px;border-radius:50%;border:0;background:#c62828;color:#fff;font:inherit;font-size:16px;font-weight:800;box-shadow:0 4px 14px rgba(198,40,40,.45);cursor:pointer}
+.sosfab b{display:block}
+body.locked .sosfab,body.printing .sosfab{display:none}
+.sos{position:fixed;inset:0;z-index:1000;background:rgba(10,20,40,.72);display:flex;align-items:center;justify-content:center;padding:16px}
+.sosin{background:#fff;border-radius:12px;width:100%;max-width:640px;max-height:94vh;overflow:auto;padding:18px 18px 16px}
+.soshd{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px}
+.soshd h2{margin:0;color:#c62828}
+.sosnote{font-size:13.5px;color:var(--ink2);margin:6px 0 12px}
+.sosgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sosb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:92px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);text-decoration:none;font:inherit;cursor:pointer;text-align:center;padding:10px}
+.sosb b{font-size:20px}.sosb span{font-size:12.5px;color:var(--ink2)}
+.sosb.red{background:#c62828;border-color:#c62828;color:#fff}.sosb.red span{color:#ffe0e0}
+.sosb.navy{background:var(--navy);border-color:var(--navy);color:#fff}.sosb.navy span{color:#dfe6f3}
+.sostl{margin-top:12px;font-size:13px}
+.sostl b{display:block;margin-bottom:4px;color:var(--navy)}
+.sostl div{display:grid;grid-template-columns:52px 1fr;gap:6px;padding:3px 0;border-top:1px solid var(--line)}
+.sostl time{font-variant-numeric:tabular-nums;color:var(--ink2)}
+/* ===== 녹음·사진 ===== */
+.evtools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:6px}
+.evtools .btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;margin:0}
+.rdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#c62828}
+.rdot.on{animation:rblink 1s infinite}
+@keyframes rblink{50%{opacity:.2}}
+#ev-rec.recon{border-color:#c62828;color:#c62828;font-variant-numeric:tabular-nums}
+.evlaw{margin:0 0 10px}
+/* ===== 보고 문자·묶음 ===== */
+.smsbox{max-width:640px}
+.smskind{margin-top:4px}
+.smsacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.smsacts .btn{margin:0;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.packlist{display:grid;gap:6px;margin:10px 0 14px}
+.packlist .opt span small{display:block;font-weight:400;font-size:12.5px;color:var(--ink2)}
+.doc .phgrid,#printroot .phgrid{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+.phgrid figure{margin:0;border:.5pt solid #999;padding:2mm;break-inside:avoid}
+.phgrid img{display:block;width:100%;height:105mm;object-fit:contain;background:#f4f4f4}
+.phgrid figcaption{font-size:8.5pt;margin-top:1.5mm;word-break:break-all}
+.phgrid .noimg{height:105mm;display:flex;align-items:center;justify-content:center;color:#888}
+/* ===== 백업 ===== */
+.ubak,.ulock{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.ubak .btn,.ulock .btn{margin:0}
+.ulock .l{display:flex;align-items:center;gap:8px;margin:0;font-weight:600}
+.ulock select{width:auto}
+#bk-last{font-size:13px;color:var(--ink2)}
+.bkbar{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:850;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;width:min(760px,calc(100% - 110px));background:#fff8e1;border:1px solid #e0b84a;border-radius:8px;padding:10px 14px;font-size:13.5px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.bkbar .btn{margin:0}
+.pinb{display:inline-block;margin-left:6px;padding:0 6px;border-radius:3px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;vertical-align:2px}
+/* ===== 잠금 ===== */
+.lock{position:fixed;inset:0;z-index:2000;background:#14284a;display:flex;align-items:center;justify-content:center;padding:16px;color:#fff}
+.lockin{width:100%;max-width:380px;text-align:center}
+.lockin h2{color:#fff;font-size:19px;margin:0}
+.locksub{color:#c9d4e8;font-size:13.5px;margin:6px 0 14px}
+.lockusers{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px}
+.lockusers button{border:1px solid #5b7099;background:transparent;color:#fff;border-radius:8px;padding:6px 12px;font:inherit;cursor:pointer;text-align:center}
+.lockusers button span{display:block;font-size:11.5px;color:#c9d4e8}
+.lockusers button.on{background:#fff;color:var(--navy)}.lockusers button.on span{color:var(--ink2)}
+.lockdots{display:flex;gap:12px;justify-content:center;margin-bottom:16px}
+.lockdots i{width:13px;height:13px;border-radius:50%;border:2px solid #fff}
+.lockdots i.opt{border-style:dashed;opacity:.5}
+.lockdots i.on{background:#fff;opacity:1;border-style:solid}
+.lockpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.lockpad button{height:58px;border-radius:10px;border:0;background:rgba(255,255,255,.12);color:#fff;font:inherit;font-size:22px;font-weight:600;cursor:pointer}
+.lockpad button[data-lk="지움"],.lockpad button[data-lk="확인"]{font-size:16px}
+.lockpad button[data-lk="확인"]{background:#fff;color:var(--navy)}
+.lockmsg{min-height:20px;color:#ffb4b4;font-size:13.5px;margin:10px 0 6px}
+.locksos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.locksos .sosb{min-height:48px}.locksos .sosb b{font-size:15px}
+.lockforget{color:#c9d4e8!important;margin-top:12px;background:none;border:0}
+.lockbtn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:6px;padding:0 12px;min-height:42px;font:inherit;font-size:13.5px;font-weight:700;color:var(--navy);cursor:pointer}
+.lockbtn i{width:12px;height:9px;border:2px solid var(--navy);border-radius:2px;position:relative;margin-top:4px}
+.lockbtn i::before{content:"";position:absolute;left:1px;top:-8px;width:6px;height:6px;border:2px solid var(--navy);border-bottom:0;border-radius:4px 4px 0 0}
+@media (max-width:760px){.sosfab{width:58px;height:58px;right:12px;bottom:12px}.bkbar{grid-template-columns:1fr 1fr;width:calc(100% - 90px);left:12px;transform:none}.bkbar span{grid-column:1/-1}.smsacts{grid-template-columns:1fr}.evtools{grid-template-columns:1fr}}
+@media print{.sosfab,.bkbar,.lock,.sos{display:none!important}}
 </style>
 <meta name="theme-color" content="#1f3a68">
 <link rel="manifest" href="manifest.webmanifest">
@@ -899,6 +972,8 @@ select:focus{outline:2px solid var(--navy);border-color:var(--navy)}
       <button type="button" class="btn ghost" id="r-preview">사건 보고서 보기·인쇄</button>
       <button type="button" class="btn ghost" id="r-draft">고소장·진술서 초안</button>
       <button type="button" class="btn ghost" id="r-sb">상병경위보고서 (공상)</button>
+      <button type="button" class="btn ghost" id="r-sms">보고 문자 만들기</button>
+      <button type="button" class="btn ghost" id="r-pack">서류 한 번에 출력</button>
       <button type="button" class="btn ghost" id="r-new">새 사건 시작</button>
     </div>
   </div>
@@ -906,6 +981,8 @@ select:focus{outline:2px solid var(--navy);border-color:var(--navy)}
   <div class="card">
     <h2>증거 자료</h2>
     <p style="font-size:14px;color:var(--ink2);margin:-8px 0 12px">사진·녹음·영상·문서를 사건에 붙여 둡니다. 화면 캡처는 Win+Shift+S로 찍은 뒤 이 화면에서 Ctrl+V로 붙여 넣으세요.</p>
+    <div class="evtools"><button type="button" class="btn ghost" id="ev-rec"><i class="rdot"></i>녹음 시작</button><label class="btn ghost" for="ev-cam">사진 찍기 · 날짜 각인</label><input type="file" id="ev-cam" accept="image/*" capture="environment" hidden></div>
+    <p class="foot evlaw">녹음은 내가 참여한 대화만 하세요. 다른 사람끼리 나누는 대화를 몰래 녹음하면 통신비밀보호법 위반입니다. 사진에는 촬영 날짜·시각·장소가 새겨지고, 원본 사진도 함께 저장됩니다.</p>
     <label class="drop evdrop" id="ev-drop" for="ev-file"><b>파일 선택</b>또는 여기에 끌어다 놓기 · 캡처는 Ctrl+V</label>
     <input type="file" id="ev-file" multiple hidden>
     <div class="evlist" id="ev-list"></div>
@@ -1663,8 +1740,15 @@ select:focus{outline:2px solid var(--navy);border-color:var(--navy)}
     <div class="f"><label class="l">등록번호<small>본원 환자 등록번호</small></label><input type="text" id="u-regno" inputmode="numeric" autocomplete="off"></div>
     <div class="f"><label class="l">휴대전화</label><input type="text" id="u-tel" inputmode="tel" placeholder="010-0000-0000" autocomplete="off"></div>
     <div class="f"><label class="l">부서장 성명</label><input type="text" id="u-boss" autocomplete="off"></div>
+    <div class="f"><label class="l">PIN<small>숫자 4~6자리, 앱 잠금용</small></label><input type="password" id="u-pin" inputmode="numeric" maxlength="6" autocomplete="new-password" placeholder="바꿀 때만 입력"></div>
   </div>
   <div class="acts3 uacts"><button type="button" class="btn" id="u-save">등록</button><button type="button" class="btn ghost hidden" id="u-cancel">새로 등록하기</button></div>
+  <h3 class="uh">앱 잠금</h3>
+  <div class="ulock"><label class="opt"><input type="checkbox" id="u-lockon"><span>앱 잠금 사용</span></label><label class="l">자동 잠금<select id="u-lockmin"><option value="5">5분 동안 안 쓰면</option><option value="10" selected>10분 동안 안 쓰면</option><option value="30">30분 동안 안 쓰면</option><option value="0">자동 잠금 안 함</option></select></label><button type="button" class="btn ghost" id="u-locknow">지금 잠그기</button></div>
+  <p class="foot">PIN은 직원마다 ‘고치기’에서 정합니다. 잠금을 켜면 PIN이 있는 직원만 앱을 열 수 있고, 잠금 화면에서도 112·보안요원 전화는 바로 걸 수 있습니다.</p>
+  <h3 class="uh">전체 백업·복원</h3>
+  <div class="ubak"><button type="button" class="btn" id="bk-save">전체 백업 파일 저장</button><label class="btn ghost" for="bk-file">백업 파일로 복원</label><input type="file" id="bk-file" accept=".json,application/json" hidden><span id="bk-last"></span></div>
+  <p class="foot">사건 기록·사건 대장·진술서·증거 파일·사용자 설정을 파일 하나로 저장합니다. 브라우저 기록을 지우거나 기기를 바꾸면 자료가 사라지니 일주일에 한 번은 백업하세요. 백업 파일에는 개인정보가 들어 있으니 안전한 곳에 보관하세요.</p>
   <div class="ufoot"><button type="button" class="linkbtn" id="u-autohelp">자동 입력 안내 — 어디서 가져오나요?</button><span>다른 PC로 옮기거나 백업할 때</span><button type="button" class="linkbtn" id="u-export">사용자 설정 파일로 내보내기</button><label class="linkbtn ufile">사용자 설정 파일 가져오기<input type="file" id="u-import" accept=".json,application/json" hidden></label></div>
 </div></div>
 
@@ -1770,6 +1854,48 @@ select:focus{outline:2px solid var(--navy);border-color:var(--navy)}
   <div class="askhd"><span id="rv-prog"></span><div class="pbar"><i id="rv-bar"></i></div><label class="opt"><input type="checkbox" id="rv-read"><span>질문 읽어 주기</span></label></div>
   <div id="rv-body"></div>
   <div class="nav rvnav"><button type="button" class="btn ghost" id="rv-prev">이전 질문</button><button type="button" class="linkbtn" id="rv-skip">건너뛰기</button><button type="button" class="btn wide" id="rv-next">다음</button></div>
+</div></div>
+
+<button type="button" class="sosfab" id="sos-open" aria-label="비상"><b>비상</b></button>
+<div class="sos hidden" id="sos"><div class="sosin">
+  <div class="soshd"><h2>비상 원터치</h2><button type="button" class="btn ghost" id="sos-close">닫기</button></div>
+  <p class="sosnote">누르면 바로 전화가 걸리고, 누른 시각이 사건 기록 ‘시간대별 경위’에 자동으로 남습니다.</p>
+  <div class="sosgrid">
+    <a class="sosb red" href="tel:112" data-sos="112 신고 전화"><b>112 신고</b><span>폭행·흉기·위협이 있으면</span></a>
+    <a class="sosb navy" href="tel:0323402345" data-sos="보안요원 호출"><b>보안요원 호출</b><span>안내실 032-340-2345</span></a>
+    <a class="sosb" id="sos-wonmu" href="tel:0323402349" data-sos="원무 보고 전화"><b>원무 보고</b><span id="sos-wonmu-t"></span></a>
+    <button type="button" class="sosb" id="sos-rec"><b>녹음 시작</b><span>내가 참여한 대화만</span></button>
+    <label class="sosb" for="ev-cam" id="sos-cam"><b>사진 찍기</b><span>날짜·시각·장소 각인</span></label>
+    <button type="button" class="sosb" id="sos-sms"><b>보고 문자</b><span>상급자·법무 Unit에 보내기</span></button>
+  </div>
+  <div class="sostl" id="sos-tl"></div>
+</div></div>
+
+<div class="modal hidden" id="m-sms"><div class="box smsbox">
+  <button class="btn ghost x" type="button" data-close>닫기</button>
+  <h2>보고 문자</h2>
+  <p class="mnote">사건 기록으로 1차 보고 문자를 만들었습니다. 고쳐 쓴 뒤 보내세요. 가해자 등록번호·주민번호는 넣지 않았습니다.</p>
+  <div class="opts smskind"><label class="opt"><input type="radio" name="sms_k" value="short" checked><span>짧게 (첫 보고)</span></label><label class="opt"><input type="radio" name="sms_k" value="long"><span>자세히 (경위 포함)</span></label></div>
+  <textarea id="sms-t" style="min-height:260px;margin-top:10px"></textarea>
+  <div class="acts3 smsacts"><button type="button" class="btn" id="sms-share">카카오톡 등으로 공유</button><a class="btn ghost" id="sms-sms" href="#">문자로 보내기</a><button type="button" class="btn ghost" id="sms-copy">복사</button></div>
+</div></div>
+
+<div class="modal hidden" id="m-pack"><div class="box">
+  <button class="btn ghost x" type="button" data-close>닫기</button>
+  <h2>서류 한 번에 출력</h2>
+  <p class="mnote">고른 서류를 한 묶음으로 인쇄하거나 PDF로 저장합니다. 인쇄 창에서 ‘PDF로 저장’을 고르면 파일 하나가 됩니다.</p>
+  <div class="packlist" id="pack-list"></div>
+  <div class="acts3"><button type="button" class="btn" id="pack-go">고른 서류 인쇄 / PDF 저장</button></div>
+</div></div>
+
+<div class="lock hidden" id="lock"><div class="lockin">
+  <h2>의료기관 폭행 등 해결도우미</h2><p class="locksub">잠겨 있습니다. 사용할 직원을 고르고 PIN을 넣으세요.</p>
+  <div class="lockusers" id="lock-users"></div>
+  <div class="lockdots" id="lock-dots"></div>
+  <div class="lockpad" id="lock-pad"></div>
+  <p class="lockmsg" id="lock-msg"></p>
+  <div class="locksos"><a class="sosb red" href="tel:112"><b>112</b></a><a class="sosb navy" href="tel:0323402345"><b>보안요원 2345</b></a></div>
+  <button type="button" class="linkbtn lockforget" id="lock-forget">PIN을 잊었어요</button>
 </div></div>
 
 <div id="printroot" class="doc"></div>
@@ -2806,7 +2932,7 @@ $("#ocr-file").addEventListener("change",function(e){ runOcr(e.target.files[0]);
 
 window.addEventListener("beforeunload",function(e){ if(S.dirty && !S.printed){ e.preventDefault(); e.returnValue=""; } });
 
-window.__LF={start:start,pane:pane,goStep:goStep,MODES:MODES,missing:missing,collect:collect,sizeSig:function(){sizeSig();},syncShow:syncShow,renderPreview:renderPreview,S:S,toast:function(m){toast(m);},hospital:CONFIG.hospital};
+window.__LF={start:start,pane:pane,goStep:goStep,MODES:MODES,missing:missing,collect:collect,docHTML:function(){return docHTML(false,false);},sizeSig:function(){sizeSig();},syncShow:syncShow,renderPreview:renderPreview,S:S,toast:function(m){toast(m);},hospital:CONFIG.hospital};
 var tt; function toast(m){ var e=$("#toast"); e.textContent=m; e.classList.add("on"); clearTimeout(tt); tt=setTimeout(function(){e.classList.remove("on");},2600); }
 })();
 </script>
@@ -4818,6 +4944,166 @@ $("#rv-prev").addEventListener("click",function(){ srStop(); rvWrite(); if(RV.i>
 $("#rv-read").addEventListener("change",function(){ if(this.checked&&RVQ[RV.i]) say(RVQ[RV.i][2]); });
 $$("#m-rv [data-close]").forEach(function(b){ b.addEventListener("click",function(){ srStop(); rvWrite(); fillRec(); }); });
 /*RVEND*/
+/*PLUSJS*//* ============================================================
+   비상 원터치 · 녹음·사진 각인 · 보고 문자 · 서류 묶음 · 백업 · 잠금
+   ============================================================ */
+/* ---------- 비상 원터치 ---------- */
+function sosPaint(){ var day=dayShift(); $("#sos-wonmu").href=day?"tel:0323402349":"tel:0323402333"; $("#sos-wonmu-t").textContent=day?"법무 Unit 032-340-2349":"응급원무 Unit 032-340-2333";
+  $("#sos-wonmu").dataset.sos=day?"법무 Unit 보고 전화":"응급원무 Unit 보고 전화";
+  var last=cur.tl.slice(-4).reverse(); $("#sos-tl").innerHTML=last.length?'<b>최근 기록</b>'+last.map(function(x){return '<div><time>'+esc(x.t)+'</time>'+esc(x.x)+'</div>';}).join(""):""; recBtns(); }
+$("#sos-open").addEventListener("click",function(){ sosPaint(); $("#sos").classList.remove("hidden"); });
+$("#sos-close").addEventListener("click",function(){ $("#sos").classList.add("hidden"); });
+$("#sos").addEventListener("click",function(e){ var a=e.target.closest("[data-sos]"); if(!a) return; var t=a.dataset.sos;
+  if(/^112/.test(t)) quick("112 신고",["r1","r1b"]); else quick(t,[]); setTimeout(sosPaint,50); });
+$("#sos-sms").addEventListener("click",function(){ $("#sos").classList.add("hidden"); smsOpen(); });
+
+/* ---------- 현장 녹음 ---------- */
+var REC=null;
+function recBtns(){ var on=!!REC, txt=on?"녹음 중지 "+recEl():"녹음 시작";
+  $("#ev-rec").innerHTML='<i class="rdot'+(on?' on':'')+'"></i>'+txt; $("#ev-rec").classList.toggle("recon",on);
+  $("#sos-rec").innerHTML='<b>'+(on?"녹음 중지":"녹음 시작")+'</b><span>'+(on?recEl()+" 녹음 중":"내가 참여한 대화만")+'</span>'; $("#sos-rec").classList.toggle("red",on); }
+function recEl(){ if(!REC) return ""; var s=Math.floor((Date.now()-REC.t0)/1000); return pad(Math.floor(s/60))+":"+pad(s%60); }
+function recToggle(){
+  if(REC){ REC.mr.stop(); return; }
+  if(!navigator.mediaDevices||!window.MediaRecorder){ toast("이 브라우저는 녹음을 지원하지 않습니다 — 휴대폰 기본 녹음 앱을 쓰고 파일을 붙이세요"); return; }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){
+    var mr=new MediaRecorder(st), ch=[]; REC={mr:mr,t0:Date.now(),st:st};
+    mr.ondataavailable=function(e){ if(e.data&&e.data.size) ch.push(e.data); };
+    mr.onstop=function(){ var el=recEl(), type=mr.mimeType||"audio/webm", ext=/mp4|m4a|aac/.test(type)?"m4a":(/ogg/.test(type)?"ogg":"webm");
+      st.getTracks().forEach(function(t){t.stop();}); clearInterval(REC.tm); REC=null;
+      var f=new File(ch,"현장녹음_"+ymd()+"_"+nowHM().replace(":","")+"."+ext,{type:type}); addFiles([f]); quick("녹음 종료 ("+el+")",[]); recBtns(); };
+    mr.start(1000); REC.tm=setInterval(recBtns,1000); quick("녹음 시작",["e2"]); recBtns(); toast("녹음을 시작했습니다. 다시 누르면 멈추고 증거에 붙습니다");
+  }).catch(function(){ toast("마이크를 쓸 수 없습니다. 브라우저의 마이크 허용을 확인하세요"); });
+}
+$("#ev-rec").addEventListener("click",recToggle); $("#sos-rec").addEventListener("click",recToggle);
+window.addEventListener("beforeunload",function(e){ if(REC){ e.preventDefault(); e.returnValue="녹음 중입니다"; } });
+
+/* ---------- 사진 날짜·장소 각인 ---------- */
+function stampPhoto(file){ return new Promise(function(res){
+  var u=URL.createObjectURL(file), im=new Image();
+  im.onload=function(){ var W=im.naturalWidth, H=im.naturalHeight, k=Math.min(1,2400/Math.max(W,H)); W=Math.round(W*k); H=Math.round(H*k);
+    var cv=document.createElement("canvas"); cv.width=W; cv.height=H; var g=cv.getContext("2d"); g.drawImage(im,0,0,W,H);
+    var d=new Date(file.lastModified||Date.now()), fs=Math.max(18,Math.round(W*0.026)), bh=Math.round(fs*2.6);
+    var t1=d.getFullYear()+". "+(d.getMonth()+1)+". "+d.getDate()+". "+pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds());
+    var t2=[(cur.f.place||"").trim(),"가톨릭대학교 부천성모병원"].filter(Boolean).join(" · ");
+    g.fillStyle="rgba(0,0,0,.62)"; g.fillRect(0,H-bh,W,bh); g.fillStyle="#ffe14d"; g.font="700 "+fs+"px 'Malgun Gothic','맑은 고딕',sans-serif"; g.textBaseline="middle";
+    g.fillText(t1,Math.round(fs*.7),H-bh/2-fs*.55); g.fillStyle="#fff"; g.font="600 "+Math.round(fs*.82)+"px 'Malgun Gothic','맑은 고딕',sans-serif"; g.fillText(t2,Math.round(fs*.7),H-bh/2+fs*.62);
+    URL.revokeObjectURL(u);
+    cv.toBlob(function(b){ var nm=ymd()+"_"+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds()); res([new File([b],"사진_각인_"+nm+".jpg",{type:"image/jpeg"}),new File([file],"사진_원본_"+nm+"."+((file.name||"").split(".").pop()||"jpg"),{type:file.type||"image/jpeg"})]); },"image/jpeg",.92); };
+  im.onerror=function(){ URL.revokeObjectURL(u); res([file]); }; im.src=u; }); }
+$("#ev-cam").addEventListener("change",function(){ var fs=Array.prototype.slice.call(this.files||[]); this.value=""; if(!fs.length) return; $("#sos").classList.add("hidden");
+  Promise.all(fs.map(stampPhoto)).then(function(r){ var all=[]; r.forEach(function(x){all=all.concat(x);}); addFiles(all); quick("사진 촬영 ("+fs.length+"장)",["e2"]); if(document.querySelector("#v-record.hidden")) tab("record"); }); });
+
+/* ---------- 보고 문자 ---------- */
+function smsText(kind){
+  var f=cur.f, me=uMe(), sitn=cur.sits.map(function(id){var s=SIT.filter(function(x){return x.id===id;})[0];return s?s.t:"";}).filter(Boolean);
+  var wd=["일","월","화","수","목","금","토"], dt=validISO(f.date)?kd(f.date)+"("+wd[new Date(f.date).getDay()]+")":"";
+  var vic=victims().map(function(v){return v.name+(v.job||v.dept?"("+[v.job,v.dept].filter(Boolean).join(", ")+")":"");}).join(", ");
+  var act=[]; if(cur.checks.r1||cur.checks.r1b) act.push("112 신고("+(cur.checks.r1||cur.checks.r1b)+")"); cur.tl.forEach(function(x){ if(/보안요원|경찰 도착|피해 직원 분리|퇴거|진료 중단/.test(x.x)) act.push(x.x+"("+x.t+")"); });
+  var L=["[원내 폭력 발생 보고]","일시: "+(dt+" "+(f.time||"")).trim(),"장소: "+(f.place||""),
+    "가해자: "+[f.aRel,f.aName?"("+f.aName+")":"",f.drunk==="주취 상태"?"주취":""].filter(Boolean).join(" "),
+    "피해 직원: "+(vic||""),"상황: "+sitn.join(", "),"피해: "+(f.dmg||"").split("\n")[0],"조치: "+act.join(", ")].filter(function(x){return !/: $/.test(x)&&!/: *$/.test(x);});
+  if(kind==="long"){ if((f.story||"").trim()) L.push("","[경위]",f.story.trim()); if(cur.tl.length) L.push("","[시간대별]",cur.tl.map(function(x){return x.t+" "+x.x;}).join("\n")); }
+  L.push("","보고자: "+(me?me.name+" / "+me.dept+(me.tel?" / "+me.tel:""):(f.writer||"")));
+  return L.join("\n").replace(/\n{3,}/g,"\n\n");
+}
+function smsSync(){ var t=$("#sms-t").value; $("#sms-sms").href="sms:?&body="+encodeURIComponent(t); }
+function smsOpen(){ var k=$('input[name="sms_k"]:checked').value; $("#sms-t").value=smsText(k); smsSync(); $("#m-sms").classList.remove("hidden"); }
+$("#r-sms").addEventListener("click",smsOpen);
+$("#m-sms").addEventListener("change",function(e){ if(e.target.name==="sms_k"){ $("#sms-t").value=smsText(e.target.value); smsSync(); } });
+$("#sms-t").addEventListener("input",smsSync);
+$("#sms-copy").addEventListener("click",function(){ var t=$("#sms-t"); t.select(); try{ navigator.clipboard.writeText(t.value).then(function(){toast("복사했습니다");},function(){document.execCommand("copy");toast("복사했습니다");}); }catch(e){ document.execCommand("copy"); toast("복사했습니다"); } });
+$("#sms-share").addEventListener("click",function(){ var t=$("#sms-t").value; if(navigator.share){ navigator.share({text:t}).then(function(){quick("보고 문자 보냄",["r2"]);}).catch(function(){}); } else { $("#sms-copy").click(); toast("이 기기는 공유를 지원하지 않아 복사했습니다 — 메신저에 붙여 넣으세요"); } });
+$("#sms-sms").addEventListener("click",function(){ quick("보고 문자 보냄",["r2"]); });
+
+/* ---------- 서류 한 번에 출력 ---------- */
+function packItems(){ var a=[["rec","사건 보고서","사건 기록 전체 (체크리스트·시간대별 경위 포함)",true]];
+  (cur.stmts||[]).forEach(function(s,i){ a.push(["st"+i,"진술서 — "+((s.info&&s.info.name)||"이름 없음")+" ("+(s.role||"")+")","저장한 진술서",true]); });
+  if(cur.sb&&(cur.sb.name||cur.sb.story)) a.push(["sb","상병경위보고서","공상 처리용",true]);
+  if(LF.S.mode) a.push(["lf",{A:"법률 지원 요청서",B:"확인서",C:"법률지원 포기서"}[LF.S.mode]||"법률지원 서식","법률지원 서식 탭에서 작성 중인 서식",true]);
+  var ims=cur.att.filter(function(x){return /^image\//.test(x.type)&&!/^사진_원본_/.test(x.name);}); if(!ims.length) ims=cur.att.filter(function(x){return /^image\//.test(x.type);}); if(ims.length) a.push(["ph","증거 사진 목록","사진 "+ims.length+"장 (날짜 각인본), 한 쪽에 4장씩",true]);
+  return a; }
+$("#r-pack").addEventListener("click",function(){ $("#pack-list").innerHTML=packItems().map(function(x){return '<label class="opt blk"><input type="checkbox" data-pk="'+x[0]+'"'+(x[3]?" checked":"")+'><span><b>'+esc(x[1])+'</b><small>'+esc(x[2])+'</small></span></label>';}).join(""); $("#m-pack").classList.remove("hidden"); });
+$("#pack-go").addEventListener("click",function(){
+  var sel=$$("#pack-list input:checked").map(function(x){return x.dataset.pk;}); if(!sel.length){ toast("출력할 서류를 고르세요"); return; }
+  var parts=[], photos=null;
+  sel.forEach(function(k){
+    if(k==="rec") parts.push(recDoc(cur));
+    else if(k==="sb"){ sbInit(); parts.push(sbDoc()); }
+    else if(k==="lf") parts.push(LF.docHTML());
+    else if(k==="ph") photos=true;
+    else if(k.indexOf("st")===0){ var s=cur.stmts[+k.slice(2)], kST=ST, kSec=STsec; ST={info:JSON.parse(JSON.stringify(s.info||{})),role:s.role,qa:(s.qa||[]).slice(),free:"",body:s.body,mode:"qa"}; STsec={}; try{ parts.push(stDoc()); } finally { ST=kST; STsec=kSec; } }
+  });
+  var go=function(ph){ printDoc(parts.join("")+(ph||"")); quick("서류 묶음 출력",[]); };
+  if(!photos) return go("");
+  var ims=cur.att.filter(function(x){return /^image\//.test(x.type)&&!/^사진_원본_/.test(x.name);}); if(!ims.length) ims=cur.att.filter(function(x){return /^image\//.test(x.type);});
+  Promise.all(ims.map(function(a){ return getBlob(a).then(function(b){ return b?new Promise(function(r){ var fr=new FileReader(); fr.onload=function(){r([a,fr.result]);}; fr.readAsDataURL(b); }):[a,""]; }); })).then(function(list){
+    var h="", f=cur.f; for(var i=0;i<list.length;i+=4){ h+='<div class="page phpage"><div class="dt" style="font-size:15pt;letter-spacing:.2em;margin:0 0 4mm">증 거 사 진</div><div class="small" style="text-align:center;margin-bottom:4mm">'+esc([validISO(f.date)?kd(f.date):"",f.place].filter(Boolean).join(" · "))+'</div><div class="phgrid">'
+      +list.slice(i,i+4).map(function(x,j){return '<figure>'+(x[1]?'<img src="'+x[1]+'">':'<div class="noimg">불러오지 못함</div>')+'<figcaption>'+(i+j+1)+'. '+esc(x[0].name)+' · '+esc(x[0].at||"")+'</figcaption></figure>';}).join("")+'</div></div>'; }
+    go(h); }); });
+
+/* ---------- 전체 백업·복원 ---------- */
+function idbAllFiles(){ return idb().then(function(d){ return new Promise(function(res){ var out=[], tx=d.transaction("files","readonly"), c=tx.objectStore("files").openCursor();
+  c.onsuccess=function(){ var r=c.result; if(r){ out.push([r.key,r.value]); r.continue(); } else res(out); }; c.onerror=function(){res(out);}; }); }).catch(function(){return [];}); }
+function b2u(b){ return new Promise(function(r){ var fr=new FileReader(); fr.onload=function(){r(fr.result);}; fr.onerror=function(){r("");}; fr.readAsDataURL(b); }); }
+function bkLast(){ var t=ls.get("lfv_bk_last",0); $("#bk-last").textContent=t?"마지막 백업: "+Math.floor((Date.now()-t)/86400000)+"일 전":"아직 백업한 적이 없습니다"; }
+$("#bk-save").addEventListener("click",function(){ toast("백업 파일을 만드는 중입니다…");
+  var L={}; for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf("lfv_")===0) L[k]=localStorage.getItem(k); }
+  idbAllFiles().then(function(fl){ return Promise.all(fl.map(function(x){ return (x[1] instanceof Blob)?b2u(x[1]).then(function(u){return {id:x[0],type:x[1].type,name:x[1].name||"",data:u};}):null; })); }).then(function(files){
+    var o={kind:"lfv_backup",app:"의료기관 폭행 등 해결도우미",ver:1,at:nowStamp(),ls:L,files:files.filter(Boolean)};
+    download("해결도우미_전체백업_"+ymd()+".json",JSON.stringify(o),"application/json"); ls.set("lfv_bk_last",Date.now()); bkLast(); $("#bk-remind")&&$("#bk-remind").remove(); toast("백업 파일을 저장했습니다 ("+o.files.length+"개 증거 파일 포함)"); }); });
+$("#bk-file").addEventListener("change",function(){ var f=this.files[0]; this.value=""; if(!f) return; var r=new FileReader();
+  r.onload=function(){ var o; try{ o=JSON.parse(r.result); }catch(e){ toast("백업 파일이 아닙니다"); return; } if(!o||o.kind!=="lfv_backup"){ toast("해결도우미 백업 파일이 아닙니다"); return; }
+    if(!confirm(o.at+"에 만든 백업으로 복원할까요?\n지금 이 기기에 있는 자료는 백업 파일 내용으로 바뀝니다.")) return;
+    Object.keys(o.ls||{}).forEach(function(k){ if(k.indexOf("lfv_")===0) localStorage.setItem(k,o.ls[k]); });
+    Promise.all((o.files||[]).map(function(x){ return fetch(x.data).then(function(r){return r.blob();}).then(function(b){ return idbPut("files",x.id,x.name?new File([b],x.name,{type:x.type}):b); }).catch(function(){}); })).then(function(){ ls.set("lfv_bk_last",Date.now()); alert("복원했습니다. 앱을 다시 엽니다."); location.reload(); }); };
+  r.readAsText(f,"utf-8"); });
+(function(){ var t=ls.get("lfv_bk_last",0); if(!(LED.length||cur.f.story)) return; if(t&&Date.now()-t<7*86400000) return; if(ls.get("lfv_bk_snooze","")===todayISO()) return;
+  var b=document.createElement("div"); b.id="bk-remind"; b.className="bkbar"; b.innerHTML='<span>'+(t?"마지막 백업이 "+Math.floor((Date.now()-t)/86400000)+"일 전입니다.":"아직 백업한 적이 없습니다.")+' 자료는 이 기기 브라우저에만 있으니 백업해 두세요.</span><button type="button" class="btn" id="bk-now">지금 백업</button><button type="button" class="linkbtn" id="bk-later">오늘은 그만</button>';
+  document.body.appendChild(b); $("#bk-now").addEventListener("click",function(){ $("#bk-save").click(); }); $("#bk-later").addEventListener("click",function(){ ls.set("lfv_bk_snooze",todayISO()); b.remove(); }); })();
+
+/* ---------- 앱 잠금 (PIN) ---------- */
+function sha256(s){ function r(n,x){return (x>>>n)|(x<<(32-n));} var K=[],H=[],i,j,p=2; for(i=0;i<64;p++){ for(j=2;j*j<=p&&p%j;j++); if(j*j>p){ if(i<8) H[i]=(Math.pow(p,.5)*4294967296)|0; K[i++]=(Math.pow(p,1/3)*4294967296)|0; } }
+  s=unescape(encodeURIComponent(s)); var l=s.length*8, w=[]; for(i=0;i<s.length;i++) w[i>>2]|=s.charCodeAt(i)<<((3-i)%4)*8; w[l>>5]|=0x80<<(24-l%32); w[((l+64>>9)<<4)+15]=l;
+  for(j=0;j<w.length;j+=16){ var a=H.slice(0),W=[]; for(i=0;i<64;i++){ if(i<16) W[i]=w[j+i]|0; else { var x=W[i-15],y=W[i-2]; W[i]=(W[i-16]+(r(7,x)^r(18,x)^(x>>>3))+W[i-7]+(r(17,y)^r(19,y)^(y>>>10)))|0; }
+      var t1=(a[7]+(r(6,a[4])^r(11,a[4])^r(25,a[4]))+((a[4]&a[5])^(~a[4]&a[6]))+K[i]+W[i])|0, t2=((r(2,a[0])^r(13,a[0])^r(22,a[0]))+((a[0]&a[1])^(a[0]&a[2])^(a[1]&a[2])))|0; a=[(t1+t2)|0].concat(a); a[4]=(a[4]+t1)|0; a.pop(); }
+    for(i=0;i<8;i++) H[i]=(H[i]+a[i])|0; }
+  return H.map(function(h){return ("00000000"+(h>>>0).toString(16)).slice(-8);}).join(""); }
+function pinHash(u,pin){ return sha256("lfv:"+u.id+":"+pin); }
+var LOCK=ls.get("lfv_lock",{on:false,min:10}), LK={u:"",v:"",fail:0,until:0}, LAST=Date.now();
+function lockable(){ return LOCK.on&&USERS.some(function(u){return u.pin;}); }
+function lockNow(){ if(!lockable()) return; LK.v=""; var pu=USERS.filter(function(u){return u.pin;}); LK.u=(uMe()&&uMe().pin)?ME:pu[0].id; lockPaint(); $("#lock").classList.remove("hidden"); document.body.classList.add("locked"); }
+function lockPaint(){ var pu=USERS.filter(function(u){return u.pin;});
+  $("#lock-users").innerHTML=pu.map(function(u){return '<button type="button" class="'+(u.id===LK.u?"on":"")+'" data-lu="'+u.id+'"><b>'+esc(u.name)+'</b><span>'+esc(u.dept)+'</span></button>';}).join("");
+  $("#lock-dots").innerHTML=[0,1,2,3,4,5].map(function(i){return '<i class="'+(i<LK.v.length?"on":"")+(i>=4?" opt":"")+'"></i>';}).join("");
+  $("#lock-pad").innerHTML=["1","2","3","4","5","6","7","8","9","지움","0","확인"].map(function(k){return '<button type="button" data-lk="'+k+'">'+k+'</button>';}).join(""); }
+function lockTry(final){ var u=uById(LK.u); if(!u) return; if(Date.now()<LK.until){ $("#lock-msg").textContent="잠시 뒤에 다시 넣으세요 ("+Math.ceil((LK.until-Date.now())/1000)+"초)"; return; }
+  if(LK.v.length>=4&&pinHash(u,LK.v)===u.pin){ ME=u.id; ls.set("lfv_me",ME); uRender(); LK.fail=0; LK.v=""; $("#lock-msg").textContent=""; $("#lock").classList.add("hidden"); document.body.classList.remove("locked"); LAST=Date.now(); sitPaint&&sitPaint(); toast(u.name+" 님, 열었습니다"); return; }
+  if(final||LK.v.length>=6){ LK.fail++; LK.v=""; if(LK.fail>=5){ LK.until=Date.now()+30000; LK.fail=0; $("#lock-msg").textContent="5번 틀려서 30초 동안 넣을 수 없습니다"; } else $("#lock-msg").textContent="PIN이 맞지 않습니다 ("+LK.fail+"/5)"; lockPaint(); } }
+function lockKey(k){ if(k==="지움"){ LK.v=LK.v.slice(0,-1); } else if(k==="확인"){ lockTry(true); return; } else if(/^\d$/.test(k)&&LK.v.length<6){ LK.v+=k; } lockPaint(); if(/^\d$/.test(k)) lockTry(false); }
+$("#lock").addEventListener("click",function(e){ var b=e.target.closest("[data-lk]"); if(b){ lockKey(b.dataset.lk); return; } var u=e.target.closest("[data-lu]"); if(u){ LK.u=u.dataset.lu; LK.v=""; $("#lock-msg").textContent=""; lockPaint(); } });
+document.addEventListener("keydown",function(e){ if($("#lock").classList.contains("hidden")) return; if(/^\d$/.test(e.key)) lockKey(e.key); else if(e.key==="Backspace") lockKey("지움"); else if(e.key==="Enter") lockKey("확인"); e.preventDefault(); },true);
+$("#lock-forget").addEventListener("click",function(){ var n=USERS.filter(function(u){return u.pin;}).length;
+  if(n>1){ alert("PIN이 있는 다른 직원으로 연 뒤, 사용자 설정에서 내 정보를 ‘고치기’로 열어 새 PIN을 정하세요."); return; }
+  if(!confirm("이 기기에서 PIN을 아는 사람이 없으면 잠금을 풀 수 없습니다.\n모든 자료(사건 기록·대장·진술서·증거·사용자 설정)를 지우고 처음부터 시작할까요?\n백업 파일이 있으면 지운 뒤 복원할 수 있습니다.")) return;
+  if(!confirm("정말 모두 지울까요? 되돌릴 수 없습니다.")) return;
+  for(var i=localStorage.length-1;i>=0;i--){ var k=localStorage.key(i); if(k&&k.indexOf("lfv_")===0) localStorage.removeItem(k); }
+  try{ indexedDB.deleteDatabase("lfv"); }catch(e){} location.reload(); });
+["pointerdown","keydown","touchstart"].forEach(function(ev){ document.addEventListener(ev,function(){ LAST=Date.now(); },true); });
+setInterval(function(){ if(!lockable()||!LOCK.min||REC) return; if(!$("#lock").classList.contains("hidden")) return; if(Date.now()-LAST>LOCK.min*60000) lockNow(); },15000);
+document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible"&&lockable()&&LOCK.min&&!REC&&Date.now()-LAST>LOCK.min*60000) lockNow(); });
+/* 사용자 설정: PIN 저장 · 잠금 설정 */
+$("#u-save").addEventListener("click",function(e){ var pin=$("#u-pin").value.trim(); if(pin&&!/^\d{4,6}$/.test(pin)){ e.stopImmediatePropagation(); toast("PIN은 숫자 4~6자리로 넣어 주세요"); return; }
+  var target=UED, nm=$("#u-name").value.trim(); setTimeout(function(){ var u=target?uById(target):USERS.filter(function(x){return x.name===nm;}).slice(-1)[0]; if(u&&pin){ u.pin=pinHash(u,pin); ls.set("lfv_users",USERS); uRender(); toast(u.name+" 님의 PIN을 저장했습니다"); } $("#u-pin").value=""; },0); },true);
+var _uForm=uForm; uForm=function(u){ _uForm(u); $("#u-pin").value=""; $("#u-pin").placeholder=u&&u.pin?"설정됨 — 바꿀 때만 입력":"숫자 4~6자리"; };
+var _uRender=uRender; uRender=function(){ _uRender(); $$("#u-list .urow").forEach(function(r){ var b=r.querySelector("[data-ued]"); var u=b&&uById(b.dataset.ued); if(u&&u.pin&&!r.querySelector(".pinb")){ var s=document.createElement("span"); s.className="pinb"; s.textContent="PIN"; r.querySelector("div").appendChild(s); } }); lockUI(); bkLast(); };
+function lockUI(){ $("#u-lockon").checked=!!LOCK.on; $("#u-lockmin").value=String(LOCK.min); var lb=$("#lockbtn"); if(lb) lb.classList.toggle("hidden",!lockable()); }
+$("#u-lockon").addEventListener("change",function(){ if(this.checked&&!USERS.some(function(u){return u.pin;})){ this.checked=false; toast("먼저 직원 ‘고치기’에서 PIN을 정하세요"); return; } LOCK.on=this.checked; ls.set("lfv_lock",LOCK); lockUI(); toast(LOCK.on?"앱 잠금을 켰습니다":"앱 잠금을 껐습니다"); });
+$("#u-lockmin").addEventListener("change",function(){ LOCK.min=+this.value; ls.set("lfv_lock",LOCK); });
+$("#u-locknow").addEventListener("click",function(){ if(!lockable()){ toast("앱 잠금을 켜고 PIN을 정해야 잠글 수 있습니다"); return; } $("#m-user").classList.add("hidden"); lockNow(); });
+(function(){ var b=document.createElement("button"); b.type="button"; b.id="lockbtn"; b.className="lockbtn hidden"; b.title="지금 잠그기"; b.innerHTML="<i></i>잠금"; $(".hdr-r").insertBefore(b,$("#ubtn")); b.addEventListener("click",lockNow); })();
+uRender(); if(lockable()) lockNow();
+/*PLUSEND*/
 /* 시작 */
 renderField(); setInterval(renderContacts,60000); shInit();
 tab(ls.get("lfv_tab","field"));
