@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="description" content="진료거부 정당사유 판단·요청서 작성·사례 대장 — 가톨릭대학교 부천성모병원 「진료거부 등 처리 및 위원회 심의 내규」 기준">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>진료거부 정당사유 판단 도우미</title>
+<style>
+:root{
+  --navy:#1f3a5f; --navy2:#2c5282; --line:#d5dbe3; --bg:#f4f6f9; --card:#fff;
+  --text:#1d2430; --muted:#5f6b7a; --ok:#1f7a4d; --okbg:#e6f4ec; --warn:#a15c00; --warnbg:#fff3df;
+  --no:#b42318; --nobg:#fde8e7; --info:#2c5282; --infobg:#e8f0fb;
+  --lbl:120px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.55}
+header{background:var(--navy);color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+header h1{margin:0;font-size:19px;letter-spacing:-.3px}
+header .sub{font-size:12px;opacity:.85;margin-top:2px}
+nav{background:#fff;border-bottom:1px solid var(--line);display:flex;padding:0 16px;position:sticky;top:0;z-index:20}
+nav button{border:0;background:none;padding:12px 18px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent}
+nav button.on{color:var(--navy);border-bottom-color:var(--navy2)}
+main{max-width:1180px;margin:0 auto;padding:18px 16px 40px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:14px}
+.card h2{font-size:15px;margin:0 0 12px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.card h2 .no{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--navy2);color:#fff;font-size:12px;align-items:center;justify-content:center;flex:none}
+.card h3{font-size:14px;margin:14px 0 8px;color:var(--navy2)}
+.hint{color:var(--muted);font-size:12.5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 24px}
+.row{display:grid;grid-template-columns:var(--lbl) 1fr;align-items:center;gap:10px;min-height:34px}
+.row>label:first-child,.row>.lbl{font-weight:600;color:#33404f}
+input[type=text],select,textarea{font:inherit;border:1px solid #c3cbd6;border-radius:5px;padding:6px 9px;width:100%;background:#fff;color:var(--text)}
+textarea{min-height:70px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid #9ec0ef;border-color:var(--navy2)}
+.opts{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
+.opts label{display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap}
+.seg{display:inline-flex;border:1px solid #c3cbd6;border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg label{padding:7px 14px;cursor:pointer;border-right:1px solid #c3cbd6;display:flex;align-items:center;gap:6px;background:#fff}
+.seg label:last-child{border-right:0}
+.seg input{display:none}
+.seg label.sel{background:var(--navy2);color:#fff}
+.btn{font:inherit;border:1px solid var(--navy2);background:var(--navy2);color:#fff;padding:7px 14px;border-radius:5px;cursor:pointer;font-weight:600}
+.btn.sec{background:#fff;color:var(--navy2)}
+.btn.red{background:#fff;color:var(--no);border-color:var(--no)}
+.btn.sm{padding:4px 10px;font-size:12.5px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
+.side{position:sticky;top:60px}
+table.rs{width:100%;border-collapse:collapse;table-layout:fixed}
+table.rs th,table.rs td{border:1px solid var(--line);padding:7px 9px;vertical-align:middle;text-align:left}
+table.rs th{background:#eef2f7;font-weight:600;color:#33404f}
+table.rs td.c,table.rs th.c{text-align:center}
+table.rs tr.pick td{background:#eef5ff}
+table.rs .grp{background:#f7f9fb;font-weight:600;color:var(--navy2);text-align:center}
+.ref{font-size:12px;color:var(--muted);display:block;margin-top:2px}
+.tag{display:inline-block;font-size:11.5px;padding:1px 7px;border-radius:10px;background:#eef2f7;color:#33404f;margin-left:4px;white-space:nowrap}
+.verdict{border-radius:8px;padding:14px;margin-bottom:12px;border:1px solid}
+.verdict .big{font-size:17px;font-weight:700}
+.v-ok{background:var(--okbg);border-color:#9fd3b6;color:var(--ok)}
+.v-warn{background:var(--warnbg);border-color:#f0c57f;color:var(--warn)}
+.v-no{background:var(--nobg);border-color:#f2a8a2;color:var(--no)}
+.v-info{background:var(--infobg);border-color:#a9c4ea;color:var(--info)}
+.res-sec{margin:10px 0 0}
+.res-sec h4{margin:0 0 5px;font-size:13px;color:var(--navy)}
+.res-sec ul{margin:0;padding-left:18px}
+.res-sec li{margin:3px 0}
+.score{display:grid;grid-template-columns:1fr auto;gap:4px;font-size:13px}
+.meter{height:8px;border-radius:4px;background:#e3e8ef;overflow:hidden;margin-top:6px}
+.meter i{display:block;height:100%;background:var(--navy2)}
+.crit{display:grid;grid-template-columns:28px 230px 1fr;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}
+.crit:last-child{border-bottom:0}
+.crit .n{font-weight:700;color:var(--navy2);text-align:center}
+.crit .t{font-weight:600}
+.alert{border-left:4px solid var(--warn);background:var(--warnbg);padding:9px 12px;border-radius:4px;margin:8px 0;font-size:13px}
+.alert.no{border-left-color:var(--no);background:var(--nobg)}
+.alert.info{border-left-color:var(--info);background:var(--infobg)}
+.hide{display:none!important}
+.stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.stat div{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.stat b{display:block;font-size:20px;color:var(--navy)}
+.stat span{font-size:12px;color:var(--muted)}
+.law p{margin:6px 0}
+.law .q{background:#f7f9fb;border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:6px 0}
+.law dl{display:grid;grid-template-columns:190px 1fr;gap:6px 14px;margin:6px 0}
+.law dt{font-weight:600;color:#33404f}
+.law dd{margin:0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:14px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1d2430;color:#fff;padding:9px 18px;border-radius:6px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:99}
+.toast.on{opacity:.95}
+/* ===== 인쇄용 서식 ===== */
+#printArea{display:none}
+.pf{font-family:"Malgun Gothic","맑은 고딕",sans-serif;color:#000;font-size:10.5pt;line-height:1.45}
+.pf .ttl{text-align:center;font-size:17pt;font-weight:700;letter-spacing:4px;margin:0 0 4px}
+.pf .form-no{font-size:9pt;margin-bottom:6px}
+.pf .contact{text-align:right;font-size:9pt;margin-bottom:8px}
+.pf h5{font-size:10.5pt;margin:10px 0 4px}
+.pf table{width:100%;border-collapse:collapse;table-layout:fixed}
+.pf th,.pf td{border:1px solid #000;padding:3px 6px;vertical-align:middle;font-size:9.5pt}
+.pf th{background:#efefef;font-weight:700;text-align:center}
+.pf td.c{text-align:center}
+.pf .nb td{border:0;padding:2px 4px}
+.pf .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pf .line{margin:3px 0}
+.pf .sig{text-align:right;margin-top:14px;font-size:12pt;font-weight:700}
+.pf .box{border:1px solid #000;padding:5px 7px;min-height:38px;white-space:pre-wrap;font-size:9.5pt}
+.ck::before{content:"□";margin-right:2px}
+.ck.on::before{content:"■"}
+@media print{
+  @page{size:A4;margin:12mm 13mm}
+  body{background:#fff}
+  header,nav,main,footer,.toast{display:none!important}
+  #printArea{display:block}
+  .pbreak{page-break-before:always}
+}
+/* ===== 4차 개선 ===== */
+.hdr-r{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.hbadge{display:inline-flex;align-items:center;gap:6px;font-size:12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:14px;padding:3px 10px;cursor:pointer;white-space:nowrap}
+.hbadge.warn{background:#ffe2b0;color:#6b3d00;border-color:#ffe2b0}
+.modesw{display:inline-flex;border:1px solid rgba(255,255,255,.45);border-radius:14px;overflow:hidden}
+.modesw button{border:0;background:transparent;color:#fff;font:inherit;font-size:12px;padding:3px 12px;cursor:pointer}
+.modesw button.on{background:#fff;color:var(--navy);font-weight:700}
+.nbadge{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:var(--no);color:#fff;font-size:11px;text-align:center;padding:0 5px;margin-left:4px;vertical-align:1px}
+body.field [data-admin],body.field .adm{display:none!important}
+body:not(.field) .fieldonly{display:none!important}
+.learn{display:grid;grid-template-columns:140px 1fr 1.4fr auto;gap:8px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.xbtn{border:1px solid #e3b5b1;background:#fff;color:var(--no);border-radius:4px;font-size:11.5px;padding:1px 6px;cursor:pointer;white-space:nowrap}
+.alist{margin:0;padding:0;list-style:none}
+.alist li{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.alist li:last-child{border-bottom:0}
+.atag{display:inline-block;text-align:center;font-size:11.5px;font-weight:700;border-radius:10px;padding:2px 0;width:90px}
+.atag.r{background:var(--nobg);color:var(--no)}.atag.y{background:var(--warnbg);color:var(--warn)}.atag.b{background:var(--infobg);color:var(--info)}
+table.wt td input{width:56px;text-align:center}
+table.wt .opts{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:6px 14px}
+table.wt .opts label{display:grid;grid-template-columns:1fr 56px;align-items:center;gap:8px;white-space:nowrap}
+table.rv td{vertical-align:top;font-size:13px}
+.simrow td{font-size:13px}
+.confbar{display:flex;align-items:center;gap:8px;font-size:12.5px;margin-top:6px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.notice-pv{border:1px solid var(--line);border-radius:6px;padding:14px;background:#fcfcfd}
+@media (max-width:640px){
+  body{font-size:15px}
+  header{padding:10px 14px}header h1{font-size:17px}header .sub{font-size:11.5px}
+  .hdr-r{align-items:flex-start;width:100%}
+  nav{overflow-x:auto;padding:0 6px;scrollbar-width:none}nav::-webkit-scrollbar{display:none}
+  nav button{white-space:nowrap;padding:12px 12px;flex:none}
+  main{padding:12px 10px 90px}
+  .card{padding:13px 12px}
+  .row{grid-template-columns:1fr;gap:4px}
+  .seg{display:flex;flex-direction:column;width:100%}
+  .seg label{border-right:0;border-bottom:1px solid #c3cbd6;min-height:44px}
+  .seg label:last-child{border-bottom:0}
+  .btn{min-height:42px;padding:9px 14px}
+  .btn.sm{min-height:32px}
+  input[type=text],select,textarea{min-height:42px;font-size:16px}
+  input[type=checkbox],input[type=radio]{width:20px;height:20px}
+  #reasonTable col:first-child,#fReasonTable col:first-child{width:0!important}
+  #reasonTable td.grp,#reasonTable th:first-child,#fReasonTable td.grp,#fReasonTable th:first-child{display:none}
+  #reasonTable col:nth-child(2),#fReasonTable col:nth-child(2){width:34px!important}
+  #reasonTable col:nth-child(4),#fReasonTable col:nth-child(4){width:46px!important}
+  table.rs th,table.rs td{padding:6px 6px}
+  .learn{grid-template-columns:1fr}
+  .alist li{grid-template-columns:1fr}
+  .mbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:8px 10px;display:flex;gap:8px;z-index:30;box-shadow:0 -2px 10px rgba(0,0,0,.06)}
+  .mbar .btn{flex:1}
+  .stack colgroup,.stack tr:first-child{display:none}
+  .stack,.stack tbody,.stack tr,.stack td{display:block;width:100%!important}
+  .stack tr{border:1px solid var(--line);border-radius:6px;margin-bottom:8px;padding:6px 8px;background:#fff}
+  .stack td{border:0!important;padding:3px 2px!important;text-align:left!important}
+  .stack td:first-child{font-weight:700;color:var(--navy)}
+  #ruleTable td:last-child{padding-top:4px!important;border-top:1px dashed var(--line)!important}
+  table.wt .opts{grid-template-columns:1fr 1fr!important}
+}
+@media (min-width:641px){.mbar{display:none!important}}
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr}.side{position:static}
+  .grid2,.grid3{grid-template-columns:1fr}.stat{grid-template-columns:repeat(2,1fr)}
+  .crit{grid-template-columns:28px 1fr}.crit .o{grid-column:2}
+  .law dl{grid-template-columns:1fr}
+}
+.lawbar{display:grid;grid-template-columns:1fr 170px 60px;gap:8px;align-items:center;margin:6px 0 10px}.lawbar input,.lawbar select{height:36px;margin:0}.lawcnt{text-align:right;font-size:13px;color:#555}@media(max-width:640px){.lawbar{grid-template-columns:1fr 1fr}.lawbar input{grid-column:1/-1}}
+.badIn{border-color:#d92d20!important;background:#fff4f3!important}
+
+/* ===== 음성 제어 ===== */
+.vbtn{position:fixed;right:22px;bottom:22px;width:56px;height:56px;border-radius:50%;border:0;background:var(--navy);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.22);cursor:pointer;z-index:60;display:flex;align-items:center;justify-content:center}
+.vbtn svg{width:26px;height:26px;fill:currentColor}
+.vbtn.on{background:#d92d20;animation:vpulse 1.4s infinite}
+.vbtn.dict{background:#1f7a4d}
+@keyframes vpulse{0%{box-shadow:0 0 0 0 rgba(217,45,32,.45)}70%{box-shadow:0 0 0 14px rgba(217,45,32,0)}100%{box-shadow:0 0 0 0 rgba(217,45,32,0)}}
+.vpanel{position:fixed;right:22px;bottom:88px;width:380px;max-width:calc(100vw - 24px);background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:60;font-size:13px}
+.vpanel.hide{display:none}
+.vpanel .vh{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);background:#f6f8fb;border-radius:10px 10px 0 0}
+.vpanel .vh b{font-size:14px}
+.vpanel .vx{border:0;background:none;font-size:18px;cursor:pointer;color:#555;line-height:1}
+.vpanel .vb{padding:12px 14px;display:grid;gap:8px}
+.vrow{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:start}
+.vrow>span:first-child{color:#667;font-size:12px;padding-top:2px}
+.vstat{font-weight:600}
+.vheard{min-height:20px;color:#1d2430;word-break:keep-all}
+.vheard i{color:#999;font-style:normal}
+.vres{min-height:20px;color:#1d4f91;word-break:keep-all}
+.vres.err{color:#b42318}
+.vtype{display:grid;grid-template-columns:1fr 64px;gap:6px}
+.vtype input{height:34px;margin:0}
+.vtype .btn{height:34px;padding:0}
+.vopts{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:#333}
+.vopts label{display:flex;align-items:center;gap:4px;cursor:pointer}
+.vnote{font-size:11.5px;color:#8a5a00;background:#fff8e6;border:1px solid #f3dca8;border-radius:6px;padding:6px 8px;line-height:1.5}
+.vhelp{max-height:46vh;overflow:auto;border-top:1px solid var(--line);padding:10px 14px}
+.vhelp table{width:100%;border-collapse:collapse;font-size:12.5px}
+.vhelp th,.vhelp td{border-bottom:1px solid #eef1f5;padding:5px 4px;text-align:left;vertical-align:top}
+.vhelp th{width:92px;color:#445;font-weight:600;white-space:nowrap}
+.vhelp td b{color:#1d4f91;font-weight:600}
+.vflash{outline:3px solid #f5b400!important;outline-offset:2px;transition:outline .2s}
+@media (max-width:640px){.vbtn{bottom:70px;right:14px;width:50px;height:50px}.vpanel{right:12px;bottom:128px}}
+@media print{.vbtn,.vpanel{display:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>진료거부 정당사유 판단 도우미</h1>
+    <div class="sub">가톨릭대학교 부천성모병원 · 「진료거부 등 처리 및 위원회 심의 내규」(2025. 6. 16. 제정) 기준</div>
+  </div>
+  <div class="hdr-r">
+    <div class="sub" id="hdrContact">문의 : 원무팀 법무Unit (원내 2349) · 응급원무Unit (2333)</div>
+    <div class="btns">
+      <span class="hbadge" id="shareBadge" title="사례 대장 저장 위치">대장 : 이 PC</span>
+      <div class="modesw" id="modeSw"><button data-m="field">현장 모드</button><button data-m="admin">간사 모드</button></div>
+    </div>
+  </div>
+</header>
+<nav id="nav">
+  <button data-t="case" class="on">① 사례 분석</button>
+  <button data-t="judge">② 판단하기</button>
+  <button data-t="form">③ 요청서 작성</button>
+  <button data-t="ledger" data-admin>④ 사례 대장<span class="nbadge hide" id="navBadge"></span></button>
+  <button data-t="law">⑤ 근거 자료</button>
+  <button data-t="set" data-admin>⑥ 설정·검토표</button>
+</nav>
+<main>
+
+<!-- ===================== ⓪ 사례 분석 ===================== -->
+<section class="tab on" id="t-case">
+ <div class="layout">
+  <div>
+   <div class="card">
+    <h2><span class="no">1</span>사례 입력</h2>
+    <p class="hint" style="margin:-4px 0 8px">일어난 일을 문장으로 적거나 경위서·보고 내용을 붙여 넣으세요. 누가(환자·보호자), 어디서(외래·응급실·병동), 무엇을 했는지, 피해·신고·반복 여부, 직원이 한 조치(설명·안내·기록)를 적을수록 정확해집니다.</p>
+    <div class="btns" style="margin-bottom:8px"><span class="hint">예시 사례 :</span>
+      <button class="btn sec sm" data-sample="0">외래 폭언·폭행</button>
+      <button class="btn sec sm" data-sample="1">응급실 주취 난동</button>
+      <button class="btn sec sm" data-sample="2">장기입원 퇴원 거부</button>
+      <button class="btn sec sm" data-sample="3">진료비 미납</button>
+    </div>
+    <textarea id="caseText" style="min-height:200px" placeholder="예) 2026. 11. 10. 정형외과 외래에서 환자 본인이 대기시간이 길다며 간호사에게 욕설을 하고 멱살을 잡아 밀쳤다. 간호사는 전치 2주 진단을 받았고 112에 신고했다. ..."></textarea>
+    <div class="btns" style="margin-top:10px">
+      <button class="btn" id="caseRun">규칙에 맞는지 분석하기</button>
+      <button class="btn sec" id="caseClear">지우기</button>
+    </div>
+   </div>
+   <div class="card hide" id="caseMarkCard">
+    <h2><span class="no">2</span>분석한 사례 <span class="hint">(색칠된 부분이 판단에 쓰인 문구)</span></h2>
+    <div id="caseMarked" style="white-space:pre-wrap;line-height:1.9"></div>
+   </div>
+   <div class="card hide" id="caseFactCard">
+    <h2><span class="no">3</span>사례에서 찾은 사실</h2>
+    <table class="rs stack" id="factTable"></table>
+    <div class="learn" data-admin>
+      <span class="lbl" style="font-weight:600">놓친 사유 알려주기</span>
+      <select id="learnReason"></select>
+      <input type="text" id="learnWord" placeholder="사례 속 표현 그대로 (예: 멱살을 잡고 흔들)">
+      <button class="btn sec sm" id="learnAdd">학습</button>
+    </div>
+    <p class="hint" style="margin:8px 0 0">틀리게 읽은 항목은 「판단하기에서 고치기」를 눌러 직접 바로잡으면 결과가 다시 계산됩니다.</p>
+   </div>
+   <div class="card hide" id="caseSimCard" data-admin>
+    <h2><span class="no">5</span>비슷한 과거 사례 <span class="hint">(사례 대장 기준 · 당시 위원회 결정)</span></h2>
+    <div id="caseSim"></div>
+   </div>
+   <div class="card hide" id="caseRuleCard">
+    <h2><span class="no">4</span>규칙 적합성 점검 <span class="hint">(내규 조항별)</span></h2>
+    <table class="rs stack" id="ruleTable"></table>
+   </div>
+  </div>
+  <aside class="side">
+   <div class="card">
+    <h2>종합 판단</h2>
+    <div id="caseResult"><div class="verdict v-info"><div class="big">사례를 입력해 주세요</div><div style="margin-top:4px;font-size:13px">왼쪽에 사례를 적고 「규칙에 맞는지 분석하기」를 누르세요.</div></div></div>
+    <div class="btns" style="margin-top:14px">
+      <button class="btn" id="caseToForm">요청서로 옮기기 →</button>
+      <button class="btn sec" id="caseToJudge">판단하기에서 고치기</button>
+    </div>
+    <p class="hint" style="margin:10px 0 0">문장 속 낱말을 내규·법령 기준과 맞춰 보는 자동 점검입니다. 부정 표현·복잡한 문장은 잘못 읽을 수 있으니 '찾은 사실'을 꼭 확인하세요. 최종 판단은 진료거부심의위원회 의결로 정해집니다.</p>
+   </div>
+  </aside>
+ </div>
+</section>
+
+<div class="mbar" id="mbarCase"><button class="btn" id="mRun">분석하기</button><button class="btn sec" id="mToForm">요청서로</button></div>
+<!-- ===================== ① 판단하기 ===================== -->
+<section class="tab" id="t-judge">
+ <div class="layout">
+  <div>
+   <div class="card">
+    <h2><span class="no">1</span>적용 법률 선택</h2>
+    <div class="seg" id="segType">
+      <label><input type="radio" name="jType" value="med" checked>일반 진료 — 의료법 제15조 (서식 1호)</label>
+      <label><input type="radio" name="jType" value="emg">응급의료 — 응급의료법 제6조 (서식 2호)</label>
+    </div>
+    <p class="hint" style="margin:8px 0 0">응급실 내원·119 이송·병동 내 응급상황 등 응급의료를 요청받은 경우는 '응급의료'를 선택합니다.</p>
+   </div>
+
+   <div class="card">
+    <h2><span class="no">2</span>기본 확인</h2>
+    <div class="row"><span class="lbl">진료 단계</span>
+      <div class="seg" id="segStage">
+        <label><input type="radio" name="jStage" value="new" checked>새 진료 요청</label>
+        <label><input type="radio" name="jStage" value="ongoing">진료 중(중단)</label>
+        <label><input type="radio" name="jStage" value="inpt">입원 중(퇴원 요구)</label>
+      </div></div>
+    <div class="row"><span class="lbl" id="lblEmg">응급상황 여부</span>
+      <div class="seg" id="segEmg">
+        <label><input type="radio" name="jEmg" value="no" checked>응급 아님</label>
+        <label><input type="radio" name="jEmg" value="yes">응급상황</label>
+        <label><input type="radio" name="jEmg" value="unk">판단 전</label>
+      </div></div>
+    <div class="row"><span class="lbl">진료비 미수·체납</span>
+      <div class="seg" id="segFee">
+        <label><input type="radio" name="jFee" value="no" checked>거부 이유 아님</label>
+        <label><input type="radio" name="jFee" value="part">이유 중 하나</label>
+        <label><input type="radio" name="jFee" value="main">주된 이유</label>
+      </div></div>
+    <div class="row"><span class="lbl">긴급성</span>
+      <div class="seg" id="segUrg">
+        <label><input type="radio" name="jUrg" value="normal" checked>통상 회의로 충분</label>
+        <label><input type="radio" name="jUrg" value="fast">즉시 조치 필요(신속 심의)</label>
+        <label><input type="radio" name="jUrg" value="post">이미 조치함(사후 심의)</label>
+      </div></div>
+   </div>
+
+   <div class="card">
+    <h2><span class="no">3</span>진료거부 사유 선택 <span class="hint">(중복 선택 가능 · 서식 번호 기준)</span></h2>
+    <table class="rs" id="reasonTable"></table>
+    <div class="row hide" id="etcRow" style="margin-top:8px"><span class="lbl">기타 사유</span><input type="text" id="jEtc" placeholder="구체적으로 적어 주세요"></div>
+   </div>
+
+   <div class="card hide" id="critCard">
+    <h2><span class="no">4</span>행위 사유의 경중 판단 <span class="hint">(내규 제3조 제4항 각 호)</span></h2>
+    <p class="hint" style="margin:-4px 0 8px">폭언·폭행·비협조 등 환자 측 행위가 사유인 경우, 내규가 정한 10가지 기준으로 경중을 따져 봅니다.</p>
+    <div id="critList"></div>
+   </div>
+
+   <div class="card">
+    <h2><span class="no" id="procNo">4</span>절차 이행 확인 <span class="hint">(내규 제6조)</span></h2>
+    <div class="grid2">
+     <div class="row"><span class="lbl">보고·서류 제출</span><div class="opts"><label><input type="checkbox" id="p1">제출함</label></div></div>
+     <div class="row"><span class="lbl">구두 설명</span><select id="p2"><option value="">선택</option><option>이행</option><option>이행 불능</option><option>생략요청</option></select></div>
+     <div class="row"><span class="lbl">서면 교부</span><select id="p2b"><option value="">선택</option><option>교부</option><option>미교부</option><option>생략요청</option></select></div>
+     <div class="row"><span class="lbl">대체기관 안내</span><div class="opts"><label><input type="checkbox" id="p3">안내함</label></div></div>
+     <div class="row"><span class="lbl">EMR 기록</span><div class="opts"><label><input type="checkbox" id="p4">기록 완료</label></div></div>
+     <div class="row"><span class="lbl">증거자료</span><div class="opts"><label><input type="checkbox" id="p5">확보함</label></div></div>
+    </div>
+   </div>
+  </div>
+
+  <aside class="side">
+   <div class="card" id="resultCard">
+    <h2>판단 결과</h2>
+    <div id="result"></div>
+    <div class="btns" style="margin-top:14px">
+      <button class="btn" id="toForm">요청서로 옮기기 →</button>
+      <button class="btn sec" id="resetJudge">처음부터</button>
+    </div>
+    <p class="hint" style="margin:10px 0 0">이 결과는 내규·법령에 비춘 1차 검토 의견입니다. 최종 판단은 진료거부심의위원회 의결(내규 제2조)로 정해집니다.</p>
+   </div>
+  </aside>
+ </div>
+</section>
+
+<!-- ===================== ② 요청서 작성 ===================== -->
+<section class="tab" id="t-form">
+ <div class="card">
+  <div class="btns" style="justify-content:space-between">
+   <div class="btns">
+    <span class="lbl" style="font-weight:600">서식</span>
+    <div class="seg" id="segFType">
+      <label><input type="radio" name="fType" value="med" checked>서식 1호 진료거부 요청서</label>
+      <label><input type="radio" name="fType" value="emg">서식 2호 응급의료 거부 요청서</label>
+    </div>
+    <span class="hint" id="caseIdView"></span>
+   </div>
+   <div class="btns">
+    <button class="btn sec" id="newForm">새 요청서</button>
+    <button class="btn sec" id="saveForm">대장에 저장</button>
+    <button class="btn sec fieldonly" id="dlCase" title="공유 대장이 없을 때 간사에게 파일로 전달">요청 파일 내려받기</button>
+    <button class="btn" id="printForm">인쇄 · PDF 저장</button>
+   </div>
+  </div>
+ </div>
+
+ <div class="card">
+  <h2>□ 관련정보</h2>
+  <div class="grid2">
+   <div class="row"><label for="fDate">요청 일자</label><input type="text" class="dateIn" id="fDate" placeholder="20250616 처럼 숫자만"></div>
+   <div class="row"><label for="fTime">요청 시각</label><input type="text" class="timeIn" id="fTime" placeholder="1430 처럼 숫자만"></div>
+  </div>
+  <h3>요청자</h3>
+  <div class="grid2">
+   <div class="row"><span class="lbl">신분</span><div class="opts" id="fRole">
+     <label><input type="radio" name="fRole" value="의료인">의료인</label>
+     <label><input type="radio" name="fRole" value="의료기사">의료기사</label>
+     <label><input type="radio" name="fRole" value="기타">기타</label>
+     <input type="text" id="fRoleEtc" placeholder="기타 신분" style="width:130px"></div></div>
+   <div class="row"><label for="fDept">부서명</label><input type="text" id="fDept"></div>
+   <div class="row"><label for="fReq">요청자</label><input type="text" id="fReq"></div>
+   <div class="row"><label for="fTel">연락처</label><input type="text" id="fTel"></div>
+  </div>
+  <h3>대상자</h3>
+  <div class="grid2">
+   <div class="row"><span class="lbl">관련자</span><div class="opts">
+     <label><input type="radio" name="fRel" value="환자">환자</label>
+     <label><input type="radio" name="fRel" value="보호자">보호자</label></div></div>
+   <div class="row"><span class="lbl">진료정보</span><div style="display:grid;grid-template-columns:1fr auto 1fr auto;gap:6px;align-items:center">
+     <input type="text" id="fClinic"><span>과</span><input type="text" id="fProf"><span>교수</span></div></div>
+   <div class="row"><label for="fRegNo">등록번호</label><input type="text" id="fRegNo"></div>
+   <div class="row"><label for="fPt">환자 성명</label><input type="text" id="fPt"></div>
+  </div>
+ </div>
+
+ <div class="card">
+  <h2>□ 진료거부 사유 <span class="hint">(중복 표기 가능 — ① 판단하기에서 고른 사유가 옮겨집니다)</span></h2>
+  <table class="rs" id="fReasonTable"></table>
+  <div class="row" style="margin-top:8px"><label for="fEtcReason">기타 사유</label><input type="text" id="fEtcReason"></div>
+  <h3>사건 경위(요약)</h3>
+  <textarea id="fStory" placeholder="언제·어디서·누가·무엇을 했는지, 피해 내용과 조치 경과를 사실 위주로 적습니다."></textarea>
+  <h3>증거자료</h3>
+  <div class="opts" id="fEvid">
+   <label><input type="checkbox" value="의무기록">의무기록</label>
+   <label><input type="checkbox" value="CCTV">CCTV</label>
+   <label><input type="checkbox" value="보안업무일지">보안업무일지</label>
+   <label><input type="checkbox" value="진술서(피해자, 참고인)">진술서(피해자, 참고인)</label>
+   <label><input type="checkbox" value="기타">기타</label>
+   <input type="text" id="fEvidEtc" placeholder="기타 증거" style="width:200px">
+  </div>
+ </div>
+
+ <div class="card">
+  <h2>□ 확인사항</h2>
+  <div class="adm">
+  <h3>Ⅰ. 거부 사유의 확인 — 간사의 의견</h3>
+  <div class="opts" id="fOpinion">
+   <label><input type="radio" name="fOp" value="용인 가능(통상회의)">용인 가능(통상회의)</label>
+   <label><input type="radio" name="fOp" value="용인 가능(신속심의)">용인 가능(신속심의)</label>
+   <label><input type="radio" name="fOp" value="결정 보류">결정 보류</label>
+   <label><input type="radio" name="fOp" value="용인 불능(반려)">용인 불능(반려)</label>
+  </div>
+  <textarea id="fOpMemo" placeholder="간사 검토 메모(판단하기 결과가 자동으로 들어갑니다)" style="margin-top:8px"></textarea>
+  </div>
+
+  <h3>Ⅱ. 진료거부 절차의 확인</h3>
+  <table class="rs">
+   <colgroup><col style="width:52px"><col style="width:34%"><col><col style="width:64px"></colgroup>
+   <tr><th class="c">순서</th><th>절차 항목</th><th>제출처 등 정보</th><th class="c">확인</th></tr>
+   <tr><td class="c">1</td><td>거부 사유 판단 후 서류 제출 여부</td><td><input type="text" id="fP1" placeholder="제출처"></td><td class="c"><input type="checkbox" id="fP1c"></td></tr>
+   <tr><td class="c">2</td><td>대상자에게 구두 설명</td><td><div class="opts"><label><input type="radio" name="fP2" value="이행">이행</label><label><input type="radio" name="fP2" value="이행 불능">이행 불능</label><label><input type="radio" name="fP2" value="생략요청">생략요청</label></div></td><td class="c"><input type="checkbox" id="fP2c"></td></tr>
+   <tr><td class="c">└</td><td>위 설명 시 서면 교부 여부</td><td><div class="opts"><label><input type="radio" name="fP2b" value="교부">교부</label><label><input type="radio" name="fP2b" value="미교부">미교부</label><label><input type="radio" name="fP2b" value="생략요청">생략요청</label></div></td><td class="c"><input type="checkbox" id="fP2bc"></td></tr>
+   <tr><td class="c">3</td><td>대체 진료기관 안내</td><td><input type="text" id="fP3" placeholder="대상병원"></td><td class="c"><input type="checkbox" id="fP3c"></td></tr>
+   <tr><td class="c">4</td><td>전자의무기록(EMR)에 기록 완료</td><td><input type="text" id="fP4" placeholder="기록명"></td><td class="c"><input type="checkbox" id="fP4c"></td></tr>
+  </table>
+
+  <h3>2. 대상자의 반응</h3>
+  <div class="grid2">
+   <div class="row"><span class="lbl">반응 수준</span><select id="fReact">
+     <option value="">선택</option>
+     <option>수용 — 안내받은 대로 이동함</option>
+     <option>수용 — 반발은 있으나 대체로 수용함</option>
+     <option>불수용 — 강하게 반발함</option>
+     <option>불수용 — 외부기관에 조치하겠다고 함</option>
+     <option>불수용 — 설명을 거부함</option>
+     <option>기타</option></select></div>
+   <div class="row"><label for="fReactEtc">기타 반응</label><input type="text" id="fReactEtc"></div>
+  </div>
+  <div class="row" style="margin-top:6px"><label for="fReactTxt">구체적 언행</label><input type="text" id="fReactTxt"></div>
+
+  <h3>Ⅲ. 요청사항</h3>
+  <div class="row"><span class="lbl">1. 거부 범위</span><div class="opts" id="fScope">
+    <label><input type="checkbox" value="전체">전체</label>
+    <label><input type="checkbox" value="외래">외래</label>
+    <label><input type="checkbox" value="응급실">응급실</label>
+    <label><input type="checkbox" value="입원">입원</label>
+    <span class="hint">입원 시 →</span>
+    <label><input type="radio" name="fWard" value="전체">전체 병동</label>
+    <label><input type="radio" name="fWard" value="특정병동">특정병동</label>
+    <input type="text" id="fWardTxt" placeholder="병동명" style="width:120px"></div></div>
+  <div class="row"><span class="lbl">2. 거부 과목</span><div class="opts">
+    <label><input type="radio" name="fDeptScope" value="병원 전체">병원 전체</label>
+    <label><input type="radio" name="fDeptScope" value="특정 임상과">특정 임상과</label>
+    <input type="text" id="fDeptScopeTxt" placeholder="임상과" style="width:110px">
+    <label><input type="radio" name="fDeptScope" value="특정 의사">특정 의사</label>
+    <input type="text" id="fDocTxt" placeholder="의사명" style="width:110px"></div></div>
+  <div class="row"><span class="lbl">3. 향후 대처</span><div class="opts">
+    <label><input type="radio" name="fFuture" value="향후에도 진료거부">향후에도 진료거부</label>
+    <label><input type="radio" name="fFuture" value="이번만 진료거부">이번만 진료거부</label></div></div>
+  <div class="row"><span class="lbl">4. 대처 방법</span><div class="opts" id="fMethod">
+    <label><input type="checkbox" value="입원 거부">입원 거부</label>
+    <label><input type="checkbox" value="외래 예약 거부(취소)">외래 예약 거부(취소)</label>
+    <label><input type="checkbox" value="전화 차단">전화 차단</label>
+    <label><input type="checkbox" value="기타">기타</label>
+    <input type="text" id="fMethodEtc" placeholder="기타 방법" style="width:160px"></div></div>
+  <div class="row"><label for="fEtcOp">5. 기타 의견</label><input type="text" id="fEtcOp"></div>
+ </div>
+
+ <div class="card adm">
+  <h2>□ 결정사항 <span class="hint">(간사·위원회 기재)</span></h2>
+  <div class="grid2">
+   <div class="row"><label for="fCDate">심의 일자</label><input type="text" class="dateIn" id="fCDate" placeholder="숫자 8자리"></div>
+   <div class="row"><label for="fNDate">통지 일자</label><input type="text" class="dateIn" id="fNDate" placeholder="숫자 8자리"></div>
+  </div>
+  <div class="row"><span class="lbl">Ⅳ. 위원회 상정</span><div class="opts">
+    <label><input type="radio" name="fPut" value="상정">상정</label>
+    <label><input type="radio" name="fPut" value="신속 심의">신속 심의</label>
+    <label><input type="radio" name="fPut" value="반려">반려</label>
+    <label><input type="radio" name="fPut" value="기타">기타</label>
+    <input type="text" id="fPutEtc" style="width:180px"></div></div>
+  <div class="row"><span class="lbl">Ⅴ. 결정(결론)</span><div class="opts">
+    <label><input type="radio" name="fDec" value="요청대로 결정">요청대로 결정</label>
+    <label><input type="radio" name="fDec" value="일부 요청사항 변경">일부 요청사항 변경</label>
+    <label><input type="radio" name="fDec" value="보류">보류</label>
+    <label><input type="radio" name="fDec" value="부결">부결</label>
+    <label><input type="radio" name="fDec" value="기타">기타</label></div></div>
+  <div class="row"><label for="fDecReason">사 유</label><input type="text" id="fDecReason"></div>
+  <div class="grid2">
+   <div class="row"><label for="fSec">간사</label><input type="text" id="fSec"></div>
+   <div class="row"><label for="fChair">소위원장</label><input type="text" id="fChair"></div>
+  </div>
+ </div>
+
+ <div class="card">
+  <h2>□ 진료거부 사유 통지서 <span class="hint">(내규 제6조 제1항 — 대상자에게 주는 안내문)</span></h2>
+  <div class="grid2">
+   <div class="row"><label for="nTo">받는 사람</label><input type="text" id="nTo" placeholder="환자 성명(보호자면 '○○○ 보호자')"></div>
+   <div class="row"><label for="nDate">통지 일자</label><input type="text" class="dateIn" id="nDate" placeholder="숫자 8자리"></div>
+   <div class="row"><label for="nScope">적용 범위</label><input type="text" id="nScope" placeholder="예: 정형외과 외래 진료"></div>
+   <div class="row"><label for="nTerm">적용 기간</label><input type="text" id="nTerm" placeholder="예: 이번 진료에 한함 / 별도 통지 시까지"></div>
+  </div>
+  <div class="row" style="margin-top:6px"><label for="nReason">거부 사유</label><textarea id="nReason" placeholder="「자동 작성」을 누르면 선택한 사유가 쉬운 말로 들어갑니다." style="min-height:90px"></textarea></div>
+  <div class="row"><label for="nAlt">대체 진료기관</label><input type="text" id="nAlt" placeholder="안내한 의료기관·연락처"></div>
+  <div class="btns" style="margin-top:10px">
+   <button class="btn sec" id="nAuto">자동 작성</button>
+   <button class="btn" id="nPrint">통지서 인쇄 · PDF</button>
+   <span class="hint">응급상황 시 응급의료는 거부하지 않는다는 안내와 이의 제기 방법이 함께 인쇄됩니다.</span>
+  </div>
+ </div>
+</section>
+
+<!-- ===================== ③ 사례 대장 ===================== -->
+<section class="tab" id="t-ledger">
+ <div class="card">
+  <div class="btns" style="justify-content:space-between">
+   <div class="btns">
+    <span class="lbl" style="font-weight:600">연도</span><select id="lYear" style="width:100px"></select>
+    <span class="lbl" style="font-weight:600">반기</span>
+    <select id="lHalf" style="width:110px"><option value="">전체</option><option value="1">상반기</option><option value="2">하반기</option></select>
+    <span class="lbl" style="font-weight:600">구분</span>
+    <select id="lType" style="width:110px"><option value="">전체</option><option value="med">일반 진료</option><option value="emg">응급의료</option></select>
+    <input type="text" id="lQ" placeholder="환자명·등록번호·부서 검색" style="width:200px">
+   </div>
+   <div class="btns">
+    <button class="btn sec" id="lCsv">엑셀(CSV) 내려받기</button>
+    <button class="btn sec" id="lBackup">백업 저장</button>
+    <label class="btn sec" style="margin:0">백업 불러오기<input type="file" id="lRestore" accept=".json" class="hide"></label>
+    <button class="btn" id="lReport">반기 보고서 인쇄</button>
+   </div>
+  </div>
+ </div>
+ <div class="card">
+  <h2>공유 대장 <span class="hint">(공유폴더의 대장 파일 하나를 여러 PC가 함께 사용)</span></h2>
+  <div class="btns">
+   <button class="btn" id="shConnect">공유 대장 파일 열기</button>
+   <button class="btn sec" id="shCreate">새 공유 대장 만들기</button>
+   <button class="btn sec" id="shSync">지금 맞추기</button>
+   <button class="btn sec" id="shOff">연결 해제</button>
+   <span class="hint" id="shStatus">연결 안 됨 — 이 PC의 브라우저에만 저장됩니다.</span>
+  </div>
+  <p class="hint" style="margin:8px 0 0">크롬·엣지에서 공유폴더(예: \\서버\원무팀\진료거부)의 「진료거부_사례대장.json」을 열면, 저장할 때마다 파일을 다시 읽어 다른 사람이 저장한 내용과 합친 뒤 씁니다. 같은 사례를 동시에 고치면 나중에 저장한 내용이 남습니다.</p>
+ </div>
+ <div class="card" id="alertCard"><h2>알림</h2><ul class="alist" id="alertList"></ul></div>
+ <div class="stat" id="lStat"></div>
+ <div class="card" style="padding:0;overflow:auto">
+  <table class="rs" id="lTable" style="min-width:1150px;white-space:nowrap"></table>
+ </div>
+ <p class="hint">※ 공유 대장을 연결하지 않으면 대장은 이 PC의 브라우저에만 저장됩니다. 이때는 '백업 저장'으로 파일을 만들어 두세요. 현장에서 받은 「요청 파일」은 '백업 불러오기'로 합칠 수 있습니다. 관련 서류는 EMR과 별개로 최소 3년간 보존합니다(내규 제6조 제4항). 위원회 의사는 공개하지 않습니다(제9조 제1항).</p>
+</section>
+
+<!-- ===================== ④ 근거 자료 ===================== -->
+<section class="tab law" id="t-law">
+ <div class="card">
+  <h2>1. 병원 내규 — 진료거부 등 처리 및 위원회 심의 내규 (2025. 6. 16.)</h2>
+  <dl>
+   <dt>제2조 위원회</dt><dd>위원장 진료부원장 포함 5~8인. 당연직: 행정부원장, 수련교육부장, 간호부장, CS실장, 원무팀장. 재적 과반수 출석·과반수 찬성 의결. 신속 심의는 간사·위원장·위원장 지명 1인의 일치된 의견으로 결정. 간사는 원무팀 법무Unit.</dd>
+   <dt>제3조 기본원칙</dt><dd>정당한 사유 = 의료인 등이 의료행위를 정상적으로 수행할 수 없는 불가피한 사정. 환자의 건강권과 안전한 환경에서 의료업을 수행할 권리를 이익형량. 제4항 각 호 10개 기준 참고.</dd>
+   <dt>제5조 제1항 (일반 진료)</dt><dd>1호 의료 제공 여건 부족 / 2호 전문성 한계 / 3호 환자의 비협조·부적절한 요구 / 4호 치료 필요성 현저히 낮음 / 5호 연명의료 중단 결정 이행 거부 / 6호 가톨릭 교회 가르침에 반하는 요구 / 7호 기타. <b>단서: 진료비 미수·체납 이유 거부 금지.</b></dd>
+   <dt>제5조 제2항 (응급의료)</dt><dd>1호 폭력 등(방해, 기물 파괴, 모욕·명예훼손·폭행·업무방해) / 2호 의료 제공 여건 부족(재난, 응급의료자원 부족) / 3호 비협조·부적절한 요구 / 4호 비응급 판단 / 5호 기타. <b>단서: 진료비 미수·체납 이유 거부 금지.</b></dd>
+   <dt>제5조 제3항</dt><dd>거부 대상자라도 응급의료에 해당하면 응급상황 해소 시까지 거부 불가 — 적절한 처치 후 필요한 전원.</dd>
+   <dt>제6조 절차</dt><dd>위원회 사전 심의(긴급 시 사후 심의) → 설명·기록(설명이 상황을 악화시키면 그 사유 기록) → 구두 설명(사유 통지서 제공 가능) → 의료적 판단·내규 근거·대체 진료 방안을 객관적으로 설명 → EMR에 경위·설명·반응 기록. 대체기관 안내, 반기별 사후 검토, 서류 3년 보존.</dd>
+   <dt>제7조 범위</dt><dd>외래·응급실·입원 등 대상자별로 구분하여 달리 판단, 직종별 피해 고려.</dd>
+   <dt>제9조 공개</dt><dd>비공개 원칙(외부기관 제출 요구 시 위원장 허가). 반기별 병원장 보고.</dd>
+  </dl>
+ </div>
+
+ <div class="card">
+  <h2>2. 법령</h2>
+  <dl>
+   <dt>의료법 제15조</dt><dd>① 의료인·의료기관 개설자는 진료나 조산 요청을 받으면 정당한 사유 없이 거부하지 못한다. ② 응급환자에게 「응급의료에 관한 법률」에서 정하는 바에 따라 최선의 처치를 하여야 한다.</dd>
+   <dt>의료법 제12조 제2항·제3항</dt><dd>누구든지 의료기관의 시설·기물을 파괴·손상하거나 의료기관을 점거해 진료를 방해해서는 안 되고, 의료행위가 이루어지는 장소에서 의료인·간호조무사·의료기사 또는 진료받는 사람을 폭행·협박해서는 안 됨 → 응급실 밖(외래·병동) 폭력의 근거 조문.</dd>
+   <dt>의료법 위반 시</dt><dd>제89조 제1호 — 1년 이하 징역 또는 1천만원 이하 벌금 / 의료관계 행정처분 규칙 — 자격정지 1개월.</dd>
+   <dt>응급의료법 제6조</dt><dd>① 응급의료기관 등에서 응급환자 발생 시 즉시 응급의료. ② 응급의료종사자는 업무 중 응급의료를 요청받거나 응급환자를 발견하면 즉시 응급의료를 하여야 하며, 정당한 사유 없이 거부·기피하지 못한다.</dd>
+   <dt>응급의료법 시행령 제1조의2<br><span class="hint">(2026. 9. 8. 신설, 공포일 시행)</span></dt><dd>정당한 거부등 사유: ① 인력·시설·장비 등 응급의료자원이 모두 운용 중이어서 새 응급환자에게 적절한 응급처치 불가 ② 급성중증응급환자 최종진료 인력이 다른 환자 진료 중이거나 예정 수술과 겹쳐 지체 없는 진료 곤란 ③ 통신·전력 마비, 화재·붕괴 등 재난 ④ 이에 준하는 사유. 수용 곤란 사유가 생기거나 해소되면 응급의료기관장은 응급의료정보통신망으로 중앙·광역 응급의료상황실에 지체 없이 통보.</dd>
+   <dt>응급의료법 시행령 제2조</dt><dd>응급환자가 아니나 진료가 필요하면 본인·법정대리인 동의를 받아 다른 의료시설로 진료 의뢰·이송 가능. 응급환자가 아닌 이유를 설명하고 진료내용·진료과목 추천, 요구 시 의무기록 제공.</dd>
+   <dt>응급의료법 개정</dt><dd>2026. 10. 1. 국회 본회의 통과, <b>2026. 10. 20. 공포(법률 제22104호), 2027. 4. 21. 시행 예정</b> — 거부·기피 금지 대상에 응급의료기관장 추가, 정당한 사유를 법률에 구체화, 수용 곤란 시 상황실 고지. 시행일 이후 조문을 다시 확인해야 합니다.</dd>
+   <dt>연명의료결정법 제19조 제3항</dt><dd>담당의사가 연명의료중단등결정의 이행을 거부하면 의료기관의 장은 윤리위원회 심의를 거쳐 담당의사를 교체하여야 하고, 거부를 이유로 불리한 처우를 해서는 안 된다 → 의사 개인의 거부는 보호되나 <b>병원은 담당의 교체로 이행</b>을 보장해야 함.</dd>
+   <dt>산업안전보건법 제41조</dt><dd>고객의 폭언 등으로 인한 고객응대근로자의 건강장해 예방조치(업무 일시 중단·전환, 휴게시간 연장, 치료·상담, 고소 등 지원).</dd>
+  </dl>
+ </div>
+
+ <div class="card">
+  <h2>3. 보건복지부 행정해석·지침</h2>
+  <dl>
+   <dt>의료법상 정당한 사유 예시<br><span class="hint">(복지부 공개 사례)</span></dt><dd>
+    · 의사가 부재중이거나 신병으로 진료할 수 없는 경우<br>
+    · 병상·의료인력·의약품·치료재료 등 시설·인력이 부족해 새 환자를 받을 수 없는 경우<br>
+    · 예약환자 진료 일정 때문에 당일 방문 환자에게 다른 의료기관 이용을 권유할 수밖에 없는 경우<br>
+    · 다른 전문과목 영역이거나 고난이도 진료를 수행할 전문지식·경험이 부족한 경우<br>
+    · 더 이상 입원치료가 필요 없거나 대학병원급 입원치료가 필요 없음이 의학적으로 명백해, 충분한 설명과 함께 가정요양·요양병원·의원급·요양시설 이용을 권유하고 퇴원을 지시하는 경우<br>
+    · 의정 66507-704(2000. 6. 2.)·의료정책팀-3246(2006. 8. 14.) — 진료 후 의학적 판단에 따른 퇴원·타 기관 진료 권유는 진료거부로 보기 어려움<br>· 의료정책팀-4579(2007. 10. 30.) — 다른 치과에서 1차 시술을 받은 환자에게 그 기관에서 계속 치료받도록 권유한 것은 진료거부 아님<br>· 의정 65507-1263(1994. 10. 22.) — 수혈 거부로 수술이 불가능하면 수술을 회피하고 차선의 조치를 하는 것은 정당<br>
+    · 복지부는 정당한 사유를 <b>명백한 이유가 있는 상황</b>으로 보고, 최종 위법 여부는 구체적 사실관계로 판단한다고 밝힘.</dd>
+   <dt>정당한 사유가 아닌 예</dt><dd>· 진료비 미납·체납 (내규 제5조 단서와 같음)<br>· 의정 65507-675(1994. 6. 3.) — 보험 청구 곤란·과거 지시 불응을 이유로 한 거부는 정당하지 않음(고의 불응은 2~3회 이상 경고 후 퇴원·전원)<br>· 의료정책팀-3246(2006. 8. 14.) — 환자와 직원 사이의 다툼만으로 특정 환자를 거부할 수 없음<br>· 행정심판 2020-20114(2021. 3. 16.) — 응급실 난동 환자에게 「선납금을 내지 않으면 진료할 수 없다」고 한 의사: 벌금 200만 원 + 자격정지 1개월 유지<br>· 의료정책팀-140(2008. 1. 15.) — 진료 중 9세 아동이 지시를 잘 따르지 않는다고 내보낸 것은 진료거부<br>· 2024. 6. 집단휴진 관련 복지부 — 일방적 진료예약 취소는 진료거부에 해당할 수 있다고 경고</dd>
+   <dt>응급의료법상 정당한 사유 지침<br><span class="hint">(2024. 9. 13. 배포)</span></dt><dd>
+    · 응급의료종사자에 대한 폭행·협박·위계·위력, 의료용 시설·기물 손괴·점거<br>
+    · 모욕죄·명예훼손죄·폭행죄·업무방해죄에 해당할 수 있는 상황을 만들어 정상 진료가 불가능한 경우<br>
+    · 인력·시설·장비 부족으로 적절한 응급의료가 불가능한 경우, 통신·전력 마비, 화재·붕괴 등 재난<br>
+    · 환자·보호자가 치료방침에 따를 수 없다고 하거나 의료인의 양심·전문지식에 반하는 치료를 요구하는 경우<br>
+    · KTAS 4~5급(경증·비응급) 환자를 응급실에서 수용하지 않아도 책임을 묻지 않음<br>
+    · 법령 제·개정, 판례·유권해석 변경에 따라 범위가 바뀔 수 있다고 명시</dd>
+  </dl>
+ </div>
+
+ <div class="card">
+  <h2>4. 판례·유권해석</h2>
+  <p style="margin:0 0 6px">법원은 진료를 거부할 당시 의료인 측과 환자 측의 사정, 그 밖의 정황을 종합해 정당한 사유를 판단합니다. 판례가 많이 쌓이지 않아 판례만으로 유형을 정하기는 어렵다는 지적이 있으므로, 아래 사례는 비슷한 사안을 볼 때 참고 기준으로 씁니다.</p>
+  <div class="lawbar"><input id="lawQ" type="search" placeholder="사건번호·키워드 검색 (예: 예약, 퇴원, 무고, 가처분)"><select id="lawP"><option value="">결론 전체</option><option value="ok">정당사유 인정·처벌</option><option value="no">정당사유 부정</option><option value="ref">참고</option></select><span id="lawCnt" class="lawcnt"></span></div>
+  <div id="lawCases"></div>
+  <p class="hint">※ 「원문↗」이 붙은 항목은 국가법령정보센터 판결문으로 확인했습니다(2026. 11. 14. 대조). 「판결문 확인」「회신 원문 확인」「재결문 확인」은 판결문 PDF·보건복지부 회신·행정심판 재결문 원문으로 내용을 대조한 항목입니다(2026. 11. 17.~19.). 「원문 미확인」은 국가법령정보센터에 수록되지 않았거나 사건번호가 없어 연구소 자료·언론 보도로만 확인한 사례이니 인용 전 대법원 사법정보공개포털에서 판결서를 확인하세요. 하급심 판결·지침은 사안과 시점에 따라 달라질 수 있으니, 중요한 사안은 국가법령정보센터(law.go.kr)·대법원 종합법률정보에서 원문을 확인하세요.</p>
+ </div>
+</section>
+
+<!-- ===================== ⑥ 설정·검토표 ===================== -->
+<section class="tab" id="t-set">
+ <div class="card">
+  <h2>1. 행위 경중 배점 <span class="hint">(내규 제3조 제4항 — 위원회가 정한 값으로 바꿔 쓰세요)</span></h2>
+  <div class="confbar" id="confBar"></div>
+  <table class="rs wt" id="wTable" style="margin-top:10px"></table>
+  <div class="grid3" style="margin-top:12px">
+   <div class="row"><label for="thHi">무거움 기준</label><div class="opts"><input type="text" id="thHi" style="width:70px;text-align:center"> 점 이상</div></div>
+   <div class="row"><label for="thMid">중간 기준</label><div class="opts"><input type="text" id="thMid" style="width:70px;text-align:center"> 점 이상</div></div>
+   <div class="row"><span class="lbl">만점</span><b id="maxView"></b></div>
+  </div>
+  <div class="grid2" style="margin-top:6px">
+   <div class="row"><label for="confDate">위원회 확정일</label><input type="text" class="dateIn" id="confDate" placeholder="숫자 8자리 (비우면 임시값)"></div>
+   <div class="row"><label for="confNote">의결 근거</label><input type="text" id="confNote" placeholder="예: 2026년 제4차 진료거부심의위원회"></div>
+  </div>
+  <div class="btns" style="margin-top:10px">
+   <button class="btn" id="wSave">배점 저장</button>
+   <button class="btn sec" id="wReset">임시 기본값으로 되돌리기</button>
+   <button class="btn sec" id="wPrint">배점표 인쇄(위원회 상정용)</button>
+  </div>
+ </div>
+
+ <div class="card">
+  <h2>2. 사례 분석이 배운 표현</h2>
+  <p class="hint" style="margin:-4px 0 8px">사례 분석에서 「잘못 읽음」을 누르거나 「놓친 사유 알려주기」로 가르친 표현입니다. 공유 대장을 쓰면 모두에게 함께 적용됩니다.</p>
+  <table class="rs stack" id="dictTable"></table>
+ </div>
+
+ <div class="card">
+  <h2>3. 문의처·간사 모드</h2>
+  <div class="grid2">
+   <div class="row"><label for="ctLaw">법무 문의처</label><input type="text" id="ctLaw"></div>
+   <div class="row"><label for="ctEmg">응급 문의처</label><input type="text" id="ctEmg"></div>
+   <div class="row"><label for="ctHosp">병원명</label><input type="text" id="ctHosp"></div>
+   <div class="row"><label for="pinSet">간사 모드 암호</label><input type="text" id="pinSet" placeholder="비우면 암호 없이 전환"></div>
+  </div>
+  <div class="btns" style="margin-top:10px"><button class="btn" id="ctSave">저장</button><span class="hint">암호는 화면 전환만 막는 간단한 잠금입니다(보안 장치가 아님).</span></div>
+ </div>
+
+ <div class="card">
+  <h2>4. 내규 개정 검토표 <span class="hint">(내규·서식 ↔ 법령·지침·판례 차이)</span></h2>
+  <p class="hint" style="margin:-4px 0 8px">검토 의견은 개정 논의를 위한 제안입니다. 위원회·법률 자문을 거쳐 확정하세요.</p>
+  <div style="overflow:auto"><table class="rs rv" id="rvTable" style="min-width:980px"></table></div>
+  <div class="btns" style="margin-top:10px"><button class="btn" id="rvPrint">검토표 인쇄(A4 가로)</button></div>
+ </div>
+</section>
+</main>
+<footer>진료거부 정당사유 판단 도우미 · 개발 노상엽</footer>
+<div id="printArea"></div>
+<div class="toast" id="toast"></div>
+<button class="vbtn" id="vBtn" title="음성 명령 (F2) — 누르고 말하세요" aria-label="음성 명령"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg></button>
+<div class="vpanel hide" id="vPanel" role="dialog" aria-label="음성 명령">
+ <div class="vh"><b>음성 명령</b><span><button class="vx" id="vHelpBtn" title="명령어 보기" style="font-size:13px;margin-right:10px;color:#1d4f91">명령어 ▾</button><button class="vx" id="vClose" title="닫기">×</button></span></div>
+ <div class="vb">
+  <div class="vrow"><span>상태</span><span class="vstat" id="vStat">대기 중</span></div>
+  <div class="vrow"><span>들은 말</span><span class="vheard" id="vHeard"><i>마이크 단추를 누르고 말하세요</i></span></div>
+  <div class="vrow"><span>처리</span><span class="vres" id="vRes"></span></div>
+  <div class="vtype"><input type="text" id="vType" placeholder="말 대신 글로 명령 (예: 퇴원 판례 찾아줘)"><button class="btn sec" id="vGo">실행</button></div>
+  <div class="vopts"><label><input type="checkbox" id="vCont">계속 듣기</label><label><input type="checkbox" id="vSpeak">결과를 소리로 알려 주기</label></div>
+  <div class="vnote" id="vNote">음성은 브라우저 회사 서버(크롬은 Google, 엣지는 Microsoft)로 보내져 글자로 바뀝니다. <b>환자 성명·등록번호 등 개인정보는 말로 넣지 말고 직접 입력하세요.</b></div>
+ </div>
+ <div class="vhelp hide" id="vHelp"></div>
+</div>
+
+
+<script>
+/* ================= 데이터 ================= */
+const REASONS={
+ med:[
+  {n:1,g:'의료 제공 여건의 부족',t:'의료인이 부재중이거나 신체적·정신적 사유(질병 등)로 진료가 불가능한 경우',ref:'내규 제5조①1호 가',c:'res',
+   note:'복지부 예시(의사 부재·신병)와 같음. 대체 의료진 유무를 먼저 확인하고, 없으면 그 사실을 기록합니다.'},
+  {n:2,g:'의료 제공 여건의 부족',t:'병상, 의료인력, 의약품, 치료재료 등 진료에 필수적인 자원이 현저히 부족한 경우',ref:'내규 제5조①1호 나',c:'res',
+   note:'복지부 예시와 같음. 당시 병상·인력 현황 자료를 증거로 남깁니다.'},
+  {n:3,g:'의료 제공 여건의 부족',t:'외래 예약 환자 진료로 인하여 당일 내원 환자 진료가 불가능한 경우',ref:'내규 제5조①1호 다',c:'res',
+   note:'복지부 예시(예약 일정으로 타 기관 이용 권유)와 같음. 가장 빠른 예약일·대체기관을 함께 안내합니다.'},
+  {n:4,g:'의료 전문성의 한계',t:'의료 인력의 부족으로 새로운 환자의 진료가 불가능한 경우',ref:'내규 제5조①1호 라',c:'res',
+   note:'인력 부족은 객관적 근거(근무표 등)가 필요합니다.'},
+  {n:5,g:'의료 전문성의 한계',t:'환자 상태가 해당 의료기관 또는 의료인의 전문과목 범위를 현저히 벗어난 경우',ref:'내규 제5조①2호 가',c:'exp',
+   note:'복지부 예시(타 전문과목 영역)와 같음. 원내 다른 과에서 진료할 수 있는지 먼저 확인합니다.'},
+  {n:6,g:'의료 전문성의 한계',t:'고난이도 진료가 요구되나 의료인이 관련 전문지식 또는 임상경험이 부족한 경우',ref:'내규 제5조①2호 나',c:'exp',
+   note:'복지부 예시와 같음. 가능한 상급·전문 기관을 구체적으로 안내합니다.'},
+  {n:7,g:'의료 전문성의 한계',t:'타 기관에서 시행된 치료내용(수술, 시술 등)에 대한 정보 부족으로 진료 지속이 의학적으로 불가능한 경우',ref:'내규 제5조①2호 다',c:'exp',
+   note:'정보 부족만으로는 약할 수 있으니, 기록 사본 요청 등 보완 노력을 했는지 함께 적습니다.'},
+  {n:8,g:'환자(또는 보호자)의 비협조나 부적절한 요구, 행동',t:'환자가 의료인의 치료방침에 동의하지 않음을 명백히 밝히고, 비의학적·비윤리적 치료를 고집하는 경우',ref:'내규 제5조①3호 가',c:'act',
+   note:'치료방침 거부 자체는 환자의 자기결정권입니다. "비의학적·비윤리적 치료를 고집"한 사정이 함께 있어야 합니다.'},
+  {n:9,g:'환자(또는 보호자)의 비협조나 부적절한 요구, 행동',t:'환자 또는 보호자가 의료인에게 모욕, 명예훼손, 폭언, 폭행, 위협, 강제추행 등을 가하여 진료환경을 훼손한 경우',ref:'내규 제5조①3호 나',c:'act',
+   note:'산업안전보건법 제41조의 피해 직원 보호조치(업무 전환·치료·고소 지원)를 함께 검토합니다.'},
+  {n:10,g:'환자(또는 보호자)의 비협조나 부적절한 요구, 행동',t:'과거 위와 유사한 사유로 인해 의료인이 위해 발생을 우려하고, 진료지연이 환자에게 중대한 위험을 초래하지 않는 경우',ref:'내규 제5조①3호 다',c:'act',req:'noRisk',
+   note:'"진료지연이 중대한 위험을 초래하지 않음"이 요건입니다. 과거 사건 기록을 첨부합니다.'},
+  {n:11,g:'환자(또는 보호자)의 비협조나 부적절한 요구, 행동',t:'환자가 적극적으로 마약류 의약품을 요구하는 경우 등과 같이 부적절한 치료방법을 요구하는 경우',ref:'내규 제5조①3호 라',c:'act',
+   note:'마약류 요구를 거절하는 것은 처방 거부이지 진료 전체 거부는 아닐 수 있습니다. 적정 대체치료를 제시했는지 적습니다.'},
+  {n:12,g:'치료의 필요성이 낮은 경우',t:'의료적으로 더 이상의 입원 또는 고난이도 치료가 불필요하다고 명백히 판단되는 경우',ref:'내규 제5조①4호 가',c:'nec',
+   note:'판례 기준: 상급종합병원 수준의 입원치료가 계속 필요한지. 급성기 치료 종결 소견서가 핵심 증거입니다.'},
+  {n:13,g:'치료의 필요성이 낮은 경우',t:'가정요양, 요양병원, 의원급 의료기관 또는 요양시설로 전원이 적절하다고 설명·권유한 경우',ref:'내규 제5조①4호 나',c:'nec',
+   note:'충분한 설명·권유와 퇴원 지시가 반복적으로 기록되어 있어야 합니다. 병실 부족·급여 삭감만으로는 부족(서울서부지법).'},
+  {n:14,g:'교리에 반하는 경우',t:'가톨릭교회의 가르침에 반하는 생명을 단축하거나 인공임신중절 수술 등을 요구하여 거부하는 경우',ref:'내규 제5조①6호',c:'rel',
+   note:'법령·행정해석에 명시된 정당사유는 아닙니다. 해당 행위만 거부하고, 다른 진료는 계속하며, 대체 의료기관 안내를 반드시 합니다.'},
+  {n:15,g:'기타 사유',t:'연명의료결정법 등 연명의료 중단 결정의 이행을 거부하는 경우',ref:'내규 제5조①5호',c:'lst',
+   note:'연명의료결정법 제19조 제3항: 담당의사가 거부하면 병원은 윤리위원회 심의를 거쳐 담당의사를 교체해야 합니다(병원 차원의 이행 거부는 불가).'},
+  {n:16,g:'기타 사유',t:'기타 위 사유에 상당하다고 인정되는 경우',ref:'내규 제5조①7호',c:'etc',
+   note:'어느 사유와 "상당"한지 구체적으로 적어야 합니다.'}
+ ],
+ emg:[
+  {n:1,g:'의료여건 또는 전문성의 한계',t:'수술 등 고난이도 진료가 요구되나 의료인이 관련 전문지식 또는 임상경험이 현저히 부족하여 응급의료가 불가능한 경우',ref:'내규 제5조②5호 · 시행령 제1조의2①2호 관련',c:'res',
+   note:'실제 가용 인력을 확인하지 않고 전화 정보만으로 선별 거절하면 정당사유가 부정된 하급심 사례가 있습니다.'},
+  {n:2,g:'의료여건 또는 전문성의 한계',t:'병상, 의료인력, 의약품, 치료재료 등 진료에 필수적인 자원이 현저히 부족한 경우',ref:'내규 제5조②2호 나 · 시행령 제1조의2①1호',c:'res',
+   note:'응급의료자원이 "모두 운용 중"이어야 합니다. 응급의료정보통신망으로 상황실에 통보(시행령 제1조의2②).'},
+  {n:3,g:'의료여건 또는 전문성의 한계',t:'타 기관에서 시행된 치료내용(수술, 시술 등)에 대한 정보 부족으로 응급의료를 수행하기 곤란한 경우',ref:'내규 제5조②5호',c:'res',
+   note:'응급처치는 정보 없이도 해야 합니다. 최종 치료가 곤란한 경우에 한해 처치 후 전원을 검토합니다.'},
+  {n:4,g:'의료여건 또는 전문성의 한계',t:'통신·전력 마비, 화재·붕괴 등 재난으로 인해 불가피하게 환자를 수용할 수 없는 경우',ref:'내규 제5조②2호 가 · 시행령 제1조의2①3호',c:'res',
+   note:'시행령에 명시된 사유입니다. 상황실 통보와 해소 통보를 잊지 마세요.'},
+  {n:5,g:'의료여건 또는 전문성의 한계',t:'응급의료기관 인력, 시설, 장비 등 응급의료자원의 가용 현황에 비추어 응급환자에게 적절한 응급의료를 할 수 없는 경우',ref:'내규 제5조②2호 나 · 시행령 제1조의2①1호·2호',c:'res',
+   note:'2024. 9. 복지부 지침·시행령과 같은 취지. 당시 가용 현황 화면·기록을 남깁니다.'},
+  {n:6,g:'환자(또는 보호자)의 비협조나 부적절한 요구, 행동 또는 폭력적인 상황',t:'응급의료종사자에 대한 구조·이송·응급처치 또는 진료를 폭행, 협박, 위계, 위력, 그 밖의 방법으로 방해하는 경우',ref:'내규 제5조②1호 가 · 응급의료법 제12조 · 2024 지침',c:'act',
+   note:'응급의료 방해는 그 자체로 범죄(응급의료법 제12조)입니다. 112 신고·보안 대응을 병행합니다.'},
+  {n:7,g:'환자(또는 보호자)의 비협조나 부적절한 요구, 행동 또는 폭력적인 상황',t:'의료기관 등의 응급의료를 위한 의료용 시설·기재·의약품 또는 그 밖의 기물을 파괴·손상하거나 점거하는 경우',ref:'내규 제5조②1호 나 · 2024 지침',c:'act',
+   note:'파손 사진·CCTV를 확보합니다.'},
+  {n:8,g:'환자(또는 보호자)의 비협조나 부적절한 요구, 행동 또는 폭력적인 상황',t:'환자 또는 보호자 등이 해당 의료인에 대하여 모욕죄, 명예훼손죄, 폭행죄, 업무방해죄에 해당될 수 있는 상황을 형성하여 의료인이 정상적인 의료행위를 행할 수 없도록 한 경우',ref:'내규 제5조②1호 다 · 2024 지침',c:'act',
+   note:'"정상적인 의료행위를 할 수 없었던" 사정을 구체적으로 적습니다.'},
+  {n:9,g:'환자(또는 보호자)의 비협조나 부적절한 요구, 행동 또는 폭력적인 상황',t:'환자 또는 보호자가 의료인의 치료방침에 따를 수 없음을 천명하여 특정 치료의 수행이 불가하거나, 의료인으로서의 양심과 전문지식에 반하는 치료방법을 요구하는 경우',ref:'내규 제5조②3호 가 · 2024 지침',c:'act',
+   note:'거부 의사는 진료거부(퇴원) 서약 등으로 문서화합니다.'},
+  {n:10,g:'환자(또는 보호자)의 비협조나 부적절한 요구, 행동 또는 폭력적인 상황',t:'환자 또는 보호자가 특정 검사나 마약류 의약품을 요구하여 의학적 판단에 따른 응급의료가 진행될 수 없다고 판단하는 경우',ref:'내규 제5조②3호 나',c:'act',
+   note:'요구를 거절하고 의학적으로 필요한 처치는 계속 제안했는지 기록합니다.'},
+  {n:11,g:'응급상황이 아닌 경우',t:'응급상황이 아니라고 의사가 판단하여 외래로 방문할 것을 권유하는 경우',ref:'내규 제5조②4호 · 2024 지침(KTAS 4~5) · 시행령 제2조',c:'non',
+   note:'의사가 진찰해 비응급으로 판단해야 합니다. 응급이 아닌 이유 설명, 진료과목 추천, 요구 시 기록 제공(시행령 제2조).'},
+  {n:12,g:'기타 사유',t:'기타 응급의료와 관련하여 전항의 사유가 포함된다고 판단하는 경우',ref:'내규 제5조②5호 · 시행령 제1조의2①4호',c:'etc',
+   note:'위 사유에 "준하는" 사정을 구체적으로 적습니다.'}
+ ]
+};
+REASONS.med.forEach(r=>r.v=[9,10].includes(r.n));REASONS.emg.forEach(r=>r.v=[6,7,8].includes(r.n));
+const CRITS=[
+ {k:'c1',t:'관련자 — 환자인지 보호자인지',o:[['patient','환자 본인',1],['guard','보호자',0]],
+  tip:{guard:'보호자의 행위라면 환자 진료 자체를 거부하기보다 보호자 출입·면회 제한, 보호자 교체 요청 등을 먼저 검토합니다.'}},
+ {k:'c2',t:'행위 태양의 중대성·잔혹성',o:[['light','경미',0],['mid','상당함',1],['severe','중대·잔혹',2]]},
+ {k:'c3',t:'신체·재산 피해 발생',o:[['none','없음',0],['prop','재산 피해',1],['body','신체 피해',2],['both','신체·재산 모두',2]]},
+ {k:'c4',t:'신체 피해 시 상해의 중대성',o:[['na','해당 없음',0],['minor','경상',0],['treat','치료 필요',1],['grave','중상',2]]},
+ {k:'c5',t:'피해자의 고소·수사 요청',o:[['none','없음',0],['report','신고·수사 요청',1],['sue','고소',2]]},
+ {k:'c6',t:'비난할 동기 / 참작할 사유',o:[['mitig','참작 사유 있음',-1],['none','특별히 없음',0],['blame','비난할 동기',1]],
+  tip:{mitig:'섬망·치매·주취·극심한 통증 등 의학적 원인이 있으면 그 자체가 진료 대상일 수 있습니다.'}},
+ {k:'c7',t:'계획적인지 우발적인지',o:[['acc','우발적',0],['plan','계획적',1]]},
+ {k:'c8',t:'1회성인지 수회에 걸친 행위인지',o:[['once','1회',0],['repeat','수회 반복',2]]},
+ {k:'c9',t:'진지한 반성·재발 방지 다짐',o:[['yes','반성·다짐 있음',-1],['none','확인 안 됨',0],['no','반성 없고 재발 우려',1]]},
+ {k:'c10',t:'행위의 전파 가능성',o:[['no','없음',0],['yes','있음(SNS·다수 앞 등)',1]]}
+];
+
+/* ================= 판례·해석 데이터 ================= */
+// r: 연결 사유(med:n / emg:n / fee / all), p: ok=정당사유 인정, no=부정·처벌, ref=참고
+const CASES=[
+ {g:'1. 진료거부 일반 원칙',items:[
+  {c:'서울형사지법 1981. 7. 2. 선고 80노8696',p:'no',r:['med:1','all'],t:'수술 준비까지 해 놓고 의료보험 문제로 시비가 생겨 다음 날 진료를 거부한 의사에게 의료법 위반을 인정한 사례로 소개됨. 「부재·신병은 정당, 피곤·개인 감정은 부당」이라는 기준은 문헌에서 이 판결과 함께 인용되나 판결문으로 확인되지 않음.'},
+  {c:'서울고법 1993. 6. 4. 선고 93노410 (1심 92고합90, 상고기각 93도1790)',p:'no',r:['fee','emg:1','emg:2','all'],f:1,t:'교통사고 중상 환자에게 응급실 인턴·간호사가 「우리 병원은 자동차보험 계약이 안 돼 있다, 진료비가 비싸다(X-ray 6배, 보증금 수십만 원)」며 보험 계약 병원으로 가라고 해 환자가 이송 중 사망. 진료비·보험 사정은 정당한 이유가 아니라며 진료거부 무죄 원심을 깨고 진료거부와 응급조치불이행을 모두 유죄(상상적 경합)로 판단 — 재단 벌금 200만 원, 의료진 선고유예.'},
+  {c:'대법원 1993. 9. 14. 선고 93도1790',p:'no',r:['all','emg:1','emg:2','emg:3'],u:'https://law.go.kr/LSW/precInfoP.do?mode=0&precSeq=189983',t:'진료거부로 인한 의료법위반죄와 응급조치불이행으로 인한 의료법위반죄는 상상적 경합 관계. 의사와 공모한 간호사도 의료인이므로 진료거부·응급조치불이행의 공동정범 책임을 짐 → 간호사·의료기사 등 현장 직원도 거부 판단에 책임이 있음.'},
+  {c:'서울지법 동부지원(현 서울동부지법) 1993. 1. 15. 선고 92고합90, 145(병합) → 항소심 93노410',p:'ref',r:['all','emg:1','emg:2','emg:3','fee'],u:'https://www.law.go.kr/LSW/precInfoP.do?mode=0&precSeq=227675',t:'교통사고 중상 환자를 치료 없이 다른 병원으로 돌려보낸 사건. 진료거부죄는 환자 측의 진료 요구가 전제인데, 환자를 택시에서 내리지 않은 채 보험 처리·비용만 묻고 일반 진료를 요청하지 않아 진료거부죄는 불성립. 그러나 응급조치불이행죄는 진료 요구와 무관하게 응급조치가 필요하고 가능하면 성립 → 엑스레이도 찍지 않고 보낸 당직의 등 유죄(선고유예), 병원 법인 벌금 200만원. 병원 능력으로 치료가 어려우면 응급처치 후 의료인을 동승시켜 이송했어야 함. ※ 항소심(93노410)은 진료거부 부분도 유죄로 바꿈 — 진료비·보험 사정을 이유로 돌려보낸 것은 진료거부.'},
+  {c:'대법원 2016. 8. 30. 선고 2015두60617 (진주의료원 폐업, 1심 창원지법 2013구합985)',p:'ref',r:['med:2','med:4','med:13'],u:'https://www.law.go.kr/precInfoP.do?mode=0&precSeq=183400',t:'폐업 과정에서 입원환자에게 퇴원·전원을 회유·종용한 사건. 원심은 협박·강압 수준이 아니었고 남은 환자에게 진료를 중단·거부하지 않고 계속 제공한 점을 들어 불법행위가 아니라고 봄. 대법원은 권한 없는 폐업결정에 따른 회유·종용 자체는 위법하나 생명·건강의 구체적 침해가 증명되지 않아 배상책임은 부정 → 전원 권유는 강압 없이, 남은 환자 진료는 계속해야 함.'},
+  {c:'헌재 2018. 11. 29. 2018헌마133 (공군 군의관)',p:'ok',r:['med:3','med:2','med:4','all'],f:1,t:'상관의 환자 수 제한 지시에 따라 일부 환자를 진료하지 못했고, 대기 환자들이 호송차량 시간에 맞춰 부대로 복귀하는 등 사정이 있었다면 진료거부의 고의를 인정하기 어렵다 → 기소유예 처분 취소.'},,
+  {c:'보건복지부 의료정책팀-675 (2007. 2. 15.)',p:'ref',r:['all'],f:2,t:'「진료거부」는 진료에 필요한 시설·인력 등을 갖추고 있는데도 정당한 이유 없이 진료를 거부하거나 하지 않는 행위.'},
+  {c:'보건복지부 의료정책팀-3246 (2006. 8. 14.)',p:'no',r:['med:9','med:10','all'],f:2,t:'환자와 의료기관 종사자 사이에 다툼이 생겼다는 이유로 특정 환자의 진료를 거부하는 것은 정당한 이유가 아님 → 환자가 원하면 진료해야 함. 다툼을 넘어 모욕·폭언·폭행 등으로 진료환경이 훼손됐는지를 기록으로 따로 입증해야 함.'},
+  {c:'중앙행정심판위원회 2021. 3. 16. 재결 2020-20114 (기각)',p:'no',r:['fee','med:9','emg:6','emg:8'],f:3,t:'응급실에서 다른 환자 진료를 방해하며 난동·위협한 환자(폭행 등으로 벌금 100만 원)에게 「선납금을 내지 않으면 진료할 수 없다」고 한 의사: 진료거부로 벌금 200만 원 약식명령, 자격정지 1개월 처분 무효확인 청구 기각. 난동 환자라도 진료거부 규정은 엄격히 지켜야 함 → 폭력 사유로 거부할 때 진료비 문제를 섞지 말 것.'},
+  {c:'중앙행정심판위원회 2020. 6. 23. 재결 2019-19187 (일부인용)',p:'ok',r:['med:16','all'],f:3,t:'의료기관 개설신고가 수리되기 전에는 진료가 허용되지 않으므로, 이때 받은 진료 요청을 거부하는 데에는 정당한 사유가 있음(진료거부 금지는 법이 허용하는 진료를 전제). 수리 전 8명을 진료한 치과의사의 자격정지 1개월 15일 → 15일로 감경.'},
+  {c:'보건복지부 의료제도과-2898 (의료생협 부속의료기관)',p:'ok',r:['med:16'],f:2,t:'의료생협이 개설한 부속의료기관은 비조합원 진료를 거부할 수 있음 — 응급환자가 아니고 생명·신체에 치명적 위험이 없는 비조합원이면 정당한 사유가 될 수 있음.'}
+ ]},
+ {g:'2. 의료 제공 여건·전원',items:[
+  {c:'대법원 1992. 10. 27. 선고 92누9180',p:'ok',r:['med:2','med:4','emg:2','emg:5'],t:'다른 병원에서 응급조치 후 이송된 뇌손상 환자를 수술한 뒤, 집중 치료할 중환자실 병상이 없다는 이유로 다른 병원 전원을 권유 → 정당한 사유 인정.'},
+  {c:'대법원 2023. 7. 13. 선고 2020다217533',p:'no',r:['med:5','med:6','med:7','emg:1','emg:3','emg:11'],u:'https://scourt.go.kr/sjudge/1689817188052_103948.pdf',t:'허리통증으로 응급실에 온 환자의 MRI에서 척추 경막외 혈종이 보였는데도 협착증·디스크로만 진단해 집 근처 의원으로 전원 → 하지마비 영구장해. 원심(병원 승소)을 파기환송: 혈종을 진단할 수 있었는지, 보존적 치료가 적절했는지, 전원할 때 환자·보호자와 전원 병원에 충분한 정보를 제공·설명했는지 심리해야 함 → 전원·외래 권유 시 위험 정보를 전원 병원과 환자에게 넘기고 기록해야 함.'},
+  {c:'대법원 2000. 9. 8. 선고 99다48245',p:'no',r:['med:5','med:6','med:13','emg:1','emg:3'],u:'https://www.law.go.kr/LSW/precInfoP.do?mode=0&evtNo=99%EB%8B%A448245',t:'장파열·비장손상이 의심돼 응급개복술이 필요한 환자를, 지금 수술하지 않으면 생명이 위험하다는 설명 없이 보호자가 집 근처 병원을 원한다는 이유만으로 1시간 거리 의원으로 전원 → 의사 과실 인정(손해배상). 환자가 전원에 불만을 말한 것은 이송 거부·수술 요청이 아니라 내심의 불만 표시에 불과하다고 봄 → 전원·거부 전에 위험성을 충분히 설명하고 응급수술이 필요하면 먼저 시행해야 함.'},
+  {c:'보건복지부 의정 66507-704 (2000. 6. 2.)',p:'ok',r:['med:5','med:6','med:12','med:13'],t:'일단 진료한 환자의 상태를 보아 의학적 판단에 따라 퇴원 또는 다른 의료기관 진료를 권유하는 것은 진료거부로 보기 어렵다.'},
+  {c:'광주지법 2015. 9. 9. 선고 2014노2555',p:'ok',r:['med:5','med:6','emg:1'],f:1,t:'뇌출혈·암 병력 환자에게 한의사가 「양방병원에 가라」고 안내 → 진료거부 무죄 유지. 보건복지부 회신(2015. 7. 15.)도 타 전문과목·고난이도 진료를 정당한 사유로 봄.'},
+  {c:'서울고법 1992. 5. 1. 선고 90구9836',p:'ref',r:['emg:11','emg:1','all'],f:1,t:'인턴이 지혈 후 환자를 다른 병원으로 보낸 사안. 지혈로 위험에서 벗어난 뒤에는 응급환자가 아니므로 일반 진료거부 조항만 문제 됨 → 적용 법조가 틀리고 처분이 과하다며 면허정지 취소.'},
+  {c:'보건복지부 의료정책팀-4579 (2007. 10. 30.)',p:'ok',r:['med:7','med:13','emg:3'],f:2,t:'다른 치과의원에서 1차 시술을 받고 온 환자를 진찰한 결과, 1차 시술 기관에서 계속 치료받는 것이 효과적이라고 판단해 권유한 경우 → 진료거부 아님. 진찰을 먼저 하고 의학적 판단을 기록할 것.'}
+ ]},
+ {g:'3. 입원계약 해지·퇴원 요구',items:[
+  {c:'대법원 2022. 4. 14. 선고 2021다311197(본소)·2021다311203(반소)',p:'ok',r:['med:12','med:13'],t:'대학병원의 장기입원 환자 퇴거·진료비 청구를 인용한 원심(서울고법 2021. 12. 2.)이 심리불속행으로 확정. 기준: 그 환자에게 상급종합병원 수준의 입원치료가 계속 필요한지.'},
+  {c:'2024구합54638 (법원 홈페이지 「우리법원 주요판결」 게시)',p:'ok',r:['med:12','med:13'],t:'상급종합병원 중환자실·일반 병실에 입원한 채로 질병의 근본적 치료나 증상 개선을 위해 진행할 치료가 더 없다는 이유의 퇴원·전원 지시는 「요양기관의 요양에 관한 정당한 지시」에 해당 → 이에 불응한 환자에 대한 국민건강보험 급여제한처분 적법. 퇴원 요구에 불응하는 장기입원 환자에게 건강보험공단 급여제한 절차를 검토할 수 있는 근거(판결서 원문은 미확인).'},
+  {c:'서울동부지법 2013. 7. 24. 선고 2012가단67345',p:'ok',r:['med:12','med:13'],t:'입원치료를 계속 받을 필요가 없어 의료기관이 퇴원을 요구한 경우 → 정당.'},
+  {c:'서울대병원 퇴거 사건',p:'ok',r:['med:12','med:13'],t:'담당 의사의 지속적인 퇴원 지시·요청으로 입원 약정이 적법하게 해지되었고, 늦어도 해지 의사가 담긴 소장 부본 송달일에 해지되었다고 보아 퇴거 의무 인정.'},
+  {c:'서울 소재 병원 퇴거 인정 사례',p:'ok',r:['med:12','med:13','med:8'],t:'급성기 치료 종료, 응급상황 가능성 자료 없음, 보호자가 의료진 지시를 무시하고 L-tube로 한약재 등을 투입 → 해지의 정당한 사유 인정.'},
+  {c:'서울중앙지법 2009. 1. 14. 선고 2007가합59573 (대학병원 퇴거 청구 기각)',p:'no',r:['med:12','med:13','fee'],u:'https://www.law.go.kr/LSW//precInfoP.do?precSeq=127762',t:'치료위탁계약은 위임계약이라 언제든 해지할 수 있지만, 의료법 제15조 때문에 병원은 정당한 사유가 있어야 퇴원을 요구할 수 있음. 뇌수술 후 합병증으로 의식저하·반신마비가 남은 환자가 반드시 3차 기관 진료가 필요한 정도는 아니어도, 객담 제거·소변관리 등 현상 유지·악화 방지 치료와 입원 필요성이 있어 치료 종결이 아님. 의료소송 제기 후 진료비를 내지 않았다는 이유로 병실 점유를 불법점유로 볼 수 없음 → 병원 퇴거 청구 기각.'},
+  {c:'서울서부지법 퇴거 청구 기각 사례',p:'no',r:['med:12','med:13'],t:'2차 기관으로 옮길 수 있더라도 병실 부족, 요양급여 삭감, "의사 판단에 따르겠다"는 입원 약정만으로는 정당한 사유가 아니며, 재활치료 등 입원 필요성이 남아 있으면 퇴원 요구 불가.'},
+  {c:'청주지법 2016가단103132, 2017나15103',p:'no',r:['med:12','med:13'],t:'상급종합병원 표준업무에 해당하지 않거나 일반 병원에서도 진료할 수 있다는 사유만으로는 정당한 해지 사유가 아니다.'},
+  {c:'서울중앙지법 2020. 2. 12. 선고 2015가합16762',p:'ok',r:['med:12','med:13','med:8'],f:1,t:'의료계약은 해지할 수 있으나 환자 의사에 반한 퇴원에는 정당한 사유가 필요. 급성기 치료가 거의 끝났고 보조기로 혼자 걸을 수 있으며 재활은 입원이 필요 없고, 불신으로 치료에 협조하지 않은 사정 → 퇴원 조치 정당.'},
+  {c:'서울남부지법 2014. 8. 19. 선고 2013가합101129 → 서울고법 2016. 4. 21. 선고 2014나2032081',p:'ok',r:['med:12','med:13'],f:1,t:'경추 수술 후 통증 호소에도 퇴원시키고 이후 진료를 거부했다는 주장 등 손해배상 청구 기각(퇴원 시 증상 반복 가능성과 재내원 기준을 설명했고 이후 외래 진료도 계속함, 의료진의 진료방법 선택 재량 인정).'}
+ ]},
+ {g:'4. 응급의료 거부·기피',items:[
+  {c:'대법원 2026. 9. 3. 심리불속행 기각 (원심 대전고법 2026. 4. 16.) — 대구 10대 추락 환자 사건',p:'no',r:['emg:1','emg:2','emg:3','emg:5','emg:12'],t:'다른 환자 수술에 의료진이 동원됐다는 병원 주장 배척. 수술에 참여하지 않은 신경외과·영상의학과 전문의가 필요한 처치를 할 수 있었고, 일단 수용해 응급처치를 했어야 함. 구급대원에게 전해 들은 단편적 정보만으로 특정 진료과목 진료가 어렵다며 선별 거절한 것은 정당한 사유가 아님 → 보조금 6개월 중단·시정명령 정당(1심 대전지법은 병원 승소).'},
+  {c:'울산지법 (2025. 선고) — 양산부산대병원 4세 아동 사건',p:'no',r:['emg:1','emg:2','emg:5'],t:'권역응급의료센터는 정당한 사유를 엄격하게 봄. 언급된 심정지 환자는 이미 자발순환이 회복돼 중환자실로 옮겨졌고, 소아응급실 12명 중 더 위급한 환자가 없었음. 향후 심정지가 다시 올 수 있다는 막연한 우려는 정당한 사유가 아님 → 전공의 벌금 500만원, 병원 벌금 1,000만원(양벌규정).'},
+  {c:'대법원 1994. 10. 11. 선고 94도1669 — 대구 동산기독병원 사건',p:'no',r:['emg:1','emg:2','emg:3'],u:'https://law.go.kr/LSW/precInfoP.do?precSeq=110882',t:'요골동맥이 절단돼 출혈이 심한 환자에게 혈색소 측정·수혈 등 저혈성 쇼크 대비 조치 없이 혈압·지혈 상태만 확인하고 다른 병원으로 보내 환자가 여러 병원을 전전하다 사망 → 응급조치불이행 유죄 확정(전공의 3명 징역 8월·집행유예 1년, 수련의 3명 벌금 50만원 — 보도 기준). 필요한 응급조치는 공소장에 적힌 수술에 한정되지 않음.'}
+ ]},
+ {g:'5. 응급의료 방해·의료진 폭력',items:[
+  {c:'대법원 1980. 9. 24. 선고 79도1387',p:'ok',r:['med:8','med:9','emg:6','emg:9'],u:'https://www.law.go.kr/precInfoP.do?precSeq=159991',t:'생모가 종교적 신념을 이유로 딸에게 필요한 수혈을 완강히 거부·방해한 사건. 수혈하려는 의사 앞을 가로막고 소란을 피운 것은 의료기관을 완전히 점거하지 않았어도 실력행사로 진료를 방해한 \'의료기관 점거\'에 해당 → 유기치사·의료법 위반 유죄.'},
+  {c:'대법원 2020. 6. 상고기각 (보도 2020. 6. 24.)',p:'ok',r:['emg:6','emg:8','emg:9','med:9'],t:'술에 취해 응급실에 온 환자가 치료를 거부하며 의료진에게 욕설하고 밀친 사건. 다른 환자가 없었고 단순한 자기 진료 거부라는 주장 배척 — 자신에 대한 진료를 거부하더라도 의료진의 진료권을 침해했다면 응급의료 방해 → 벌금 500만원 확정.'},
+  {c:'대법원 2023. 3. 16. 선고 2021도16482',p:'ok',r:['med:9','med:10','emg:8'],u:'https://www.law.go.kr/LSW/precInfoP.do?mode=0&precSeq=234401',t:'병원에서 11회에 걸쳐 큰 소리를 지르거나 진료 예약이 있는 의사를 붙잡은 사건. 원심은 비의료인이 개설한 병원이라 업무방해죄의 보호 대상이 아니라며 무죄로 보았으나, 대법원은 그런 병원에 고용된 의사의 진료행위까지 당연히 보호 대상에서 빠지는 것은 아니고 진료 방해로 볼 여지가 있다며 파기환송 → 반복적 소란·진료 의사 붙잡기는 진료 업무방해가 될 수 있음(일반 진료 9·10번 사유의 근거).'},
+  {c:'청주지법 (2013. 7. 보도)',p:'ok',r:['emg:6','med:9'],t:'빨리 치료해 주지 않는다며 응급실 의사를 폭행한 환자에게 상해·응급의료법 위반으로 벌금 300만원.'},
+  {c:'울산지법 (2017. 9. 보도)',p:'ok',r:['emg:6','emg:7','emg:8','med:9'],t:'"불친절해서 돈 못 낸다"며 응급실에서 폭언·난동 → 징역 8월·집행유예 2년.'},
+  {c:'응급실 행정직원·보안요원 폭행 사건 (2021. 3. 보도)',p:'ref',r:['emg:6','emg:8','med:9'],t:'원무과 직원·보안요원 등은 응급의료종사자가 아니어서 응급의료법 대신 폭행·업무방해죄만 적용 → 피해 직원의 직종을 확인해 적용 법조를 구분해야 함.'},
+  {c:'대법원 양형위원회 2026. 8. 10. 「응급의료·구조·구급방해범죄 양형기준」 설정',p:'ref',r:['emg:6','emg:7','emg:8'],t:'응급의료 방해 최대 징역 5년. 참작할 만한 범행동기·경미한 방해는 감경, 피해 의료진의 처벌불원·피해회복도 감경요소 — 내규 제3조 제4항 6·9호(동기, 반성) 판단에 참고.'}
+ ]},
+ {g:'6. 진료비·지시 불이행',items:[
+  {c:'보건복지부 의정 65507-675 (1994. 6. 3.)',p:'no',r:['fee','med:8','all'],f:2,t:'「정당한 이유」는 의사 부재·신병 등 진료할 수 없었다고 객관적으로 인정되는 사정. 보험 청구가 곤란하다는 이유, 과거 의사 지시를 무시했다는 이유로 심한 요통 환자를 거부하는 것은 부당. 고의로 지시에 불응해 효과적인 진료가 불가능하면 최소 2~3회 이상 경고한 뒤에도 계속 불응할 때 퇴원·전원을 명하는 것이 타당.'},
+  {c:'대전지법 논산지원 2016. 3. 17. 선고 2015가단2334 → 대전지법 2016. 9. 22. 선고 2016나2992 / 논산지원 2016. 5. 31. 선고 2015가소2710 → 대전지법 2016. 12. 2. 선고 2016나4912',p:'ref',r:['fee','med:8'],f:1,t:'치과 임플란트 환자가 「다 끝나고 이상 없으면 내겠다」며 약정 중도금을 내지 않자 치과의사가 면담·사후관리를 거부. 보건소는 위반 아님으로 회신. ① 치과의사가 낸 진료비 청구(2015가단2334·2016나2992): 진료비 일부 인용. ② 환자가 낸 손해배상(2015가소2710·2016나4912): 선이행 의무(중도금) 불이행에 따른 중단이라 계약 불이행은 아니라고 보았으나 설명의무 위반으로 위자료 100만 원 인정 → 비급여 계약상 지급 약정 위반은 응급·필수 진료가 아닌 범위에서만 참고.'},
+  {c:'서울고법(춘천) 2021. 11. 3. 선고 2021노23',p:'ref',r:['fee','all'],f:1,t:'사무장병원(의료법 제33조 위반) 형사사건. 행정관청 민원 중에 「보험사가 병원비를 늦게 지급해 그 보험 환자는 진료하지 않는다며 진료거부를 당했다」는 내용이 판결에 언급됨 → 진료비 지급 지연을 이유로 한 선별 거부는 정당한 사유가 되기 어려움(직접 판단은 아님).'},
+  {c:'보건복지부 의료정책팀-140 (2008. 1. 15.)',p:'no',r:['med:8'],f:2,t:'안과의원에서 9세 아동이 진료 중 의사 지시를 잘 따르지 않는다며 진료를 중단하고 내보낸 행위 → 정당한 사유가 없는 진료거부.'}
+ ]},
+ {g:'7. 연명의료·생명윤리',items:[
+  {c:'대법원 2009. 5. 21. 선고 2009다17417 전원합의체 (김할머니 사건)',p:'ref',r:['med:15'],u:'https://www.law.go.kr/precInfoP.do?mode=0&precSeq=134342',t:'회복 불가능한 사망 단계에 이른 환자가 사전에 의사를 밝혔거나 추정할 수 있는 경우 연명치료 중단을 허용. 환자의 이러한 자기결정권 행사가 있으면 의료법상 진료·응급의료를 하지 않을 정당한 사유에 해당한다고 봄. 이후 연명의료결정법으로 입법화 — 이행은 담당의 교체(법 제19조 제3항)로 보장.'},
+  {c:'대법원 2016. 1. 28. 선고 2015다9769',p:'ref',r:['med:15','fee'],u:'https://www.law.go.kr/LSW/precInfoP.do?precSeq=209254',t:'연명치료 중단 판결이 확정돼도 판결이 중단을 명한 치료만 허용되지 않고, 나머지 범위의 의료계약은 유효하게 존속. 중단 소송 기간의 인공호흡기 유지비, 판결 확정 후 사망 시까지의 진료비도 지급해야 함 → 연명의료 중단이 곧 진료관계 종료(퇴원 요구 사유)는 아님.'},
+  {c:'서울동부지법 2010. 10. 21. 자 2010카합2341 결정',p:'ref',r:['med:8','emg:9'],u:'https://www.law.go.kr/LSW/precInfoP.do?precSeq=146820',t:'부모가 종교적 신념으로 신생아 수술의 수혈을 거부한 사안. 정당한 친권 행사 범위를 넘는 거부는 효력이 없고, 긴급·필수적 진료는 객관적 자료로 자녀의 의사를 추정해 시행할 수 있으며 부모의 방해 금지 가처분 인용 → 보호자가 치료를 거부해도 진료를 거부하기보다 법적 절차로 진료를 지키는 길이 있음.'},
+  {c:'헌재 2019. 4. 11. 2017헌바127',p:'ref',r:['med:14'],t:'자기낙태죄·의사낙태죄 조항 헌법불합치(개선입법 시한 2020. 12. 31. 경과). 진료거부 정당사유에 관한 명시적 판단은 아님 → 교리 사유는 해당 시술만 거부하고 대체 의료기관을 안내하며, 다른 진료는 계속.'},
+  {c:'보건복지부 의정 65507-1263 (1994. 10. 22.)',p:'ok',r:['med:8','emg:9'],f:2,t:'여호와의 증인 수혈 거부: 수혈 거부만으로 진료 자체를 거부할 수는 없으나, 수혈 없이는 수술이 불가능함이 명백하면 수술을 회피하고 나머지 차선의 조치를 하는 것은 정당. 미성년자는 원칙적으로 부모 동의(부모 불일치 시 가정법원). 거부 의사는 자필 서명 각서로도 증명력이 있고, 분쟁 우려가 크면 공증 권장.'},
+  {c:'보건복지부 의제 01254-4469 (1987. 4. 10.)',p:'ref',r:['med:8','emg:9'],f:2,t:'환자가 수술을 거부할 때 이를 강제하지 않았다는 것만으로 의사에게 법적 책임을 물을 수 없음(진료거부·요양방법 지도 의무를 명백히 위반하지 않은 경우).'}
+ ]},
+ {g:'8. 진료 요청의 성립·입증',items:[
+  {c:'부산지법 2013. 10. 14. 선고 2013고정1692 → 2014. 1. 10. 선고 2013노3482',p:'ok',r:['all'],f:1,t:'진료 요청은 질병이 있고 그 치료를 구하는 것이 전제. CT 영상이 본인 것인지 확인해 달라는 요구는 검증·감정 요구일 뿐 진료 요청이 아님 → 무죄.'},
+  {c:'수원지법 2020. 2. 6. 선고 2019고정597',p:'ok',r:['all','med:1'],f:1,t:'의사가 진료 요청을 받았다는 점이 증명돼야 함. 직원 휴대폰으로 보낸 문자가 의사에게 전달되지 않았다면 진료거부로 볼 수 없음 → 무죄.'},
+  {c:'대구지법 2021. 4. 15. 선고 2020나320345',p:'ok',r:['emg:11','all'],f:1,t:'설명 도중 환자가 3분 만에 스스로 응급실을 떠남 → 진료거부 아님.'},
+  {c:'헌재 2018. 8. 30. 2018헌마176, 2018헌마184 (육군 군의관)',p:'ok',r:['med:3','med:4','all'],f:1,t:'하루 진료 인원을 40명으로 제한한 상부 방침에 따라 진료하지 못한 사안 → 진료거부 고의 인정 어려움, 기소유예 처분 취소.'},
+  {c:'서울중앙지법 2013. 1. 31. 선고 2008가단243781',p:'ok',r:['all'],f:1,t:'환자가 보건소에 진료거부 민원을 냈으나 진료거부로 보기 어렵다는 회신 → 손해배상 청구 기각. 보건소 판단이 민사에서도 중요한 자료가 됨.'},
+  {c:'헌재 2006. 2. 14. 2006헌마105 · 2006. 7. 25. 2006헌마785 (지정재판부)',p:'ref',r:['all'],f:1,t:'응급실 응급의료·진료 거부 고소 사건 등의 불기소처분 헌법소원 → 진료거부(의료법)·응급의료거부(응급의료법) 위반의 공소시효는 각 3년(당시)이어서 이미 완성 → 각하. 민원·고소는 시효부터 확인.'},
+  {c:'헌재 2005. 6. 30. 2005헌마64',p:'ref',r:['med:8','all'],f:1,t:'MRI 조영제 등 환자 측 요구를 둘러싼 진료거부 고소 불기소처분 → 자의적 처분 아님, 기각.'}
+ ]},
+ {g:'9. 허위 진료거부 주장·환자 측 위법행위',items:[
+  {c:'서울남부지법 2025. 3. 26. 선고 2024고단3565 → 2025. 11. 28. 선고 2025노555',p:'ok',r:['med:3','med:9','med:10'],f:1,t:'예약 시각보다 1시간 20분 늦게 온 환자에게 대표원장 진료가 어렵다며 부원장 진료를 안내하자 「진료거부, 의료법 위반」이라며 30분간 소리치고 사진 촬영 → 업무방해 유죄(항소심 벌금 300만 원). 지각 환자를 다른 의사에게 안내한 것은 정당한 대응.'},
+  {c:'대구지법 의성지원 2025. 6. 27. 선고 2024고단341 → 대구지법 2026. 7. 23. 선고 2025노2537',p:'ok',r:['med:9','med:10','emg:8'],f:1,t:'보건지소 의사를 모욕·폭행한 환자의 「부당한 진료거부에 대한 정당방위」 주장 배척. 다만 밀친 곳이 주차장일 수 있어 의료법 제12조 제3항(의료행위 장소 폭행)은 증명 부족 → 장소를 기록해 둘 것. 항소심 징역 8월·집행유예 2년.'},
+  {c:'서울서부지법 2025. 12. 10. 선고 2024고단1605',p:'ok',r:['med:9','med:10'],f:1,t:'한의사를 진료거부로 허위 고소(무고)하고 악성 후기·시위 예고 → 무고·업무방해·스토킹 유죄, 징역 1년 6월·집행유예 3년.'},
+  {c:'수원지법 2023. 8. 18. 선고 2022노4640',p:'ok',r:['med:9'],f:1,t:'대기 환자가 많다며 진찰도 않고 퇴원시켰다는 허위 고소 → 무고·명예훼손 유죄 유지.'},
+  {c:'서울북부지법 2016. 11. 25. 자 2016카합20247 결정',p:'ok',r:['med:9','med:10'],f:1,t:'수사기관에서 무혐의가 난 내용을 병원 앞 팻말 시위로 계속 주장한 환자에 대해 의사가 낸 시위·업무방해 금지 가처분 인용, 위반 1회당 100만 원 → 반복 위해에 대한 민사적 대응 수단.'},
+  {c:'서울서부지법 2021. 12. 16. 선고 2020나47813 · 서울중앙지법 2019. 5. 22. 선고 2016가합12354',p:'ok',r:['med:9','med:10','all'],f:1,t:'치과 진료를 받았던 환자가 진료거부 등을 이유로 낸 손해배상 청구 기각. 이 환자는 앞서 그 치과에 찾아가 항의하다 공갈미수·업무방해·모욕으로 징역 1년이 확정됨(2016고단409).'},
+  {c:'의정부지법 2019. 6. 5. 선고 2018가합57452',p:'ok',r:['med:9','all'],f:1,t:'정신과 환자가 「진료 요청을 의사에게 전달하지 않았다」며 병원 간호사에게 진료거부 손해배상 청구 → 기각. 이 환자는 의사에게 폭언·난동을 해 업무방해로 벌금 200만 원을 선고받았고 의사에게 위자료 지급 판결도 받음.'},
+  {c:'창원지법 진주지원 2022. 12. 21. 선고 2021가단41401',p:'ok',r:['all'],f:1,t:'진료거부·진료기록 사본 발급 거부 주장 모두 배척.'},
+  {c:'서울동부지법 2020. 9. 10. 선고 2020고정194',p:'ref',r:['med:8'],f:1,t:'정신질환 환자가 내원(진료)을 거부하자 직접 진찰 없이 보호자에게 처방전을 발급 → 의료법 위반, 선고유예. 환자가 진료를 거부해도 대리처방으로 대신할 수 없고, 보호자에게 입원 등 다른 절차를 안내했어야 함.'},
+  {c:'청주지법 2014. 5. 16. 선고 2013고단1612',p:'ref',r:['all'],f:1,t:'진료거부 금지 의무가 있다고 해서 정신질환자를 법령상 시설이 아닌 곳에 수용한 행위가 정당해지지 않음.'}
+ ]},
+ {g:'10. 집단 진료거부·집단행동',items:[
+  {c:'대법원 2005. 9. 29. 선고 2002도4317',p:'no',r:['all'],f:1,t:'의약분업 반대 집단휴업과 전공의 집단 진료거부 → 업무방해 유죄 확정(병원장이 묵인했다고 보기 어려움). 다만 1차 업무개시명령은 등기우편이 반송되거나 병원에 붙이기만 해 적법하게 송달되지 않았다며, 그 명령 위반(의료법위반) 부분이 있는 피고인 3명은 파기환송 → 업무개시명령은 문서로 적법하게 송달돼야 효력이 생김.'},
+  {c:'인천지법 2004. 5. 12. 선고 2003노1455',p:'no',r:['all'],f:1,t:'병원 노조의 로비 점거 → 업무방해·의료법(진료방해) 위반 유죄. 정당한 쟁의행위가 아닌 노무 거부·점거는 위력에 해당.'},
+  {c:'서울중앙지법 2025. 11. 27. 선고 2024가합106872 외 2024가단5320553·5356309·5368180·5370206·5417969 (2025. 10.~2026. 7. 선고)',p:'ref',r:['all'],f:1,t:'2024년 의대 증원 반발 사직 전공의들이 사직서 수리 금지 등 행정명령이 위법하다며 국가·수련병원에 손해배상 청구 → 모두 기각.'},
+  {c:'서울행정법원 2025. 10. 30. 선고 2024구합59909 · 2026. 1. 23. 선고 2024구합59916',p:'ref',r:['all'],f:1,t:'의료법 제59조 집단행동 금지명령 위반(조장)을 이유로 한 의사 면허정지 처분 취소 → 「조장」은 집단적 진료 중단을 부추기는 행위만이며 의견 표명은 해당하지 않음.'},
+  {c:'서울행정법원 2018. 11. 15. 선고 2018구합64122',p:'ref',r:['all'],f:1,t:'다른 의료법 위반에 대한 면허자격정지 12개월 처분 취소 청구 기각. 원고(의사)가 「진료거부 같은 핵심 위반도 최대 자격정지 3개월」이라고 주장한 부분이 있음(법원 판단 아님) → 행정처분 수위 참고는 「의료관계 행정처분 규칙」으로 확인(진료거부: 자격정지 1개월, 행정심판 2020-20114 참고).'},
+  {c:'보건복지부 의정 01254-1129 (1992. 2. 7.)',p:'no',r:['all'],f:2,t:'간호사의 간호·진료보조도 「진료」에 포함됨. 임금 인상을 이유로 한 간호사 집단 조퇴·결근은 정당한 쟁의행위가 아니어서 진료거부 금지 위반.'}
+ ]}
+];
+function casesFor(type,nums,fee){
+  const keys=new Set(nums.map(n=>type+':'+n));if(fee&&fee!=='no')keys.add('fee');
+  const out=[];CASES.forEach(g=>g.items.forEach(x=>{if(x.r.some(k=>keys.has(k)))out.push(x)}));
+  if(!out.length&&nums.length)CASES[0].items.filter(x=>x.r.includes('all')).forEach(x=>out.push(x));
+  return out;
+}
+const PTAG={ok:'<span class="tag" style="background:#e6f4ec;color:#1f7a4d">정당사유 인정·처벌</span>',no:'<span class="tag" style="background:#fde8e7;color:#b42318">정당사유 부정</span>',ref:'<span class="tag">참고</span>'};
+function vtag(x){return x.u?'':x.f?'<span class="tag" style="background:#e8f0fb;color:#1d4f91">'+({2:'회신 원문 확인',3:'재결문 확인'}[x.f]||'판결문 확인')+'</span>':'<span class="tag" style="background:#fff3df;color:#a15c00">원문 미확인</span>'}
+function ptag(x){if(x.p==='ok'&&/폭|방해|난동|무고|모욕|가처분/.test(x.t))return '<span class="tag" style="background:#e6f4ec;color:#1f7a4d">가해자 처벌</span>';if(x.p==='ok')return '<span class="tag" style="background:#e6f4ec;color:#1f7a4d">정당사유 인정</span>';return PTAG[x.p]}
+function casesHTML(list){return list.length?`<div class="res-sec"><h4>관련 판례·해석 (${list.length}건)</h4><ul>${list.map(x=>`<li><b>${esc(x.c)}</b> ${ptag(x)}${x.u?` <a href="${x.u}" target="_blank" style="font-size:12px">원문↗</a>`:''}<br><span style="font-size:12.5px">${esc(x.t)}</span></li>`).join('')}</ul></div>`:''}
+function renderLawCases(){
+  const q=(($('#lawQ')||{}).value||'').trim().toLowerCase(),pf=(($('#lawP')||{}).value||'');let h='',n=0;
+  CASES.forEach(g=>{const its=g.items.filter(x=>(!q||(x.c+' '+x.t).toLowerCase().includes(q))&&(!pf||x.p===pf));if(!its.length)return;n+=its.length;h+=`<h3>${esc(g.g)}</h3><table class="rs"><colgroup><col style="width:300px"><col style="width:110px"><col></colgroup><tr><th>판례·해석</th><th class="c">결론</th><th>요지</th></tr>`;
+    its.forEach(x=>h+=`<tr><td><b>${esc(x.c)}</b>${x.u?` <a href="${x.u}" target="_blank" style="font-size:12px">원문↗</a>`:''}<span class="ref">관련 사유: ${x.r.map(k=>k==='all'?'일반':k==='fee'?'진료비':(k.startsWith('emg')?'응급 ':'일반 ')+k.split(':')[1]+'번').join(', ')}</span></td><td class="c">${ptag(x)}<br>${vtag(x)}</td><td>${esc(x.t)}</td></tr>`);h+='</table>'});
+  $('#lawCases').innerHTML=h||'<p class="hint">검색 결과가 없습니다.</p>';const c=$('#lawCnt');if(c)c.textContent=n+'건';
+}
+
+/* ================= 유틸 ================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),1800)}
+function radio(name){const r=document.querySelector(`input[name="${name}"]:checked`);return r?r.value:''}
+function setRadio(name,v){$$(`input[name="${name}"]`).forEach(r=>r.checked=(r.value===v));syncSeg()}
+function syncSeg(){$$('.seg label').forEach(l=>{const i=l.querySelector('input');l.classList.toggle('sel',!!(i&&i.checked))})}
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function validYMD(y,m,d){y=+y;m=+m;d=+d;if(!y||!m||!d||y<1900||y>2100||m>12)return false;const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d}
+function isDate(v){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v||'');return !!m&&validYMD(m[1],m[2],m[3])}
+function fmtDate(v){v=String(v??'').trim();if(!v)return v;let y,m,d;const s=v.match(/^(\d{4})\s*[.\-\/년]\s*(\d{1,2})\s*[.\-\/월]\s*(\d{1,2})\s*[.일]?$/);
+  if(s){[y,m,d]=[s[1],s[2],s[3]]}else{const n=v.replace(/\D/g,'');if(n.length===8){y=n.slice(0,4);m=n.slice(4,6);d=n.slice(6)}else if(n.length===6&&/^\d{6}$/.test(v)){y='20'+n.slice(0,2);m=n.slice(2,4);d=n.slice(4)}else return v}
+  if(!validYMD(y,m,d))return v;return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function fmtTime(v){v=String(v??'').trim();const d=v.replace(/\D/g,'');let h,mi;if(d.length===4){h=d.slice(0,2);mi=d.slice(2)}else if(d.length===3){h='0'+d[0];mi=d.slice(1)}else return v;if(+h>23||+mi>59)return v;return h+':'+mi}
+function isTime(v){return /^([01]\d|2[0-3]):[0-5]\d$/.test(v||'')}
+function markDT(el){const v=el.value.trim();const bad=v&&(el.classList.contains('dateIn')?!isDate(v):!isTime(v));el.classList.toggle('badIn',!!bad);el.title=bad?(el.classList.contains('dateIn')?'날짜가 올바르지 않습니다 (예: 20250616)':'시각이 올바르지 않습니다 (예: 1430)'):'';return !bad}
+function dot(d){if(!d)return '';if(!isDate(d))return d;const [y,m,dd]=d.split('-');return y+'. '+(+m)+'. '+(+dd)+'.'}
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el.classList.contains('dateIn')){const d=el.value.replace(/\D/g,'');if(d.length===8&&/^\d{8}$/.test(el.value.trim()))el.value=fmtDate(el.value);if(el.classList.contains('badIn'))markDT(el)}
+  if(el.classList.contains('timeIn')){const d=el.value.replace(/\D/g,'');if(d.length===4&&/^\d{4}$/.test(el.value.trim()))el.value=fmtTime(el.value);if(el.classList.contains('badIn'))markDT(el)}
+});
+document.addEventListener('blur',e=>{
+  const el=e.target;
+  if(el.classList&&el.classList.contains('dateIn')){el.value=fmtDate(el.value);if(!markDT(el))toast('날짜가 올바르지 않습니다. 숫자 8자리로 입력하세요 (예: 20250616)')}
+  if(el.classList&&el.classList.contains('timeIn')){el.value=fmtTime(el.value);if(!markDT(el))toast('시각이 올바르지 않습니다. 숫자 4자리로 입력하세요 (예: 1430)')}
+},true);
+
+/* ================= 저장소 ================= */
+const KEY='refusalApp.v1';let memStore=null;
+function loadDB(){try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):{cases:[]}}catch(e){return memStore||{cases:[]}}}
+function saveDBlocal(db){try{localStorage.setItem(KEY,JSON.stringify(db));memStore=db;return true}catch(e){memStore=db;toast('브라우저 저장이 막혀 있어 임시로만 보관됩니다. 백업 저장을 해 두세요.');return false}}
+function saveDB(db){const ok=saveDBlocal(db);if(typeof scheduleSync==='function')scheduleSync();if(typeof refreshAlerts==='function')refreshAlerts();return ok}
+function activeCases(){return loadDB().cases.filter(c=>!c.deleted)}
+
+/* ================= 탭 ================= */
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;showTab(b.dataset.t)});
+function showTab(t){$$('#nav button').forEach(x=>x.classList.toggle('on',x.dataset.t===t));$$('.tab').forEach(x=>x.classList.toggle('on',x.id==='t-'+t));if(t==='ledger')renderLedger();window.scrollTo(0,0)}
+
+/* ================= ① 판단하기 ================= */
+let jSel=new Set();const jCrit={};
+function jType(){return radio('jType')||'med'}
+function renderReasonTable(){
+  const type=jType(),list=REASONS[type];
+  let h='<colgroup><col style="width:22%"><col style="width:48px"><col><col style="width:56px"></colgroup><tr><th>구분</th><th class="c">연번</th><th>사유</th><th class="c">확인</th></tr>';
+  const cnt={};list.forEach(r=>cnt[r.g]=(cnt[r.g]||0)+1);const done={};
+  list.forEach(r=>{
+    h+=`<tr class="${jSel.has(r.n)?'pick':''}">`;
+    if(!done[r.g]){h+=`<td class="grp" rowspan="${cnt[r.g]}">${esc(r.g)}</td>`;done[r.g]=1}
+    h+=`<td class="c">${r.n}</td><td><label style="cursor:pointer;display:block" for="jr${r.n}">${esc(r.t)}<span class="ref">${esc(r.ref)}</span></label></td><td class="c"><input type="checkbox" id="jr${r.n}" data-n="${r.n}" ${jSel.has(r.n)?'checked':''}></td></tr>`;
+  });
+  $('#reasonTable').innerHTML=h;
+  $('#lblEmg').textContent=type==='emg'?'응급환자 여부':'응급상황 여부';
+  const segE=$$('#segEmg label');segE[0].lastChild.textContent=type==='emg'?' 비응급(KTAS 4~5 등)':' 응급 아님';segE[1].lastChild.textContent=type==='emg'?' 응급환자(KTAS 1~3)':' 응급상황';
+}
+$('#reasonTable').addEventListener('change',e=>{const n=+e.target.dataset.n;if(!n)return;e.target.checked?jSel.add(n):jSel.delete(n);renderReasonTable();updateJudge()});
+function renderCrit(){
+  let h='';CRITS.forEach((c,i)=>{
+    h+=`<div class="crit"><div class="n">${i+1}</div><div class="t">${esc(c.t)}</div><div class="o opts">`+
+      c.o.map(o=>`<label><input type="radio" name="${c.k}" value="${o[0]}" ${jCrit[c.k]===o[0]?'checked':''}>${esc(o[1])}</label>`).join('')+`</div></div>`;
+  });
+  h+=`<div class="crit"><div class="n">11</div><div class="t">그 밖의 고려 사항</div><div class="o"><input type="text" id="c11" placeholder="예: 의료사고 분쟁 진행 중, 피해 직원의 업무 복귀 곤란 등"></div></div>`;
+  $('#critList').innerHTML=h;
+}
+$('#critList').addEventListener('change',e=>{if(e.target.name){jCrit[e.target.name]=e.target.value;updateJudge()}});
+$('#critList').addEventListener('input',e=>{if(e.target.id==='c11')updateJudge()});
+['segType','segStage','segEmg','segFee','segUrg'].forEach(id=>$('#'+id).addEventListener('change',e=>{
+  if(id==='segType'){jSel.clear();renderReasonTable()}
+  syncSeg();updateJudge()}));
+['p1','p2','p2b','p3','p4','p5','jEtc'].forEach(id=>$('#'+id).addEventListener('input',updateJudge));
+['p1','p3','p4','p5'].forEach(id=>$('#'+id).addEventListener('change',updateJudge));
+
+function critScore(){
+  const st=S();let s=0,ans=0;const tips=[];
+  CRITS.forEach(c=>{const v=jCrit[c.k];if(!v)return;ans++;s+=wOf(st,c.k,v);if(c.tip&&c.tip[v])tips.push(c.tip[v])});
+  return {s,ans,tips,max:maxScore(st),hi:st.th.hi,mid:st.th.mid};
+}
+let lastJudge=null;
+function judge(){
+  const type=jType(),stage=radio('jStage'),emg=radio('jEmg'),fee=radio('jFee'),urg=radio('jUrg');
+  const sel=REASONS[type].filter(r=>jSel.has(r.n));
+  const cats=new Set(sel.map(r=>r.c));
+  const out={level:'info',title:'사유를 선택해 주세요',why:[],basis:[],warn:[],todo:[],op:'',scope:'',score:null};
+  // 근거 기본
+  out.basis.push(type==='emg'?'응급의료법 제6조 제2항 · 내규 제5조 제2항':'의료법 제15조 제1항 · 내규 제5조 제1항');
+  out.basis.push('내규 제3조(기본원칙: 이익형량)');
+  sel.forEach(r=>out.basis.push(`[${r.n}] ${r.ref}`));
+
+  if(fee==='main'){
+    out.level='no';out.title='정당사유로 볼 수 없음';
+    out.why.push('진료비 미수·체납을 이유로 한 진료거부·응급의료 거부는 금지됩니다(내규 제5조 제1항·제2항 단서).');
+    out.why.push('복지부도 진료비 미납은 정당한 사유가 아니라고 봅니다.');
+    out.todo.push('미수금은 진료와 분리해 원무 절차(납부 안내·분할 납부·법적 청구)로 처리하세요.');
+    out.op='용인 불능(반려)';return out;
+  }
+  if(fee==='part')out.warn.push('진료비 미수·체납이 거부 이유에 섞여 있으면 안 됩니다. 요청서·EMR에는 실제 정당사유만 적고, 미수금 문제는 따로 처리하세요.');
+
+  if(!sel.length){out.why.push('왼쪽 3번에서 해당하는 사유를 하나 이상 고르면 판단 결과가 나옵니다.');return out}
+
+  // 각 사유 메모
+  sel.forEach(r=>out.why.push(`[${r.n}] ${r.note}`));
+
+  let level='ok',title='정당사유 해당 가능성 높음',needInfo=false;
+  const actOnly=sel.every(r=>r.c==='act');
+  const resSel=sel.filter(r=>r.c==='res');
+
+  // 행위 사유 경중
+  if(sel.some(r=>r.v)){
+    const cs=critScore();out.score=cs;
+    cs.tips.forEach(t=>out.warn.push(t));
+    if(cs.ans<6){level='warn';title='경중 판단 정보 부족';needInfo=true;out.todo.push('④ 경중 판단 기준을 6개 이상 답하면 판단이 더 정확해집니다.')}
+    else if(cs.s>=cs.hi){/*유지*/}
+    else if(cs.s>=cs.mid){if(actOnly){level='warn';title='위원회 심의로 판단 필요'}}
+    else {if(actOnly){level='warn';title='거부보다 다른 조치 우선 검토';out.todo.push('경중이 낮게 평가됩니다. 경고·주의 안내, 보안요원 동석, 담당 의료진 변경 등 덜 제한적인 조치를 먼저 검토하세요.')}}
+    if(cs.ans>=6)out.scope=(jCrit.c8==='repeat'&&cs.s>=cs.hi)?'향후에도 진료거부':'이번만 진료거부';
+    out.todo.push('피해 직원 보호조치: 업무 일시 중단·전환, 치료·상담, 고소·고발 지원(산업안전보건법 제41조).');
+  }
+  if(type==='med'&&jSel.has(10)){out.warn.push('[10] 요건: 진료 지연이 환자에게 중대한 위험을 초래하지 않아야 합니다. 의학적 소견으로 확인해 기록하세요.')}
+
+  // 치료 필요성
+  if(cats.has('nec')){
+    if(stage!=='inpt'&&type==='med')out.warn.push('[12·13]은 주로 입원 중 퇴원 요구 사안입니다. 진료 단계를 다시 확인하세요.');
+    out.todo.push('급성기 치료 종결·상급종합병원 수준 입원치료 불필요 소견서, 퇴원 권유·지시 기록(일자별)을 갖추세요.');
+    out.todo.push('전원 가능 기관(요양병원 등)을 구체적으로 안내하고 안내 사실을 기록하세요.');
+    out.warn.push('병실 부족·요양급여 삭감·입원 약정만으로는 정당사유가 되지 않는다는 판결이 있습니다.');
+    if(level==='ok'){level='warn';title='요건 충족 시 정당사유 인정 가능'}
+  }
+  if(cats.has('lst')){
+    level='warn';title='담당의 교체로 처리해야 함';
+    out.warn.push('연명의료결정법 제19조 제3항: 담당의사가 이행을 거부하면 병원은 의료기관윤리위원회 심의를 거쳐 담당의사를 교체해야 합니다. 병원 차원에서 이행을 거부할 수는 없습니다.');
+    out.basis.push('연명의료결정법 제19조 제3항');
+  }
+  if(cats.has('rel')){
+    if(level==='ok'){level='warn';title='해당 행위에 한해 거부 가능(신중 검토)'}
+    out.warn.push('교리 사유는 법령·행정해석에 명시된 정당사유가 아닙니다. 해당 시술만 거부하고 나머지 진료는 계속하며, 대체 의료기관을 반드시 안내하세요.');
+  }
+  if(cats.has('etc')){if(level==='ok'){level='warn';title='위원회 심의로 판단 필요'}if(!$('#jEtc').value.trim())out.todo.push('기타 사유의 구체적 내용을 적어 주세요.')}
+  if(cats.has('exp')||(type==='emg'&&jSel.has(1))){out.todo.push('원내 다른 과·다른 의료진으로 진료할 수 있는지 확인하고, 그 결과를 기록하세요.')}
+
+  // 응급 관련
+  if(type==='emg'){
+    if(emg==='yes'){
+      if(jSel.has(11)){level='no';title='판단이 서로 맞지 않음';out.warn.unshift('응급환자로 표시했는데 [11] 비응급 사유를 골랐습니다. 의사 진찰 결과를 다시 확인하세요.')}
+      if(actOnly&&!jSel.has(11)){
+        level='warn';title='응급처치 후 판단(즉시 거부 불가)';
+        out.warn.unshift('응급환자는 거부 대상자라도 응급상황이 해소될 때까지 진료를 거부할 수 없습니다(내규 제5조 제3항). 응급처치 후 필요한 전원을 시행하세요.');
+        out.todo.push('폭력 상황이면 112 신고·보안요원 배치로 진료 공간의 안전부터 확보하세요(응급의료법 제12조 위반 소지).');
+      }
+      if(resSel.length){
+        out.todo.push('수용 곤란 사유가 생기거나 해소되면 응급의료정보통신망으로 중앙·광역 응급의료상황실에 지체 없이 통보(시행령 제1조의2 제2항).');
+        out.todo.push('이송 시 적절한 응급처치 후 이송받을 기관을 확인하고 의무기록을 함께 보내세요.');
+        out.basis.push('응급의료법 시행령 제1조의2');
+      }
+    }else if(emg==='unk'){
+      if(level==='ok'){level='warn'}title='먼저 의사 진찰로 응급 여부 판단';needInfo=true;
+      out.warn.unshift('응급 여부를 판단하기 전에는 거부할 수 없습니다. 의사가 진찰(중증도 분류)부터 하세요.');
+    }else{
+      if(jSel.has(11)){out.todo.push('응급이 아닌 이유를 설명하고 진료과목·의료기관을 추천, 요구 시 의무기록 제공(시행령 제2조).');out.basis.push('응급의료법 시행령 제2조 · 2024. 9. 복지부 지침')}
+    }
+  }else{
+    if(emg==='yes'){
+      if(level==='ok')level='warn';title='응급처치 후 판단(즉시 거부 불가)';
+      out.warn.unshift('응급상황이면 의료법 제15조 제2항에 따라 최선의 처치를 해야 하고, 응급상황 해소 후 거부·전원을 검토합니다(내규 제5조 제3항).');
+    }else if(emg==='unk'){if(level==='ok')level='warn';needInfo=true;out.warn.unshift('응급상황 여부를 먼저 의학적으로 확인하세요.')}
+  }
+
+  // 이미 진료 중
+  if(stage==='ongoing')out.todo.push('이미 시작한 진료를 중단하는 경우, 중단 시점의 환자 상태와 후속 진료 연계를 꼭 기록하세요.');
+
+  // 절차
+  const miss=[];
+  if(!$('#p1').checked)miss.push('내부 보고·서류 제출');
+  const p2=$('#p2').value;if(!p2)miss.push('구두 설명');else if(p2==='이행 불능')out.todo.push('설명하지 못한 사유(상황 악화 우려 등)를 EMR에 기록하세요(내규 제6조 제1항 제2호).');
+  if(!$('#p3').checked)miss.push('대체 진료기관 안내');
+  if(!$('#p4').checked)miss.push('EMR 기록(경위·설명·반응)');
+  if(!$('#p5').checked)miss.push('증거자료 확보');
+  if(miss.length)out.todo.unshift('보완할 절차: '+miss.join(', '));
+
+  // 간사 의견 제안
+  if(level==='no')out.op='용인 불능(반려)';
+  else if(level==='ok')out.op=urg==='fast'?'용인 가능(신속심의)':'용인 가능(통상회의)';
+  else out.op=(needInfo||title.includes('판단 필요'))?'결정 보류':(urg==='fast'?'용인 가능(신속심의)':'용인 가능(통상회의)');
+  if(urg==='post')out.todo.push('긴급히 먼저 조치한 경우 사후 심의를 요청하세요(내규 제6조 제1항 단서).');
+  if(urg==='fast')out.todo.push('신속 심의: 간사·위원장·위원장 지명 1인의 일치된 의견으로 결정(내규 제2조 제7항).');
+
+  out.level=level;out.title=title;return out;
+}
+function updateJudge(){
+  const type=jType();
+  const hasAct=REASONS[type].some(r=>jSel.has(r.n)&&r.v);
+  $('#critCard').classList.toggle('hide',!hasAct);
+  $('#procNo').textContent=hasAct?'5':'4';
+  $('#etcRow').classList.toggle('hide',!REASONS[type].some(r=>jSel.has(r.n)&&r.c==='etc'));
+  const o=judge();lastJudge=o;
+  const cls={ok:'v-ok',warn:'v-warn',no:'v-no',info:'v-info'}[o.level];
+  let h=`<div class="verdict ${cls}"><div class="big">${esc(o.title)}</div>`;
+  if(o.op)h+=`<div style="margin-top:4px;font-size:13px">간사 의견 제안 : <b>${esc(o.op)}</b>${o.scope?` · 향후 대처 제안 : <b>${esc(o.scope)}</b>`:''}</div>`;
+  h+='</div>';
+  if(o.score&&o.score.ans)h+=scoreHTML(o.score,'기준 답변');
+  const sec=(t,a)=>a.length?`<div class="res-sec"><h4>${t}</h4><ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'';
+  h+=sec('주의할 점',o.warn)+sec('해야 할 일',o.todo)+sec('검토 메모',o.why)+casesHTML(casesFor(type,[...jSel],radio('jFee')))+(jSel.size?simBlock(similarCases(type,[...jSel],'',curUid)):'')+sec('근거',[...new Set(o.basis)]);
+  $('#result').innerHTML=h;
+}
+$('#resetJudge').addEventListener('click',()=>{
+  jSel.clear();Object.keys(jCrit).forEach(k=>delete jCrit[k]);
+  setRadio('jType','med');setRadio('jStage','new');setRadio('jEmg','no');setRadio('jFee','no');setRadio('jUrg','normal');
+  ['p1','p3','p4','p5'].forEach(id=>$('#'+id).checked=false);$('#p2').value='';$('#p2b').value='';$('#jEtc').value='';
+  renderReasonTable();renderCrit();updateJudge();toast('초기화했습니다');
+});
+$('#toForm').addEventListener('click',()=>{
+  const type=jType(),o=lastJudge||judge();
+  setRadio('fType',type);renderFormReasons([...jSel]);
+  $('#fEtcReason').value=$('#jEtc').value;
+  if(o.op)setRadio('fOp',o.op);
+  if(o.scope)setRadio('fFuture',o.scope);
+  const memo=[`[판단 결과] ${o.title}`,...o.warn.map(x=>'· '+x),...o.todo.map(x=>'· '+x)];
+  if(o.score&&o.score.ans)memo.splice(1,0,`[행위 경중] ${o.score.s}점/${o.score.max}점(${o.score.ans}개 기준, ${confText()})`);
+  const c11=$('#c11');if(c11&&c11.value.trim())memo.push('[기타 고려] '+c11.value.trim());
+  $('#fOpMemo').value=memo.join('\n');
+  if($('#p1').checked)$('#fP1c').checked=true;
+  if($('#p2').value){setRadio('fP2',$('#p2').value);$('#fP2c').checked=true}
+  if($('#p2b').value){setRadio('fP2b',$('#p2b').value);$('#fP2bc').checked=true}
+  if($('#p3').checked)$('#fP3c').checked=true;
+  if($('#p4').checked)$('#fP4c').checked=true;
+  if(!$('#fP1').value)$('#fP1').value=type==='emg'?'원무팀 응급원무Unit':'원무팀 법무Unit';
+  if(!$('#fDate').value)$('#fDate').value=today();
+  fCrit={...jCrit};fJudge={stage:radio('jStage'),emg:radio('jEmg'),fee:radio('jFee'),urg:radio('jUrg'),title:o.title,level:o.level};
+  showTab('form');toast('판단 내용을 요청서로 옮겼습니다');
+});
+
+/* ================= ② 요청서 ================= */
+let curId=null,curUid=null,fCrit={},fJudge={};
+function fType(){return radio('fType')||'med'}
+function renderFormReasons(checked){
+  const type=fType(),list=REASONS[type];const set=new Set(checked||fReasons());
+  let h='<colgroup><col style="width:22%"><col style="width:48px"><col><col style="width:56px"></colgroup><tr><th>구분</th><th class="c">연번</th><th>'+(type==='emg'?'응급의료 거부 사유':'진료거부 사유')+'</th><th class="c">확인</th></tr>';
+  const cnt={};list.forEach(r=>cnt[r.g]=(cnt[r.g]||0)+1);const done={};
+  list.forEach(r=>{h+=`<tr class="${set.has(r.n)?'pick':''}">`;if(!done[r.g]){h+=`<td class="grp" rowspan="${cnt[r.g]}">${esc(r.g)}</td>`;done[r.g]=1}
+    h+=`<td class="c">${r.n}</td><td><label for="fr${r.n}" style="cursor:pointer;display:block">${esc(r.t)}</label></td><td class="c"><input type="checkbox" id="fr${r.n}" data-n="${r.n}" ${set.has(r.n)?'checked':''}></td></tr>`});
+  $('#fReasonTable').innerHTML=h;
+}
+function fReasons(){return $$('#fReasonTable input[type=checkbox]:checked').map(i=>+i.dataset.n)}
+$('#fReasonTable').addEventListener('change',e=>{const tr=e.target.closest('tr');if(tr)tr.classList.toggle('pick',e.target.checked)});
+$('#segFType').addEventListener('change',()=>{syncSeg();renderFormReasons([]);if(!curId)$('#fP1').value=fType()==='emg'?'원무팀 응급원무Unit':'원무팀 법무Unit'});
+const F_TEXT=['nTo','nDate','nScope','nTerm','nReason','nAlt','fDate','fTime','fRoleEtc','fDept','fReq','fTel','fClinic','fProf','fRegNo','fPt','fEtcReason','fStory','fEvidEtc','fOpMemo','fP1','fP3','fP4','fReact','fReactEtc','fReactTxt','fWardTxt','fDeptScopeTxt','fDocTxt','fMethodEtc','fEtcOp','fCDate','fNDate','fPutEtc','fDecReason','fSec','fChair'];
+const F_RADIO=['fRole','fRel','fOp','fP2','fP2b','fWard','fDeptScope','fFuture','fPut','fDec'];
+const F_CHECK=['fP1c','fP2c','fP2bc','fP3c','fP4c'];
+const F_MULTI=['fEvid','fScope','fMethod'];
+function collect(){
+  const d={id:curId,uid:curUid,type:fType(),reasons:fReasons(),crit:fCrit,judge:fJudge};
+  F_TEXT.forEach(k=>d[k]=$('#'+k).value.trim());
+  F_RADIO.forEach(k=>d[k]=radio(k));
+  F_CHECK.forEach(k=>d[k]=$('#'+k).checked);
+  F_MULTI.forEach(k=>d[k]=$$('#'+k+' input[type=checkbox]:checked').map(i=>i.value));
+  return d;
+}
+function fill(d){
+  curId=d.id||null;curUid=d.uid||null;setRadio('fType',d.type||'med');renderFormReasons(d.reasons||[]);
+  F_TEXT.forEach(k=>$('#'+k).value=d[k]||'');
+  F_RADIO.forEach(k=>setRadio(k,d[k]||''));
+  F_CHECK.forEach(k=>$('#'+k).checked=!!d[k]);
+  F_MULTI.forEach(k=>$$('#'+k+' input[type=checkbox]').forEach(i=>i.checked=(d[k]||[]).includes(i.value)));
+  fCrit=d.crit||{};fJudge=d.judge||{};
+  $('#caseIdView').textContent=curId?'접수번호 '+curId:'';
+}
+$('#newForm').addEventListener('click',()=>{if(!confirmNew())return;fill({type:fType(),fDate:today(),fP1:fType()==='emg'?'원무팀 응급원무Unit':'원무팀 법무Unit'});toast('새 요청서를 열었습니다')});
+function confirmNew(){return true}
+$('#saveForm').addEventListener('click',()=>{
+  const d=collect();if(!d.fPt&&!d.fRegNo){toast('환자 성명 또는 등록번호를 입력하세요');return}
+  if(!d.reasons.length&&!d.fEtcReason){toast('거부 사유를 하나 이상 표시하세요');return}
+  {const bad=$$('#t-form .dateIn,#t-form .timeIn').filter(el=>!markDT(el));if(bad.length){bad[0].focus();toast('날짜·시각이 올바르지 않은 칸이 있습니다. 빨간 칸을 고쳐 주세요');return}}
+  const db=loadDB();
+  if(!d.uid)d.uid=newUid();
+  if(!d.id){d.id=nextId(db,(d.fDate||today()).slice(0,4));d.created=new Date().toISOString()}
+  d.updated=new Date().toISOString();
+  const i=db.cases.findIndex(c=>ckey(c)===ckey(d));if(i>=0)db.cases[i]={...db.cases[i],...d};else db.cases.push(d);
+  saveDB(db);curId=d.id;curUid=d.uid;$('#caseIdView').textContent='접수번호 '+curId;toast('대장에 저장했습니다 ('+curId+')'+(shared.handle?' · 공유 대장 반영':''));
+});
+
+/* ---------- 인쇄용 서식 ---------- */
+const ck=(on,txt)=>`<span class="ck ${on?'on':''}">${esc(txt)}</span>`;
+function printHTML(d){
+  const type=d.type,list=REASONS[type],set=new Set(d.reasons||[]);
+  const isE=type==='emg';
+  const name=isE?'응급의료 거부 요청서':'진료거부 요청서';
+  const [Y,M,D]=(d.fDate||'').split('-');const [hh,mm]=(d.fTime||'').split(':');
+  let h=`<div class="pf"><div class="form-no">[서식 ${isE?2:1}호] ${name}</div><div class="ttl">${name}</div>`;
+  h+=`<div class="contact">문의처 : ${esc(S().ct.law)}${isE?' / '+esc(S().ct.emg):''}</div>`;
+  h+=`<h5>□ 관련정보(요청 일시 : ${Y||'&nbsp;&nbsp;&nbsp;&nbsp;'}. ${M||'&nbsp;&nbsp;'}. ${D||'&nbsp;&nbsp;'}. ${hh||'&nbsp;&nbsp;'} : ${mm||'&nbsp;&nbsp;'})</h5>`;
+  h+=`<div class="two"><table><colgroup><col style="width:30%"><col style="width:6%"><col></colgroup>
+   <tr><th colspan="3">요청자 ( ${ck(d.fRole==='의료인','의료인')}, ${ck(d.fRole==='의료기사','의료기사')}, ${ck(d.fRole==='기타','기타')} )</th></tr>
+   <tr><td class="c">부서명</td><td class="c">:</td><td>${esc(d.fDept)}</td></tr>
+   <tr><td class="c">요청자</td><td class="c">:</td><td>${esc(d.fReq)}</td></tr>
+   <tr><td class="c">연락처</td><td class="c">:</td><td>${esc(d.fTel)}</td></tr></table>
+   <table><colgroup><col style="width:30%"><col style="width:6%"><col></colgroup>
+   <tr><th colspan="3">대상자 (관련자 ${ck(d.fRel==='환자','환자')} / ${ck(d.fRel==='보호자','보호자')})</th></tr>
+   <tr><td class="c">진료정보</td><td class="c">:</td><td>${esc(d.fClinic)} 과 &nbsp; ${esc(d.fProf)} 교수</td></tr>
+   <tr><td class="c">등록 번호</td><td class="c">:</td><td>${esc(d.fRegNo)}</td></tr>
+   <tr><td class="c">환자 성명</td><td class="c">:</td><td>${esc(d.fPt)}</td></tr></table></div>`;
+  h+=`<div class="line" style="margin-top:4px">&nbsp;&nbsp;[신분이 기타인 경우 : ${esc(d.fRoleEtc)} ]</div>`;
+  h+=`<div class="line">상기 요청자는 상기 대상자에 대하여 아래와 같은 사유로 ${isE?'응급의료 거부':'진료거부'}를 요청하오니 진료거부심의위원회에서 심의하여 처리하여 주시기 바랍니다.</div>`;
+  h+=`<h5>□ 관련정보(중복 표기 가능 / 증거자료 중복 제출 가능)</h5><table><colgroup><col style="width:20%"><col style="width:7%"><col><col style="width:8%"></colgroup><tr><th>구분</th><th>연번</th><th>${isE?'응급의료 거부 사유':'진료거부 사유'}</th><th>확인</th></tr>`;
+  const cnt={};list.forEach(r=>cnt[r.g]=(cnt[r.g]||0)+1);const done={};
+  list.forEach(r=>{h+='<tr>';if(!done[r.g]){h+=`<td class="c" rowspan="${cnt[r.g]}">${esc(r.g)}</td>`;done[r.g]=1}h+=`<td class="c">${r.n}</td><td>${esc(r.t)}${r.c==='etc'&&d.fEtcReason?` (${esc(d.fEtcReason)})`:''}</td><td class="c">${set.has(r.n)?'■':'□'}</td></tr>`});
+  h+='</table>';
+  const ev=d.fEvid||[];
+  h+=`<div class="line">▷ 증거자료 - ${['의무기록','CCTV','보안업무일지','진술서(피해자, 참고인)'].map(x=>ck(ev.includes(x),x)).join(' / ')} ${ck(ev.includes('기타'),'기타')} ( ${esc(d.fEvidEtc)} )</div>`;
+  if(d.fStory)h+=`<div class="line"><b>※ 사건 경위</b></div><div class="box">${esc(d.fStory)}</div>`;
+  h+=`<h5>□ 확인사항</h5><div class="line"><b>Ⅰ. ${isE?'응급의료 거부':'진료거부'} 사유의 확인 :</b></div>
+   <div class="line">&nbsp;&nbsp;간사는 ${isE?'응급의료법':'의료법'} 및 산업안전보건법의 취지에 따라 위 사례에 대하여 다음과 같이 의견을 개진함.</div>
+   <div class="line">간사의 의견 : [${['용인 가능(통상회의)','용인 가능(신속심의)','결정 보류','용인 불능(반려)'].map(x=>ck(d.fOp===x,x)).join(' / ')}]</div>`;
+  if(d.fOpMemo)h+=`<div class="box">${esc(d.fOpMemo)}</div>`;
+  h+=`<div class="line" style="margin-top:6px"><b>Ⅱ. 진료거부 절차의 확인</b></div><div class="line">&nbsp;&nbsp;1. 절차 확인</div>
+   <table><colgroup><col style="width:7%"><col style="width:36%"><col><col style="width:8%"></colgroup>
+   <tr><th>순서</th><th>절차 항목</th><th>제출처 등 정보</th><th>확인</th></tr>
+   <tr><td class="c">1</td><td>${isE?'응급의료거부':'진료거부'} 사유 판단 후 서류 제출 여부</td><td>${ck(!!d.fP1,'제출처')} (${esc(d.fP1)})</td><td class="c">${d.fP1c?'■':'□'}</td></tr>
+   <tr><td class="c">2</td><td>진료거부에 대해 대상자에게 구두 설명</td><td>${['이행','이행 불능','생략요청'].map(x=>ck(d.fP2===x,x)).join(' / ')}</td><td class="c">${d.fP2c?'■':'□'}</td></tr>
+   <tr><td class="c"></td><td>└ 위 설명시 서면 교부 여부</td><td>${['교부','미교부','생략요청'].map(x=>ck(d.fP2b===x,x)).join(' / ')}</td><td class="c">${d.fP2bc?'■':'□'}</td></tr>
+   <tr><td class="c">3</td><td>대체 진료기관 안내</td><td>${ck(!!d.fP3,'대상병원')} (${esc(d.fP3)})</td><td class="c">${d.fP3c?'■':'□'}</td></tr>
+   <tr><td class="c">4</td><td>전자의무기록(EMR)에 기록 완료</td><td>${ck(!!d.fP4,'기록명')} (${esc(d.fP4)})</td><td class="c">${d.fP4c?'■':'□'}</td></tr></table>`;
+  const R=d.fReact||'';
+  const rr=(t)=>R.endsWith(t)?'■':'□';
+  h+=`<div class="line" style="margin-top:6px">&nbsp;&nbsp;2. 대상자의 반응</div><table><colgroup><col style="width:7%"><col style="width:16%"><col style="width:34%"><col></colgroup>
+   <tr><th>순서</th><th>반응 수준</th><th>반응 정도</th><th>구체적인 내용(언행)</th></tr>
+   <tr><td class="c" rowspan="2">1</td><td rowspan="2">${ck(R.startsWith('수용'),'수용')}</td><td>${rr('안내받은 대로 이동함')} 안내받은 대로 이동함</td><td rowspan="5">${esc(d.fReactTxt)}</td></tr>
+   <tr><td>${rr('반발은 있으나 대체로 수용함')} 반발은 있으나 대체로 수용함</td></tr>
+   <tr><td class="c" rowspan="3">2</td><td rowspan="3">${ck(R.startsWith('불수용'),'불수용')}</td><td>${rr('강하게 반발함')} 강하게 반발함</td></tr>
+   <tr><td>${rr('외부기관에 조치하겠다고 함')} 외부기관에 조치하겠다고 함</td></tr>
+   <tr><td>${rr('설명을 거부함')} 설명을 거부함</td></tr>
+   <tr><td class="c">3</td><td colspan="3">${ck(R==='기타','기타')} ( ${esc(d.fReactEtc)} )</td></tr></table>`;
+  const sc=d.fScope||[],me=d.fMethod||[];
+  h+=`<div class="line" style="margin-top:6px"><b>Ⅲ. 요청사항</b></div>
+   <div class="line">&nbsp;&nbsp;1. 거부 범위 : ${ck(sc.includes('전체'),'전체')} / ${ck(sc.includes('외래'),'외래')} / ${ck(sc.includes('응급실'),'응급실')} / ${ck(sc.includes('입원'),'입원')} (${ck(d.fWard==='전체','전체')} / ${ck(d.fWard==='특정병동','특정병동')} : ${esc(d.fWardTxt)} )</div>
+   <div class="line">&nbsp;&nbsp;2. 거부 과목 : ${ck(d.fDeptScope==='병원 전체','병원 전체')} / ${ck(d.fDeptScope==='특정 임상과','특정 임상과')} ( ${esc(d.fDeptScopeTxt)} ) / ${ck(d.fDeptScope==='특정 의사','특정 의사')} ( ${esc(d.fDocTxt)} )</div>
+   <div class="line">&nbsp;&nbsp;3. 향후 대처 : ${ck(d.fFuture==='향후에도 진료거부','향후에도 진료거부')} / ${ck(d.fFuture==='이번만 진료거부','이번만 진료거부')}</div>
+   <div class="line">&nbsp;&nbsp;4. 대처 방법 : ${['입원 거부','외래 예약 거부(취소)','전화 차단'].map(x=>ck(me.includes(x),x)).join(' / ')} / ${ck(me.includes('기타'),'기타')} ( ${esc(d.fMethodEtc)} )</div>
+   <div class="line">&nbsp;&nbsp;5. 기타 의견 : ${esc(d.fEtcOp)}</div>`;
+  const [cy,cm,cd]=(d.fCDate||'').split('-');
+  h+=`<h5>□ 결정사항(심의일자 : ${cy||'&nbsp;&nbsp;&nbsp;&nbsp;'}. ${cm||'&nbsp;&nbsp;'}. ${cd||'&nbsp;&nbsp;'}.)</h5>
+   <div class="line"><b>Ⅳ. 위원회 상정 :</b> ${['상정','신속 심의','반려'].map(x=>ck(d.fPut===x,x)).join(' / ')} / ${ck(d.fPut==='기타','기타')}( ${esc(d.fPutEtc)} )</div>
+   <div class="line"><b>Ⅴ. 결정사항(결론) :</b> ${['요청대로 결정','일부 요청사항 변경','보류','부결','기타'].map(x=>ck(d.fDec===x,x)).join(' / ')}</div>
+   <table style="margin-top:4px"><colgroup><col style="width:14%"><col style="width:4%"><col><col style="width:14%"><col style="width:4%"><col style="width:24%"></colgroup>
+   <tr><td class="c">사 유</td><td class="c">:</td><td colspan="4">${esc(d.fDecReason)}</td></tr>
+   <tr><td class="c">간사</td><td class="c">:</td><td>${esc(d.fSec)} &nbsp;&nbsp;(서명)</td><td class="c">통지일자</td><td class="c">:</td><td>${dot(d.fNDate)}</td></tr>
+   <tr><td class="c">소위원장</td><td class="c">:</td><td colspan="4">${esc(d.fChair)} &nbsp;&nbsp;(서명)</td></tr></table>
+   <div class="sig">진료거부심의위원회 위원장 귀중</div></div>`;
+  return h;
+}
+$('#printForm').addEventListener('click',()=>{$('#printArea').innerHTML=printHTML(collect());window.print()});
+
+/* ================= ③ 사례 대장 ================= */
+function half(d){if(!d)return '';return +d.slice(5,7)<=6?'1':'2'}
+function reasonLabel(c){return (c.reasons||[]).map(n=>(c.type==='emg'?'응':'')+n).join(', ')}
+function filtered(){
+  const db=loadDB(),y=$('#lYear').value,hf=$('#lHalf').value,tp=$('#lType').value,q=$('#lQ').value.trim();
+  return db.cases.filter(c=>!c.deleted&&(!y||(c.fDate||'').startsWith(y))&&(!hf||half(c.fDate)===hf)&&(!tp||c.type===tp)&&(!q||[c.fPt,c.fRegNo,c.fDept,c.fClinic,c.fReq].join(' ').includes(q)))
+   .sort((a,b)=>(b.fDate||'').localeCompare(a.fDate||'')||(b.id||'').localeCompare(a.id||''));
+}
+function renderLedger(){
+  const db=loadDB();const years=[...new Set(db.cases.map(c=>(c.fDate||'').slice(0,4)).filter(Boolean))].sort().reverse();
+  const cy=String(new Date().getFullYear());if(!years.includes(cy))years.unshift(cy);
+  const ys=$('#lYear');const sel=ys.dataset.init?ys.value:cy;
+  ys.innerHTML='<option value="">전체</option>'+years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  ys.value=sel;ys.dataset.init=1;
+  const L=filtered();
+  const cntDec=v=>L.filter(c=>c.fDec===v).length;
+  $('#lStat').innerHTML=`<div><b>${L.length}</b><span>전체 건수</span></div><div><b>${L.filter(c=>c.type==='med').length} / ${L.filter(c=>c.type==='emg').length}</b><span>일반 진료 / 응급의료</span></div><div><b>${cntDec('요청대로 결정')+cntDec('일부 요청사항 변경')}</b><span>거부 인정(전부·일부)</span></div><div><b>${L.filter(c=>!c.fDec).length}</b><span>결정 대기</span></div>`;
+  let h='<colgroup><col style="width:82px"><col style="width:92px"><col style="width:66px"><col style="width:90px"><col style="width:96px"><col style="width:130px"><col><col style="width:160px"><col style="width:130px"><col style="width:120px"></colgroup>';
+  h+='<tr><th class="c">접수번호</th><th class="c">요청일</th><th class="c">구분</th><th class="c">환자</th><th class="c">등록번호</th><th class="c">요청 부서</th><th>사유(서식 연번)</th><th class="c">간사 의견</th><th class="c">결정</th><th class="c">관리</th></tr>';
+  if(!L.length)h+='<tr><td colspan="10" class="c hint" style="padding:22px">저장된 사례가 없습니다. ③ 요청서 작성에서 "대장에 저장"을 누르세요.</td></tr>';
+  L.forEach(c=>{h+=`<tr><td class="c">${esc(c.id)}</td><td class="c">${esc(c.fDate)}</td><td class="c">${c.type==='emg'?'응급':'일반'}</td><td class="c">${esc(c.fPt)}</td><td class="c">${esc(c.fRegNo)}</td><td class="c">${esc(c.fDept)}</td><td>${esc(reasonLabel(c))}</td><td class="c">${esc(c.fOp||'-')}</td><td class="c">${esc(c.fDec||'대기')}</td><td class="c"><button class="btn sec sm" data-open="${esc(ckey(c))}">열기</button> <button class="btn red sm" data-del="${esc(ckey(c))}">삭제</button></td></tr>`});
+  $('#lTable').innerHTML=h;
+}
+['lYear','lHalf','lType'].forEach(id=>$('#'+id).addEventListener('change',renderLedger));$('#lQ').addEventListener('input',renderLedger);
+$('#lTable').addEventListener('click',e=>{
+  const o=e.target.dataset.open,d=e.target.dataset.del;const db=loadDB();
+  if(o){const c=db.cases.find(x=>!x.deleted&&ckey(x)===o);if(c){fill(c);showTab('form')}}
+  if(d){const i=db.cases.findIndex(x=>!x.deleted&&ckey(x)===d);if(i<0)return;if(!confirm(`${db.cases[i].id} 사례를 삭제할까요?`))return;db.cases[i]={id:db.cases[i].id,uid:db.cases[i].uid,deleted:true,updated:new Date().toISOString()};saveDB(db);renderLedger();toast('삭제했습니다')}
+});
+function download(name,text,mime){const b=new Blob([text],{type:mime});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+$('#lCsv').addEventListener('click',()=>{
+  const L=filtered();const head=['접수번호','요청일','구분','요청자 신분','요청 부서','요청자','관련자','진료과','담당교수','등록번호','환자','사유(연번)','기타 사유','증거자료','간사 의견','구두 설명','대체기관','대상자 반응','거부 범위','향후 대처','대처 방법','상정','결정','심의일','통지일'];
+  const rows=L.map(c=>[c.id,c.fDate,c.type==='emg'?'응급의료':'일반 진료',c.fRole,c.fDept,c.fReq,c.fRel,c.fClinic,c.fProf,c.fRegNo,c.fPt,reasonLabel(c),c.fEtcReason,(c.fEvid||[]).join('/'),c.fOp,c.fP2,c.fP3,c.fReact,(c.fScope||[]).join('/'),c.fFuture,(c.fMethod||[]).join('/'),c.fPut,c.fDec,c.fCDate,c.fNDate]);
+  const csv=[head,...rows].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  download('진료거부_사례대장_'+today()+'.csv','﻿'+csv,'text/csv;charset=utf-8');
+});
+$('#lBackup').addEventListener('click',()=>download('진료거부_사례대장_백업_'+today()+'.json',JSON.stringify(loadDB(),null,1),'application/json'));
+$('#lRestore').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const inc=JSON.parse(r.result);if(!inc.cases)throw 0;const before=loadDB();const m=mergeDB(before,inc);
+    const add=m.cases.length-before.cases.length;saveDB(m);renderLedger();toast(`불러왔습니다 (새 사례 ${Math.max(0,add)}건, 나머지는 최신 내용으로 맞춤)`)}catch(err){toast('백업 파일 형식이 맞지 않습니다')}};
+  r.readAsText(f,'utf-8');e.target.value='';
+});
+$('#lReport').addEventListener('click',()=>{
+  const y=$('#lYear').value||'전체',hf=$('#lHalf').value;const L=filtered().slice().reverse();
+  const period=`${y}${y==='전체'?'':'년'} ${hf==='1'?'상반기':hf==='2'?'하반기':'전체'}`;
+  const by=(f)=>{const m={};L.forEach(c=>{const k=f(c)||'미기재';m[k]=(m[k]||0)+1});return m};
+  const rc={};L.forEach(c=>(c.reasons||[]).forEach(n=>{const r=REASONS[c.type].find(x=>x.n===n);if(r){const k=`${c.type==='emg'?'[응급]':'[일반]'} ${r.n}. ${r.t}`;rc[k]=(rc[k]||0)+1}}));
+  const tbl=(t,m)=>`<h5>${t}</h5><table><colgroup><col><col style="width:16%"></colgroup><tr><th>항목</th><th>건수</th></tr>${Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="c">${v}</td></tr>`).join('')||'<tr><td colspan="2" class="c">해당 없음</td></tr>'}</table>`;
+  let h=`<div class="pf"><div class="ttl" style="font-size:15pt;letter-spacing:1px">진료거부 사례 반기 검토 보고</div><div class="contact">대상 기간 : ${esc(period)} · 작성일 : ${dot(today())} · 원무팀 법무Unit</div>`;
+  h+=`<div class="line">내규 제6조 제3항(반기별 사후 검토) 및 제9조 제2항(반기별 병원장 보고)에 따른 자료입니다. 총 <b>${L.length}건</b>(일반 진료 ${L.filter(c=>c.type==='med').length}건 · 응급의료 ${L.filter(c=>c.type==='emg').length}건).</div>`;
+  h+=tbl('1. 결정 결과',by(c=>c.fDec||'결정 대기'))+tbl('2. 거부 사유별(중복 집계)',rc)+tbl('3. 요청 부서별',by(c=>c.fDept))+tbl('4. 대상자 반응',by(c=>c.fReact));
+  h+=`<h5>5. 사례 목록</h5><table><colgroup><col style="width:11%"><col style="width:12%"><col style="width:8%"><col style="width:13%"><col><col style="width:15%"></colgroup><tr><th>접수번호</th><th>요청일</th><th>구분</th><th>요청 부서</th><th>사유(연번)</th><th>결정</th></tr>`+
+    (L.map(c=>`<tr><td class="c">${esc(c.id)}</td><td class="c">${esc(c.fDate)}</td><td class="c">${c.type==='emg'?'응급':'일반'}</td><td class="c">${esc(c.fDept)}</td><td>${esc(reasonLabel(c))}</td><td class="c">${esc(c.fDec||'대기')}</td></tr>`).join('')||'<tr><td colspan="6" class="c">해당 없음</td></tr>')+'</table>';
+  h+=`<div class="line" style="margin-top:6px;font-size:9pt">※ 환자 개인정보는 목록에서 제외했습니다. 위원회 의사는 비공개(내규 제9조 제1항).</div></div>`;
+  if(y!=='전체'&&hf){const st=S();st.reports[y+'-'+hf]=today();putS(st)}
+  printWith(h,false);
+});
+
+/* ================= ⓪ 사례 분석 ================= */
+const SAMPLES=[
+ '2026. 11. 10. 정형외과 외래에서 환자 본인이 대기시간이 길다며 간호사에게 욕설을 하고 멱살을 잡아 밀쳤음. 간호사는 경추 염좌로 전치 2주 진단을 받았고 112에 신고하여 경찰이 출동함. 환자는 지난달에도 같은 이유로 소리를 지르며 난동을 부린 적이 있으며, 사과를 거부하고 다음에 오면 가만두지 않겠다고 협박함. 대기실 다른 환자들 앞에서 벌어진 일이며 CCTV와 피해자 진술서를 확보함. 환자 상태는 만성 요통으로 응급상황은 아님. 담당 교수가 진료거부 사유를 설명하고 인근 병원을 안내했으며 EMR에 기록함.',
+ '응급실에 술에 취한 상태로 내원한 환자(KTAS 3)가 수액 처치 중 의료진에게 욕설하며 의료기기를 던져 모니터가 파손됨. 보안요원이 제지하고 112에 신고함. 환자는 처치 거부 의사를 밝히고 계속 소리를 지르는 중이며 보호자는 연락되지 않음.',
+ '신경외과 병동 장기입원 환자로 급성기 치료가 종결되어 주치의가 상급종합병원 수준의 입원치료가 불필요하다는 소견서를 작성함. 3개월간 수차례 요양병원 전원을 권유하고 퇴원을 지시했으나 보호자가 거부함. 보호자는 의료진 지시 없이 L-tube로 한약을 넣기도 함. 퇴원 권유 내용은 EMR에 기록되어 있음.',
+ '내과 외래 환자가 지난 진료비 약 80만원을 6개월째 미납하고 있어 담당 부서에서 다음 예약을 취소하고 진료를 받지 못하게 해 달라고 요청함. 그 밖에 폭언 등 다른 문제는 없었음.'
+];
+// 사유별 문구 규칙
+const RULES={
+ med:{
+  1:['의사가? ?부재','학회','휴가 ?중','병가','의사가 ?아파','진료할 의사가 없'],
+  2:['병상이? ?(부족|없)','병실이? ?(부족|없)','만실','장비(가)? ?고장','약품이? ?(없|부족)','치료재료가? ?(없|부족)'],
+  3:['예약 ?환자','예약이? ?(꽉|마감|다 찼)','당일 ?(진료|접수)(가)? ?불가'],
+  4:['(의료)?인력(이)? ?부족','인원이? ?부족','신규 환자를? ?(받을 수 없|못 받)'],
+  5:['전문과목','다른 과','해당 ?과(가)? ?아니','진료 범위(를)? ?(벗어|밖)'],
+  6:['고난이도','고난도','경험이? ?(없|부족)','전문지식이? ?부족'],
+  7:['타 ?(병원|기관)에서 (수술|시술)','다른 병원에서 (수술|시술)','수술 기록이? ?없','타원 (수술|시술)'],
+  8:['치료(방침)?를? ?거부','치료에 ?동의하지 ?않','민간요법','비의학적','비윤리적','한약','대체요법','검증되지 않은 치료'],
+  9:['욕설','폭언','폭행','때리','때렸','밀쳤','밀치','멱살','협박','위협','성추행','추행','모욕','명예훼손','난동','소리를 ?지르','침을 ?뱉','주먹','발로 ?(차|찼)'],
+  10:['과거에도','이전에도','지난(달|번|해)에도','전에도','또 (올|와서)','재발 ?우려','위해(가)? 우려'],
+  11:['마약','마약성','펜타닐','옥시코돈','졸피뎀','향정','진통제를? ?(더 )?(달라|요구)','수면제를? ?(달라|요구)'],
+  12:['급성기 ?치료(가)? ?(종결|끝)','입원(치료)?(가|이)? ?(불필요|필요 없)','상급종합병원 수준의 입원','치료(가)? ?종결','더 이상의? ?(입원|치료)'],
+  13:['요양병원','요양시설','가정요양','전원(을)? ?권유','퇴원(을)? ?(권유|지시|요구|요청)','퇴원을 거부','장기 ?입원'],
+  14:['낙태','인공임신중절','임신중절','안락사','조력 ?(사|자살|존엄사)'],
+  15:['연명의료(의)? ?(중단|유보)','연명의료결정','인공호흡기(를)? ?(제거|중단)'],
+  16:[]
+ },
+ emg:{
+  1:['고난이도','고난도','전문의(가)? ?없','수술(이)? ?(불가|어렵)','최종 ?진료(가)? ?(불가|어렵)'],
+  2:['병상이? ?(부족|없)','병실이? ?(부족|없)','만실','인력(이)? ?부족','장비(가)? ?(고장|부족)','약품이? ?(없|부족)'],
+  3:['타 ?(병원|기관)에서 (수술|시술)','다른 병원에서 (수술|시술)','정보(가)? ?부족'],
+  4:['정전','전력','통신 ?(마비|장애)','화재','붕괴','재난'],
+  5:['수용(이)? ?(불가|곤란)','가용','응급의료자원','포화','과밀'],
+  6:['폭행','때리','때렸','밀쳤','밀치','멱살','협박','위협','위력','진료를? ?방해','처치를? ?방해','주먹','발로 ?(차|찼)'],
+  7:['파손','부수','부쉈','던져','던지','기물','점거','깨뜨','깨졌'],
+  8:['욕설','폭언','모욕','명예훼손','업무방해','난동','소리를 ?지르','성추행','추행'],
+  9:['치료(방침)?를? ?거부','처치 ?거부','치료에 ?동의하지 ?않','양심','전문지식에 반하'],
+  10:['검사를? ?(해 ?달라|요구|고집)','(CT|MRI|씨티)를? ?(찍어|요구)','마약','마약성','진통제를? ?(더 )?(달라|요구)','펜타닐'],
+  11:['비응급','경증','KTAS ?[45]','감기','설사','장염','외래(로)? ?(방문|진료)(을)? ?권유'],
+  12:[]
+ }
+};
+const NEGAFTER=/^\s*(은|는|이|가|도|을|를)?\s*(없|않|아니|아님)|^\s*(하)?지(는|도|를)?\s*(않|못)|^\s*(으)?려다\s*(말|그만|멈)|^\s*(할|하려다|하려고)?\s*뻔/;
+const NEGCLAUSE=/(문제|일|사실|행위|적)?(은|는|이|가)?\s*없(었|음|다|어서|으며|고|이)|않았|아니(었|다|며)|아님|사실무근/;
+function findHit(text,pats,ex){
+  for(const p of pats){const re=new RegExp(p,'gi');let m;
+    while((m=re.exec(text))){const end=m.index+m[0].length;
+      if(ex&&ex.length&&ex.some(w=>w&&m[0].includes(w))){if(re.lastIndex===m.index)re.lastIndex++;continue}
+      const tail=text.slice(end,end+18).split(/[.,。;\n]/)[0];
+      if(!NEGAFTER.test(tail)&&!NEGCLAUSE.test(tail))return {s:m.index,e:end,w:m[0]};
+      if(re.lastIndex===m.index)re.lastIndex++;}}
+  return null;
+}
+function ctx(text,h){if(!h)return '';const a=Math.max(0,h.s-12),b=Math.min(text.length,h.e+12);return (a>0?'…':'')+text.slice(a,b)+(b<text.length?'…':'')}
+let caseLast=null;
+function analyzeCase(text){
+  const r={hits:[],facts:[],reasons:[],crit:{},proc:{},evid:[]};
+  const H=(label,val,h,kind)=>{r.facts.push({label,val,h,kind});if(h)r.hits.push({...h,kind:kind||'f'})};
+  // 1) 적용 법률
+  const hE=findHit(text,['응급실','응급환자','응급의료','119','구급차','구급대','KTAS','권역응급','응급센터']);
+  r.type=hE?'emg':'med';H('적용 법률',hE?'응급의료 (응급의료법 제6조, 서식 2호)':'일반 진료 (의료법 제15조, 서식 1호)',hE);
+  // 2) 응급 여부
+  let hY=findHit(text,['KTAS ?[123]','심정지','의식 ?(저하|소실|없)','쇼크','호흡곤란','대량 ?출혈','중증 ?응급','생명이 ?위급','응급상황']),
+      hN=findHit(text,['KTAS ?[45]','비응급','경증','응급(상황)?(은|이)? ?아님','응급(상황)?(이|은|에)? ?(해당하지 않|아니)','만성','감기','설사','외래 ?(진료|방문)']);
+  // "응급상황은 아님" 처리: 부정형이 있으면 아님 우선
+  if(hY&&hN&&/응급상황/.test(hY.w)&&hN)hY=null;
+  r.emg=hY?'yes':hN?'no':(r.type==='emg'?'unk':'no');
+  H(r.type==='emg'?'응급환자 여부':'응급상황 여부',{yes:'응급(상황)으로 보임',no:'응급 아님으로 보임',unk:'문장에서 확인 안 됨 — 의사 판단 필요'}[r.emg],hY||hN);
+  // 3) 진료 단계
+  const hI=findHit(text,['입원 ?중','장기 ?입원','병동','퇴원(을)? ?(권유|지시|요구|요청|거부)','병실']),hO=findHit(text,['치료 ?중','처치 ?중','진료 ?중','수술 ?후']);
+  r.stage=hI?'inpt':hO?'ongoing':'new';H('진료 단계',{inpt:'입원 중(퇴원 요구)',ongoing:'진료 중(중단)',new:'새 진료 요청'}[r.stage],hI||hO);
+  // 4) 사유
+  const R=RULES[r.type],DICT=S().dict;
+  Object.keys(R).forEach(n=>{const key=r.type+':'+n;const pats=R[n].concat((DICT.add[key]||[]).map(escRe));const h=findHit(text,pats,DICT.ex[key]||[]);if(h){r.reasons.push(+n);r.hits.push({...h,kind:'r'});r.facts.push({label:'거부 사유 ['+n+']',val:REASONS[r.type].find(x=>x.n==n).t,h,kind:'r'})}});
+  // 일반 진료에서 폭력 사유 + 과거 사유 동시: 10은 과거 문구가 있을 때만 유지
+  if(r.type==='med'&&r.reasons.includes(10)&&!r.reasons.includes(9)&&!findHit(text,['폭','욕','협박','위협','난동']))r.reasons=r.reasons.filter(x=>x!==10);
+  // 13은 퇴원 맥락일 때만, 12와 함께 판단
+  // 5) 진료비
+  const hF=findHit(text,['진료비','미납','체납','미수','수납(을)? ?(안|하지 않)','병원비']);
+  const otherReason=r.reasons.length>0;
+  r.fee=hF?(otherReason?'part':'main'):'no';H('진료비 미수·체납',{no:'거부 이유 아님',part:'이유 중 하나로 섞여 있음',main:'주된 이유로 보임'}[r.fee],hF);
+  // 6) 긴급성
+  const hU=findHit(text,['계속 ?(소리|난동|위협)','지금도','현재도','당장','오늘 다시','재방문 ?예정','내일 ?(외래|예약)']),hP=findHit(text,['이미 ?(진료를 )?(거부|취소|퇴실)','퇴실 ?조치','귀가 ?조치']);
+  r.urg=hP?'post':hU?'fast':'normal';H('긴급성',{normal:'통상 회의로 충분',fast:'즉시 조치 필요(신속 심의)',post:'이미 조치함(사후 심의)'}[r.urg],hU||hP);
+  // 7) 제3조④ 기준 (행위 사유일 때)
+  const actN=r.reasons.some(n=>REASONS[r.type].find(x=>x.n===n).v);
+  if(actN){
+    const C=(k,v,h,label)=>{r.crit[k]=v;const c=CRITS.find(x=>x.k===k);const o=c.o.find(x=>x[0]===v);r.facts.push({label:'경중 '+(CRITS.indexOf(c)+1)+'. '+c.t,val:o[1],h,kind:'c'});if(h)r.hits.push({...h,kind:'c'})};
+    const sub=actorOf(text);C('c1',sub.v,sub.h);
+    const sv=findHit(text,['흉기','칼','가위','둔기','골절','목을 ?조르','의식을 ?잃','잔혹']),md=findHit(text,['폭행','때리','때렸','밀쳤','밀치','멱살','던져','던지','파손','주먹','발로 ?(차|찼)','성추행','추행']);
+    C('c2',sv?'severe':md?'mid':'light',sv||md||findHit(text,['욕설','폭언','모욕','난동']));
+    const bd=findHit(text,['상해','부상','타박','골절','염좌','멍','출혈','다쳤','맞았','진단(서)?를? ?받','전치']),pr=findHit(text,['파손','부서지','부서졌','부쉈','깨졌','깨뜨','기물']);
+    C('c3',bd&&pr?'both':bd?'body':pr?'prop':'none',bd||pr);
+    const gr=findHit(text,['골절','입원 ?치료','수술','중상','전치 ?([3-9]|\\d{2}) ?주']),tr=findHit(text,['치료','전치 ?[12] ?주','진단(서)?를? ?받','진료를 받']),mn=findHit(text,['경상','멍','타박']);
+    C('c4',!bd?'na':gr?'grave':tr?'treat':'minor',bd?(gr||tr||mn):null);
+    const su=findHit(text,['고소']),rp=findHit(text,['112','경찰','신고','수사']);
+    C('c5',su?'sue':rp?'report':'none',su||rp);
+    const mi=findHit(text,['섬망','치매','의식 ?(저하|혼탁)','정신질환','조현','인지 ?저하','극심한 ?통증','의료사고','의료과실','분쟁 ?중']),bl=findHit(text,['보복','앙심','합의금','금품','돈을 ?요구','보상(금)?을? ?요구']);
+    C('c6',mi?'mitig':bl?'blame':'none',mi||bl);
+    const pl=findHit(text,['미리','계획','준비해','찾아와','기다렸','작정']),ac=findHit(text,['순간','우발','갑자기','흥분']);
+    C('c7',pl&&!ac?'plan':'acc',pl&&!ac?pl:ac);
+    const rp2=findHit(text,['수차례','여러 ?(번|차례)','반복','매번','또다시','다시 ?와서','계속해서','지속적','[2-9] ?회','지난(달|번|해)에도','이전에도','과거에도','전에도']);
+    C('c8',rp2?'repeat':'once',rp2);
+    const nr=findHit(text,['사과(를|도)? ?거부','사과하지 ?않','반성(이|하는 기색)?(이)? ?없','오히려','적반하장','가만(두지|히 안)','또 (하겠|오겠|그러겠)','협박']),yr=findHit(text,['사과(했|함|하였)','반성','재발 ?방지','각서','다시는 ?(안|그러지)']);
+    C('c9',nr?'no':yr?'yes':'none',nr||yr);
+    const sp=findHit(text,['SNS','유튜브','인터넷','커뮤니티','게시','맘카페','블로그','다른 환자(들)? 앞','대기실','방송','촬영(해|하여|하며)']);
+    C('c10',sp?'yes':'no',sp);
+    if(findHit(text,['술에 ?취','주취','만취','음주']))r.drunk=true;
+  }
+  // 8) 절차·증거
+  r.proc.p1=findHit(text,['보고(했|함|하였)','법무','원무팀에 ?(알|보고)','서류(를)? ?제출']);
+  const ex=findHit(text,['설명(했|함|하였|하고)','안내(했|함|하였)하?','고지(했|함)']),exNo=findHit(text,['설명(하지|을 하지) ?못','설명할 수 없']);
+  r.proc.p2=exNo?'이행 불능':ex?'이행':'';
+  r.proc.p2b=findHit(text,['통지서','서면(으로)?','문서(로|를)'])?'교부':'';
+  r.proc.p3=findHit(text,['(인근|다른|타) ?(병원|의료기관|기관)(을|를|으로)? ?(안내|소개|연계|권유)','전원(을)? ?(안내|권유)','요양병원(을)? ?(안내|권유)','병원을 안내']);
+  r.proc.p4=findHit(text,['EMR','의무기록에','차트에','기록(했|함|하였|되어)']);
+  ['CCTV','보안업무일지|보안일지|보안요원','진술서','의무기록|EMR|소견서'].forEach((p,i)=>{const h=findHit(text,p.split('|'));if(h)r.evid.push(['CCTV','보안업무일지','진술서(피해자, 참고인)','의무기록'][i])});
+  r.proc.p5=r.evid.length>0;
+  return r;
+}
+// 폭력 행위 바로 앞(같은 문장)에서 가장 가까운 행위 주체를 찾음
+function actorOf(text){
+  const vH=findHit(text,['폭행','때리','때렸','밀쳤','밀치','멱살','욕설','폭언','협박','위협','난동','소리를 ?지르','던져','던지','파손','추행','주먹','모욕','침을 ?뱉','발로 ?(차|찼)']);
+  if(vH){
+    const seg=text.slice(Math.max(0,vH.s-60),vH.s);const cut=Math.max(seg.lastIndexOf('.'),seg.lastIndexOf('\n'),seg.lastIndexOf('。'));
+    const pre=seg.slice(cut+1),base=vH.s-pre.length;
+    const gRe=/(보호자|아들|딸|남편|아내|배우자|가족|부인|어머니|아버지|며느리|사위|동생|언니|누나|오빠|형이|형은|형님|간병인|지인|일행)/g,pRe=/환자/g;let g=null,p=null,m;
+    while((m=gRe.exec(pre)))g=m;while((m=pRe.exec(pre)))p=m;
+    if(g&&(!p||g.index>p.index))return {v:'guard',h:{s:base+g.index,e:base+g.index+g[0].length,w:g[0]}};
+    if(p)return {v:'patient',h:{s:base+p.index,e:base+p.index+p[0].length,w:p[0]}};
+  }
+  const gH=findHit(text,['보호자','아들','딸','남편','아내','배우자','가족','부인','어머니','아버지','며느리','사위']);
+  const pH=findHit(text,['환자 ?본인','환자가','환자는']);
+  return gH&&(!pH||gH.s<pH.s)?{v:'guard',h:gH}:{v:'patient',h:pH};
+}
+function applyCase(r){
+  setRadio('jType',r.type);jSel.clear();r.reasons.forEach(n=>jSel.add(n));
+  setRadio('jStage',r.stage);setRadio('jEmg',r.emg);setRadio('jFee',r.fee);setRadio('jUrg',r.urg);
+  Object.keys(jCrit).forEach(k=>delete jCrit[k]);Object.assign(jCrit,r.crit);
+  $('#p1').checked=!!r.proc.p1;$('#p2').value=r.proc.p2||'';$('#p2b').value=r.proc.p2b||'';$('#p3').checked=!!r.proc.p3;$('#p4').checked=!!r.proc.p4;$('#p5').checked=!!r.proc.p5;
+  renderReasonTable();renderCrit();updateJudge();
+}
+function markText(text,hits){
+  const hs=hits.slice().sort((a,b)=>a.s-b.s);let out='',pos=0;
+  const col={r:'#ffe08a',c:'#c9e3ff',f:'#d9f2df'};
+  hs.forEach(h=>{if(h.s<pos)return;out+=esc(text.slice(pos,h.s))+`<mark style="background:${col[h.kind]||'#eee'};padding:0 2px;border-radius:3px">${esc(text.slice(h.s,h.e))}</mark>`;pos=h.e});
+  return out+esc(text.slice(pos));
+}
+function ruleRows(r,o){
+  const rows=[];const list=REASONS[r.type];const sel=list.filter(x=>r.reasons.includes(x.n));
+  const st=(k)=>({ok:'<b style="color:var(--ok)">충족</b>',warn:'<b style="color:var(--warn)">확인 필요</b>',no:'<b style="color:var(--no)">미충족</b>',na:'<span class="hint">해당 없음</span>'}[k]);
+  rows.push([r.type==='emg'?'제5조 제2항':'제5조 제1항','정당한 거부 사유에 해당하는가',sel.length?sel.map(x=>'['+x.n+'] '+x.t).join('<br>'):'사유에 해당하는 문구를 찾지 못함',sel.length?'ok':'no']);
+  rows.push(['제5조 단서','진료비 미수·체납을 이유로 하지 않는가',{no:'진료비 관련 내용 없음',part:'진료비 문제가 섞여 있음 — 요청서에서 제외해야 함',main:'진료비 미납이 주된 이유'}[r.fee],{no:'ok',part:'warn',main:'no'}[r.fee]]);
+  const resOnly=sel.length&&sel.every(x=>x.c==='res');
+  rows.push(['제5조 제3항'+(r.type==='med'?' · 의료법 제15조 제2항':''),'응급상황이면 해소 시까지 진료를 계속하는가',r.emg==='yes'?(resOnly?'응급이나 자원·재난 사유 — 처치 후 전원, 상황실 통보':'응급상황 — 지금은 거부 불가, 응급처치 후 판단'):r.emg==='unk'?'응급 여부가 문장에 없음':'응급상황 아님',r.emg==='yes'?(resOnly?'warn':'no'):r.emg==='unk'?'warn':'ok']);
+  if(o.score&&o.score.ans){const s=o.score.s,hi=o.score.hi,mi=o.score.mid;rows.push(['제3조 제4항','행위의 경중이 거부를 정당화할 만큼 무거운가',`${s}점 / ${o.score.max}점 (${s>=hi?'무거움':s>=mi?'중간':'가벼움'}) · ${confText()}`+(r.crit.c1==='guard'?' · 보호자 행위':'')+(r.drunk?' · 주취 상태(참작 사유 아님, 의학적 평가 필요)':''),s>=hi?'ok':s>=mi?'warn':'no'])}
+  else rows.push(['제3조 제4항','행위의 경중 판단','폭언·폭행 등 행위 사유 없음','na']);
+  // 사유별 추가 요건
+  const extra=[];let ek='ok';const T=caseText();
+  if(r.type==='med'&&r.reasons.includes(10)){const ok=findHit(T,['위험(이|은)? ?(없|낮)','지연(되어도|돼도)','급하지 않','만성','응급(상황)?(은|이)? ?아님']);extra.push('[10] 진료 지연이 중대한 위험이 아님 → '+(ok?'문장에 있음':'확인 필요'));if(!ok)ek='warn'}
+  if(r.reasons.includes(12)||r.reasons.includes(13)){const a=findHit(T,['소견서','소견']),b=findHit(T,['(수차례|여러 ?번|반복).{0,10}(권유|지시)','(권유|지시).{0,10}(수차례|여러 ?번|반복)','개월']);extra.push('[12·13] 입원치료 불필요 소견서 → '+(a?'있음':'확인 필요'));extra.push('[12·13] 반복적인 퇴원 권유·지시 → '+(b?'있음':'확인 필요'));if(!a||!b)ek='warn'}
+  if(r.type==='med'&&r.reasons.includes(15)){extra.push('[15] 담당의 교체(연명의료결정법 제19조 제3항)로 처리');ek='warn'}
+  if(r.type==='med'&&r.reasons.includes(14)){extra.push('[14] 해당 시술만 거부, 대체 의료기관 안내 필수');ek='warn'}
+  if(r.type==='med'&&r.reasons.includes(8)&&!findHit(T,['민간요법','비의학적','비윤리적','한약','대체요법','검증되지'])){extra.push('[8] 단순한 치료 거부는 자기결정권 — 비의학적 치료를 고집한 사정 필요');ek='warn'}
+  if(r.crit.c1==='guard')extra.push('보호자 행위 — 보호자 출입·면회 제한 등 대안 먼저 검토');
+  rows.push(['사유별 요건','선택된 사유의 추가 요건을 갖추었는가',extra.length?extra.join('<br>'):'추가 요건 없음',extra.length?ek:'na']);
+  // 절차
+  const P=r.proc,done=[],miss=[];
+  [['보고·서류 제출',P.p1],['구두 설명',P.p2],['대체기관 안내',P.p3],['EMR 기록',P.p4]].forEach(([n,v])=>(v?done:miss).push(n+(n==='구두 설명'&&v?'('+v+')':'')));
+  rows.push(['제6조 제1항·제2항','설명·기록·대체기관 안내 절차를 거쳤는가',(done.length?'이행: '+done.join(', '):'')+(done.length&&miss.length?'<br>':'')+(miss.length?'미확인: '+miss.join(', '):''),miss.length===0?'ok':done.length?'warn':'no']);
+  rows.push(['제6조 제4항 · 서식','증거자료를 확보했는가',r.evid.length?r.evid.join(', '):'증거 관련 문구 없음',r.evid.length?'ok':'warn']);
+  rows.push([r.urg==='post'?'제6조 제1항 단서':'제2조 제7항','심의 방식',{normal:'통상 회의',fast:'신속 심의 권고 (간사·위원장·지명 1인 일치)',post:'이미 조치 → 사후 심의 요청'}[r.urg],'na']);
+  let h='<colgroup><col style="width:150px"><col style="width:30%"><col><col style="width:86px"></colgroup><tr><th>근거 조항</th><th>점검 요건</th><th>사례 확인 내용</th><th class="c">판정</th></tr>';
+  rows.forEach(x=>h+=`<tr><td>${esc(x[0])}</td><td>${esc(x[1])}</td><td>${x[2]}</td><td class="c">${st(x[3])}</td></tr>`);
+  return {html:h,rows};
+}
+function caseText(){return $('#caseText').value}
+function runCase(){
+  const text=caseText().trim();if(text.length<10){toast('사례를 조금 더 자세히 적어 주세요');return}
+  const r=analyzeCase(text);caseLast=r;applyCase(r);const o=lastJudge||judge();
+  $('#caseMarked').innerHTML=markText(text,r.hits)+'<div class="hint" style="margin-top:8px"><mark style="background:#ffe08a">거부 사유</mark> <mark style="background:#c9e3ff">경중 기준</mark> <mark style="background:#d9f2df">기본 사실</mark></div>';
+  let fh='<colgroup><col style="width:270px"><col><col style="width:34%"></colgroup><tr><th>항목</th><th>판단</th><th>근거 문구</th></tr>';
+  r.facts.forEach(f=>{const rn=(f.label.match(/^거부 사유 \[(\d+)\]/)||[])[1];
+    fh+=`<tr><td>${esc(f.label)}${rn&&f.h?` <button class="xbtn" data-admin data-x="${r.type}:${rn}" data-w="${esc(f.h.w)}" title="이 표현은 이 사유가 아님 — 다음부터 제외">잘못 읽음</button>`:''}</td><td>${esc(f.val)}</td><td class="hint">${f.h?esc(ctx(text,f.h)):'—'}</td></tr>`});
+  $('#factTable').innerHTML=fh;
+  const rr=ruleRows(r,o);$('#ruleTable').innerHTML=rr.html;
+  const bad=rr.rows.filter(x=>x[3]==='no').length,warn=rr.rows.filter(x=>x[3]==='warn').length;
+  const cls={ok:'v-ok',warn:'v-warn',no:'v-no',info:'v-info'}[o.level];
+  let h=`<div class="verdict ${cls}"><div class="big">${esc(o.title)}</div><div style="margin-top:4px;font-size:13px">규칙 점검 : 미충족 <b>${bad}</b>건 · 확인 필요 <b>${warn}</b>건</div>${o.op?`<div style="font-size:13px">간사 의견 제안 : <b>${esc(o.op)}</b>${o.scope?` · 향후 대처 : <b>${esc(o.scope)}</b>`:''}</div>`:''}</div>`;
+  const sec=(t,a)=>a.length?`<div class="res-sec"><h4>${t}</h4><ul>${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'';
+  if(o.score&&o.score.ans)h+=scoreHTML(o.score,'기준 자동 평가');
+  const w=o.warn.slice();if(r.drunk)w.push('주취는 참작 사유가 아니지만, 의식 저하·외상 등 의학적 평가가 먼저 필요합니다.');
+  h+=sec('주의할 점',w)+sec('해야 할 일',o.todo)+casesHTML(casesFor(r.type,r.reasons,r.fee));
+  $('#caseResult').innerHTML=h;
+  ['caseMarkCard','caseFactCard','caseRuleCard','caseSimCard'].forEach(id=>$('#'+id).classList.remove('hide'));
+  $('#caseSim').innerHTML=simHTML(similarCases(r.type,r.reasons,text,null),true);
+  renderLearnSel(r.type);
+  if(window.innerWidth<=640)$('#caseResult').scrollIntoView({behavior:'smooth',block:'start'});
+  toast('분석했습니다');
+}
+$('#caseRun').addEventListener('click',runCase);
+$('#caseClear').addEventListener('click',()=>{$('#caseText').value='';['caseMarkCard','caseFactCard','caseRuleCard','caseSimCard'].forEach(id=>$('#'+id).classList.add('hide'));caseLast=null});
+$$('[data-sample]').forEach(b=>b.addEventListener('click',()=>{$('#caseText').value=SAMPLES[+b.dataset.sample];runCase()}));
+$('#caseToJudge').addEventListener('click',()=>{if(!caseLast){toast('먼저 분석하기를 누르세요');return}showTab('judge')});
+$('#caseToForm').addEventListener('click',()=>{
+  if(!caseLast){toast('먼저 분석하기를 누르세요');return}
+  $('#toForm').click();
+  $('#fStory').value=caseText().trim();
+  $$('#fEvid input[type=checkbox]').forEach(i=>{if(caseLast.evid.includes(i.value))i.checked=true});
+  if(caseLast.crit.c1)setRadio('fRel',caseLast.crit.c1==='guard'?'보호자':'환자');
+  const rr=ruleRows(caseLast,lastJudge).rows.filter(x=>x[3]==='no'||x[3]==='warn');
+  if(rr.length)$('#fOpMemo').value+='\n[규칙 점검 보완 필요]\n'+rr.map(x=>'· '+x[0]+' — '+x[2].replace(/<br>/g,' / ')).join('\n');
+});
+
+/* ================= 4차 개선 : 설정·배점 ================= */
+const DEF_W=()=>{const w={};CRITS.forEach(c=>{w[c.k]={};c.o.forEach(o=>w[c.k][o[0]]=o[2])});return w};
+const DEF_CT={law:'원무팀 법무Unit 노상엽 과장(원내 2349)',emg:'응급원무Unit(원내 2333)',hosp:'가톨릭대학교 부천성모병원'};
+function S(){const s=(loadDB().settings)||{};const w=DEF_W();if(s.w)Object.keys(s.w).forEach(k=>{if(w[k])Object.assign(w[k],s.w[k])});
+  return {w,th:s.th||{hi:7,mid:4},conf:s.conf||null,dict:{add:(s.dict&&s.dict.add)||{},ex:(s.dict&&s.dict.ex)||{}},reports:s.reports||{},ct:{...DEF_CT,...(s.ct||{})},pin:s.pin||'',updated:s.updated||''}}
+function putS(st){const db=loadDB();st.updated=new Date().toISOString();db.settings=st;saveDB(db)}
+function wOf(st,k,v){const x=st.w[k]&&st.w[k][v];return isFinite(+x)?+x:0}
+function maxScore(st){st=st||S();return CRITS.reduce((a,c)=>a+Math.max(0,...c.o.map(o=>wOf(st,c.k,o[0]))),0)}
+function confText(){const c=S().conf;return c&&c.date?`배점 ${dot(c.date)} 위원회 확정`:'배점 임시 기본값(위원회 미확정)'}
+function scoreHTML(sc,lbl){const pct=Math.max(0,Math.min(100,sc.max?sc.s/sc.max*100:0));const c=S().conf;
+  return `<div class="res-sec"><h4>행위 경중 점수</h4><div class="score"><span>${sc.ans}개 ${lbl}</span><b>${sc.s}점 / ${sc.max}점</b></div><div class="meter"><i style="width:${pct}%"></i></div><div class="hint" style="margin-top:3px">${sc.hi}점 이상 무거움 · ${sc.mid}~${sc.hi-1}점 중간 · ${sc.mid-1}점 이하 가벼움</div><div class="confbar"><span class="dot" style="background:${c&&c.date?'var(--ok)':'var(--warn)'}"></span>${esc(confText())}</div></div>`}
+const escRe=t=>String(t).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+function hashPin(p){let h=5381;for(const ch of String(p))h=((h<<5)+h+ch.charCodeAt(0))|0;return 'h'+(h>>>0).toString(36)}
+
+/* ---------- 사례 키·번호·병합 ---------- */
+function ckey(c){return c.uid||('id:'+c.id)}
+function newUid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function nextIdFrom(cases,y){const n=cases.filter(c=>!c.deleted&&(c.id||'').startsWith(y+'-')).reduce((m,c)=>Math.max(m,+(String(c.id).split('-')[1])||0),0)+1;return y+'-'+String(n).padStart(3,'0')}
+function nextId(db,y){return nextIdFrom(db.cases,y)}
+function mergeDB(a,b){
+  const m=new Map();[...((a&&a.cases)||[]),...((b&&b.cases)||[])].forEach(c=>{if(!c)return;const k=ckey(c);const o=m.get(k);if(!o||(c.updated||'')>(o.updated||''))m.set(k,c)});
+  const cases=[...m.values()].sort((x,y)=>(x.created||x.updated||'').localeCompare(y.created||y.updated||'')||String(x.id).localeCompare(String(y.id)));
+  cases.forEach(c=>{if(!c.deleted&&!c.id){c.id=nextIdFrom(cases,(isDate(c.fDate)?c.fDate:today()).slice(0,4));c.updated=new Date().toISOString()}});
+  const seen=new Set();cases.forEach(c=>{if(c.deleted||!c.id)return;if(seen.has(c.id)){c.id=nextIdFrom(cases,String(c.id).slice(0,4));c.renumbered=true;c.updated=new Date().toISOString()}seen.add(c.id)});
+  const sa=a&&a.settings,sb=b&&b.settings;const settings=!sa?sb:!sb?sa:((sa.updated||'')>=(sb.updated||'')?sa:sb);
+  const out={cases};if(settings)out.settings=settings;return out;
+}
+
+/* ---------- 비슷한 과거 사례 ---------- */
+function bigr(t){t=String(t||'').replace(/[\s\d.,·()\[\]"'“”‘’-]+/g,'');const s=new Set();for(let i=0;i<t.length-1;i++)s.add(t.slice(i,i+2));return s}
+function jac(a,b){if(!a.size||!b.size)return 0;let i=0;a.forEach(x=>{if(b.has(x))i++});return i/(a.size+b.size-i)}
+function similarCases(type,reasons,text,exKey){
+  const L=activeCases().filter(c=>ckey(c)!==exKey);if(!L.length)return [];
+  const rs=new Set(reasons.map(n=>type+':'+n)),tb=bigr(text);
+  return L.map(c=>{const cs=new Set((c.reasons||[]).map(n=>c.type+':'+n));const r=jac(rs,cs);const t=text&&c.fStory?Math.min(1,jac(tb,bigr(c.fStory))*2.2):0;
+      const sc=text?0.5*r+0.15*(c.type===type?1:0)+0.35*t:0.8*r+0.2*(c.type===type?1:0);return {c,sc}})
+    .filter(x=>x.sc>=0.3).sort((a,b)=>b.sc-a.sc).slice(0,3);
+}
+function simHTML(list,full){
+  if(!activeCases().length)return '<p class="hint" style="margin:0">사례 대장에 저장된 사례가 없어 비교할 수 없습니다. 사례가 쌓이면 비슷한 사례와 당시 결정을 보여 줍니다.</p>';
+  if(!list.length)return '<p class="hint" style="margin:0">비슷한 과거 사례가 없습니다(유사도 30% 미만).</p>';
+  let h='<table class="rs simrow stack"><colgroup><col style="width:64px"><col style="width:120px"><col><col style="width:150px"><col style="width:170px"><col style="width:62px"></colgroup><tr><th class="c">유사도</th><th class="c">접수번호·요청일</th><th>사유(연번)</th><th class="c">간사 의견</th><th>결정 · 사유</th><th class="c">보기</th></tr>';
+  list.forEach(({c,sc})=>{h+=`<tr><td class="c"><b>${Math.round(sc*100)}%</b></td><td class="c">${esc(c.id)}<br><span class="hint">${esc(c.fDate)}</span></td><td>${esc((c.type==='emg'?'[응급] ':'[일반] ')+reasonLabel(c))}${full&&c.fStory?`<span class="ref">${esc(c.fStory.slice(0,60))}${c.fStory.length>60?'…':''}</span>`:''}</td><td class="c">${esc(c.fOp||'-')}</td><td>${esc(c.fDec||'결정 대기')}${c.fDecReason?`<span class="ref">${esc(c.fDecReason)}</span>`:''}</td><td class="c"><button class="btn sec sm" data-opensim="${esc(ckey(c))}">열기</button></td></tr>`});
+  return h+'</table><p class="hint" style="margin:6px 0 0">※ 유사도는 거부 사유와 경위 문장의 겹침으로 계산한 참고값입니다. 위원회 의사는 비공개(내규 제9조)이므로 간사 모드에서만 보입니다.</p>';
+}
+function simBlock(list){if(MODE!=='admin'||!activeCases().length)return '';return `<div class="res-sec"><h4>비슷한 과거 사례 (${list.length}건)</h4>${list.length?simHTML(list,false):'<p class="hint" style="margin:0">비슷한 과거 사례가 없습니다.</p>'}</div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-opensim]');if(!b)return;const c=loadDB().cases.find(x=>!x.deleted&&ckey(x)===b.dataset.opensim);if(c){fill(c);showTab('form');toast(c.id+' 사례를 열었습니다')}});
+
+/* ---------- 분석 학습(사용자 사전) ---------- */
+function renderLearnSel(type){const el=$('#learnReason');if(!el)return;el.innerHTML=REASONS[type].map(r=>`<option value="${type}:${r.n}">${type==='emg'?'[응급] ':''}${r.n}. ${esc(r.t.length>34?r.t.slice(0,34)+'…':r.t)}</option>`).join('')}
+$('#learnAdd').addEventListener('click',()=>{
+  const k=$('#learnReason').value,w=$('#learnWord').value.trim();
+  if(w.length<2){toast('두 글자 이상의 표현을 적어 주세요');return}
+  const st=S();(st.dict.add[k]=st.dict.add[k]||[]);if(!st.dict.add[k].includes(w))st.dict.add[k].push(w);
+  if(st.dict.ex[k])st.dict.ex[k]=st.dict.ex[k].filter(x=>x!==w);putS(st);$('#learnWord').value='';
+  toast('학습했습니다: '+w);if(caseText().trim())runCase();
+});
+$('#factTable').addEventListener('click',e=>{
+  const b=e.target.closest('.xbtn');if(!b)return;const k=b.dataset.x,w=b.dataset.w;
+  if(!confirm(`'${w}' 표현을 ${k.replace('med:','일반 ').replace('emg:','응급 ')}번 사유에서 제외할까요?\n(설정·검토표 탭에서 되돌릴 수 있습니다)`))return;
+  const st=S();(st.dict.ex[k]=st.dict.ex[k]||[]);if(!st.dict.ex[k].includes(w))st.dict.ex[k].push(w);
+  if(st.dict.add[k])st.dict.add[k]=st.dict.add[k].filter(x=>x!==w);putS(st);toast('제외했습니다');runCase();
+});
+function renderDict(){
+  const st=S(),rows=[];['add','ex'].forEach(t=>Object.entries(st.dict[t]).forEach(([k,arr])=>arr.forEach(w=>rows.push([t,k,w]))));
+  let h='<colgroup><col style="width:110px"><col><col style="width:220px"><col style="width:70px"></colgroup><tr><th class="c">구분</th><th>사유</th><th>표현</th><th class="c">삭제</th></tr>';
+  if(!rows.length)h+='<tr><td colspan="4" class="c hint" style="padding:14px">아직 배운 표현이 없습니다.</td></tr>';
+  rows.forEach(([t,k,w])=>{const [ty,n]=k.split(':');const r=REASONS[ty].find(x=>x.n==n);
+    h+=`<tr><td class="c">${t==='add'?'<span class="tag" style="background:#e6f4ec;color:#1f7a4d">찾도록 학습</span>':'<span class="tag" style="background:#fde8e7;color:#b42318">제외</span>'}</td><td>${ty==='emg'?'[응급] ':'[일반] '}${n}. ${esc(r?r.t:'')}</td><td>${esc(w)}</td><td class="c"><button class="btn red sm" data-dt="${t}" data-dk="${k}" data-dw="${esc(w)}">삭제</button></td></tr>`});
+  $('#dictTable').innerHTML=h;
+}
+$('#dictTable').addEventListener('click',e=>{const b=e.target.closest('[data-dt]');if(!b)return;const st=S();const a=st.dict[b.dataset.dt][b.dataset.dk]||[];st.dict[b.dataset.dt][b.dataset.dk]=a.filter(x=>x!==b.dataset.dw);putS(st);renderDict();toast('삭제했습니다')});
+
+/* ---------- 배점 설정 화면 ---------- */
+function renderWeights(){
+  const st=S();let h='<colgroup><col style="width:52px"><col style="width:250px"><col></colgroup><tr><th class="c">번호</th><th>판단 기준 (내규 제3조 제4항)</th><th>선택지별 점수 (거부를 뒷받침하면 +, 참작 사유면 −)</th></tr>';
+  CRITS.forEach((c,i)=>{h+=`<tr><td class="c">${i+1}</td><td>${esc(c.t)}</td><td><div class="opts">${c.o.map(o=>`<label style="gap:6px">${esc(o[1])} <input type="text" inputmode="numeric" data-wk="${c.k}" data-wo="${o[0]}" value="${wOf(st,c.k,o[0])}"></label>`).join('')}</div></td></tr>`});
+  $('#wTable').innerHTML=h;$('#thHi').value=st.th.hi;$('#thMid').value=st.th.mid;
+  $('#confDate').value=st.conf&&st.conf.date||'';$('#confNote').value=st.conf&&st.conf.note||'';
+  updMax();const c=st.conf;$('#confBar').innerHTML=`<span class="dot" style="background:${c&&c.date?'var(--ok)':'var(--warn)'}"></span><b>${esc(confText())}</b>${c&&c.note?' · '+esc(c.note):''}<span class="hint">　판단 결과와 요청서 메모에 이 상태가 함께 표시됩니다.</span>`;
+}
+function readW(){const w=DEF_W();let bad=false;$$('#wTable [data-wk]').forEach(i=>{const v=i.value.trim();if(!/^-?\d+$/.test(v)||+v<-5||+v>10){bad=true;i.style.borderColor='var(--no)'}else{i.style.borderColor='';w[i.dataset.wk][i.dataset.wo]=+v}});return bad?null:w}
+function updMax(){const w=readW()||S().w;const st={w};$('#maxView').textContent=maxScore(st)+'점'}
+$('#wTable').addEventListener('input',updMax);
+$('#wSave').addEventListener('click',()=>{
+  const w=readW();if(!w){toast('점수는 -5 ~ 10 사이의 정수로 적어 주세요');return}
+  const hi=+$('#thHi').value,mid=+$('#thMid').value,mx=maxScore({w});
+  if(!(hi>mid&&mid>=0&&hi<=mx)){toast(`기준선은 0 ≤ 중간 < 무거움 ≤ 만점(${mx}) 이어야 합니다`);return}
+  const st=S();st.w=w;st.th={hi,mid};const cd=fmtDate($('#confDate').value.trim());if(cd&&!isDate(cd)){markDT($('#confDate'));toast('위원회 확정일이 올바르지 않습니다 (예: 20261120)');return}st.conf=cd?{date:cd,note:$('#confNote').value.trim()}:null;
+  putS(st);renderWeights();updateJudge();toast('배점을 저장했습니다'+(shared.handle?' · 공유 대장 반영':''));
+});
+$('#wReset').addEventListener('click',()=>{if(!confirm('배점과 기준선을 임시 기본값으로 되돌릴까요?'))return;const st=S();st.w=DEF_W();st.th={hi:7,mid:4};st.conf=null;putS(st);renderWeights();updateJudge();toast('임시 기본값으로 되돌렸습니다')});
+$('#wPrint').addEventListener('click',()=>{
+  const st=S();let h=`<div class="pf"><div class="ttl" style="font-size:15pt;letter-spacing:1px">진료거부 행위 경중 판단 배점표(안)</div><div class="contact">${esc(confText())}${st.conf&&st.conf.note?' · '+esc(st.conf.note):''} · 출력일 ${dot(today())}</div>`;
+  h+=`<div class="line">「진료거부 등 처리 및 위원회 심의 내규」 제3조 제4항 각 호의 기준에 따라 폭언·폭행 등 행위 사유의 경중을 점수로 정리한 표입니다. 점수는 위원회 판단을 돕는 참고값이며 의결을 대신하지 않습니다.</div>`;
+  h+='<table style="margin-top:6px"><colgroup><col style="width:7%"><col style="width:33%"><col></colgroup><tr><th>호</th><th>판단 기준</th><th>선택지(점수)</th></tr>'+CRITS.map((c,i)=>`<tr><td class="c">${i+1}</td><td>${esc(c.t)}</td><td>${c.o.map(o=>`${esc(o[1])}(${wOf(st,c.k,o[0])>0?'+':''}${wOf(st,c.k,o[0])})`).join(' / ')}</td></tr>`).join('')+'</table>';
+  h+=`<div class="line" style="margin-top:6px">만점 <b>${maxScore(st)}점</b> · <b>${st.th.hi}점 이상</b> 무거움(거부 정당성 높음) · <b>${st.th.mid}~${st.th.hi-1}점</b> 중간(위원회 심의) · <b>${st.th.mid-1}점 이하</b> 가벼움(경고·보안요원 동석 등 덜 제한적인 조치 우선)</div>`;
+  h+=`<div class="line">※ 응급환자는 점수와 관계없이 응급상황 해소 시까지 거부할 수 없음(내규 제5조 제3항). 진료비 미수·체납은 거부 사유가 될 수 없음(제5조 단서).</div><div class="sig" style="margin-top:28px">위원장 확인 : ____________________</div></div>`;
+  printWith(h,false);
+});
+
+/* ---------- 문의처·암호 ---------- */
+function renderCt(){const st=S();$('#ctLaw').value=st.ct.law;$('#ctEmg').value=st.ct.emg;$('#ctHosp').value=st.ct.hosp;$('#pinSet').value='';$('#pinSet').placeholder=st.pin?'암호 설정됨 — 바꾸려면 새 암호 입력(지우려면 - 입력)':'비우면 암호 없이 전환';applyCt()}
+function applyCt(){const c=S().ct;$('#hdrContact').textContent='문의 : '+c.law+' · '+c.emg}
+$('#ctSave').addEventListener('click',()=>{const st=S();st.ct={law:$('#ctLaw').value.trim()||DEF_CT.law,emg:$('#ctEmg').value.trim()||DEF_CT.emg,hosp:$('#ctHosp').value.trim()||DEF_CT.hosp};
+  const p=$('#pinSet').value.trim();if(p==='-')st.pin='';else if(p)st.pin=hashPin(p);putS(st);renderCt();toast('저장했습니다')});
+
+/* ---------- 내규 개정 검토표 ---------- */
+const RV=[
+ ['제5조 제1항 제3호 나<br>(폭력 사유와 진료비)','폭언·폭행 등 진료환경 훼손 시 거부 가능 / 단서: 진료비 이유 거부 금지','행정심판 2020-20114: 응급실 난동 환자에게 선납금을 요구하며 거부 → 벌금 200만 원·자격정지 1개월 유지 · 의료정책팀-3246: 단순 다툼은 정당한 이유 아님','폭력 사유로 거부할 때 진료비·선납금 언급을 금지하고, 「다툼」과 「진료환경 훼손」을 구분하는 기록 항목(행위·피해·지속 여부) 추가'],
+ ['제5조 제1항 제3호 가<br>(지시 불응)','치료방침 불동의 + 비의학적 치료 고집','의정 65507-675: 고의 불응은 2~3회 이상 경고 후 퇴원·전원 · 의료정책팀-140: 아동이 지시를 따르지 않는다고 내보내는 것은 진료거부','「경고 횟수·방법을 기록한 뒤 퇴원·전원」 절차와 소아·의사결정능력 제한 환자 예외 명시'],
+ ['제6조<br>(진료 요청 접수)','요청서 작성·위원회 심의 절차','부산지법 2013노3482(진료 요청은 치료를 구하는 것이어야 함) · 수원지법 2019고정597(의사에게 요청이 전달돼야 함) · 헌재 2018헌마133·176(고의 필요)','진료 요청 수신 경로(전화·문자·대리 접수)와 전달 기록 의무를 절차에 명시'],
+ ['제5조 제1항 제3호 나<br>(폭언·위해 대응)','모욕·폭언·폭행 시 진료거부 가능','서울북부지법 2016카합20247(시위·업무방해 금지 가처분, 위반 1회 100만 원) · 서울남부지법 2025노555·서울서부지법 2024고단1605(허위 진료거부 주장 → 업무방해·무고)','진료거부와 별도로 법무 대응(고소·가처분) 연계 조항 및 장소·녹취 기록 지침 추가(대구지법 2025노2537: 장소 미입증 시 제12조③ 불성립)'],
+ ['제5조 제1항 제1호 다<br>(예약 환자)','외래 예약 진료로 당일 내원 진료 불가','서울남부지법 2025노555: 지각 환자를 다른 의사에게 안내한 것은 정당, 환자의 항의 소란은 업무방해','「대체 진료(다른 의사·다른 시간) 안내」를 조치 요건으로 명시'],
+ ['제5조 제2항<br>(응급 사유 체계)','1호 폭력 등 / 2호 여건 부족(재난·자원) / 3호 비협조 / 4호 비응급 / 5호 기타','서식 2호 1번(고난이도·전문성 부족), 3번(타 기관 치료정보 부족)은 내규 각 호에 없음 · 시행령 제1조의2 제1항 제2호(최종진료 인력이 다른 환자 진료 중)','서식과 내규 체계 불일치 — 서식 2호 1·3번은 5호(기타)로만 포섭됨','시행령 제1조의2 제1항 제2호를 반영한 「최종진료 인력 부재」 호 신설, 서식 2호 1·3번 근거 조항 명시'],
+ ['제5조 제2항 제2호','「응급의료자원 부족」 포괄 규정','시행령 제1조의2 제1항(2026. 9. 8. 신설): 자원이 「모두 운용 중」, 최종진료 인력, 재난, 준하는 사유 / 제2항: 수용 곤란·해소 시 상황실 통보','시행령보다 요건이 넓어 보이고, 상황실 통보 절차가 없음','문언을 시행령 용어로 맞추고, 수용 곤란 발생·해소 시 응급의료정보통신망 통보를 제6조 절차에 추가'],
+ ['제5조 제2항 전반','현행 응급의료법 기준','개정 응급의료법(2026. 10. 20. 공포, 2027. 4. 21. 시행 예정): 응급의료기관장 거부 금지 주체 추가, 정당한 사유 법률 명시','시행 시 내규 문언과 법률 문언 차이 발생 예정','시행일에 맞춰 제5조 제2항 전면 재정비 — 시행일 전 위원회 안건 준비'],
+ ['제5조 제1항 제6호<br>(교리 사유)','가톨릭 교회 가르침에 반하는 요구 거부','의료법·행정해석에 명시된 정당사유 아님 · 헌재 2017헌바127(낙태죄 헌법불합치) 이후 입법 공백','법적 근거가 약해 분쟁 시 다툼 소지','「해당 시술에 한정, 다른 진료는 계속, 대체 의료기관 안내 의무」 단서 신설'],
+ ['제5조 제1항 제5호<br>(연명의료)','연명의료 중단 결정 이행 거부를 진료거부 사유로 규정','연명의료결정법 제19조 제3항: 담당의 거부 시 기관장은 윤리위원회 심의 후 담당의 교체 의무 · 대법원 2015다9769','병원 차원의 거부는 불가 — 「진료거부」가 아니라 「담당의 교체」 문제','진료거부 사유에서 분리해 「담당의사 교체 절차」(의료기관윤리위원회 연계)로 이동'],
+ ['제5조 제1항 제3호 가','치료방침 불동의 + 비의학적·비윤리적 치료 고집','의정 65507-675: 의사 지시 무시만으로 거부 부당, 고의 불응은 2~3회 이상 경고 후 퇴원·전원 · 서울동부지법 2010카합2341(보호자 수혈 거부 → 방해금지 가처분)','단순 불응과 「비의학적 치료 고집」 구분 기준이 없음','환자 자기결정권 존중 문구와 판단 예시 추가, 보호자 거부 시 법적 절차(가처분 등) 대안 명시'],
+ ['제5조 제1항 제4호<br>(치료 필요성)','입원·고난이도 치료 불필요, 전원 권유','서울중앙지법 2007가합59573(현상 유지·악화 방지 치료도 입원 필요성) · 대법원 2021다311197 · 2024구합54638(퇴원 지시 불응 시 건강보험 급여제한 적법)','판단 요소와 절차가 내규에 없음','급성기 종결 소견서·반복 권유 기록·전원기관 안내를 요건으로 열거, 급여제한 신청 절차 근거 추가 검토'],
+ ['제5조 단서<br>(진료비)','진료비 미수·체납 이유 거부 금지','서울중앙지법 2007가합59573: 진료비 미납만으로 병실 점유를 불법점유로 볼 수 없음','입원 중 퇴원·퇴거 요구에도 적용되는지 문언상 불분명','「퇴원·퇴거 요구를 포함한다」로 적용 범위 명시'],
+ ['제3조 제4항<br>(경중 기준)','10개 판단 기준 열거','양형위원회 응급의료방해 양형기준(2026. 8.): 동기·피해 회복·처벌불원을 감경 요소로 둠','기준만 있고 가중치·판단 방법이 없어 사안마다 판단이 달라질 수 있음','위원회 의결로 배점표(별표) 채택 — 이 앱의 「배점 설정」을 별표 초안으로 활용'],
+ ['제6조<br>(절차)','설명·기록·대체기관 안내','대법원 93도1790(간호사도 공동정범) · 대법원 2020다217533·99다48245(전원 시 위험 정보 설명·제공 의무)','현장 직원의 책임과 전원 시 정보 제공 의무가 명시되지 않음','전원·거부 시 위험 정보 설명과 전원기관 정보 제공 의무 명시, 간호사 등 현장 직원 교육 조항 추가'],
+ ['제7조<br>(직종별 피해)','직종별 피해 고려','응급의료법 제12조의 응급의료종사자에 원무·보안 직원 미포함 · 의료법 제12조 제3항도 의료인·간호조무사·의료기사 중심 · 산업안전보건법 제41조','행정직 피해 시 적용 법조와 보호 절차가 불명확','행정직 피해는 형법(폭행·업무방해)·산안법 제41조 보호조치로 연결하는 절차 명시'],
+ ['서식 1호 4번','「의료 전문성의 한계」 구분 아래 인력 부족 사유 배치','내규 제5조 제1항 제1호 라목(의료 제공 여건 부족)','서식 구분과 내규 조항이 다름','서식 1호 4번을 「의료 제공 여건의 부족」 구분으로 이동']
+];
+function renderRV(){let h='<colgroup><col style="width:130px"><col style="width:20%"><col style="width:27%"><col style="width:20%"><col></colgroup><tr><th>조항</th><th>현행 내규·서식</th><th>법령·지침·판례</th><th>차이·문제점</th><th>개정 검토 의견(제안)</th></tr>';
+  RV.forEach(r=>h+=`<tr><td><b>${r[0]}</b></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`);$('#rvTable').innerHTML=h}
+$('#rvPrint').addEventListener('click',()=>{
+  let h=`<div class="pf"><div class="ttl" style="font-size:15pt;letter-spacing:1px">「진료거부 등 처리 및 위원회 심의 내규」 개정 검토표</div><div class="contact">작성 : 원무팀 법무Unit · ${dot(today())} · 검토 의견은 제안이며 위원회·법률 자문을 거쳐 확정</div>`;
+  h+='<table><colgroup><col style="width:11%"><col style="width:18%"><col style="width:27%"><col style="width:19%"><col></colgroup><tr><th>조항</th><th>현행 내규·서식</th><th>법령·지침·판례</th><th>차이·문제점</th><th>개정 검토 의견(제안)</th></tr>'+RV.map(r=>`<tr><td>${r[0]}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join('')+'</table></div>';
+  printWith(h,true);
+});
+
+/* ---------- 인쇄 도우미 ---------- */
+function printWith(h,land){$('#printArea').innerHTML=h;let st=null;if(land){st=document.createElement('style');st.textContent='@media print{@page{size:A4 landscape;margin:10mm}}';document.head.appendChild(st)}window.print();if(st)setTimeout(()=>st.remove(),800)}
+
+/* ================= 진료거부 사유 통지서 ================= */
+const PLAIN={
+ res:'현재 진료에 필요한 의료진·병상·장비 등이 부족하여 적절한 진료를 해 드리기 어렵습니다.',
+ exp:'요청하신 진료가 저희 병원 해당 의료진의 전문 진료 범위를 벗어나, 더 적합한 의료기관에서 진료받으시는 것이 필요합니다.',
+ actv:'진료 과정에서 의료진에 대한 폭언·폭행·위협 등이 있어 안전하고 정상적인 진료를 계속하기 어렵습니다.',
+ act:'의료진의 치료방침과 다른 치료 또는 의학적으로 적절하지 않은 처방을 요구하셔서 저희 병원의 의학적 판단에 따른 진료를 계속하기 어렵습니다.',
+ nec:'의학적으로 더 이상 저희 병원(상급종합병원) 수준의 입원치료가 필요하지 않아, 요양병원 등 상태에 맞는 의료기관으로 옮겨 진료받으시도록 안내드립니다.',
+ rel:'요청하신 시술은 가톨릭 의료기관인 저희 병원에서 시행하지 않습니다. 그 밖의 진료는 계속 받으실 수 있습니다.',
+ non:'의사 진찰 결과 응급상황이 아니라고 판단되어 외래 진료를 이용하시도록 안내드립니다.',
+ lst:'',etc:''
+};
+$('#nAuto').addEventListener('click',()=>{
+  const d=collect(),list=REASONS[d.type].filter(r=>d.reasons.includes(r.n));
+  if(!list.length&&!d.fEtcReason){toast('먼저 위에서 거부 사유를 표시하세요');return}
+  const keys=[];list.forEach(r=>{const k=r.c==='act'&&r.v?'actv':r.c;if(!keys.includes(k))keys.push(k)});
+  const lines=keys.map(k=>k==='etc'?(d.fEtcReason||''):PLAIN[k]).filter(Boolean);
+  if(d.fEtcReason&&!keys.includes('etc'))lines.push(d.fEtcReason);
+  if(keys.includes('lst'))toast('연명의료 사유는 통지 대상이 아니라 담당의 교체 사안입니다');
+  $('#nReason').value=lines.map((x,i)=>(lines.length>1?(i+1)+'. ':'')+x).join('\n');
+  if(!$('#nTo').value)$('#nTo').value=d.fPt?(d.fRel==='보호자'?d.fPt+' 환자 보호자':d.fPt):'';
+  if(!$('#nDate').value)$('#nDate').value=today();
+  if(!$('#nScope').value){const sc=(d.fScope||[]).join('·'),dp=d.fDeptScope==='특정 임상과'?d.fDeptScopeTxt+' ':d.fDeptScope==='특정 의사'?d.fDocTxt+' 교수 ':'';$('#nScope').value=(dp+(sc?sc+' 진료':'')).trim()||(d.fClinic?d.fClinic+'과 진료':'')}
+  if(!$('#nTerm').value)$('#nTerm').value=d.fFuture==='향후에도 진료거부'?'별도로 알려 드릴 때까지':d.fFuture==='이번만 진료거부'?'이번 진료에 한함':'';
+  if(!$('#nAlt').value)$('#nAlt').value=d.fP3||'';
+  toast('통지서 내용을 채웠습니다. 문구를 확인해 주세요');
+});
+$('#nPrint').addEventListener('click',()=>{
+  const d=collect(),ct=S().ct;if(!d.nReason){toast('거부 사유를 적거나 「자동 작성」을 누르세요');return}
+  const isE=d.type==='emg';
+  let h=`<div class="pf" style="font-size:11pt"><div class="ttl" style="margin-top:6mm">진료거부 사유 통지서</div><div style="height:6mm"></div>
+  <table><colgroup><col style="width:22%"><col></colgroup>
+   <tr><th>받는 분</th><td>${esc(d.nTo)} 귀하</td></tr>
+   <tr><th>등록번호</th><td>${esc(d.fRegNo)}</td></tr>
+   <tr><th>적용 범위</th><td>${esc(d.nScope)}</td></tr>
+   <tr><th>적용 기간</th><td>${esc(d.nTerm)}</td></tr>
+   <tr><th style="height:34mm">사유</th><td style="white-space:pre-wrap;vertical-align:top">${esc(d.nReason)}</td></tr>
+   <tr><th>근거</th><td>「${isE?'응급의료에 관한 법률」 제6조':'의료법」 제15조'} 및 ${esc(ct.hosp)} 「진료거부 등 처리 및 위원회 심의 내규」 제5조</td></tr>
+   <tr><th>대체 진료기관</th><td>${esc(d.nAlt)||'&nbsp;'}</td></tr>
+  </table>
+  <h5 style="margin-top:6mm">안내 말씀</h5>
+  <div class="line">1. 위급한 상황이 생기면 가까운 응급실을 이용하시거나 119에 연락하십시오. <b>응급환자에 대한 응급처치는 이 통지와 관계없이 제공됩니다.</b></div>
+  <div class="line">2. 다른 의료기관에서 진료받으실 때 필요한 진료기록 사본과 영상 자료는 원무팀에서 발급받으실 수 있습니다.</div>
+  <div class="line">3. 이 결정에 의견이 있으시면 아래 문의처로 말씀해 주십시오. 진료거부심의위원회에서 다시 검토합니다.</div>
+  <div class="line" style="margin-top:4mm">문의처 : ${esc(ct.law)}${isE?' / '+esc(ct.emg):''}</div>
+  <div style="text-align:center;margin-top:16mm;font-size:12pt">${dot(d.nDate||today())}</div>
+  <div class="sig" style="text-align:center;font-size:15pt;margin-top:10mm">${esc(ct.hosp)}장 (직인)</div>
+  <div class="line" style="margin-top:10mm;font-size:9pt;border-top:1px solid #000;padding-top:4px">수령 확인 : 받은 사람 ____________ (서명)　　전달한 직원 ____________ (서명)　　전달 방법 : □ 대면 □ 우편 □ 기타</div></div>`;
+  if(!d.fNDate&&d.nDate){$('#fNDate').value=d.nDate}
+  printWith(h,false);
+});
+$('#dlCase').addEventListener('click',()=>{
+  const d=collect();if(!d.fPt&&!d.fRegNo){toast('환자 성명 또는 등록번호를 입력하세요');return}
+  if(!d.uid){d.uid=newUid();curUid=d.uid}d.created=d.created||new Date().toISOString();d.updated=new Date().toISOString();
+  download(`진료거부요청_${(d.fPt||d.fRegNo).replace(/[\\/:*?"<>|]/g,'')}_${today()}.json`,JSON.stringify({cases:[d],from:'현장 요청'},null,1),'application/json');
+  toast('요청 파일을 내려받았습니다. 간사에게 전달하세요');
+});
+
+/* ================= 공유 대장 ================= */
+const shared={handle:null,name:'',last:null,busy:false,err:'',need:false};
+const FSA=typeof window.showOpenFilePicker==='function';
+const FTYPES=[{description:'진료거부 사례 대장',accept:{'application/json':['.json']}}];
+function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open('refusalApp',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function kv(op,k,v){try{const d=await idbOpen();return await new Promise(res=>{const t=d.transaction('kv',op==='get'?'readonly':'readwrite');const o=t.objectStore('kv');const q=op==='get'?o.get(k):op==='del'?o.delete(k):o.put(v,k);q.onsuccess=()=>res(q.result);q.onerror=()=>res(null)})}catch(e){return null}}
+async function perm(h,ask){const o={mode:'readwrite'};try{if((await h.queryPermission(o))==='granted')return true;if(!ask)return false;return (await h.requestPermission(o))==='granted'}catch(e){return false}}
+async function readShared(h){const f=await h.getFile();const t=(await f.text()).trim();if(!t)return {cases:[]};const j=JSON.parse(t);if(!j||!Array.isArray(j.cases))throw new Error('사례 대장 파일이 아닙니다');return j}
+async function writeShared(h,db){const w=await h.createWritable();await w.write(JSON.stringify({app:'진료거부 정당사유 판단 도우미',savedAt:new Date().toISOString(),cases:db.cases,settings:db.settings||null},null,1));await w.close()}
+const core=d=>JSON.stringify({c:d.cases||[],s:d.settings||null});
+async function shConnect(create){
+  if(!FSA){toast('공유 파일 연결은 크롬·엣지에서만 됩니다. 백업 저장·불러오기를 이용하세요.');return}
+  try{let h;if(create){h=await window.showSaveFilePicker({suggestedName:'진료거부_사례대장.json',types:FTYPES});await writeShared(h,loadDB())}else{[h]=await window.showOpenFilePicker({types:FTYPES,multiple:false})}
+    shared.handle=h;shared.name=h.name;await kv('put','shared',h);await syncShared(false,true)}
+  catch(e){if(e&&e.name==='AbortError')return;toast('연결하지 못했습니다: '+(e.message||e))}
+}
+let syncT=null;function scheduleSync(){if(!shared.handle)return;clearTimeout(syncT);syncT=setTimeout(()=>syncShared(true,false),400)}
+async function syncShared(silent,ask){
+  if(!shared.handle)return;if(shared.busy){scheduleSync();return}shared.busy=true;
+  try{
+    if(!(await perm(shared.handle,ask))){shared.need=true;updateShareUI();if(!silent)toast('위쪽 「대장」 표시를 눌러 파일 사용을 허용해 주세요');return}
+    shared.need=false;const remote=await readShared(shared.handle);const merged=mergeDB(loadDB(),remote);saveDBlocal(merged);
+    if(core(merged)!==core(remote))await writeShared(shared.handle,merged);
+    shared.last=new Date();shared.err='';updateShareUI();refreshAlerts();
+    if($('#t-ledger').classList.contains('on'))renderLedger();if($('#t-set').classList.contains('on'))renderSet();
+    if(!silent)toast('공유 대장과 맞췄습니다');
+  }catch(e){shared.err=e.message||String(e);updateShareUI();if(!silent)toast('공유 대장을 맞추지 못했습니다: '+shared.err)}
+  finally{shared.busy=false}
+}
+function updateShareUI(){
+  const b=$('#shareBadge'),st=$('#shStatus');let t='대장 : 이 PC',w=false,s='연결 안 됨 — 이 PC의 브라우저에만 저장됩니다.';
+  if(shared.handle){const tm=shared.last?String(shared.last.getHours()).padStart(2,'0')+':'+String(shared.last.getMinutes()).padStart(2,'0'):'';
+    if(shared.need){t='대장 : 공유 파일 (눌러서 허용)';w=true;s=`「${shared.name}」 연결됨 — 파일 사용 허용이 필요합니다. 위쪽 대장 표시나 「지금 맞추기」를 누르세요.`}
+    else if(shared.err){t='대장 : 공유 오류';w=true;s=`「${shared.name}」 오류: ${shared.err}`}
+    else{t=`대장 : 공유 · ${shared.name}${tm?' · '+tm:''}`;s=`「${shared.name}」 연결됨${tm?' · 마지막으로 맞춘 시각 '+tm:''}`}}
+  b.textContent=t;b.classList.toggle('warn',w);if(st)st.textContent=s;
+}
+$('#shareBadge').addEventListener('click',()=>{if(shared.handle)syncShared(false,true);else if(MODE==='admin')showTab('ledger');else toast('공유 대장은 간사 모드의 사례 대장 탭에서 연결합니다')});
+$('#shConnect').addEventListener('click',()=>shConnect(false));
+$('#shCreate').addEventListener('click',()=>shConnect(true));
+$('#shSync').addEventListener('click',()=>{if(!shared.handle){toast('먼저 공유 대장 파일을 여세요');return}syncShared(false,true)});
+$('#shOff').addEventListener('click',async()=>{if(!shared.handle)return;shared.handle=null;shared.name='';shared.err='';await kv('del','shared');updateShareUI();toast('연결을 해제했습니다. 지금까지의 내용은 이 PC에도 남아 있습니다')});
+window.addEventListener('focus',()=>{if(shared.handle)syncShared(true,false)});
+setInterval(()=>{if(shared.handle&&document.visibilityState==='visible')syncShared(true,false)},60000);
+
+/* ================= 알림 ================= */
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+function ymd(x){return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}
+function alertsData(){
+  const L=activeCases(),now=new Date(today()),out=[];const days=d=>isDate(d)?Math.floor((now-new Date(d))/864e5):0;
+  L.forEach(c=>{
+    if(!c.fDec){const dd=days(c.fDate),fast=c.fPut==='신속 심의'||(c.judge&&c.judge.urg==='fast');
+      out.push({lv:fast||dd>=7?'r':'y',tag:fast?'신속 심의 대기':'결정 대기',txt:`${c.id} · ${c.fDept||'부서 미기재'} · 요청 ${isDate(c.fDate)?dot(c.fDate)+' ('+dd+'일 경과)':'일자 미기재·오류 — 요청 일자를 확인하세요'}`,key:ckey(c)})}
+    else if(['요청대로 결정','일부 요청사항 변경'].includes(c.fDec)&&!c.fNDate&&!c.nDate)out.push({lv:'y',tag:'통지 미완료',txt:`${c.id} · ${c.fDec} — 대상자 통지 일자가 없습니다`,key:ckey(c)});
+    if(isDate(c.fDate)){const exp=new Date(c.fDate);exp.setFullYear(exp.getFullYear()+3);const left=Math.floor((exp-now)/864e5);
+      if(left<0)out.push({lv:'b',tag:'보존기한 경과',txt:`${c.id} · 3년 보존기한(${dot(ymd(exp))}) 경과 — 폐기 여부 검토(내규 제6조 제4항)`,key:ckey(c)});
+      else if(left<=60)out.push({lv:'b',tag:'보존기한 임박',txt:`${c.id} · ${left}일 뒤 3년 보존기한(${dot(ymd(exp))})`,key:ckey(c)})}
+  });
+  const y=now.getFullYear(),m=now.getMonth()+1,ph=m>=7?{k:y+'-1',y:String(y),h:'1',t:`${y}년 상반기`}:{k:(y-1)+'-2',y:String(y-1),h:'2',t:`${y-1}년 하반기`};
+  if(!S().reports[ph.k])out.unshift({lv:'y',tag:'반기 검토',txt:`${ph.t} 사후 검토·병원장 보고(내규 제6조 제3항·제9조 제2항) 기록 없음 — 해당 반기로 「반기 보고서 인쇄」 시 완료로 기록됩니다`,half:ph});
+  return out;
+}
+function refreshAlerts(){
+  const A=alertsData(),n=A.filter(a=>a.lv!=='b').length,nb=$('#navBadge');
+  if(nb){nb.textContent=n;nb.classList.toggle('hide',!n)}
+  const ul=$('#alertList');if(!ul)return;
+  ul.innerHTML=A.length?A.map((a,i)=>`<li><span class="atag ${a.lv}">${esc(a.tag)}</span><span>${esc(a.txt)}</span><span>${a.key?`<button class="btn sec sm" data-akey="${esc(a.key)}">열기</button>`:a.half?`<button class="btn sec sm" data-ahalf="${i}">해당 반기 보기</button>`:''}</span></li>`).join(''):'<li><span class="atag b">정상</span><span>처리할 알림이 없습니다.</span><span></span></li>';
+  ul._a=A;
+}
+$('#alertList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.akey){const c=loadDB().cases.find(x=>!x.deleted&&ckey(x)===b.dataset.akey);if(c){fill(c);showTab('form')}}
+  if(b.dataset.ahalf){const a=$('#alertList')._a[+b.dataset.ahalf];if(!a||!a.half)return;const ys=$('#lYear');if(![...ys.options].some(o=>o.value===a.half.y))ys.insertAdjacentHTML('beforeend',`<option value="${a.half.y}">${a.half.y}</option>`);ys.value=a.half.y;$('#lHalf').value=a.half.h;renderLedger();toast(a.half.t+' 사례를 보여 줍니다. 「반기 보고서 인쇄」를 누르세요')}});
+
+/* ================= 모드 ================= */
+const LKEY='refusalApp.local.v1';
+function LGet(){try{return JSON.parse(localStorage.getItem(LKEY)||'{}')||{}}catch(e){return {}}}
+function LSet(o){try{localStorage.setItem(LKEY,JSON.stringify({...LGet(),...o}))}catch(e){}}
+let MODE='admin';
+function setMode(m,silent){
+  MODE=m;document.body.classList.toggle('field',m==='field');$$('#modeSw button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));LSet({mode:m});
+  const cur=$('.tab.on');if(m==='field'&&cur&&['t-ledger','t-set'].includes(cur.id))showTab('case');
+  updateJudge();if(!silent)toast(m==='field'?'현장 모드 : 사례 분석·판단·요청서 중심으로 보입니다':'간사 모드 : 대장·설정·위원회 기재란까지 보입니다');
+}
+$('#modeSw').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.dataset.m===MODE)return;
+  if(b.dataset.m==='admin'){const p=S().pin;if(p){const v=prompt('간사 모드 암호를 입력하세요');if(v===null)return;if(hashPin(v)!==p){toast('암호가 맞지 않습니다');return}}}
+  setMode(b.dataset.m)});
+
+/* ================= 탭 확장·모바일 ================= */
+function renderSet(){renderWeights();renderDict();renderCt();renderRV()}
+const _showTab=showTab;
+showTab=function(t){_showTab(t);if(t==='set')renderSet();if(t==='ledger')refreshAlerts();const mb=$('#mbarCase');if(mb)mb.style.display=t==='case'?'':'none'};
+$('#mRun').addEventListener('click',runCase);
+$('#mToForm').addEventListener('click',()=>$('#caseToForm').click());
+
+function initV4(){
+  setMode(LGet().mode||(activeCases().length?'admin':'field'),true);
+  applyCt();renderLearnSel('med');refreshAlerts();updateShareUI();
+  kv('get','shared').then(h=>{if(h&&h.name){shared.handle=h;shared.name=h.name;updateShareUI();syncShared(true,false)}});
+}
+
+/* ================= 시작 ================= */
+renderLawCases();['#lawQ','#lawP'].forEach(s=>{const el=$(s);if(el)el.addEventListener('input',renderLawCases)});renderReasonTable();renderCrit();updateJudge();renderFormReasons([]);syncSeg();
+$('#fDate').value=today();$('#fP1').value='원무팀 법무Unit';
+initV4();
+</script>
+
+<script>
+/* ================= 음성 검색·제어·명령 ================= */
+(function(){
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const V={rec:null,on:false,want:false,dict:null,local:false,lastErr:''};
+const vb=$('#vBtn'),vp=$('#vPanel');
+const LS=LGet();$('#vCont').checked=!!LS.vCont;$('#vSpeak').checked=!!LS.vSpeak;
+$('#vCont').addEventListener('change',e=>LSet({vCont:e.target.checked}));
+$('#vSpeak').addEventListener('change',e=>LSet({vSpeak:e.target.checked}));
+
+const TABS={case:'① 사례 분석',judge:'② 판단하기',form:'③ 요청서 작성',ledger:'④ 사례 대장',law:'⑤ 근거 자료',set:'⑥ 설정·검토표'};
+function curTab(){const s=$('.tab.on');return s?s.id.replace('t-',''):'case'}
+function stat(s){$('#vStat').textContent=s}
+function heard(s,interim){$('#vHeard').innerHTML=interim?'<i>'+esc(s)+'</i>':esc(s)}
+function say(msg,err){const r=$('#vRes');r.textContent=msg;r.classList.toggle('err',!!err);toast(msg);
+  if($('#vSpeak').checked&&'speechSynthesis' in window)speak(msg)}
+function speak(text){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text).slice(0,600));u.lang='ko-KR';u.rate=1.05;
+  const ko=speechSynthesis.getVoices().find(v=>/ko/i.test(v.lang));if(ko)u.voice=ko;speechSynthesis.speak(u)}catch(e){}}
+function flash(el){if(!el)return;el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('vflash');setTimeout(()=>el.classList.remove('vflash'),1400)}
+function openPanel(){vp.classList.remove('hide')}
+function setBtn(){vb.classList.toggle('on',V.on&&!V.dict);vb.classList.toggle('dict',V.on&&!!V.dict)}
+
+/* ---- 숫자·날짜 말 바꾸기 ---- */
+const KN={'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9,'십':10,'십일':11,'십이':12,'십삼':13,'십사':14,'십오':15,'십육':16,
+  '하나':1,'한':1,'둘':2,'두':2,'셋':3,'세':3,'넷':4,'네':4,'다섯':5,'여섯':6,'일곱':7,'여덟':8,'아홉':9,'열':10,'열하나':11,'열한':11,'열둘':12,'열두':12,'열셋':13,'열세':13,'열넷':14,'열네':14,'열다섯':15,'열여섯':16};
+function nums(s){const out=[];s.replace(/(\d{1,2}|십[일이삼사오육]?|열(?:하나|한|둘|두|셋|세|넷|네|다섯|여섯)?|하나|한|둘|두|셋|세|넷|네|다섯|여섯|일곱|여덟|아홉|[일이삼사오육칠팔구])\s*번/g,(m,a)=>{const n=/^\d+$/.test(a)?+a:KN[a];if(n)out.push(n);return m});return out}
+function spokenDate(s){
+  s=s.replace(/\s+/g,' ').trim();const now=new Date();
+  const rel={'오늘':0,'금일':0,'어제':-1,'그제':-2,'그저께':-2,'내일':1};
+  for(const k in rel)if(s.includes(k)){const d=new Date(now);d.setDate(d.getDate()+rel[k]);return ymd(d)}
+  let m=s.match(/(?:(\d{4})\s*년\s*)?(\d{1,2})\s*월\s*(\d{1,2})\s*일/);
+  if(m){const y=m[1]||String(now.getFullYear());const v=fmtDate(y+'-'+m[2]+'-'+m[3]);return isDate(v)?v:''}
+  const v=fmtDate(s.replace(/[^\d.\-\/]/g,''));return isDate(v)?v:'';
+}
+function spokenTime(s){
+  if(/지금|현재/.test(s)){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+  const m=s.match(/(오전|오후|아침|저녁|밤|낮)?\s*(\d{1,2})\s*시\s*(?:(\d{1,2})\s*분|(반))?/);
+  if(m){let h=+m[2];const mi=m[4]?30:+(m[3]||0);if(/오후|저녁|밤|낮/.test(m[1]||'')&&h<12)h+=12;if(m[1]==='오전'&&h===12)h=0;const v=String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0');return isTime(v)?v:''}
+  const v=fmtTime(s.replace(/\D/g,''));return isTime(v)?v:'';
+}
+const tailRe=/\s*(으로|로|이야|입니다|이에요|예요|에요|해\s*줘|해\s*주세요|해|넣어\s*줘|넣어|적어\s*줘|적어|입력해?\s*줘?|요)\s*$/;
+function clean(v){let p;do{p=v;v=v.replace(tailRe,'').trim()}while(v!==p);return v.replace(/^[은는이가을를:]\s*/,'').trim()}
+
+/* ---- 화면 동작 ---- */
+function go(tab){if(['ledger','set'].includes(tab)&&MODE!=='admin'){say(TABS[tab]+'은 간사 모드에서 볼 수 있습니다. 「간사 모드」라고 말해 보세요',true);return false}
+  showTab(tab);window.scrollTo({top:0,behavior:'smooth'});return true}
+function click(id){const el=$('#'+id);if(!el)return false;el.click();return true}
+function pickRadio(name,val){const el=document.querySelector(`input[name="${name}"][value="${val}"]`);if(!el)return false;el.checked=true;el.dispatchEvent(new Event('change',{bubbles:true}));syncSeg();return true}
+function setField(id,val,append){const el=$('#'+id);if(!el)return false;el.value=append&&el.value?el.value.replace(/\s*$/,'')+' '+val:val;el.dispatchEvent(new Event('input',{bubbles:true}));if(el.classList.contains('dateIn')||el.classList.contains('timeIn'))markDT(el);flash(el);return true}
+function checkReasons(list,on){const tab=curTab()==='form'?'form':'judge';if(curTab()!==tab)go(tab);const pre=tab==='form'?'fr':'jr';const done=[],miss=[];
+  list.forEach(n=>{const el=$('#'+pre+n);if(!el){miss.push(n);return}if(el.checked!==on){el.checked=on;el.dispatchEvent(new Event('change',{bubbles:true}))}done.push(n)});
+  const el=$('#'+pre+(done[0]||list[0]));if(el)flash(el.closest('tr'));
+  const ty=tab==='form'?fType():radio('jType');const tn=ty==='emg'?'응급의료':'일반 진료';
+  if(done.length)say(`${tn} 사유 ${done.join('·')}번을 ${on?'선택':'해제'}했습니다`+(miss.length?` (${miss.join('·')}번은 없는 번호)`:''));else say(`${tn} 사유에 ${miss.join('·')}번이 없습니다`,true)}
+function readOut(){const tab=curTab();let txt='';
+  if(tab==='case')txt=$('#caseResult').innerText;
+  else if(tab==='judge')txt=$('#result').innerText;
+  else if(tab==='law'){const rows=$$('#lawCases tr td:first-child b').slice(0,3).map(b=>b.textContent);txt=`판례 ${$('#lawCnt').textContent}. `+rows.join('. ')}
+  else if(tab==='ledger')txt=$('#alertList').innerText;
+  else if(tab==='form')txt='요청서 화면입니다. '+($('#caseIdView').textContent||'저장 전입니다');
+  else txt=$('#confBar').innerText;
+  txt=txt.replace(/\s+/g,' ').trim();if(!txt){say('읽을 결과가 없습니다',true);return}
+  $('#vRes').textContent='읽는 중…';speak(txt)}
+function lawSearch(q,pf){go('law');const el=$('#lawQ');el.value=q;if(pf!==undefined)$('#lawP').value=pf;renderLawCases();flash($('#lawCases'));
+  say(`판례 ${q?'「'+q+'」 ':''}${pf?({ok:'정당사유 인정·처벌',no:'정당사유 부정',ref:'참고'}[pf])+' ':''}검색 결과 ${$('#lawCnt').textContent}`)}
+function ledgerSearch(q){if(!go('ledger'))return;$('#lQ').value=q;renderLedger();flash($('#lTable'));say(q?`대장에서 「${q}」 검색 — ${filtered().length}건`:`대장 검색을 지웠습니다 — ${filtered().length}건`)}
+
+/* ---- 받아쓰기 ---- */
+function dictTarget(){const a=document.activeElement;if(a&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&a.type==='text'))&&a.id!=='vType'&&!a.closest('.tab:not(.on)'))return a;
+  const tab=curTab();if(tab==='form')return $('#fStory');if(tab!=='case')go('case');return $('#caseText')}
+function startDict(){const el=dictTarget();V.dict=el;el.focus();flash(el);setBtn();say('받아쓰기를 시작합니다. 끝내려면 「받아쓰기 끝」이라고 말하세요');if(!V.on)listen(true)}
+function stopDict(){if(!V.dict)return false;V.dict=null;setBtn();if(!$('#vCont').checked)stopListen(true);else stat('듣는 중… 말씀하세요');say('받아쓰기를 끝냈습니다');return true}
+function dictate(text){const el=V.dict;let s=text.trim().replace(/\s*(마침표|점 찍어)$/,'.').replace(/\s*쉼표$/,',');
+  if(/^(줄 ?바꿈|다음 줄|엔터)$/.test(s)){el.value+='\n';}else{s=s.replace(/\s*(줄 ?바꿈|다음 줄)\s*/g,'\n');el.value=(el.value&&!/[\s\n]$/.test(el.value)?el.value+' ':el.value)+s}
+  el.dispatchEvent(new Event('input',{bubbles:true}));el.scrollTop=el.scrollHeight;$('#vRes').textContent='받아쓰는 중 — '+(el.id==='caseText'?'사례 입력칸':el.id==='fStory'?'요청 경위':'선택한 칸')}
+
+/* ---- 명령 해석 ---- */
+const FIELDS=[
+  [/^(?:환자\s*(?:성명|이름|명)?|성명)\s*(?:은|는|:)?\s*(.+)$/,'fPt','환자 성명'],
+  [/^등록\s*번호\s*(?:는|은|:)?\s*(.+)$/,'fRegNo','등록번호',v=>v.replace(/[^\dA-Za-z-]/g,'')],
+  [/^(?:요청\s*)?부서\s*(?:명)?\s*(?:은|는|:)?\s*(.+)$/,'fDept','부서명'],
+  [/^요청자\s*(?:는|은|:)?\s*(.+)$/,'fReq','요청자'],
+  [/^(?:전화|연락처|전화\s*번호)\s*(?:는|은|:)?\s*(.+)$/,'fTel','연락처',v=>v.replace(/[^\d-]/g,'')],
+  [/^진료과\s*(?:는|은|:)?\s*(.+)$/,'fClinic','진료과'],
+  [/^(?:담당\s*교수|주치의|담당\s*의사)\s*(?:는|은|:)?\s*(.+)$/,'fProf','담당 교수'],
+];
+function run(raw){
+  const text=String(raw||'').trim();if(!text)return;heard(text);
+  if(V.dict){if(/^받아\s*쓰기\s*(끝|종료|그만|멈춰|중지)|^(받아쓰기\s*)?그만\s*받아/.test(text.replace(/\s+/g,' '))){stopDict();return}dictate(text);return}
+  const s=text.replace(/[.?!。]+$/,'').replace(/\s+/g,' ').trim(),n=s.replace(/\s+/g,'');
+  let m;
+  // 듣기·도움말
+  if(/^(그만|멈춰|중지|종료|음성\s*(끄기|꺼|종료)|듣기\s*(끝|그만|중지))(해|해\s*줘)?$/.test(s)){stopListen(true);say('음성 듣기를 멈췄습니다');return}
+  if(/읽기\s*(멈춰|그만|중지)|그만\s*읽어/.test(s)){speechSynthesis.cancel();say('읽기를 멈췄습니다');return}
+  if(/도움말|명령어|뭐라고\s*말|사용법/.test(s)){showHelp(true);say('명령어 목록을 열었습니다');return}
+  if(/^받아\s*쓰기(\s*(시작|켜|해))?/.test(s)){startDict();return}
+  // 모드
+  if(/현장\s*모드/.test(s)){if(MODE!=='field')setMode('field');say('현장 모드로 바꿨습니다');return}
+  if(/간사\s*모드/.test(s)){if(MODE==='admin'){say('이미 간사 모드입니다');return}const b=document.querySelector('#modeSw button[data-m="admin"]');b.click();if(MODE==='admin')say('간사 모드로 바꿨습니다');return}
+  // 읽기
+  if(/(결과|판단|내용|알림|이거|화면)?\s*읽어(\s*줘|\s*주세요)?$/.test(s)&&!/사례\s*입력/.test(s)){readOut();return}
+  // 사례 분석
+  if(/^(사례\s*)?(입력|내용)\s*[:：]?\s*(.+)$/.test(s)&&/^(사례\s*)?(입력|내용)/.test(s)&&(m=s.match(/^(?:사례\s*)?(?:입력|내용)\s*[:：]?\s*(.+)$/))&&m[1].length>4){go('case');setField('caseText',m[1],true);say('사례 입력칸에 적었습니다. 「분석해」라고 말하면 분석합니다');return}
+  if(/^(사례\s*)?(지워|비워|초기화|새\s*사례)/.test(s)&&!/검색/.test(s)){go('case');click('caseClear');say('사례 입력칸을 비웠습니다');return}
+  if(/요청서로\s*(보내|옮겨|넘겨|가져|작성)/.test(s)||/요청서\s*(만들어|작성해)/.test(s)&&curTab()==='case'){const from=curTab();if(from==='judge')click('toForm');else{go('case');click('caseToForm')}say('요청서로 옮겼습니다');return}
+  if(/판단(하기)?로\s*(보내|옮겨|넘겨)/.test(s)){go('case');click('caseToJudge');say('판단하기로 옮겼습니다');return}
+  if(/^(사례\s*)?분석(\s*해|\s*하기|\s*실행|\s*시작|\s*해\s*줘|\s*해\s*주세요)?$/.test(s)||/규칙에\s*맞는지/.test(s)){go('case');if(!$('#caseText').value.trim()){say('사례 입력칸이 비어 있습니다. 「받아쓰기」로 사례를 말해 주세요',true);return}click('caseRun');setTimeout(()=>{flash($('#caseResult'));const v=$('#caseResult .big');say('분석했습니다'+(v?' — '+v.textContent.trim():''))},120);return}
+  // 사유 선택
+  const ns=nums(s);
+  if(ns.length&&/(선택|체크|표시|골라|넣어|추가|켜)/.test(s)&&!/(해제|빼|지워|취소|끄)/.test(s)){if(/응급/.test(s))typeTo('emg',true);else if(/일반/.test(s))typeTo('med',true);checkReasons(ns,true);return}
+  if(ns.length&&/(해제|빼|지워|취소|끄)/.test(s)){checkReasons(ns,false);return}
+  // 유형
+  if(/(응급\s*의료|응급)\s*(로|으로)?\s*(선택|바꿔|변경|해)/.test(s)||/^응급\s*의료$/.test(s)){typeTo('emg');return}
+  if(/(일반\s*진료|일반)\s*(로|으로)?\s*(선택|바꿔|변경|해)/.test(s)||/^일반\s*진료$/.test(s)){typeTo('med');return}
+  if(/판단\s*(초기화|다시|새로)/.test(s)){go('judge');click('resetJudge');say('판단하기를 처음 상태로 돌렸습니다');return}
+  // 요청서
+  if(/새\s*요청서/.test(s)){go('form');click('newForm');say('새 요청서를 열었습니다');return}
+  if(/(요청\s*)?파일\s*(내려\s*받|다운)/.test(s)){go('form');click('dlCase');return}
+  if(/^(요청서\s*)?저장(\s*해|\s*하기|\s*해\s*줘)?$/.test(s)||/대장에\s*저장/.test(s)){go('form');click('saveForm');setTimeout(()=>say($('#toast').textContent||'저장했습니다'),60);return}
+  if(/반기\s*보고서/.test(s)){if(go('ledger')){click('lReport');say('반기 보고서 인쇄 창을 엽니다')}return}
+  if(/통지서\s*(인쇄|출력)/.test(s)){go('form');click('nPrint');say('통지서 인쇄 창을 엽니다');return}
+  if(/(인쇄|출력|PDF|피디에프)/i.test(s)){const t=curTab();if(t==='ledger'){click('lReport')}else if(t==='set'){click('rvPrint')}else{go('form');click('printForm')}say('인쇄 창을 엽니다');return}
+  if((m=s.match(/^(?:요청\s*)?(?:일자|날짜)\s*(?:는|은|:)?\s*(.+)$/))){const v=spokenDate(m[1]);if(!v){say('날짜를 알아듣지 못했습니다. 예: 「요청 일자 오늘」, 「요청 일자 11월 26일」',true);return}go('form');setField('fDate',v);say('요청 일자 → '+dot(v));return}
+  if((m=s.match(/^(?:요청\s*)?(?:시각|시간)\s*(?:은|는|:)?\s*(.+)$/))){const v=spokenTime(m[1]);if(!v){say('시각을 알아듣지 못했습니다. 예: 「요청 시각 지금」, 「요청 시각 오후 2시 30분」',true);return}go('form');setField('fTime',v);say('요청 시각 → '+v);return}
+  if((m=s.match(/^(?:요청\s*)?경위\s*(?:는|은|:)?\s*(.+)$/))&&m[1].length>2){go('form');setField('fStory',m[1],true);say('요청 경위에 덧붙였습니다');return}
+  if((m=s.match(/^신분\s*(?:은|는)?\s*(의료인|의료\s*기사|기타)/))){go('form');pickRadio('fRole',m[1].replace(/\s/g,''));say('신분 → '+m[1]);return}
+  for(const [re,id,label,fx] of FIELDS){if((m=s.match(re))){let v=clean(m[1]);if(fx)v=fx(v);if(!v){say(label+' 값을 알아듣지 못했습니다',true);return}go('form');setField(id,v);say(label+' → '+v);return}}
+  // 대장
+  if(/(공유\s*대장|대장)\s*(맞춰|동기화|새로\s*고침)|^동기화/.test(s)){if(go('ledger'))click('shSync');return}
+  if(/백업/.test(s)){if(go('ledger')){click('lBackup');say('백업 파일을 내려받습니다')}return}
+  if(/(엑셀|씨에스브이|CSV)/i.test(s)){if(go('ledger')){click('lCsv');say('대장을 CSV 파일로 내려받습니다')}return}
+  if(/알림/.test(s)&&/(보여|열어|확인|봐)/.test(s)){if(go('ledger')){flash($('#alertCard'));say('알림 '+($('#navBadge').textContent||0)+'건')}return}
+  // 검색
+  if(/(검색|찾아|찾기|찾자|보여\s*줘|뭐\s*있)/.test(s)&&!/^(판단|요청서|대장|설정|근거)\s*(화면)?\s*(보여|열어)/.test(s)){
+    if(/검색\s*(지워|초기화|취소|해제|비워)/.test(s)){if(curTab()==='ledger'){ledgerSearch('')}else lawSearch('','');return}
+    let pf;if(/부정/.test(s))pf='no';else if(/(인정|처벌)/.test(s))pf='ok';else if(/참고/.test(s))pf='ref';else if(/전체/.test(s))pf='';
+    const inLedger=/대장/.test(s)||(curTab()==='ledger'&&!/판례|해석|사례집/.test(s));
+    let q=s.replace(/(사례\s*)?대장에서|판례에서|근거\s*자료에서|에\s*대한|에\s*관한|관련(된)?|(판례|해석|사례|재결|결정)(를|을|들)?|정당\s*사유\s*(인정|부정)|부정(된|만)?|인정(된|만)?|처벌|참고(만)?|전체|(만\s*)?(검색|찾아|찾기|찾자|보여)\s*(해|줘|주세요|해\s*줘|봐|볼래)*|뭐\s*있(어|나|니|는지)?|좀|주세요|줘/g,' ').replace(/\s+/g,' ').trim();
+    if(inLedger){ledgerSearch(q);return}
+    lawSearch(q,pf);return}
+  // 화면 이동
+  const NAV=[[/사례\s*분석|분석\s*화면|처음\s*화면|첫\s*화면/,'case'],[/판단(하기)?/,'judge'],[/요청서/,'form'],[/대장/,'ledger'],[/근거|법령|판례\s*목록|판례|해석/,'law'],[/설정|검토표|배점|개정/,'set']];
+  for(const [re,tab] of NAV)if(re.test(s)&&(/(열어|보여|가|이동|화면|탭|으로|로)\s*(줘|주세요|가자)?$/.test(s)||n.replace(re,'').length<=2)){if(go(tab))say(TABS[tab]+' 화면입니다');return}
+  // 스크롤
+  if(/맨\s*위|처음으로|위로\s*올려/.test(s)){window.scrollTo({top:0,behavior:'smooth'});say('맨 위로 갔습니다');return}
+  if(/맨\s*아래|끝으로/.test(s)){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});say('맨 아래로 갔습니다');return}
+  if(/아래로|내려/.test(s)){window.scrollBy({top:innerHeight*0.7,behavior:'smooth'});$('#vRes').textContent='아래로 내렸습니다';return}
+  if(/위로|올려/.test(s)){window.scrollBy({top:-innerHeight*0.7,behavior:'smooth'});$('#vRes').textContent='위로 올렸습니다';return}
+  // 사례 분석 화면에서 긴 문장은 사례로 받기
+  if(curTab()==='case'&&s.length>=25){setField('caseText',s,true);say('사례 입력칸에 적었습니다. 「분석해」라고 말하면 분석합니다');return}
+  say(`「${s}」 — 알아듣지 못한 명령입니다. 「도움말」이라고 말하면 명령어를 보여 줍니다`,true);
+}
+function typeTo(ty,quiet){const tab=curTab()==='form'?'form':'judge';if(curTab()!==tab)go(tab);const name=tab==='form'?'fType':'jType';
+  if(radio(name)!==ty)pickRadio(name,ty);if(!quiet)say((ty==='emg'?'응급의료':'일반 진료')+'로 선택했습니다'+(tab==='judge'?' (선택한 사유는 초기화됨)':''))}
+
+/* ---- 도움말 ---- */
+const HELP=[
+ ['화면 이동','<b>판단하기 열어</b> · <b>요청서</b> · <b>사례 대장</b> · <b>근거 자료</b> · <b>설정</b> · <b>맨 위로</b> · <b>아래로</b>'],
+ ['판례 검색','<b>퇴원 판례 찾아줘</b> · <b>가처분 검색</b> · <b>폭행 정당사유 부정만 보여줘</b> · <b>검색 지워</b>'],
+ ['대장 검색','<b>대장에서 홍길동 찾아줘</b> · <b>알림 보여줘</b> · <b>공유 대장 맞춰</b> · <b>백업</b> · <b>엑셀로</b>'],
+ ['사례 분석','<b>받아쓰기</b> → 사례를 말함 → <b>받아쓰기 끝</b> · <b>분석해</b> · <b>요청서로 보내</b> · <b>판단하기로 보내</b> · <b>사례 지워</b>'],
+ ['판단하기','<b>응급의료로 바꿔</b> · <b>일반 진료</b> · <b>9번 10번 선택</b> · <b>응급 6번 체크</b> · <b>9번 해제</b> · <b>판단 다시</b>'],
+ ['요청서','<b>새 요청서</b> · <b>요청 일자 오늘</b> · <b>요청 시각 오후 2시 30분</b> · <b>부서 정형외과</b> · <b>요청자 김간호</b> · <b>진료과 정형외과</b> · <b>신분 의료인</b> · <b>경위 …</b> · <b>저장</b> · <b>인쇄</b> · <b>통지서 인쇄</b>'],
+ ['읽기','<b>결과 읽어줘</b> (지금 화면의 결과를 소리로) · <b>읽기 멈춰</b>'],
+ ['모드·끄기','<b>현장 모드</b> · <b>간사 모드</b> · <b>그만</b>(음성 끄기) · <b>도움말</b>'],
+ ['받아쓰기 중','말한 내용이 그대로 입력됩니다. <b>마침표</b>·<b>쉼표</b>·<b>줄 바꿈</b>을 말하면 부호가 들어갑니다. 끝낼 때 <b>받아쓰기 끝</b>'],
+ ['단축키','<b>F2</b> 듣기 시작/멈춤 · <b>Esc</b> 멈춤 · 입력칸을 누른 뒤 「받아쓰기」라고 하면 그 칸에 받아씁니다'],
+];
+function showHelp(force){const h=$('#vHelp');if(!h.innerHTML)h.innerHTML='<table>'+HELP.map(r=>`<tr><th>${r[0]}</th><td>${r[1]}</td></tr>`).join('')+'</table><p class="hint" style="margin:8px 0 0">※ 환자 성명·등록번호도 「환자 성명 ○○○」「등록번호 ○○」로 넣을 수 있으나, 음성이 외부 서버로 전송되므로 직접 입력을 권장합니다.</p>';
+  const show=force===true?true:h.classList.contains('hide');h.classList.toggle('hide',!show);$('#vHelpBtn').textContent=show?'명령어 ▴':'명령어 ▾';openPanel()}
+
+/* ---- 음성 인식 ---- */
+async function makeRec(){
+  const r=new SR();r.lang='ko-KR';r.interimResults=true;r.maxAlternatives=1;r.continuous=true;
+  try{if('processLocally' in r&&SR.available){const a=await SR.available({langs:['ko-KR'],processLocally:true});if(a==='available'){r.processLocally=true;V.local=true}}}catch(e){}
+  r.onstart=()=>{V.on=true;setBtn();stat(V.dict?'받아쓰는 중… (끝내려면 「받아쓰기 끝」)':'듣는 중… 말씀하세요'+(V.local?' (이 PC 안에서 인식)':''));if(V.local)$('#vNote').innerHTML='음성을 <b>이 PC 안에서</b> 글자로 바꿉니다(외부 전송 없음).'};
+  r.onresult=e=>{let fin='',tmp='';for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal)fin+=x[0].transcript;else tmp+=x[0].transcript}
+    if(tmp)heard(tmp,true);if(fin){run(fin);if(!$('#vCont').checked&&!V.dict&&V.on){V.want=false;try{r.stop()}catch(e){}}}};
+  r.onerror=e=>{V.lastErr=e.error;
+    const M={'not-allowed':'마이크 사용이 막혀 있습니다. 주소창 왼쪽 자물쇠(또는 i) 표시에서 마이크를 「허용」으로 바꿔 주세요.','service-not-allowed':'이 브라우저에서 음성 인식을 쓸 수 없습니다. 아래 입력칸에 글로 명령하세요.','network':'음성 인식 서버에 연결하지 못했습니다(병원 인터넷 차단 가능). 아래 입력칸에 글로 명령하세요.','audio-capture':'마이크를 찾지 못했습니다. 마이크(헤드셋) 연결을 확인하세요.','language-not-supported':'한국어 음성 인식을 지원하지 않는 브라우저입니다.'};
+    if(e.error==='no-speech'||e.error==='aborted')return;
+    if(M[e.error]){V.want=false;say(M[e.error],true)}};
+  r.onend=()=>{V.on=false;setBtn();if(V.want&&($('#vCont').checked||V.dict)&&!['not-allowed','service-not-allowed','network','audio-capture','language-not-supported'].includes(V.lastErr)){V.lastErr='';try{r.start();return}catch(e){}}
+    V.want=false;stat('대기 중 — 마이크 단추나 F2를 누르면 다시 듣습니다')};
+  return r;
+}
+async function listen(){
+  openPanel();
+  if(!SR){stat('이 브라우저는 음성 인식을 지원하지 않습니다');say('음성 인식은 크롬·엣지에서 됩니다. 아래 입력칸에 글로 명령할 수 있습니다',true);$('#vType').focus();return}
+  if(V.on){return}
+  if(!V.rec)V.rec=await makeRec();
+  V.want=true;V.lastErr='';try{speechSynthesis&&speechSynthesis.cancel()}catch(e){}
+  try{V.rec.start();stat('마이크 준비 중…')}catch(e){stat('듣는 중…')}
+}
+function stopListen(quiet){V.want=false;V.dict=null;setBtn();if(V.rec&&V.on){try{V.rec.stop()}catch(e){}}stat('대기 중');if(!quiet)$('#vRes').textContent='음성 듣기를 멈췄습니다'}
+vb.addEventListener('click',()=>{if(V.on)stopListen();else listen()});
+$('#vClose').addEventListener('click',()=>{stopListen(true);vp.classList.add('hide')});
+$('#vHelpBtn').addEventListener('click',()=>showHelp());
+$('#vGo').addEventListener('click',()=>{const v=$('#vType').value;$('#vType').value='';run(v)});
+$('#vType').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#vGo').click()}});
+document.addEventListener('keydown',e=>{if(e.key==='F2'){e.preventDefault();if(V.on)stopListen();else listen()}else if(e.key==='Escape'&&(V.on||!vp.classList.contains('hide'))){if(V.on)stopListen();else vp.classList.add('hide')}});
+if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices()}
+window.voiceRun=run; /* 테스트·연동용 */
+})();
+</script>
+<script>if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
+</body>
+</html>
