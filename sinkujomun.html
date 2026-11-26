@@ -2,6 +2,19 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<script>/* 저장이 막힌 창(미리보기·샌드박스)에서도 멈추지 않도록: 임시 메모리 저장소로 대신함 */
+(function(){var ok=true;try{var s=window.localStorage;s.setItem('__t','1');s.removeItem('__t');}catch(e){ok=false;}
+if(ok)return;var m={};var mem={getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null}};
+Object.defineProperty(mem,'length',{get:function(){return Object.keys(m).length}});
+try{Object.defineProperty(window,'localStorage',{value:mem,configurable:true})}catch(e){}
+try{Object.defineProperty(window,'sessionStorage',{value:mem,configurable:true})}catch(e){}
+try{Object.defineProperty(window,'indexedDB',{value:{open:function(){throw new Error('저장소 없음')}},configurable:true})}catch(e){}
+window.__noStore=true;
+document.addEventListener('DOMContentLoaded',function(){var d=document.createElement('div');d.id='noStoreBar';
+d.innerHTML='<b>⚠ 미리보기 창이라 저장이 막혀 있습니다.</b> 사용자 등록·작업은 할 수 있지만 <b>창을 닫으면 모두 사라집니다.</b> 계속 쓰려면 파일을 <b>내려받아 크롬·엣지로 열거나</b> 배포 사이트 주소에서 여세요. <button type="button" onclick="this.parentNode.remove()">닫기</button>';
+d.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:100000;background:#fff4d6;color:#5a4300;border-top:2px solid #f2c14e;padding:10px 16px;font-size:13.5px;line-height:1.5;font-family:inherit;box-shadow:0 -4px 12px rgba(0,0,0,.12)';
+document.body.appendChild(d);});})();</script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>신·구조문 대조표 작성 도구</title>
 <style id="appcss">
@@ -9665,7 +9678,7 @@ details summary{cursor:pointer;color:#2f6bbd;font-size:13px}.bar{position:fixed;
    예: {"version":"2.1","date":"2026-11-02","notes":["…"],"download":"https://…/sinkujomun.html"} */
 (function () {
   'use strict';
-  const APP_VERSION = '3.5.2';
+  const APP_VERSION = '3.5.3';
   const APP_FILE = '신구조문 대조표 작성 도구.html';
   const UPDATE_URL = 'https://appraisal-fee.github.io/rohslaw/sinkujomun-version.json';
   const $ = (s) => document.querySelector(s);
