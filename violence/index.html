@@ -858,6 +858,31 @@ body.locked .sosfab,body.printing .sosfab{display:none}
 .lockbtn i::before{content:"";position:absolute;left:1px;top:-8px;width:6px;height:6px;border:2px solid var(--navy);border-bottom:0;border-radius:4px 4px 0 0}
 @media (max-width:760px){.sosfab{width:58px;height:58px;right:12px;bottom:12px}.bkbar{grid-template-columns:1fr 1fr;width:calc(100% - 90px);left:12px;transform:none}.bkbar span{grid-column:1/-1}.smsacts{grid-template-columns:1fr}.evtools{grid-template-columns:1fr}}
 @media print{.sosfab,.bkbar,.lock,.sos{display:none!important}}
+/* ===== 말로 칸 채우기 ===== */
+.vffab{position:fixed;left:18px;bottom:18px;z-index:900;display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 18px;border:0;border-radius:24px;background:var(--navy);color:#fff;font:inherit;font-size:15px;font-weight:700;box-shadow:0 4px 14px rgba(20,40,74,.35);cursor:pointer}
+.vffab i{width:10px;height:10px;border-radius:50%;background:#ff6b6b}
+.vffab.on{background:#c62828}.vffab.on i{background:#fff;animation:rblink 1s infinite}
+body.locked .vffab{display:none}
+.vfpanel{position:fixed;left:50%;transform:translateX(-50%);bottom:80px;z-index:1500;width:min(560px,calc(100% - 24px));background:#fff;border:2px solid var(--navy);border-radius:12px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.vfhd{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center}
+.vfhd b{font-size:18px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#vf-pos{font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.vfdot{width:12px;height:12px;border-radius:50%;background:#c62828;animation:rblink 1s infinite}
+.vftxt{margin:10px 0 8px;min-height:48px;padding:10px 12px;border-radius:8px;background:var(--bg);font-size:17px;line-height:1.45;word-break:break-all;color:var(--ink2)}
+.vftxt.live{color:var(--ink);font-weight:600}.vftxt.ok{color:var(--ok);font-weight:700}.vftxt.bad{color:var(--alert)}
+.vfbar{height:5px;border-radius:3px;background:#e4e9f0;overflow:hidden}.vfbar i{display:block;height:100%;width:0;background:var(--navy)}
+.vfopts{display:flex;gap:14px;align-items:center;margin:10px 0 0;flex-wrap:wrap}
+.vfopts .l{display:flex;align-items:center;gap:6px;margin:0;font-size:13.5px}.vfopts select{width:auto;min-height:0;padding:3px 6px}
+.vfnav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}.vfnav .btn{margin:0}
+.vfhelp{margin:8px 0 0;font-size:12.5px;color:var(--ink2);text-align:center}
+.vf-on{outline:3px solid #ff9800!important;outline-offset:2px;border-radius:4px;animation:vfblink 1s ease-in-out infinite}
+@keyframes vfblink{0%,100%{outline-color:#ff9800;box-shadow:0 0 0 0 rgba(255,152,0,.0)}50%{outline-color:#ffd180;box-shadow:0 0 0 6px rgba(255,152,0,.25)}}
+@media (max-width:760px){.vffab{left:12px;bottom:12px;height:46px;padding:0 14px;font-size:14px}.vfpanel{bottom:68px}}
+@media print{.vffab,.vfpanel{display:none!important}}
+.sitvoice{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:center;width:100%;margin:0 0 12px;min-height:48px;text-align:left}
+.sitvoice i{width:10px;height:10px;border-radius:50%;background:#ff6b6b;box-shadow:0 0 0 3px rgba(255,107,107,.3)}
+.sitvoice small{font-weight:400;opacity:.85;font-size:12.5px;justify-self:end}
+@media (max-width:760px){.sitvoice{grid-template-columns:auto 1fr}.sitvoice small{grid-column:1/-1;justify-self:start}}
 </style>
 <meta name="theme-color" content="#1f3a68">
 <link rel="manifest" href="manifest.webmanifest">
@@ -884,6 +909,7 @@ body.locked .sosfab,body.printing .sosfab{display:none}
   <div class="card">
     <h2>지금 어떤 상황인가요?</h2>
     <p class="qsub" style="margin-top:-10px">해당하는 것을 모두 고르세요. 고르는 대로 대응 수준과 할 일이 나옵니다.</p>
+    <button type="button" class="btn sitvoice" id="sit-voice"><i></i>말로 상황 말하기 <small>“술 취한 보호자가 간호사를 때리고 욕했어요”처럼</small></button>
     <div id="sitgrid"></div>
     <div class="sitopt">
       <label class="opt"><input type="checkbox" id="sit-er"><span>응급실에서 발생했습니다</span></label>
@@ -5116,6 +5142,125 @@ $("#u-locknow").addEventListener("click",function(){ if(!lockable()){ toast("앱
 (function(){ var b=document.createElement("button"); b.type="button"; b.id="lockbtn"; b.className="lockbtn hidden"; b.title="지금 잠그기"; b.innerHTML="<i></i>잠금"; $(".hdr-r").insertBefore(b,$("#ubtn")); b.addEventListener("click",lockNow); })();
 uRender(); if(lockable()) lockNow();
 /*PLUSEND*/
+/*VFJS*//* ============================================================
+   말로 칸 채우기 — 반짝이는 칸에 말하면 쉬는 순간 넣고 다음 칸으로
+   ============================================================ */
+var VF={on:false,list:[],i:0,buf:"",fin:"",timer:null,rec:null,wait:ls.get("lfv_vf_wait",2),empty:ls.get("lfv_vf_empty",true),t0:0,raf:null};
+(function(){ var b=document.createElement("button"); b.type="button"; b.id="vf-open"; b.className="vffab"; b.innerHTML='<i></i>말로 칸 채우기'; document.body.appendChild(b);
+  var p=document.createElement("div"); p.id="vf"; p.className="vfpanel hidden";
+  p.innerHTML='<div class="vfhd"><span class="vfdot"></span><b id="vf-lab">칸 이름</b><span id="vf-pos"></span></div><div class="vftxt" id="vf-txt">말하세요</div><div class="vfbar"><i id="vf-bar"></i></div>'
+   +'<div class="vfopts"><label class="opt"><input type="checkbox" id="vf-empty"><span>빈 칸만</span></label><label class="l">쉬는 시간<select id="vf-wait"><option value="1.5">1.5초</option><option value="2">2초</option><option value="3">3초</option></select></label></div>'
+   +'<div class="vfnav"><button type="button" class="btn ghost" id="vf-prev">이전 칸</button><button type="button" class="btn ghost" id="vf-skip">건너뛰기</button><button type="button" class="btn" id="vf-stop">마치기</button></div>'
+   +'<p class="vfhelp">“다음” 건너뛰기 · “이전” 앞 칸 · “지워” 칸 비우기 · “그만” 마치기</p>';
+  document.body.appendChild(p); $("#vf-empty").checked=VF.empty; $("#vf-wait").value=String(VF.wait); })();
+
+/* ---------- 지금 상황을 말로 ---------- */
+var SITKW=[
+ ["weapon",/칼|흉기|가위|망치|낫|송곳|유리\s*조각|병을\s*들|의자를\s*(들|던|휘)|폴대|링거\s*대|쇠파이프|각목/],
+ ["injury",/다쳤|다치|피가|피를|출혈|상처|부었|붓|멍|골절|찢어|찢|부러|상해|봉합|기절/],
+ ["assault",/때리|때렸|때려|폭행|밀쳤|밀치|밀어|발로|찼|걷어|주먹|뺨|멱살|머리채|쳤|침을\s*뱉|할퀴|꼬집|잡아당|물었|깨물|던져서\s*맞|목을\s*졸/],
+ ["verbal",/욕|폭언|협박|죽여|죽인다|가만\s*안|소리\s*(지르|질러)|고함|위협|막말|모욕|반말|저주/],
+ ["drunk",/술|취해|취한|만취|주취|소란|난동|행패|고성/],
+ ["property",/부수|부쉈|부서|깨뜨|깼|깨졌|파손|집어\s*던|던졌|망가|기물|발로\s*차서|점거|드러누/],
+ ["sexual",/성희롱|추행|만졌|만지|더듬|성적|엉덩이|가슴|음란|야한|몸을\s*밀착/],
+ ["confine",/안\s*나가|나가지\s*않|버티|버텨|퇴거|못\s*나가게|가뒀|가두|감금|문을\s*막|농성|안\s*가고/],
+ ["group",/두\s*명|2명|세\s*명|3명|여럿|여러\s*명|같이|함께|일행|가족들|떼로|집단|무리|둘이|셋이/],
+ ["stalking",/따라다|따라와|스토킹|기다리고|기다렸|계속\s*연락|반복해서\s*(연락|전화|문자)|집까지|퇴근길/],
+ ["extort",/돈을?\s*(달라|요구|내놔)|합의금|금품|보상하라|공갈|강요|고소하겠다|신고하겠다며|돈\s*내놔/],
+ ["online",/인터넷|온라인|SNS|에스엔에스|댓글|유튜브|게시|단톡|블로그|맘카페|몰래\s*녹음|몰래\s*촬영|찍어서\s*올/],
+ ["ems",/구급대원|119|경찰관(을|이|한테|에게)?\s*(때|폭|밀|욕)|구급차/],
+ ["intrude",/무단|침입|출입\s*금지|몰래\s*들어|훔쳐|훔친|절도|가져갔/],
+ ["infect",/격리|마스크|감염|입원\s*거부|검사\s*거부|코로나|결핵/]];
+function sitParse(t){ var ids=[]; SITKW.forEach(function(k){ if(k[1].test(t)) ids.push(k[0]); }); if(/(경찰관|구급대원)/.test(t)&&ids.indexOf("ems")<0&&/(때|폭행|밀|욕)/.test(t)) ids.push("ems");
+  return {ids:ids, er:/응급실|응급의료센터|응급센터/.test(t), victim:/원무|보안|접수|수납|행정|안내/.test(t)?"adm":(/다른\s*환자|옆\s*환자|보호자가\s*맞|환자가\s*맞/.test(t)?"pt":(/의사|간호|교수|전공의|조무사|방사선|임상병리|의료기사|약사/.test(t)?"med":""))}; }
+function sitApplySaid(t){ var r=sitParse(t), added=[];
+  r.ids.forEach(function(id){ if(cur.sits.indexOf(id)>=0) return; var lab=$('#sitgrid label[data-sid="'+id+'"]'); if(lab){ lab.classList.remove("hidden"); var cb=lab.querySelector("input"); if(cb&&!cb.checked){ cb.checked=true; cb.dispatchEvent(new Event("change",{bubbles:true})); } } added.push(SIT.filter(function(s){return s.id===id;})[0].t); });
+  if(r.er&&!$("#sit-er").checked){ $("#sit-er").checked=true; $("#sit-er").dispatchEvent(new Event("change",{bubbles:true})); added.push("응급실"); }
+  if(r.victim&&$("#sit-victim").value!==r.victim){ $("#sit-victim").value=r.victim; $("#sit-victim").dispatchEvent(new Event("change",{bubbles:true})); added.push($("#sit-victim").selectedOptions[0].textContent.replace("피해자: ","피해자 ")); }
+  if((cur.sits.length||added.length)&&t.trim()){ quick("상황(말): "+t.trim().slice(0,60),[]); }
+  return {added:added, all:r.ids}; }
+function vfRoot(){ var ms=$$(".modal:not(.hidden)"); if(ms.length) return ms[ms.length-1]; if(!$("#sos").classList.contains("hidden")) return null; return $$(".main .view").filter(function(v){return !v.classList.contains("hidden");})[0]||$(".main"); }
+function vfVisible(el){ if(!el||el.disabled||el.readOnly) return false; var r=el.getBoundingClientRect(); if(el.type==="radio"){ var s=el.nextElementSibling; r=s?s.getBoundingClientRect():r; } return r.width>0&&r.height>0&&!el.closest(".hidden"); }
+function vfLabel(el){ var f=el.closest(".f"), t="";
+  if(f){ var l=f.querySelector("label.l"); if(l){ var c=l.cloneNode(true); $$(".srcchip,.mic,small,button,select,.r",c).forEach(function(x){x.remove();}); t=c.textContent.replace(/[*\s]+/g," ").trim(); } }
+  if(!t&&el.type==="radio"){ var g=el.closest(".opts"); var pl=g&&g.previousElementSibling; if(pl) t=pl.textContent.trim(); }
+  return t||el.getAttribute("aria-label")||el.placeholder||"입력 칸"; }
+function vfCollect(){ var root=vfRoot(); if(!root) return []; var seen={}, out=[];
+  if(root.id==="v-field") out.push({el:$("#sitgrid"),sit:true});
+  $$("input,textarea,select",root).forEach(function(el){ var t=(el.type||"").toLowerCase();
+    if(["checkbox","file","hidden","button","submit","password","range","color"].indexOf(t)>=0) return; if(el.id==="vf-wait"||el.closest("#vf")||el.closest(".modebar")||el.closest(".srch")||el.closest(".uadd")||el.id==="st-pick"||el.id==="sb-user"||el.id==="sb-optpl"||el.id==="mb-user"||el.id==="r-uadd"||/^(q|tl|pg|cm|ev|bk|u)-/.test(el.id||"")&&!vfRoot().classList.contains("modal")) return;
+    if(!vfVisible(el)) return;
+    if(t==="radio"){ if(seen["r:"+el.name]) return; seen["r:"+el.name]=1; out.push({el:el,radio:el.name}); return; }
+    out.push({el:el}); });
+  return out; }
+function vfFilled(x){ if(x.sit) return cur.sits.length>0; if(x.radio) return !!$('input[name="'+x.radio+'"]:checked'); return !!(x.el.value||"").trim(); }
+function vfMark(){ $$(".vf-on").forEach(function(e){e.classList.remove("vf-on");}); var x=VF.list[VF.i]; if(!x) return;
+  var t=x.sit?x.el.closest(".card"):(x.radio?(x.el.closest(".opts")||x.el.closest(".f")||x.el.parentNode):x.el); t.classList.add("vf-on");
+  if(t.closest(".modal")) t.scrollIntoView({block:"center",behavior:"smooth"}); else { var rr=t.getBoundingClientRect(), room=window.innerHeight-$("#vf").offsetHeight-110; if(rr.top<130||rr.bottom>room) window.scrollBy({top:rr.top-140,behavior:"smooth"}); } if(!x.radio&&x.el.tagName!=="SELECT") try{ x.el.focus({preventScroll:true}); }catch(e){}
+  $("#vf-lab").textContent=x.sit?"지금 어떤 상황인가요?":vfLabel(x.el); $("#vf-pos").textContent=(VF.i+1)+" / "+VF.list.length; VF.buf=""; VF.fin=""; $("#vf-txt").textContent=vfHint(x); $("#vf-txt").className="vftxt"; vfBar(0); }
+function vfHint(x){ var el=x.el; if(x.sit) return "있었던 일을 그대로 말하세요 — 예: “술 취한 보호자가 응급실에서 간호사를 때리고 욕했어요”"; if(x.radio) return "고를 것을 말하세요 — "+$$('input[name="'+x.radio+'"]').map(function(r){return r.nextElementSibling?r.nextElementSibling.textContent.trim():r.value;}).join(" / ");
+  if(el.tagName==="SELECT") return "고를 것을 말하세요 — "+$$("option",el).filter(function(o){return o.value;}).slice(0,6).map(function(o){return o.textContent.trim();}).join(" / ");
+  if(el.classList.contains("date8")) return "예: 1984년 1월 29일, 오늘, 어제"; if(el.classList.contains("time24")||el.classList.contains("time24x")) return "예: 오후 2시 반, 14시 30분, 지금";
+  return el.value?"지금 값: "+el.value.slice(0,40)+" — 바꾸려면 말하세요":"말하세요"; }
+function vfNext(step){ var n=VF.i+step; if(VF.empty&&step>0){ while(n<VF.list.length&&vfFilled(VF.list[n])) n++; } if(n<0) n=0; if(n>=VF.list.length){ vfStop(true); return; } VF.i=n; vfMark(); }
+function vfBar(p){ $("#vf-bar").style.width=Math.max(0,Math.min(100,p*100))+"%"; }
+function vfTick(){ if(!VF.on) return; if(VF.t0&&(VF.buf||VF.fin)){ var p=(Date.now()-VF.t0)/(VF.wait*1000*(vfLong()?1.6:1)); vfBar(p); if(p>=1){ VF.t0=0; vfCommit(); } } VF.raf=requestAnimationFrame(vfTick); }
+function vfLong(){ var x=VF.list[VF.i]; return x&&(x.sit||x.el.tagName==="TEXTAREA"); }
+function vfSet(el,v){ el.value=v; el.dispatchEvent(new Event("input",{bubbles:true})); el.dispatchEvent(new Event("change",{bubbles:true})); }
+function vfMatch(opts,said){ var s=said.replace(/\s/g,""); var best=null,sc=0; opts.forEach(function(o){ var t=o.t.replace(/[\s()·,]/g,""); if(!t) return; var k=0;
+    if(t===s) k=100; else if(s.indexOf(t)>=0) k=60+t.length; else if(t.indexOf(s)>=0&&s.length>=2) k=40+s.length; else { var c=0; for(var i=0;i<s.length;i++) if(t.indexOf(s[i])>=0) c++; if(c>=2&&c/s.length>=.6) k=c; }
+    if(k>sc){sc=k;best=o;} }); return best; }
+function vfApply(x,said){ var el=x.el, t=said.trim(); if(!t) return false;
+  if(x.sit){ var r=sitApplySaid(t); if(!r.all.length&&!r.added.length) return false; VF.sitmsg=r.added.length?"고름: "+r.added.join(", "):"이미 고른 상황입니다"; return true; }
+  if(x.radio){ var rs=$$('input[name="'+x.radio+'"]'), m=vfMatch(rs.map(function(r){return {t:(r.nextElementSibling?r.nextElementSibling.textContent:r.value),r:r};}),t); if(!m) return false; m.r.click(); return true; }
+  if(el.tagName==="SELECT"){ var m2=vfMatch($$("option",el).filter(function(o){return o.value!==""||o.textContent.trim();}).map(function(o){return {t:o.textContent,v:o.value};}),t); if(!m2) return false; vfSet(el,m2.v); return true; }
+  if(el.classList.contains("date8")){ var d=kDate(t.replace(/\s*\.\s*/g,". ")); if(!d){ var g=t.replace(/\D/g,""); if(g.length===8) d=kDate(g); } if(!d) return false; vfSet(el,d); return true; }
+  if(el.classList.contains("time24")||el.classList.contains("time24x")){ var tm=kTime(t); if(!tm) return false; vfSet(el,tm); return true; }
+  var lab=vfLabel(el);
+  if(el.dataset.s==="rrn"||/주민/.test(lab)){ var r=t.replace(/\D/g,""); if(r.length<6) return false; el.value=r; el.dispatchEvent(new Event("input",{bubbles:true})); return true; }
+  if(/전화|연락처|휴대/.test(lab)||el.type==="tel"||el.inputMode==="tel"){ var p=t.replace(/\D/g,""); if(p.length<7) return false; vfSet(el,p.length===11?p.slice(0,3)+"-"+p.slice(3,7)+"-"+p.slice(7):(p.length===10&&p.slice(0,2)!=="02"?p.slice(0,3)+"-"+p.slice(3,6)+"-"+p.slice(6):p)); return true; }
+  if(el.inputMode==="numeric"&&el.tagName==="INPUT"){ var n=t.replace(/\D/g,""); if(!n) return false; vfSet(el,n); return true; }
+  if(el.tagName==="TEXTAREA"){ var tx=t.replace(/\s*마침표\s*/g,". ").replace(/\s*쉼표\s*/g,", ").replace(/\s*물음표\s*/g,"? ").replace(/\s*줄\s*바꿈\s*/g,"\n").trim(); vfSet(el,(el.value&&!VF.repl?el.value.replace(/\s+$/,"")+(/[\n]$/.test(el.value)?"":" "):"")+tx); return true; }
+  t=t.replace(/\s*(입니다|이에요|예요|이요|요)\.?$/,"").replace(/[.。]$/,"");
+  if(/성명|이름|진술인|피의자|가해자 성명|부서장|담당|협조자|진료의/.test(lab)&&t.length<=8) t=t.replace(/\s+/g,"");
+  vfSet(el,t); return true; }
+function vfCommit(){ var x=VF.list[VF.i]; if(!x) return; var said=(VF.fin+" "+VF.buf).trim(); VF.fin=""; VF.buf="";
+  var c=said.replace(/[\s.!?]/g,"");
+  if(/^(그만|멈춰|끝|마치기|종료)$/.test(c)){ vfStop(); return; }
+  if(/^(다음|건너뛰기|넘어가|패스|다음칸)$/.test(c)){ vfNext(1); return; }
+  if(/^(이전|뒤로|앞칸|이전칸)$/.test(c)){ vfNext(-1); return; }
+  if(/^(지워|지우기|비워|삭제)$/.test(c)){ if(x.radio) $$('input[name="'+x.radio+'"]').forEach(function(r){r.checked=false;}); else vfSet(x.el,""); $("#vf-txt").textContent="지웠습니다 — 다시 말하세요"; return; }
+  VF.sitmsg=""; if(vfApply(x,said)){ $("#vf-txt").textContent="✔ "+(VF.sitmsg||said); $("#vf-txt").className="vftxt ok"; var cur0=VF.i; setTimeout(function(){ if(VF.on&&VF.i===cur0) vfNext(1); },450); }
+  else { $("#vf-txt").textContent="“"+said+"” — 알아듣지 못했습니다. 다시 말하세요"; $("#vf-txt").className="vftxt bad"; }
+}
+function vfListen(){ if(!VF.on) return; var r=new SRC(); r.lang="ko-KR"; r.continuous=true; r.interimResults=true; VF.rec=r;
+  r.onresult=function(e){ var fin="",itm=""; for(var i=e.resultIndex;i<e.results.length;i++){ var tr=e.results[i][0].transcript; if(e.results[i].isFinal) fin+=tr; else itm+=tr; }
+    if(fin) VF.fin=(VF.fin+" "+fin).trim(); VF.buf=itm.trim(); VF.t0=Date.now();
+    if(fin&&!VF.buf&&/^(그만|멈춰|끝|마치기|종료|다음|건너뛰기|넘어가|패스|다음칸|이전|뒤로|앞칸|이전칸|지워|지우기|비워|삭제)$/.test(VF.fin.replace(/[\s.!?]/g,""))){ VF.t0=0; vfCommit(); return; } var show=(VF.fin+" "+VF.buf).trim(); if(show){ $("#vf-txt").textContent=show; $("#vf-txt").className="vftxt live"; } };
+  r.onerror=function(e){ if(e.error==="not-allowed"||e.error==="service-not-allowed"){ toast("마이크를 쓸 수 없습니다. 브라우저의 마이크 허용을 확인하세요"); vfStop(); } };
+  r.onend=function(){ if(VF.on&&VF.rec===r) setTimeout(vfListen,150); };
+  try{ r.start(); }catch(e){} }
+function vfStart(){ if(!SRC){ toast("이 브라우저는 음성 받아쓰기를 지원하지 않습니다 — 크롬·엣지로 여세요"); return; }
+  if(typeof srStop==="function") srStop(); VF.list=vfCollect(); if(!VF.list.length){ toast("이 화면에는 채울 칸이 없습니다"); return; }
+  var a=document.activeElement, s=-1; VF.list.forEach(function(x,i){ if(x.el===a) s=i; });
+  if(s<0){ s=0; if(VF.empty){ while(s<VF.list.length&&vfFilled(VF.list[s])) s++; if(s>=VF.list.length){ toast("빈 칸이 없습니다 — ‘빈 칸만’을 끄면 모든 칸을 차례로 돕니다"); s=0; } } }
+  VF.on=true; VF.i=s; $("#vf").classList.remove("hidden"); $("#vf-open").classList.add("on"); document.body.classList.add("vfing"); vfMark(); vfListen(); VF.raf=requestAnimationFrame(vfTick); }
+function vfStop(done){ VF.on=false; cancelAnimationFrame(VF.raf); if(VF.rec){ var r=VF.rec; VF.rec=null; try{ r.stop(); }catch(e){} }
+  $$(".vf-on").forEach(function(e){e.classList.remove("vf-on");}); $("#vf").classList.add("hidden"); $("#vf-open").classList.remove("on"); document.body.classList.remove("vfing");
+  if(done) toast("마지막 칸까지 채웠습니다"); }
+$("#sit-voice").addEventListener("click",function(){ if(VF.on) vfStop(); var e=VF.empty; VF.empty=false; tab("field"); setTimeout(function(){ vfStart(); VF.empty=e; VF.i=0; vfMark(); },50); });
+$("#vf-open").addEventListener("mousedown",function(e){ e.preventDefault(); });
+$("#vf-open").addEventListener("click",function(){ if(VF.on) vfStop(); else vfStart(); });
+$("#vf-stop").addEventListener("click",function(){ vfStop(); });
+$("#vf-skip").addEventListener("click",function(){ VF.fin=VF.buf=""; vfNext(1); });
+$("#vf-prev").addEventListener("click",function(){ VF.fin=VF.buf=""; vfNext(-1); });
+$("#vf-empty").addEventListener("change",function(){ VF.empty=this.checked; ls.set("lfv_vf_empty",VF.empty); });
+$("#vf-wait").addEventListener("change",function(){ VF.wait=+this.value; ls.set("lfv_vf_wait",VF.wait); });
+/* 사용자가 다른 칸을 누르면 그 칸부터 */
+document.addEventListener("focusin",function(e){ if(!VF.on||e.target.closest("#vf")) return; var k=-1; VF.list.forEach(function(x,i){ if(x.el===e.target||(x.radio&&e.target.name===x.radio)) k=i; }); if(k>=0&&k!==VF.i){ VF.i=k; vfMark(); } });
+/* 화면(탭·창)이 바뀌면 칸 목록을 새로 */
+document.addEventListener("click",function(e){ if(!VF.on) return; if(e.target.closest("#vf,#vf-open")) return; if(e.target.closest("[data-tab],[data-close],.choice,#home,#next,#prev,#r-sb,#st-new")) setTimeout(function(){ if(!VF.on) return; VF.list=vfCollect(); if(!VF.list.length){ vfStop(); return; } VF.i=0; vfNext(0); if(VF.empty&&vfFilled(VF.list[0])) vfNext(1); },350); });
+/*VFEND*/
 /* 시작 */
 renderField(); setInterval(renderContacts,60000); shInit();
 tab(ls.get("lfv_tab","field"));
