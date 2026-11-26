@@ -4004,34 +4004,43 @@ function docFile(name,html){
 /* ============================================================
    음성 받아쓰기 (말로 쓰기)
    ============================================================ */
-var APPVER="2026.11.27-3";
+var APPVER="2026.11.27-4";
 function isTouch(){ try{ return window.matchMedia("(pointer:coarse)").matches||("ontouchstart" in window&&navigator.maxTouchPoints>0); }catch(e){ return false; } }
 /* 음성 입력 중 휴대폰 키보드 막기: 칸을 잠시 읽기 전용 + inputmode none */
 function kbLock(el,tag){ tag=tag||"sr"; kbHide(); if(!isTouch()||!el||el.dataset.kbl) return; el.dataset.kbl=tag; el.dataset.kbro=el.readOnly?"1":""; el.dataset.kbim=el.getAttribute("inputmode")||""; el.setAttribute("inputmode","none"); el.readOnly=true; }
 function kbUnlock(tag){ $$("[data-kbl]").forEach(function(e){ if(tag&&e.dataset.kbl!==tag) return; e.readOnly=e.dataset.kbro==="1"; if(e.dataset.kbim) e.setAttribute("inputmode",e.dataset.kbim); else e.removeAttribute("inputmode"); delete e.dataset.kbl; delete e.dataset.kbro; delete e.dataset.kbim; }); }
 function kbHide(){ if(!isTouch()) return; var a=document.activeElement; if(a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA")) try{ a.blur(); }catch(e){} }
-var SRC=window.SpeechRecognition||window.webkitSpeechRecognition, SRrec=null, SRtarget=null, SRbtn=null, SRwant=false, SRbase="";
+var SRC=window.SpeechRecognition||window.webkitSpeechRecognition, SRrec=null, SRtarget=null, SRbtn=null, SRwant=false, SRbase="", SRsess="";
+var ANDROID=/Android/i.test(navigator.userAgent||"");
+/* 한 번의 인식 동안 받은 결과를 처음부터 다시 모아 정리 — 안드로이드 크롬이 같은 말을 누적해 여러 번 보내는 문제(“술 술 술 취한”)를 막음 */
+function srSession(ev){ var fins=[], tmps=[];
+  function add(list,t){ var last=list[list.length-1]; if(!last){ list.push(t); return; } var a=last.replace(/\s/g,""), b=t.replace(/\s/g,""); if(b.indexOf(a)===0) list[list.length-1]=t; else if(a.indexOf(b)===0) return; else list.push(t); }
+  for(var i=0;i<ev.results.length;i++){ var r=ev.results[i], t=((r[0]&&r[0].transcript)||"").trim(); if(!t) continue; if(r.isFinal) add(fins,t); else add(tmps,t); }
+  var fin=fins.join(" ").replace(/\s+/g," ").trim(), tmp=tmps.join(" ").trim();
+  if(tmp&&fin){ var f=fin.replace(/\s/g,""), tt=tmp.replace(/\s/g,""); if(tt.indexOf(f)===0){ var k=0,n=0; while(k<tmp.length&&n<f.length){ if(!/\s/.test(tmp[k])) n++; k++; } tmp=tmp.slice(k).trim(); } else if(f.slice(-tt.length)===tt) tmp=""; }
+  fin=fin.replace(/(^|\s)(\S+)(\s+\2)+(?=\s|$)/g,"$1$2");
+  return {fin:fin,tmp:tmp}; }
 function srNote(msg){var w=$("#sr-warn"); w.innerHTML=msg; w.classList.toggle("hidden",!msg);}
 function srFix(t){return t.replace(/\s*(마침표|온점)\s*/g,". ").replace(/\s*쉼표\s*/g,", ").replace(/\s*물음표\s*/g,"? ").replace(/\s*느낌표\s*/g,"! ").replace(/\s*(줄 ?바꿈|다음 ?줄|엔터)\s*/g,"\n").replace(/ +\n/g,"\n");}
 function srStatus(t){ if(!SRtarget) return; var st=document.getElementById(SRtarget.id+"-st")||(SRbtn&&SRbtn.parentNode.querySelector(".micst")); if(st) st.innerHTML=t; }
-function srStop(){ kbUnlock("sr"); SRwant=false; if(SRrec){try{SRrec.stop();}catch(e){}} if(SRbtn){SRbtn.classList.remove("on");SRbtn.textContent=SRbtn.dataset.lab||"말하기";} srStatus(""); var was=SRtarget; SRtarget=null; SRbtn=null; if(was) was.dispatchEvent(new Event("input",{bubbles:true})); return was; }
+function srStop(){ kbUnlock("sr"); SRwant=false; if(SRtarget&&SRsess){ SRbase=(SRbase+srFix(SRsess)+" ").replace(/ \n/g,"\n"); SRsess=""; SRtarget.value=SRbase.replace(/\s+$/,""); } if(SRrec){try{SRrec.stop();}catch(e){}} if(SRbtn){SRbtn.classList.remove("on");SRbtn.textContent=SRbtn.dataset.lab||"말하기";} srStatus(""); var was=SRtarget; SRtarget=null; SRbtn=null; if(was) was.dispatchEvent(new Event("input",{bubbles:true})); return was; }
 function srStart(btn,ta){
   if(!SRC){ srNote("<b>이 브라우저는 음성 받아쓰기를 지원하지 않습니다</b>크롬이나 엣지로 열어 주세요. 또는 입력 칸을 누른 뒤 Windows 음성 입력(Win+H)을 써도 됩니다."); return; }
   if(SRtarget) srStop();
   kbLock(ta);
-  SRrec=new SRC(); SRrec.lang="ko-KR"; SRrec.continuous=true; SRrec.interimResults=true;
+  SRrec=new SRC(); SRrec.lang="ko-KR"; SRrec.continuous=!ANDROID; SRrec.interimResults=true; SRsess="";
   SRtarget=ta; SRbtn=btn; SRwant=true; btn.dataset.lab=btn.dataset.lab||btn.textContent; btn.classList.add("on"); btn.textContent="멈춤";
   SRbase=ta.value; if(SRbase&&!/[\s\n]$/.test(SRbase)) SRbase+=" ";
-  SRrec.onresult=function(ev){ var fin="",tmp=""; for(var i=ev.resultIndex;i<ev.results.length;i++){ var r=ev.results[i]; if(r.isFinal) fin+=r[0].transcript; else tmp+=r[0].transcript; }
-    if(fin){ SRbase+=srFix(fin.trim())+" "; SRbase=SRbase.replace(/ \n/g,"\n"); }
-    ta.value=SRbase+(tmp?srFix(tmp):""); ta.scrollTop=ta.scrollHeight;
+  SRrec.onresult=function(ev){ var s=srSession(ev), tmp=s.tmp; SRsess=s.fin;
+    ta.value=(SRbase+(SRsess?srFix(SRsess)+" ":"")).replace(/ \n/g,"\n")+(tmp?srFix(tmp):""); ta.scrollTop=ta.scrollHeight;
     srStatus(tmp?'듣는 중… <i>'+esc(tmp)+'</i>':'듣는 중…'); };
   SRrec.onerror=function(ev){
     if(ev.error==="not-allowed"||ev.error==="service-not-allowed"){ srNote("<b>마이크를 쓸 수 없습니다</b>주소창 왼쪽 자물쇠(또는 정보) 아이콘에서 마이크를 ‘허용’으로 바꾼 뒤 다시 누르세요."); SRwant=false; }
     else if(ev.error==="network"){ srNote("<b>음성 인식 서버에 연결하지 못했습니다</b>크롬·엣지의 음성 받아쓰기는 인터넷 연결이 필요합니다. 연결이 안 되면 직접 입력하거나 Windows 음성 입력(Win+H)을 쓰세요."); SRwant=false; }
     else if(ev.error==="audio-capture"){ srNote("<b>마이크를 찾지 못했습니다</b>PC에 마이크(헤드셋)가 연결되어 있는지 확인하세요."); SRwant=false; }
   };
-  SRrec.onend=function(){ if(SRwant&&SRtarget===ta){ try{SRrec.start();}catch(e){} } else if(SRtarget===ta) srStop(); };
+  SRrec.onend=function(){ if(SRsess){ SRbase=(SRbase+srFix(SRsess)+" ").replace(/ \n/g,"\n"); SRsess=""; }
+    if(SRwant&&SRtarget===ta){ ta.value=SRbase; try{SRrec.start();}catch(e){} } else if(SRtarget===ta) srStop(); };
   try{ SRrec.start(); srNote(""); srStatus("듣는 중…"); }catch(e){ srStop(); }
 }
 document.addEventListener("click",function(e){
@@ -5207,14 +5216,14 @@ function vfFilled(x){ if(x.sit) return cur.sits.length>0; if(x.radio) return !!$
 function vfMark(){ $$(".vf-on").forEach(function(e){e.classList.remove("vf-on");}); var x=VF.list[VF.i]; if(!x) return;
   var t=x.sit?x.el.closest(".card"):(x.radio?(x.el.closest(".opts")||x.el.closest(".f")||x.el.parentNode):x.el); t.classList.add("vf-on");
   if(t.closest(".modal")) t.scrollIntoView({block:"center",behavior:"smooth"}); else { var rr=t.getBoundingClientRect(), room=window.innerHeight-$("#vf").offsetHeight-110; if(rr.top<130||rr.bottom>room) window.scrollBy({top:rr.top-140,behavior:"smooth"}); } if(!x.radio&&x.el.tagName!=="SELECT"&&!isTouch()) try{ x.el.focus({preventScroll:true}); }catch(e){}
-  $("#vf-lab").textContent=x.sit?"지금 어떤 상황인가요?":vfLabel(x.el); $("#vf-pos").textContent=(VF.i+1)+" / "+VF.list.length; VF.buf=""; VF.fin=""; $("#vf-txt").textContent=vfHint(x); $("#vf-txt").className="vftxt"; vfBar(0); }
+  $("#vf-lab").textContent=x.sit?"지금 어떤 상황인가요?":vfLabel(x.el); $("#vf-pos").textContent=(VF.i+1)+" / "+VF.list.length; VF.buf=""; VF.fin=""; VF.sess=""; $("#vf-txt").textContent=vfHint(x); $("#vf-txt").className="vftxt"; vfBar(0); }
 function vfHint(x){ var el=x.el; if(x.sit) return "있었던 일을 그대로 말하세요 — 예: “술 취한 보호자가 응급실에서 간호사를 때리고 욕했어요”"; if(x.radio) return "고를 것을 말하세요 — "+$$('input[name="'+x.radio+'"]').map(function(r){return r.nextElementSibling?r.nextElementSibling.textContent.trim():r.value;}).join(" / ");
   if(el.tagName==="SELECT") return "고를 것을 말하세요 — "+$$("option",el).filter(function(o){return o.value;}).slice(0,6).map(function(o){return o.textContent.trim();}).join(" / ");
   if(el.classList.contains("date8")) return "예: 1984년 1월 29일, 오늘, 어제"; if(el.classList.contains("time24")||el.classList.contains("time24x")) return "예: 오후 2시 반, 14시 30분, 지금";
   return el.value?"지금 값: "+el.value.slice(0,40)+" — 바꾸려면 말하세요":"말하세요"; }
 function vfNext(step){ var n=VF.i+step; if(VF.empty&&step>0){ while(n<VF.list.length&&vfFilled(VF.list[n])) n++; } if(n<0) n=0; if(n>=VF.list.length){ vfStop(true); return; } VF.i=n; vfMark(); }
 function vfBar(p){ $("#vf-bar").style.width=Math.max(0,Math.min(100,p*100))+"%"; }
-function vfTick(){ if(!VF.on) return; if(VF.t0&&(VF.buf||VF.fin)){ var p=(Date.now()-VF.t0)/(VF.wait*1000*(vfLong()?1.6:1)); vfBar(p); if(p>=1){ VF.t0=0; vfCommit(); } } VF.raf=requestAnimationFrame(vfTick); }
+function vfTick(){ if(!VF.on) return; if(VF.t0&&vfSaid()){ var p=(Date.now()-VF.t0)/(VF.wait*1000*(vfLong()?1.6:1)); vfBar(p); if(p>=1){ VF.t0=0; vfCommit(); } } VF.raf=requestAnimationFrame(vfTick); }
 function vfLong(){ var x=VF.list[VF.i]; return x&&(x.sit||x.el.tagName==="TEXTAREA"); }
 function vfSet(el,v){ el.value=v; el.dispatchEvent(new Event("input",{bubbles:true})); el.dispatchEvent(new Event("change",{bubbles:true})); }
 function vfMatch(opts,said){ var s=said.replace(/\s/g,""); var best=null,sc=0; opts.forEach(function(o){ var t=o.t.replace(/[\s()·,]/g,""); if(!t) return; var k=0;
@@ -5234,7 +5243,10 @@ function vfApply(x,said){ var el=x.el, t=said.trim(); if(!t) return false;
   t=t.replace(/\s*(입니다|이에요|예요|이요|요)\.?$/,"").replace(/[.。]$/,"");
   if(/성명|이름|진술인|피의자|가해자 성명|부서장|담당|협조자|진료의/.test(lab)&&t.length<=8) t=t.replace(/\s+/g,"");
   vfSet(el,t); return true; }
-function vfCommit(){ var x=VF.list[VF.i]; if(!x) return; var said=(VF.fin+" "+VF.buf).trim(); VF.fin=""; VF.buf="";
+function vfSaid(){ return [VF.fin,VF.sess,VF.buf].filter(Boolean).join(" ").replace(/\s+/g," ").trim(); }
+/* 칸 하나를 넣으면 인식을 새로 시작해 앞 칸 말이 섞이지 않게 */
+function vfFresh(){ VF.fin=""; VF.sess=""; VF.buf=""; var r=VF.rec; if(r&&VF.on){ VF.rec=null; try{ r.abort?r.abort():r.stop(); }catch(e){} setTimeout(vfListen,120); } }
+function vfCommit(){ var x=VF.list[VF.i]; if(!x) return; var said=vfSaid(); vfFresh();
   var c=said.replace(/[\s.!?]/g,"");
   if(/^(그만|멈춰|끝|마치기|종료)$/.test(c)){ vfStop(); return; }
   if(/^(다음|건너뛰기|넘어가|패스|다음칸)$/.test(c)){ vfNext(1); return; }
@@ -5243,12 +5255,11 @@ function vfCommit(){ var x=VF.list[VF.i]; if(!x) return; var said=(VF.fin+" "+VF
   VF.sitmsg=""; if(vfApply(x,said)){ $("#vf-txt").textContent="✔ "+(VF.sitmsg||said); $("#vf-txt").className="vftxt ok"; var cur0=VF.i; setTimeout(function(){ if(VF.on&&VF.i===cur0) vfNext(1); },450); }
   else { $("#vf-txt").textContent="“"+said+"” — 알아듣지 못했습니다. 다시 말하세요"; $("#vf-txt").className="vftxt bad"; }
 }
-function vfListen(){ if(!VF.on) return; var r=new SRC(); r.lang="ko-KR"; r.continuous=true; r.interimResults=true; VF.rec=r;
-  r.onresult=function(e){ var fin="",itm=""; for(var i=e.resultIndex;i<e.results.length;i++){ var tr=e.results[i][0].transcript; if(e.results[i].isFinal) fin+=tr; else itm+=tr; }
-    if(fin) VF.fin=(VF.fin+" "+fin).trim(); VF.buf=itm.trim(); VF.t0=Date.now();
-    if(fin&&!VF.buf&&/^(그만|멈춰|끝|마치기|종료|다음|건너뛰기|넘어가|패스|다음칸|이전|뒤로|앞칸|이전칸|지워|지우기|비워|삭제)$/.test(VF.fin.replace(/[\s.!?]/g,""))){ VF.t0=0; vfCommit(); return; } var show=(VF.fin+" "+VF.buf).trim(); if(show){ $("#vf-txt").textContent=show; $("#vf-txt").className="vftxt live"; } };
+function vfListen(){ if(!VF.on) return; var r=new SRC(); r.lang="ko-KR"; r.continuous=!ANDROID; r.interimResults=true; VF.rec=r; VF.sess="";
+  r.onresult=function(e){ if(VF.rec!==r) return; var s=srSession(e), fin=s.fin&&s.fin!==VF.sess?s.fin:""; VF.sess=s.fin; VF.buf=s.tmp; VF.t0=Date.now();
+    var all=vfSaid(); if(fin&&!VF.buf&&/^(그만|멈춰|끝|마치기|종료|다음|건너뛰기|넘어가|패스|다음칸|이전|뒤로|앞칸|이전칸|지워|지우기|비워|삭제)$/.test(all.replace(/[\s.!?]/g,""))){ VF.t0=0; vfCommit(); return; } var show=all; if(show){ $("#vf-txt").textContent=show; $("#vf-txt").className="vftxt live"; } };
   r.onerror=function(e){ if(e.error==="not-allowed"||e.error==="service-not-allowed"){ toast("마이크를 쓸 수 없습니다. 브라우저의 마이크 허용을 확인하세요"); vfStop(); } };
-  r.onend=function(){ if(VF.on&&VF.rec===r) setTimeout(vfListen,150); };
+  r.onend=function(){ if(VF.rec===r){ if(VF.sess){ VF.fin=(VF.fin+" "+VF.sess).trim(); VF.sess=""; } if(VF.on) setTimeout(vfListen,120); } };
   try{ r.start(); }catch(e){} }
 function vfStart(){ if(!SRC){ toast("이 브라우저는 음성 받아쓰기를 지원하지 않습니다 — 크롬·엣지로 여세요"); return; }
   if(typeof srStop==="function") srStop(); VF.list=vfCollect(); if(!VF.list.length){ toast("이 화면에는 채울 칸이 없습니다"); return; }
@@ -5263,8 +5274,8 @@ $("#sit-voice").addEventListener("click",function(){ if(VF.on) vfStop(); var e=V
 $("#vf-open").addEventListener("mousedown",function(e){ e.preventDefault(); });
 $("#vf-open").addEventListener("click",function(){ if(VF.on) vfStop(); else vfStart(); });
 $("#vf-stop").addEventListener("click",function(){ vfStop(); });
-$("#vf-skip").addEventListener("click",function(){ VF.fin=VF.buf=""; vfNext(1); });
-$("#vf-prev").addEventListener("click",function(){ VF.fin=VF.buf=""; vfNext(-1); });
+$("#vf-skip").addEventListener("click",function(){ vfFresh(); vfNext(1); });
+$("#vf-prev").addEventListener("click",function(){ vfFresh(); vfNext(-1); });
 $("#vf-empty").addEventListener("change",function(){ VF.empty=this.checked; ls.set("lfv_vf_empty",VF.empty); });
 $("#vf-wait").addEventListener("change",function(){ VF.wait=+this.value; ls.set("lfv_vf_wait",VF.wait); });
 /* 사용자가 다른 칸을 누르면 그 칸부터 */
