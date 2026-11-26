@@ -885,6 +885,54 @@ body.locked .vffab{display:none}
 @media (max-width:760px){.sitvoice{grid-template-columns:auto 1fr}.sitvoice small{grid-column:1/-1;justify-self:start}}
 .appver{font-size:12px;color:var(--ink2);margin-top:4px}
 @media (pointer:coarse){.mic.mini{padding:6px 12px;font-size:13px;margin-left:10px}.mic.mini::before{width:8px;height:8px}}
+/* ===== 음성 비서 ===== */
+.vafab{position:fixed;left:18px;bottom:76px;z-index:900;display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 18px;border:0;border-radius:24px;background:#c62828;color:#fff;font:inherit;font-size:15px;font-weight:700;box-shadow:0 4px 14px rgba(198,40,40,.35);cursor:pointer}
+.vafab i{width:10px;height:10px;border-radius:50%;background:#fff}
+body.locked .vafab{display:none}
+.va{position:fixed;inset:0;z-index:1600;background:rgba(10,20,40,.78);display:flex;align-items:center;justify-content:center;padding:12px}
+.vain{width:100%;max-width:620px;max-height:96vh;overflow:auto;background:#fff;border-radius:14px;padding:16px}
+.vahd{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center}
+.vahd b{font-size:19px;color:var(--navy)}
+.vamic{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:100%;height:190px;margin:14px 0 10px;border:0;border-radius:16px;background:var(--navy);color:#fff;font:inherit;font-size:18px;font-weight:700;cursor:pointer}
+.vamic i{width:64px;height:64px;border-radius:50%;background:#fff;position:relative}
+.vamic i::after{content:"";position:absolute;left:24px;top:14px;width:16px;height:26px;border-radius:8px;background:var(--navy)}
+.vamic.on{background:#c62828}.vamic.on i{animation:vapulse 1.2s infinite}.vamic.on i::after{background:#c62828}
+@keyframes vapulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.6)}100%{box-shadow:0 0 0 22px rgba(255,255,255,0)}}
+.vatxt{min-height:52px;padding:10px 12px;border-radius:8px;background:var(--bg);font-size:17px;line-height:1.5;color:var(--ink2);word-break:break-all}
+.vatxt.live{color:var(--ink);font-weight:600}
+.valts{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 0;font-size:13px;color:var(--ink2)}
+.valts:empty{display:none}
+.valts button{border:1px solid var(--navy);background:#fff;color:var(--navy);border-radius:14px;padding:3px 10px;font:inherit;font-size:13.5px;cursor:pointer}
+.valog{margin-top:10px;display:grid;gap:6px}
+.valog div{display:grid;grid-template-columns:44px 1fr;gap:8px;font-size:13.5px;line-height:1.5;padding:7px 10px;border:1px solid var(--line);border-radius:8px}
+.valog time{color:var(--ink2);font-variant-numeric:tabular-nums}
+.valog b{color:var(--ok)}.valog .bad b,.valog b.bad{color:var(--alert)}.valog .cmd b{color:var(--navy)}
+.vahelp{margin-top:10px;font-size:13.5px}.vahelp summary{cursor:pointer;font-weight:700;color:var(--navy)}.vahelp ul{margin:6px 0 0;padding-left:18px;line-height:1.7}
+.vdict{border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:6px 0}
+.vdict>div{display:grid;grid-template-columns:1fr auto 1fr auto;gap:10px;align-items:center;padding:6px 12px;border-top:1px solid var(--line);font-size:14px}
+.vdict>div:first-child{border-top:0}.vdict .nodata{display:block;text-align:center;color:var(--ink2)}
+.vdadd{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:6px}.vdadd .btn{margin:0}
+#st-hands{margin:0 0 10px}
+@media (max-width:760px){.vafab{left:12px;bottom:66px;height:46px;padding:0 14px;font-size:14px}.vamic{height:160px}.vdadd{grid-template-columns:1fr}}
+@media print{.vafab,.va{display:none!important}}
+.sos{z-index:1700}
+/* ===== 휴대폰: 아래쪽 버튼 3개를 같은 크기로 한 줄 ===== */
+@media (max-width:760px){
+ body{padding-bottom:78px}
+ .vafab,.vffab,.sosfab{bottom:10px;height:54px;width:calc((100% - 32px)/3);border-radius:12px;padding:0 6px;justify-content:center;display:inline-flex;align-items:center;gap:6px;font-size:14px;white-space:nowrap}
+ .vafab{left:8px}
+ .vffab{left:calc(8px + (100% - 32px)/3 + 8px)}
+ .sosfab{right:8px;left:auto}
+ .sosfab b{font-size:16px}
+ .vfpanel{bottom:74px}
+ .bkbar{bottom:74px;width:calc(100% - 16px);left:8px}
+ .ubtn{grid-template-columns:auto;padding:6px 10px}
+ .ubtn i{display:none}
+ .ubtn b{white-space:nowrap;font-size:13.5px}
+ .ubtn span{display:none}
+ .appbar h1{font-size:22px;line-height:1.3}
+}
+@media (max-width:760px){.sithd{grid-template-columns:1fr auto}.sithd>span{grid-column:1/-1;grid-row:2}.sithd.mod{grid-template-columns:1fr}}
 </style>
 <meta name="theme-color" content="#1f3a68">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4004,7 +4052,7 @@ function docFile(name,html){
 /* ============================================================
    음성 받아쓰기 (말로 쓰기)
    ============================================================ */
-var APPVER="2026.11.27-4";
+var APPVER="2026.11.27-5";
 function isTouch(){ try{ return window.matchMedia("(pointer:coarse)").matches||("ontouchstart" in window&&navigator.maxTouchPoints>0); }catch(e){ return false; } }
 /* 음성 입력 중 휴대폰 키보드 막기: 칸을 잠시 읽기 전용 + inputmode none */
 function kbLock(el,tag){ tag=tag||"sr"; kbHide(); if(!isTouch()||!el||el.dataset.kbl) return; el.dataset.kbl=tag; el.dataset.kbro=el.readOnly?"1":""; el.dataset.kbim=el.getAttribute("inputmode")||""; el.setAttribute("inputmode","none"); el.readOnly=true; }
@@ -5165,7 +5213,7 @@ uRender(); if(lockable()) lockNow();
    말로 칸 채우기 — 반짝이는 칸에 말하면 쉬는 순간 넣고 다음 칸으로
    ============================================================ */
 var VF={on:false,list:[],i:0,buf:"",fin:"",timer:null,rec:null,wait:ls.get("lfv_vf_wait",2),empty:ls.get("lfv_vf_empty",true),t0:0,raf:null};
-(function(){ var b=document.createElement("button"); b.type="button"; b.id="vf-open"; b.className="vffab"; b.innerHTML='<i></i>말로 칸 채우기'; document.body.appendChild(b);
+(function(){ var b=document.createElement("button"); b.type="button"; b.id="vf-open"; b.className="vffab"; b.innerHTML='<i></i>칸 채우기'; document.body.appendChild(b);
   var p=document.createElement("div"); p.id="vf"; p.className="vfpanel hidden";
   p.innerHTML='<div class="vfhd"><span class="vfdot"></span><b id="vf-lab">칸 이름</b><span id="vf-pos"></span></div><div class="vftxt" id="vf-txt">말하세요</div><div class="vfbar"><i id="vf-bar"></i></div>'
    +'<div class="vfopts"><label class="opt"><input type="checkbox" id="vf-empty"><span>빈 칸만</span></label><label class="l">쉬는 시간<select id="vf-wait"><option value="1.5">1.5초</option><option value="2">2초</option><option value="3">3초</option></select></label></div>'
@@ -5283,6 +5331,176 @@ document.addEventListener("focusin",function(e){ if(!VF.on||e.target.closest("#v
 /* 화면(탭·창)이 바뀌면 칸 목록을 새로 */
 document.addEventListener("click",function(e){ if(!VF.on) return; if(e.target.closest("#vf,#vf-open")) return; if(e.target.closest("[data-tab],[data-close],.choice,#home,#next,#prev,#r-sb,#st-new")) setTimeout(function(){ if(!VF.on) return; VF.list=vfCollect(); if(!VF.list.length){ vfStop(); return; } VF.i=0; vfNext(0); if(VF.empty&&vfFilled(VF.list[0])) vfNext(1); },350); });
 /*VFEND*/
+/*VAJS*//* ============================================================
+   말로 쓰기 고도화 — 용어 교정·소리 확인·후보 고르기·음성 비서(현장 모드)·진술서 말로
+   ============================================================ */
+/* ---------- 병원 용어 교정 사전 ---------- */
+var VDICT_BASE=[[/에이\s*유닛|A\s*유닛|a\s*유닛|에이\s*unit/gi,"A Unit"],[/비\s*유닛|B\s*유닛|b\s*유닛/gi,"B Unit"],[/씨\s*유닛|C\s*유닛/gi,"C Unit"],[/유닛/g,"Unit"],[/(응급실|외래간호|수술실|가\d+병동|나\d+병동)\s+([ABC])\s*Unit/g,"$1$2 Unit"],
+ [/응급\s*의료\s*센터/g,"응급의료센터"],[/응급\s*실/g,"응급실"],[/원무\s*팀/g,"원무팀"],[/법무\s*Unit/g,"법무 Unit"],[/응급\s*원무\s*Unit/g,"응급원무 Unit"],[/입원\s*원무\s*Unit/g,"입원원무 Unit"],[/외래\s*원무\s*Unit/g,"외래원무 Unit"],
+ [/일일이\s*신고|일일\s*이\s*신고|백십이\s*신고/g,"112 신고"],[/일일구|백십구/g,"119"],[/씨씨\s*티비|씨씨티브이|cctv/gi,"CCTV"],[/엔유\s*프로그램/gi,"NU 프로그램"],
+ [/간호\s*조무사/g,"간호조무사"],[/보안\s*요원/g,"보안요원"],[/중환자\s*실/g,"중환자실"],[/처치\s*실/g,"처치실"],[/진료\s*실/g,"진료실"],[/대기\s*실/g,"대기실"],[/안내\s*실/g,"안내실"],[/(\d+)\s*병동/g,"$1병동"],[/(\d+)\s*층/g,"$1층"]];
+var VDICT=ls.get("lfv_dict",[]);
+function vEdit(a,b){ a=a.replace(/\s/g,""); b=b.replace(/\s/g,""); if(Math.abs(a.length-b.length)>1) return 9; var m=[],i,j; for(i=0;i<=a.length;i++){m[i]=[i];} for(j=0;j<=b.length;j++) m[0][j]=j;
+  for(i=1;i<=a.length;i++) for(j=1;j<=b.length;j++) m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return m[a.length][b.length]; }
+function vFix(t){ if(!t) return t; var s=t;
+  VDICT.forEach(function(p){ if(p[0]) s=s.split(p[0]).join(p[1]); });
+  VDICT_BASE.forEach(function(p){ s=s.replace(p[0],p[1]); });
+  /* 등록 직원 이름: 띄어 들린 이름 붙이기, 한 글자 틀린 이름 바로잡기 */
+  USERS.forEach(function(u){ var n=u.name; if(!n||n.length<2||!/^[가-힣]+$/.test(n)) return; s=s.replace(new RegExp(n.split("").join("[ \\t]?"),"g"),n); });
+  return s.replace(/[ \t]+/g," ").replace(/ *\n */g,"\n").trim(); }
+/* ---------- 소리: 읽어 주기·신호음 ---------- */
+var VOPT=ls.get("lfv_vopt",{tts:true,beep:true});
+var vAudio=null;
+function vBeep(f,d){ if(!VOPT.beep) return; try{ vAudio=vAudio||new (window.AudioContext||window.webkitAudioContext)(); var o=vAudio.createOscillator(), g=vAudio.createGain(); o.frequency.value=f||880; g.gain.value=.08; o.connect(g); g.connect(vAudio.destination); o.start(); o.stop(vAudio.currentTime+(d||.12)); }catch(e){} try{ navigator.vibrate&&navigator.vibrate(30); }catch(e){} }
+var vSpeaking=false;
+function vSay(t,cb,force){ if(!(VOPT.tts||force)||!window.speechSynthesis||!t){ if(cb) setTimeout(cb,0); return; }
+  try{ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang="ko-KR"; u.rate=1.08; var v=speechSynthesis.getVoices().filter(function(x){return /ko/i.test(x.lang);})[0]; if(v) u.voice=v;
+    vSpeaking=true; var done=false, fin=function(){ if(done) return; done=true; vSpeaking=false; if(cb) cb(); }; u.onend=fin; u.onerror=fin; setTimeout(fin,Math.min(9000,700+t.length*170)); speechSynthesis.speak(u); }catch(e){ vSpeaking=false; if(cb) cb(); } }
+/* 말로 칸 채우기에 소리 확인·후보·교정 붙이기 */
+(function(){ var o=$("#vf .vfopts"); if(!o) return; var l=document.createElement("label"); l.className="opt"; l.innerHTML='<input type="checkbox" id="vf-tts"><span>소리로 확인</span>'; o.appendChild(l); $("#vf-tts").checked=!!VOPT.tts;
+  $("#vf-tts").addEventListener("change",function(){ VOPT.tts=this.checked; ls.set("lfv_vopt",VOPT); });
+  var a=document.createElement("div"); a.id="vf-alts"; a.className="valts"; $("#vf-txt").parentNode.insertBefore(a,$("#vf-txt").nextSibling); })();
+/* vf 인식기가 말하는 동안 소리를 받아 적지 않도록 잠시 멈춤 */
+function vfMute(t,cb){ if(!VOPT.tts){ if(cb) cb(); return; } var r=VF.rec; VF.rec=null; VF.muted=true; if(r) try{ r.abort?r.abort():r.stop(); }catch(e){}
+  vSay(t,function(){ VF.muted=false; if(VF.on&&!VF.rec) vfListen(); if(cb) cb(); }); }
+var _vfListen=vfListen; vfListen=function(){ if(VF.muted) return; _vfListen(); if(VF.rec){ try{ VF.rec.maxAlternatives=3; }catch(e){} var r=VF.rec, h=r.onresult; r.onresult=function(e){ try{ var last=e.results[e.results.length-1]; if(last&&last.isFinal){ VF.alts=[]; for(var k=0;k<last.length&&k<3;k++){ var tx=(last[k].transcript||"").trim(); if(tx&&VF.alts.indexOf(tx)<0) VF.alts.push(tx); } } }catch(x){} h.call(this,e); }; } };
+var _vfMark=vfMark; vfMark=function(){ _vfMark(); var x=VF.list[VF.i]; if(x&&x.qlab){ $("#vf-lab").textContent=x.qlab; $("#vf-txt").textContent=x.qsub||"말하세요"; } vBeep(880,.08); if(x&&VF.on&&VOPT.tts) vfMute(x.qlab||(x.sit?"지금 어떤 상황인가요":vfLabel(x.el))); };
+var _vfSaid=vfSaid; vfSaid=function(){ return vFix(_vfSaid()); };
+var _vfApply=vfApply; vfApply=function(x,said){ VF.lastField={i:VF.i,x:x,prev:x.radio?(($('input[name="'+x.radio+'"]:checked')||{}).value||""):(x.sit?null:x.el.value)}; return _vfApply(x,said); };
+var _vfCommit=vfCommit; vfCommit=function(){ var before=VF.i, x=VF.list[VF.i], said=vfSaid(); _vfCommit();
+  var ok=$("#vf-txt").classList.contains("ok"); var alts=(VF.alts||[]).map(vFix).filter(function(a){return a&&a!==said;});
+  $("#vf-alts").innerHTML=ok&&alts.length?'<span>다르게 들렸나요?</span>'+alts.map(function(a,i){return '<button type="button" data-alt="'+i+'">'+esc(a)+'</button>';}).join(""):""; VF.altList=alts;
+  if(ok&&x&&VOPT.tts){ var v=x.sit?(VF.sitmsg||"상황을 골랐습니다"):(x.radio?(($('input[name="'+x.radio+'"]:checked')||{}).nextElementSibling||{}).textContent:x.el.value); vfMute((x.qlab?"":vfLabel(x.el)+", ")+(v||"").slice(0,60)); }
+  VF.alts=[]; };
+$("#vf").addEventListener("click",function(e){ var b=e.target.closest("[data-alt]"); if(!b||!VF.lastField) return; var lf=VF.lastField, alt=VF.altList[+b.dataset.alt];
+  if(lf.x.radio){ $$('input[name="'+lf.x.radio+'"]').forEach(function(r){ r.checked=r.value===lf.prev; }); } else if(!lf.x.sit) vfSet(lf.x.el,lf.prev||"");
+  VF.i=lf.i; _vfMark(); if(_vfApply(lf.x,alt)){ $("#vf-txt").textContent="✔ "+alt; $("#vf-txt").className="vftxt ok"; $("#vf-alts").innerHTML=""; setTimeout(function(){ if(VF.on) vfNext(1); },400); } });
+/* 직접 목록(진술서 질문 등)으로 칸 채우기 시작 */
+function vfStartList(list,onDone){ if(!SRC){ toast("이 브라우저는 음성 받아쓰기를 지원하지 않습니다 — 크롬·엣지로 여세요"); return; } if(typeof srStop==="function") srStop();
+  VF.list=list; VF.done=onDone||null; VF.on=true; VF.i=0; var e0=VF.empty; VF.empty=false; kbHide(); list.forEach(function(x){ if(x.el&&(x.el.tagName==="TEXTAREA"||x.el.tagName==="INPUT")) kbLock(x.el,"vf"); });
+  $("#vf").classList.remove("hidden"); $("#vf-open").classList.add("on"); document.body.classList.add("vfing"); vfMark(); vfListen(); VF.raf=requestAnimationFrame(vfTick); VF.empty=e0; }
+var _vfStop=vfStop; vfStop=function(done){ var cb=VF.done; VF.done=null; VF.muted=false; _vfStop(done&&!cb); if(done&&cb) cb(); };
+
+/* ---------- 진술서 전 과정 말로 ---------- */
+(function(){ var c=$("#st-mode"); if(!c) return; var b=document.createElement("button"); b.type="button"; b.className="btn sitvoice"; b.id="st-hands"; b.innerHTML='<i></i>진술서 말로 끝까지 <small>질문을 읽어 주고 답을 받아 적습니다</small>'; c.parentNode.insertBefore(b,c); })();
+$("#st-hands").addEventListener("click",function(){
+  if(!(ST.info.name||"").trim()){ toast("먼저 진술인을 고르거나 성명을 넣으세요"); $("#st-pick").scrollIntoView({block:"center",behavior:"smooth"}); return; }
+  if(ST.mode!=="qa"){ var qb=$('#st-mode [data-m="qa"]'); if(qb) qb.click(); }
+  var list=QA.map(function(q,i){ return {el:$("#qa-"+i),qlab:(i+1)+". "+q[0],qsub:q[1]}; }).filter(function(x){ return x.el&&!(x.el.value||"").trim(); });
+  if(!list.length){ toast("모든 질문에 답이 있습니다"); return; }
+  var old=VF.wait; VF.wait=Math.max(old,3);
+  vfStartList(list,function(){ VF.wait=old; vSay("모든 질문에 답했습니다. 진술 내용으로 옮겼습니다. 확인한 뒤 저장하세요.",null,true); $("#st-compose").click(); }); });
+
+/* ---------- 음성 비서 (현장 모드 큰 마이크) ---------- */
+(function(){ var d=document.createElement("div"); d.id="va"; d.className="va hidden";
+  d.innerHTML='<div class="vain"><div class="vahd"><b>말로 하기</b><label class="opt"><input type="checkbox" id="va-tts"><span>소리로 확인</span></label><button type="button" class="btn ghost" id="va-close">닫기</button></div>'
+   +'<button type="button" class="vamic" id="va-mic"><i></i><span id="va-st">눌러서 말하기</span></button>'
+   +'<div class="vatxt" id="va-txt">있었던 일을 그대로 말하거나 명령하세요</div><div class="valts" id="va-alts"></div>'
+   +'<div class="valog" id="va-log"></div>'
+   +'<details class="vahelp"><summary>이렇게 말해 보세요</summary><ul>'
+   +'<li><b>있었던 일</b> “어제 오후 2시 응급실에서 술 취한 보호자 김철수가 간호사 홍길동을 때렸어요” — 날짜·시각·장소·가해자·피해 직원·상황·경위를 한꺼번에 채움</li>'
+   +'<li><b>칸 고치기</b> “장소는 외래 3층”, “가해자 이름은 김철수”, “시각은 오후 3시”, “경위에 추가 이후 보안요원이 왔어요”, “피해 내용은 왼팔 타박상”</li>'
+   +'<li><b>화면</b> “사건 기록 열어”, “진술서 열어”, “법률지원 서식”, “사건 대장”</li>'
+   +'<li><b>실행</b> “112 신고”, “보안요원 불러”, “녹음 시작/중지”, “보고 문자 만들어”, “저장해”, “상병경위보고서”, “서류 출력”, “칸 채우기”, “진술서 말로 하기”, “읽어 줘”</li>'
+   +'<li><b>되돌리기</b> “취소” — 방금 넣은 것을 되돌림 · “그만” — 마이크 끄기</li></ul></details></div>';
+  document.body.appendChild(d);
+  var f=document.createElement("button"); f.type="button"; f.id="va-open"; f.className="vafab"; f.innerHTML='<i></i>말로 하기'; document.body.appendChild(f); $("#va-tts").checked=!!VOPT.tts; })();
+var VA={on:false,rec:null,fin:"",sess:"",buf:"",t0:0,undo:[],alts:[],muted:false};
+function vaLog(t,cls){ var l=$("#va-log"), d=document.createElement("div"); d.className=cls||""; d.innerHTML='<time>'+nowHM()+'</time>'+t; l.insertBefore(d,l.firstChild); while(l.children.length>8) l.removeChild(l.lastChild); }
+function vaSnap(){ return JSON.stringify({f:cur.f,sits:cur.sits,tl:cur.tl,er:cur.er,victim:cur.victim,checks:cur.checks}); }
+function vaRestore(s){ var o=JSON.parse(s); cur.f=o.f; cur.sits=o.sits; cur.tl=o.tl; cur.er=o.er; cur.victim=o.victim; cur.checks=o.checks; saveCur(); fillRec(); $("#sit-er").checked=!!cur.er; if(o.victim) $("#sit-victim").value=o.victim; renderField(); renderTL&&renderTL(); }
+function vaPut(k,v,append){ var el=$('#v-record [data-r="'+k+'"]'); if(!el) return; var nv=append&&el.value.trim()?el.value.replace(/\s+$/,"")+(el.tagName==="TEXTAREA"?"\n":" ")+v:v;
+  if(el.tagName==="SELECT"){ var m=vfMatch($$("option",el).map(function(o){return {t:o.textContent,v:o.value};}),v); if(!m) return false; nv=m.v; }
+  el.value=nv; cur.f[k]=nv; if(cur.asrc) delete cur.asrc[k]; unchip(el); el.dispatchEvent(new Event("input",{bubbles:true})); el.dispatchEvent(new Event("change",{bubbles:true})); return true; }
+var VAFIELDS=[["date",/^(발생\s*)?(날짜|일자)/,"date"],["time",/^(발생\s*)?(시각|시간)/,"time"],["place",/^(발생\s*)?장소/],["aName",/^가해자\s*(이름|성명)/],["aNo",/^(가해자\s*)?등록\s*번호/],["aRel",/^가해자\s*(구분|관계)/],["drunk",/^주취/],
+ ["victims",/^피해\s*(직원|자)/,"add"],["wit",/^목격자/,"add"],["story",/^경위(\s*요약)?/],["dmg",/^(피해\s*내용|다친\s*(곳|데)|부상)/],["pol",/^경찰\s*신고/],["polOff",/^출동\s*(관서|경찰서|지구대)/],["polNo",/^접수\s*번호/],["act",/^(가해\s*환자\s*)?진료\s*조치/],["writer",/^작성자/]];
+function vaField(t){ var add=/(에\s*추가|추가해|덧붙여|더\s*적어)/.test(t);
+  for(var i=0;i<VAFIELDS.length;i++){ var f=VAFIELDS[i], m=f[1].exec(t); if(!m) continue; var rest=t.slice(m[0].length).replace(/^\s*(은|는|이|가|을|를|에|에다|에다가|란에|칸에)?\s*/,"").replace(/^(추가|덧붙여|더\s*적어)\s*(해\s*줘|해)?\s*/,"");
+    var longF=/^(story|dmg|act|victims|wit)$/.test(f[0]); rest=rest.replace(longF?/\s*(으로\s*(바꿔|고쳐)(\s*줘)?|로\s*(바꿔|고쳐)(\s*줘)?|라고\s*(적어|써)(\s*줘)?|추가해\s*줘)\.?$/:/\s*(이야|야|입니다|이에요|예요|이요|요|으로\s*(바꿔|고쳐|해)(\s*줘)?|로\s*(바꿔|고쳐|해)(\s*줘)?|라고\s*(적어|써)(\s*줘)?|추가해\s*줘|추가)\.?$/,"").trim(); if(!rest) return null;
+    var v=rest; if(f[2]==="date"){ v=kDate(rest); if(!v) return {err:"날짜를 알아듣지 못했습니다"}; } if(f[2]==="time"){ v=kTime(rest); if(!v) return {err:"시각을 알아듣지 못했습니다"}; }
+    if(f[0]==="victims"||f[0]==="wit"){ var p=rest.split(/\s+/); if(p.length>=2&&rest.indexOf("/")<0) v=p[0]+" / "+p.slice(1).join(" "); var u=USERS.filter(function(x){return x.name===p[0];})[0]; if(u&&f[0]==="victims") v=u.name+" / "+u.job+" / "+u.dept; }
+    if(f[0]==="aName"||f[0]==="writer") v=v.replace(/\s+/g,"");
+    var ok=vaPut(f[0],v,f[2]==="add"||(add&&/story|dmg|act/.test(f[0]))); if(ok===false) return {err:"고를 수 있는 값이 아닙니다"};
+    var lab=$('#v-record [data-r="'+f[0]+'"]').closest(".f").querySelector("label.l"); var ln=lab?lab.firstChild.textContent.trim():f[0];
+    return {ok:ln+(add||f[2]==="add"?"에 덧붙임: ":": ")+(f[2]==="date"?kd(v):v),say:ln+", "+(f[2]==="date"?kd(v):v)}; }
+  if(add&&/^경위/.test(t)) return null; return null; }
+var VACMD=[
+ [/^(그만|마이크\s*꺼|멈춰|끝)$/,function(){ vaStop(); return "마이크를 껐습니다"; }],
+ [/^(취소|되돌려|방금\s*(거\s*)?취소)/,function(){ var s=VA.undo.pop(); if(!s) return "되돌릴 것이 없습니다"; vaRestore(s); return "방금 넣은 것을 되돌렸습니다"; }],
+ [/^(도움말|뭐라고\s*말해|사용법)/,function(){ $(".vahelp").open=true; return "있었던 일을 그대로 말하거나, 장소는 무엇, 처럼 칸 이름과 함께 말하세요"; }],
+ [/^현장\s*대응\s*(열어|가|보여|화면)?/,function(){ tab("field"); return "현장 대응을 열었습니다"; }],
+ [/사건\s*기록\s*(열어|가|보여|화면)/,function(){ tab("record"); return "사건 기록을 열었습니다"; }],
+ [/^진술서\s*(열어|가|보여|화면)/,function(){ tab("stmt"); return "진술서를 열었습니다"; }],
+ [/^법률\s*지원/,function(){ tab("form"); return "법률지원 서식을 열었습니다"; }],
+ [/^사건\s*대장/,function(){ tab("ledger"); return "사건 대장을 열었습니다"; }],
+ [/^(통계|응대\s*매뉴얼|매뉴얼|인증\s*기준|법령|구성\s*요건)/,function(t){ var k=/통계/.test(t)?"stats":/매뉴얼/.test(t)?"manual":/인증/.test(t)?"cert":/법령/.test(t)?"law":"elem"; tab(k); return "열었습니다"; }],
+ [/^(112|경찰)\s*(신고|불러|부르)/,function(){ quick("112 신고",["r1","r1b"]); sosPaint(); $("#sos").classList.remove("hidden"); return "112 신고를 기록했습니다. 화면의 112 버튼을 누르면 전화가 걸립니다"; }],
+ [/^보안\s*요원\s*(불러|호출|부르)/,function(){ quick("보안요원 호출",[]); sosPaint(); $("#sos").classList.remove("hidden"); return "보안요원 호출을 기록했습니다. 화면의 보안요원 버튼을 누르면 안내실로 전화가 걸립니다"; }],
+ [/^녹음\s*(시작|해)/,function(){ if(REC) return "이미 녹음 중입니다"; vaStop(true); recToggle(); return "녹음을 시작했습니다. 녹음하는 동안은 받아쓰기를 멈춥니다"; }],
+ [/^녹음\s*(중지|멈춰|끝|그만)/,function(){ if(!REC) return "녹음 중이 아닙니다"; recToggle(); return "녹음을 멈추고 증거에 붙였습니다"; }],
+ [/^보고\s*문자/,function(){ $("#va").classList.add("hidden"); smsOpen(); vaStop(true); return "보고 문자를 만들었습니다. 확인하고 보내세요"; }],
+ [/^(저장해|저장|사건\s*대장에\s*저장)/,function(){ $("#r-save").click(); return "사건 대장에 저장했습니다"; }],
+ [/^상병\s*경위\s*보고서/,function(){ tab("record"); vaStop(true); $("#va").classList.add("hidden"); sbOpen(); return "상병경위보고서를 열었습니다"; }],
+ [/^서류\s*(출력|인쇄|묶)/,function(){ tab("record"); vaStop(true); $("#va").classList.add("hidden"); $("#r-pack").click(); return "출력할 서류를 고르세요"; }],
+ [/^(칸\s*채우기|말로\s*채우기|빈\s*칸\s*채우)/,function(){ vaStop(true); $("#va").classList.add("hidden"); setTimeout(vfStart,200); return "빈 칸을 차례로 채웁니다"; }],
+ [/^진술서\s*(말로|시작)/,function(){ vaStop(true); $("#va").classList.add("hidden"); tab("stmt"); setTimeout(function(){ $("#st-hands").click(); },300); return "진술서를 말로 씁니다"; }],
+ [/^(읽어\s*줘|확인해\s*줘|지금\s*내용)/,function(){ var f=cur.f, s=[]; if(f.date) s.push("날짜 "+kd(f.date).replace(/\.$/,"")); if(f.time) s.push("시각 "+f.time); if(f.place) s.push("장소 "+f.place); if(f.aName||f.aRel) s.push("가해자 "+[f.aRel,f.aName].filter(Boolean).join(" ")); var v=victims().map(function(x){return x.name;}).join(", "); if(v) s.push("피해 직원 "+v);
+   var sn=cur.sits.map(function(id){return (SIT.filter(function(x){return x.id===id;})[0]||{}).t;}).filter(Boolean); if(sn.length) s.push("상황 "+sn.join(", ")); return s.length?s.join(". "):"아직 적힌 내용이 없습니다"; }]];
+var PLACEKW=/(응급|병동|외래|층|실|센터|과|팀|Unit|로비|복도|엘리베이터|주차장|입구|창구|대기|접수|수납|화장실|계단|앞|옆|안|원무|약국|카페|편의점|병실|호실)/;
+function vaParse(t){ var got=[], f=cur.f;
+  var hasDate=/(오늘|어제|그저께|그제|\d{1,2}\s*월\s*\d{1,2}\s*일|\d{4}\s*년)/.test(t);
+  if(hasDate){ var d=kDate(t); if(d){ vaPut("date",d); got.push("날짜 "+kd(d)); } }
+  var tm=/(오전|오후|아침|저녁|밤|새벽)?\s*(\d{1,2})\s*시(\s*(\d{1,2})\s*분|\s*반)?/.exec(t); if(tm){ var tv=kTime(tm[0]); if(tv){ vaPut("time",tv); got.push("시각 "+tv); } } else if(/방금|지금/.test(t)&&!f.time){ var n=new Date(); vaPut("time",pad(n.getHours())+":"+pad(n.getMinutes())); got.push("시각 지금"); }
+  var w=t.split(/\s+/);
+  for(var i=0;i<w.length;i++){ if(/에서$/.test(w[i])){ var s=i, c=0; while(s-1>=0&&c<3&&!/(어제|오늘|그제|그저께|시$|분$|반$|오전|오후|저녁|밤|새벽|아침|월$|일$|년$|가$|이$|를$|을$)/.test(w[s-1])){ s--; c++; }
+      var pl=w.slice(s,i+1).join(" ").replace(/에서$/,"").trim(); if(pl&&PLACEKW.test(pl)){ vaPut("place",pl); got.push("장소 "+pl); break; } } }
+  var rel=/(환자|보호자|방문객|내원객|면회객|가족|아들|딸|남편|아내|어머니|아버지|어머님|아버님|할머니|할아버지)(?:\s*분)?\s*(?:인\s*)?([가-힣]{2,4}?)(?:\s*씨|\s*님)?\s*(?:이|가)\s/.exec(t+" ");
+  var relOnly=/(환자|보호자|방문객|내원객|면회객|가족|아들|딸|남편|아내|어머니|아버지|어머님|아버님|할머니|할아버지)/.exec(t);
+  if(relOnly){ var rv=/환자/.test(relOnly[1])?"환자":(/방문객|내원객|면회객/.test(relOnly[1])?"방문객":"보호자"); if(f.aRel!==rv&&!(f.aRel&&f.aRel!=="환자"&&rv==="환자")){ vaPut("aRel",rv); got.push("가해자 구분 "+rv); } }
+  if(rel&&rel[2]&&!/^(분|들|측|쪽|한명|두명|님|씨|자|이|가|께서|술|자꾸|갑자기|계속|다시|또)$/.test(rel[2])){ vaPut("aName",rel[2]); got.push("가해자 "+rel[2]); }
+  if(/술|취해|취한|만취|주취/.test(t)&&f.drunk!=="주취 상태"){ vaPut("drunk","주취 상태"); got.push("주취 상태"); }
+  var JOB="간호사|의사|교수|전공의|인턴|간호조무사|조무사|원무과?\\s*직원|직원|보안요원|방사선사|임상병리사|약사|응급구조사|선생님";
+  var vm=new RegExp("(?:([가-힣]{2,4})\\s*("+JOB+")|("+JOB+")\\s*([가-힣]{2,4}))\\s*(?:을|를|에게|한테|님을|님에게|씨를)").exec(t);
+  if(vm){ var nm=vm[1]||vm[4], jb=(vm[2]||vm[3]||"").replace(/\s/g,""); if(nm&&/^(그|저|이|여러|다른|담당|우리)/.test(nm)) nm=""; var u=nm?USERS.filter(function(x){return x.name===nm;})[0]:null;
+    var line=u?u.name+" / "+u.job+" / "+u.dept:(nm?nm+" / "+jb:""); if(line&&(f.victims||"").indexOf(nm)<0){ vaPut("victims",line,true); got.push("피해 직원 "+nm); } }
+  var inj=/([가-힣]{0,6}\s?[가-힣]{0,6}\s?(타박상|찰과상|열상|골절|멍이?\s?들|상처|출혈|피가\s?났|부었|부어|긁혔|찢어졌))/.exec(t); if(inj){ var dv=inj[0].trim(); if((f.dmg||"").indexOf(dv)<0){ vaPut("dmg",dv,true); got.push("피해 "+dv); } }
+  var sr=sitApplySaid(t); if(sr.added.length) got.push("상황 "+sr.added.join(", "));
+  vaPut("story",t.replace(/\s*(요|어요|아요)\.?$/,"$1")+(/[.!?]$/.test(t)?"":"."),true); got.push("경위에 덧붙임");
+  return got; }
+function vaHandle(t){ t=vFix(t); if(!t) return; var c=t.replace(/[.!?]$/,"").trim(), cc=c.replace(/\s/g,"");
+  for(var i=0;i<VACMD.length;i++){ if(VACMD[i][0].test(c)||VACMD[i][0].test(cc)){ var snap=vaSnap(); var msg=VACMD[i][1](c); if(!/취소|되돌/.test(c)&&vaSnap()!==snap) VA.undo.push(snap); vaLog("▶ "+esc(c)+"<br><b>"+esc(msg)+"</b>","cmd"); vaSay(msg); return; } }
+  var snap2=vaSnap(), fr=vaField(c);
+  if(fr){ if(fr.err){ vaLog(esc(c)+"<br><b class='bad'>"+fr.err+"</b>","bad"); vaSay(fr.err); return; } VA.undo.push(snap2); vaLog(esc(c)+"<br><b>"+esc(fr.ok)+"</b>"); vaSay(fr.say); return; }
+  VA.undo.push(snap2); var got=vaParse(c); vaLog(esc(c)+"<br><b>"+esc(got.join(" · "))+"</b>"); vaSay(got.filter(function(g){return g!=="경위에 덧붙임";}).join(", ")||"경위에 적었습니다"); if(VA.undo.length>20) VA.undo.shift(); }
+function vaSay(t){ if(!VOPT.tts||!VA.on){ return; } var r=VA.rec; VA.rec=null; VA.muted=true; if(r) try{ r.abort?r.abort():r.stop(); }catch(e){} vSay(t,function(){ VA.muted=false; if(VA.on) vaListen(); }); }
+function vaListen(){ if(!VA.on||VA.muted) return; var r=new SRC(); r.lang="ko-KR"; r.continuous=!ANDROID; r.interimResults=true; try{ r.maxAlternatives=3; }catch(e){} VA.rec=r; VA.sess="";
+  r.onresult=function(e){ if(VA.rec!==r) return; var s=srSession(e); VA.sess=s.fin; VA.buf=s.tmp; VA.t0=Date.now(); try{ var last=e.results[e.results.length-1]; if(last&&last.isFinal){ VA.alts=[]; for(var k=1;k<last.length&&k<3;k++){ var tx=(last[k].transcript||"").trim(); if(tx) VA.alts.push(tx); } } }catch(x){}
+    var all=[VA.fin,VA.sess,VA.buf].filter(Boolean).join(" "); $("#va-txt").textContent=vFix(all)||"…"; $("#va-txt").className="vatxt live"; };
+  r.onerror=function(e){ if(e.error==="not-allowed"||e.error==="service-not-allowed"){ toast("마이크를 쓸 수 없습니다. 브라우저의 마이크 허용을 확인하세요"); vaStop(); } };
+  r.onend=function(){ if(VA.rec===r){ if(VA.sess){ VA.fin=(VA.fin+" "+VA.sess).trim(); VA.sess=""; } if(VA.on&&!VA.muted) setTimeout(vaListen,120); } };
+  try{ r.start(); }catch(e){} }
+function vaTick(){ if(!VA.on) return; var all=[VA.fin,VA.sess,VA.buf].filter(Boolean).join(" ").trim(); if(VA.t0&&all&&Date.now()-VA.t0>VF.wait*1000){ VA.t0=0; var said=all, alts=VA.alts.slice(); VA.fin=VA.sess=VA.buf=""; var r=VA.rec; if(r){ VA.rec=null; try{ r.abort?r.abort():r.stop(); }catch(e){} setTimeout(vaListen,120); }
+    $("#va-txt").textContent=vFix(said); $("#va-txt").className="vatxt"; vaHandle(said);
+    $("#va-alts").innerHTML=alts.length?'<span>다르게 들렸나요?</span>'+alts.map(function(a,i){return '<button type="button" data-valt="'+esc(a)+'">'+esc(vFix(a))+'</button>';}).join(""):""; }
+  requestAnimationFrame(vaTick); }
+function vaStart(){ if(!SRC){ toast("이 브라우저는 음성 받아쓰기를 지원하지 않습니다 — 크롬·엣지로 여세요"); return; } if(VF.on) vfStop(); if(typeof srStop==="function") srStop(); kbHide();
+  VA.on=true; VA.fin=VA.sess=VA.buf=""; $("#va-mic").classList.add("on"); $("#va-st").textContent="듣는 중 — 누르면 멈춤"; vBeep(988,.1); vaListen(); requestAnimationFrame(vaTick); }
+function vaStop(keepOpen){ VA.on=false; VA.muted=false; var r=VA.rec; VA.rec=null; if(r) try{ r.abort?r.abort():r.stop(); }catch(e){} $("#va-mic").classList.remove("on"); $("#va-st").textContent="눌러서 말하기"; }
+$("#va-open").addEventListener("click",function(){ $("#va").classList.remove("hidden"); vaStart(); });
+$("#va-close").addEventListener("click",function(){ vaStop(); $("#va").classList.add("hidden"); });
+$("#va-mic").addEventListener("click",function(){ if(VA.on) vaStop(); else vaStart(); });
+$("#va-tts").addEventListener("change",function(){ VOPT.tts=this.checked; ls.set("lfv_vopt",VOPT); var t=$("#vf-tts"); if(t) t.checked=VOPT.tts; });
+$("#va-alts").addEventListener("click",function(e){ var b=e.target.closest("[data-valt]"); if(!b) return; var s=VA.undo.pop(); if(s) vaRestore(s); $("#va-alts").innerHTML=""; vaHandle(b.dataset.valt); });
+
+/* ---------- 사용자 설정: 잘못 들리는 말 바로잡기 ---------- */
+(function(){ var f=$("#m-user .ufoot"); if(!f) return; var w=document.createElement("div"); w.innerHTML='<h3 class="uh">말로 쓰기 — 잘못 들리는 말 바로잡기</h3><p class="foot">음성 인식이 자주 틀리는 말을 적어 두면 받아쓸 때 자동으로 바꿉니다. 등록한 직원 이름과 병원 부서명(○○ Unit 등)은 이미 바로잡습니다.</p><div class="vdict" id="vd-list"></div><div class="vdadd"><input type="text" id="vd-a" placeholder="이렇게 들리면 — 예: 김철 수"><input type="text" id="vd-b" placeholder="이렇게 바꿈 — 예: 김철수"><button type="button" class="btn" id="vd-add">추가</button></div>';
+  f.parentNode.insertBefore(w,f); vdRender(); })();
+function vdRender(){ $("#vd-list").innerHTML=VDICT.length?VDICT.map(function(p,i){return '<div><span>'+esc(p[0])+'</span><b>→</b><span>'+esc(p[1])+'</span><button type="button" class="linkbtn del" data-vd="'+i+'">삭제</button></div>';}).join(""):'<div class="nodata">아직 추가한 말이 없습니다</div>'; }
+$("#vd-add").addEventListener("click",function(){ var a=$("#vd-a").value.trim(), b=$("#vd-b").value.trim(); if(!a||!b){ toast("두 칸을 모두 적어 주세요"); return; } VDICT.push([a,b]); ls.set("lfv_dict",VDICT); $("#vd-a").value=$("#vd-b").value=""; vdRender(); toast("추가했습니다"); });
+$("#vd-list").addEventListener("click",function(e){ var i=e.target.dataset&&e.target.dataset.vd; if(i==null) return; VDICT.splice(+i,1); ls.set("lfv_dict",VDICT); vdRender(); });
+/* 칸마다 [말하기] 받아쓰기에도 용어 교정 */
+var _srFix=srFix; srFix=function(t){ return vFix(_srFix(t)); };
+/*VAEND*/
 /* 시작 */
 renderField(); setInterval(renderContacts,60000); shInit();
 tab(ls.get("lfv_tab","field"));
