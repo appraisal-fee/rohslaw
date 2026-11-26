@@ -4002,14 +4002,17 @@ function docFile(name,html){
 /* ============================================================
    음성 받아쓰기 (말로 쓰기)
    ============================================================ */
+function isTouch(){ try{ return window.matchMedia("(pointer:coarse)").matches||("ontouchstart" in window&&navigator.maxTouchPoints>0); }catch(e){ return false; } }
+function kbHide(){ if(!isTouch()) return; var a=document.activeElement; if(a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA")) try{ a.blur(); }catch(e){} }
 var SRC=window.SpeechRecognition||window.webkitSpeechRecognition, SRrec=null, SRtarget=null, SRbtn=null, SRwant=false, SRbase="";
 function srNote(msg){var w=$("#sr-warn"); w.innerHTML=msg; w.classList.toggle("hidden",!msg);}
 function srFix(t){return t.replace(/\s*(마침표|온점)\s*/g,". ").replace(/\s*쉼표\s*/g,", ").replace(/\s*물음표\s*/g,"? ").replace(/\s*느낌표\s*/g,"! ").replace(/\s*(줄 ?바꿈|다음 ?줄|엔터)\s*/g,"\n").replace(/ +\n/g,"\n");}
 function srStatus(t){ if(!SRtarget) return; var st=document.getElementById(SRtarget.id+"-st")||(SRbtn&&SRbtn.parentNode.querySelector(".micst")); if(st) st.innerHTML=t; }
-function srStop(){ SRwant=false; if(SRrec){try{SRrec.stop();}catch(e){}} if(SRbtn){SRbtn.classList.remove("on");SRbtn.textContent=SRbtn.dataset.lab||"말하기";} srStatus(""); var was=SRtarget; SRtarget=null; SRbtn=null; if(was) was.dispatchEvent(new Event("input",{bubbles:true})); return was; }
+function srStop(){ $$("[data-srim]").forEach(function(e){ if(e.dataset.srim) e.setAttribute("inputmode",e.dataset.srim); else e.removeAttribute("inputmode"); delete e.dataset.srim; }); SRwant=false; if(SRrec){try{SRrec.stop();}catch(e){}} if(SRbtn){SRbtn.classList.remove("on");SRbtn.textContent=SRbtn.dataset.lab||"말하기";} srStatus(""); var was=SRtarget; SRtarget=null; SRbtn=null; if(was) was.dispatchEvent(new Event("input",{bubbles:true})); return was; }
 function srStart(btn,ta){
   if(!SRC){ srNote("<b>이 브라우저는 음성 받아쓰기를 지원하지 않습니다</b>크롬이나 엣지로 열어 주세요. 또는 입력 칸을 누른 뒤 Windows 음성 입력(Win+H)을 써도 됩니다."); return; }
   if(SRtarget) srStop();
+  kbHide(); if(isTouch()&&ta&&ta.dataset.srim==null){ ta.dataset.srim=ta.getAttribute("inputmode")||""; ta.setAttribute("inputmode","none"); }
   SRrec=new SRC(); SRrec.lang="ko-KR"; SRrec.continuous=true; SRrec.interimResults=true;
   SRtarget=ta; SRbtn=btn; SRwant=true; btn.dataset.lab=btn.dataset.lab||btn.textContent; btn.classList.add("on"); btn.textContent="멈춤";
   SRbase=ta.value; if(SRbase&&!/[\s\n]$/.test(SRbase)) SRbase+=" ";
@@ -4571,7 +4574,7 @@ function askRender(){
     else h+='<div class="askline"><input type="text" id="ask-in" value="'+esc(v)+'" '+(type==="date"||type==="time"?'inputmode="numeric" ':'')+(type==="date"?'class="date8" ':'')+(type==="time"?'class="time24x" maxlength="5" ':'')+'autocomplete="off"><button type="button" class="mic" data-mic="ask-in">말하기</button></div><span class="micst"></span>';
   }
   body.innerHTML=h;
-  var ai=$("#ask-in"); if(ai){ setTimeout(function(){ai.focus();},30); }
+  var ai=$("#ask-in"); if(ai&&!isTouch()){ setTimeout(function(){ai.focus();},30); }
   if($("#ask-read").checked) say(q[2].replace(/<[^>]+>/g,""));
 }
 function askWrite(){
@@ -4957,7 +4960,7 @@ function rvRender(){
   else { h+='<div class="askline"><input type="text" id="rv-in" value="'+esc(q[1]==="date"&&validISO(v)?kd(v):v)+'" autocomplete="off"><button type="button" class="mic" data-mic="rv-in">말하기</button></div><span class="micst" id="rv-in-st"></span>';
     if(q[1]==="date"||q[1]==="time") h+='<div class="rvconv" id="rv-conv"></div>';
     if(q[1]==="victim"&&USERS.length) h+='<div class="askopts rvusers">'+USERS.map(function(u){return '<button type="button" class="askopt" data-rvu="'+u.id+'">'+esc(u.name)+'<small>'+esc(u.job+" · "+u.dept)+'</small></button>';}).join("")+'</div>'; }
-  body.innerHTML=h; rvConv(); var ai=$("#rv-in"); if(ai) setTimeout(function(){ai.focus();},40);
+  body.innerHTML=h; rvConv(); var ai=$("#rv-in"); if(ai&&!isTouch()) setTimeout(function(){ai.focus();},40);
   if($("#rv-read").checked) say(q[2]);
 }
 function rvConv(){ var q=RVQ[RV.i], c=$("#rv-conv"), ai=$("#rv-in"); if(!c||!ai) return; var r=q[1]==="date"?kDate(ai.value):kTime(ai.value);
@@ -5196,7 +5199,7 @@ function vfCollect(){ var root=vfRoot(); if(!root) return []; var seen={}, out=[
 function vfFilled(x){ if(x.sit) return cur.sits.length>0; if(x.radio) return !!$('input[name="'+x.radio+'"]:checked'); return !!(x.el.value||"").trim(); }
 function vfMark(){ $$(".vf-on").forEach(function(e){e.classList.remove("vf-on");}); var x=VF.list[VF.i]; if(!x) return;
   var t=x.sit?x.el.closest(".card"):(x.radio?(x.el.closest(".opts")||x.el.closest(".f")||x.el.parentNode):x.el); t.classList.add("vf-on");
-  if(t.closest(".modal")) t.scrollIntoView({block:"center",behavior:"smooth"}); else { var rr=t.getBoundingClientRect(), room=window.innerHeight-$("#vf").offsetHeight-110; if(rr.top<130||rr.bottom>room) window.scrollBy({top:rr.top-140,behavior:"smooth"}); } if(!x.radio&&x.el.tagName!=="SELECT") try{ x.el.focus({preventScroll:true}); }catch(e){}
+  if(t.closest(".modal")) t.scrollIntoView({block:"center",behavior:"smooth"}); else { var rr=t.getBoundingClientRect(), room=window.innerHeight-$("#vf").offsetHeight-110; if(rr.top<130||rr.bottom>room) window.scrollBy({top:rr.top-140,behavior:"smooth"}); } if(!x.radio&&x.el.tagName!=="SELECT"&&!isTouch()) try{ x.el.focus({preventScroll:true}); }catch(e){}
   $("#vf-lab").textContent=x.sit?"지금 어떤 상황인가요?":vfLabel(x.el); $("#vf-pos").textContent=(VF.i+1)+" / "+VF.list.length; VF.buf=""; VF.fin=""; $("#vf-txt").textContent=vfHint(x); $("#vf-txt").className="vftxt"; vfBar(0); }
 function vfHint(x){ var el=x.el; if(x.sit) return "있었던 일을 그대로 말하세요 — 예: “술 취한 보호자가 응급실에서 간호사를 때리고 욕했어요”"; if(x.radio) return "고를 것을 말하세요 — "+$$('input[name="'+x.radio+'"]').map(function(r){return r.nextElementSibling?r.nextElementSibling.textContent.trim():r.value;}).join(" / ");
   if(el.tagName==="SELECT") return "고를 것을 말하세요 — "+$$("option",el).filter(function(o){return o.value;}).slice(0,6).map(function(o){return o.textContent.trim();}).join(" / ");
@@ -5244,8 +5247,9 @@ function vfStart(){ if(!SRC){ toast("이 브라우저는 음성 받아쓰기를 
   if(typeof srStop==="function") srStop(); VF.list=vfCollect(); if(!VF.list.length){ toast("이 화면에는 채울 칸이 없습니다"); return; }
   var a=document.activeElement, s=-1; VF.list.forEach(function(x,i){ if(x.el===a) s=i; });
   if(s<0){ s=0; if(VF.empty){ while(s<VF.list.length&&vfFilled(VF.list[s])) s++; if(s>=VF.list.length){ toast("빈 칸이 없습니다 — ‘빈 칸만’을 끄면 모든 칸을 차례로 돕니다"); s=0; } } }
+  kbHide(); if(isTouch()) VF.list.forEach(function(x){ var e=x.el; if(e.tagName==="INPUT"||e.tagName==="TEXTAREA"){ if(e.dataset.vfim==null) e.dataset.vfim=e.getAttribute("inputmode")||""; e.setAttribute("inputmode","none"); } });
   VF.on=true; VF.i=s; $("#vf").classList.remove("hidden"); $("#vf-open").classList.add("on"); document.body.classList.add("vfing"); vfMark(); vfListen(); VF.raf=requestAnimationFrame(vfTick); }
-function vfStop(done){ VF.on=false; cancelAnimationFrame(VF.raf); if(VF.rec){ var r=VF.rec; VF.rec=null; try{ r.stop(); }catch(e){} }
+function vfStop(done){ VF.on=false; $$("[data-vfim]").forEach(function(e){ if(e.dataset.vfim) e.setAttribute("inputmode",e.dataset.vfim); else e.removeAttribute("inputmode"); delete e.dataset.vfim; }); cancelAnimationFrame(VF.raf); if(VF.rec){ var r=VF.rec; VF.rec=null; try{ r.stop(); }catch(e){} }
   $$(".vf-on").forEach(function(e){e.classList.remove("vf-on");}); $("#vf").classList.add("hidden"); $("#vf-open").classList.remove("on"); document.body.classList.remove("vfing");
   if(done) toast("마지막 칸까지 채웠습니다"); }
 $("#sit-voice").addEventListener("click",function(){ if(VF.on) vfStop(); var e=VF.empty; VF.empty=false; tab("field"); setTimeout(function(){ vfStart(); VF.empty=e; VF.i=0; vfMark(); },50); });
