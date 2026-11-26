@@ -131,6 +131,14 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-betw
 .src{display:inline-grid;gap:0;border:1px solid var(--blue);border-radius:8px;padding:5px 12px;min-height:44px;align-content:center;text-decoration:none;color:var(--blue);background:var(--bg)}
 .src b{font-size:14px}.src span{font-size:12px;color:var(--mute)}.src:hover{background:var(--blueSoft)}
 footer a{color:inherit}
+.vfab{position:fixed;right:16px;bottom:16px;z-index:55;min-height:56px;padding:0 20px;border-radius:28px;border:0;background:var(--red);color:#fff;font-weight:700;font-size:16px;display:flex;gap:10px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer}
+.vfab[aria-pressed=true]{background:var(--blue)}.vfab .vdot{width:12px;height:12px;border-radius:50%;background:#fff}
+@media(prefers-reduced-motion:no-preference){.vfab[aria-pressed=true] .vdot{animation:vp 1.2s infinite}}@keyframes vp{50%{transform:scale(1.6);opacity:.5}}
+.vbar2{position:fixed;left:16px;right:190px;bottom:16px;z-index:54;background:var(--bg);color:var(--ink);border:2px solid var(--blue);border-radius:12px;padding:10px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.18);max-width:900px}
+.vbar2 .vheard{grid-column:1;font-weight:600;min-height:1.4em}.vbar2 .vmsg{grid-column:1;font-size:14px;color:var(--mute)}.vbar2 #vHelp{grid-row:1/3;grid-column:2;min-height:40px}
+.vbar2.vok .vmsg{color:var(--blue)}.vbar2.vno .vmsg{color:var(--red)}
+.vhelp th{white-space:nowrap;width:5.5em;vertical-align:top}.vhelp td{font-size:15px}
+body{padding-bottom:84px}
 .bar{display:grid;grid-template-columns:8em minmax(0,1fr) 2.5em;gap:8px;align-items:center;font-size:14px;margin:6px 0}.bar b{text-align:right}
 .micwrap{position:relative;display:block}.micwrap>input,.micwrap>textarea{width:100%;padding-right:84px!important}.micwrap .mic{position:absolute;right:4px;top:4px;min-height:36px;padding:0 10px;font-size:14px;white-space:nowrap;background:var(--bg)}
 .tools button{border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;border-radius:10px;min-height:44px;padding:0 14px;cursor:pointer;font-weight:600}
@@ -180,6 +188,7 @@ td.num,th.num{text-align:right;white-space:nowrap}
 
 @media(max-width:860px){.calc{grid-template-columns:minmax(0,1fr)}.stampBox{position:static;order:-1}.cols{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){.pick{grid-template-columns:minmax(0,1fr)}
+ .vbar2{left:8px;right:8px;bottom:82px}.vfab{right:12px;bottom:12px}
  .srcs{display:grid;grid-template-columns:minmax(0,1fr)}.src{display:grid}
  .vbar .btns{width:100%}.vbar .btns .btn{flex:1}.vl{width:100%}.vl button{flex:1;padding:0 4px;font-size:14px}
  .frow{grid-template-columns:minmax(0,1fr)}.frow>div:empty{display:none}
@@ -1058,8 +1067,9 @@ function attachMics(){if(!DICT)return;['#lgT','#lgN','#lgW','#recTxt','#cdMemo',
   b.onclick=()=>{if(micBtn===b){DICT.stop().catch(()=>{});return}micEl=el;micBtn=b;DICT.start().catch(e=>{micBtn=null;micSet(false);toast(e&&e.code==='not_granted'?'마이크 사용이 허용되지 않았습니다. 글로 입력하세요.':'음성 입력을 시작하지 못했습니다.')});micSet(true)};
   const w=document.createElement('div');w.className='micwrap';el.parentNode.insertBefore(w,el);w.appendChild(el);w.appendChild(b)})}
 (async()=>{try{if(window.claude&&typeof claude.use==='function'){DICT=await claude.use('dictation');if(DICT){
- DICT.onFinal(({text})=>{if(!micEl||!text)return;micEl.value=(micEl.value&&!/\s$/.test(micEl.value)?micEl.value+' ':micEl.value)+text;micEl.dispatchEvent(new Event('input',{bubbles:true}))});
- DICT.onState(({state})=>{if(state!=='listening'){micBtn=null;micSet(false)}});attachMics()}}}catch(e){DICT=null}})();
+ DICT.onFinal(({text})=>{if(VX.on&&VX.eng==='dict'){handleVoice(text);return}if(!micEl||!text)return;micEl.value=(micEl.value&&!/\s$/.test(micEl.value)?micEl.value+' ':micEl.value)+text;micEl.dispatchEvent(new Event('input',{bubbles:true}))});
+ DICT.onPartial(({text})=>{if(VX.on&&VX.eng==='dict')vHeard(text,true)});
+ DICT.onState(({state})=>{if(state!=='listening'){micBtn=null;micSet(false);if(VX.on&&VX.eng==='dict'){VX.on=false;voiceSet(false)}}});attachMics();$('#vfab').classList.remove('hidden')}}}catch(e){DICT=null}})();
 
 $('#sessBtn').onclick=sessClick;$('#showBtn').onclick=openViewer;
 $('#quick').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;cur=b.dataset.t;store.set('type',cur);vals={};calcIdx=0;render()});
@@ -1074,6 +1084,105 @@ const npsUrl=id=>'https://nps.or.kr/das/crtr/getOHAO'+String(NPSN[id]).padStart(
 const lk=(u,t,s)=>'<a class="src" href="'+u+'" target="_blank" rel="noopener noreferrer"><b>'+t+' ↗</b>'+(s?'<span>'+s+'</span>':'')+'</a>';
 function srcHTML(t){return '<div class="srcs"><span class="ql">원문 바로가기</span>'+lk(LAW.goshi[1],LAW.goshi[0],LAW.goshi[2])+lk(npsUrl(t.id),'공단 '+t.name+' 기준','국민연금공단 게시본')+'</div>'}
 function srcProcHTML(){return '<div class="srcs"><span class="ql">원문 바로가기</span>'+['simsa','goshi','rule','nps'].map(k=>lk(LAW[k][1],LAW[k][0],LAW[k][2])).join('')+'</div>'}
+/* 15. 말로 조작 */
+const VX={on:false,eng:null,rec:null,partial:''};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const nz=s=>String(s||'').toLowerCase().replace(/[\s.,!?·~'"()\-]/g,'');
+const STEM={limb:['지체'],brain:['뇌병변'],vis:['시각','시력'],ear:['청각','청력','난청'],speech:['언어','말더듬'],face:['안면','얼굴'],kidney:['신장','콩팥','투석'],heart:['심장'],lung:['호흡기','폐'],liver:['간','간경변'],ostomy:['장루','요루','방광루'],epi:['뇌전증','간질'],pan:['췌장','1형당뇨'],intel:['지적'],autism:['자폐','자폐성'],mental:['정신','조현병']};
+const FILL=/(장애|으로|로|를|을|은|는|이|가|보여줘|보여주세요|열어줘|열어|가줘|가기|가|해줘|해주세요|해|줘|주세요|요|좀|화면|탭)$/;
+function strip(s){let x=nz(s),p;do{p=x;x=x.replace(FILL,'')}while(x!==p&&x.length>1);return x}
+const TAB_AL={calc:['판정계산','계산','예상정도','예상','판정해','판정'],crit:['판정기준','기준','중복','중복장애'],cert:['진단서','보완점검','진단서보완점검','소견'],time:['진단시기','시기','언제진단','진단가능일','진단시기계산'],docs:['준비서류','서류','준비물','준비물안내','qr','큐알'],hist:['판정이력','이력'],find:['유형찾기'],easy:['쉬운설명','설명'],sym:['증상정리','증상','일지'],card:['상담안내문','안내문','문자'],appeal:['판정절차','절차','이의신청','순서도'],log:['상담기록','기록','통계']};
+const FIELD_AL={iq:['아이큐','지능지수','지능'],gas:['지에이에스','가스','gas'],fev:['에프이브이원','fev1','폐활량','일초량'],dl:['폐확산능','디엘씨오','dlco'],po:['산소분압','pao2','피에이오투'],bi:['빌리루빈','빌리'],al:['알부민'],inr:['inr','아이엔알','응고'],sc:['점수','합계','각도'],gl:['혈당','포도당'],cp:['c펩타이드','씨펩타이드','펩타이드'],pcc:['자음정확도','자음'],ex:['표현언어','표현'],re:['수용언어','수용'],ssi:['ssi','에스에스아이'],pfa:['pfa','피에프에이'],d:['변형','변형면적'],vt:['백반증'],mo:['개월','기간'],age:['나이','만나이'],ht:['키'],ld:['다리길이','길이차이'],it:['항목수','항목'],r:['오른눈','우안'],l:['왼눈','좌안'],d0:['최초투석일','투석일','투석시작'],dx:['진단일','진단'],sv:['중증발작','중증'],mi:['경증발작','경증'],pm:['한달','월평균'],p6:['6개월','육개월'],tx:['이식','이식받음'],fo:['폰탄'],vent:['인공호흡기','기관절개'],pf:['늑막루'],c1:['난치성복수','흉수'],c2:['간성뇌증'],c3:['간신증후군'],c4:['정맥류','출혈'],c5:['복막염','흉막염'],dem:['치매'],idas:['지적장애로','자폐성장애로'],dp:['겹보임','복시'],ach:['연골무형성'],psy:['정신병적'],cont:['중단없이','지속투석'],tr:['적극적인치료','약물치료'],st:['장루'],ur:['요루'],bl:['방광루'],je:['공장루'],ace:['관장루'],kock:['코크파우치','미트라파노프'],fi:['장피누공','누공'],vd:['배뇨기능장애'],cx:['기타합병증','그밖의합병증'],sv2:['심각한배뇨장애'],rb:['배변장애']};
+const KD={'영':0,'공':0,'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'륙':6,'칠':7,'팔':8,'구':9},KU={'십':10,'백':100,'천':1000};
+function knum(s){if(!s)return NaN;let [ip,fp]=s.split('점');let tot=0,cur=0,any=false;for(const c of ip){if(c in KD){cur=KD[c];any=true}else if(c in KU){tot+=(cur||1)*KU[c];cur=0;any=true}else if(c==='만'){tot=(tot+cur)*10000;cur=0;any=true}}tot+=cur;
+ if(fp!==undefined){let f='';for(const c of fp)if(c in KD)f+=KD[c];if(f)return parseFloat(tot+'.'+f)}return any?tot:NaN}
+function firstNum(s){const m=String(s).match(/-?\d+(?:\.\d+)?/);if(m)return m[0];const k=String(s).match(/[영공일이삼사오육륙칠팔구십백천만점]{1,12}/);if(k){const v=knum(k[0]);if(!isNaN(v))return String(v)}return null}
+function parseSpokenDate(s){const m=String(s).match(/(\d{4})\s*[년.\-\/]\s*(\d{1,2})\s*[월.\-\/]\s*(\d{1,2})/)||String(s).match(/(\d{4})(\d{2})(\d{2})/);if(!m)return null;const v=m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');return pd(v)?v:null}
+function vSay(msg,ok){const b=$('#vbar');if(!b)return;b.querySelector('.vmsg').textContent=msg;b.classList.toggle('vok',!!ok);b.classList.toggle('vno',ok===false)}
+function vHeard(t,partial){const b=$('#vbar');if(b)b.querySelector('.vheard').textContent=(partial?'… ':'「')+t+(partial?'':'」')}
+function click(sel){const e=document.querySelector(sel);if(e&&e.offsetParent!==null){e.click();return true}if(e){e.click();return true}return false}
+function goTab(k){if(!mode)setMode('family');if(!TABS[mode].some(x=>x[0]===k)){if(k==='appeal'&&mode==='doctor'){if($('#procSec').classList.contains('hidden'))toggleProc();$('#procSec').scrollIntoView({behavior:'smooth'});return 'proc'}return null}click('#tabs [data-tab='+k+']');$('#panel').scrollIntoView({behavior:'smooth',block:'start'});return k}
+function pickType(id){if(!mode)setMode('family');click('#types [data-t='+id+']');return id}
+function speakShort(t){try{const u=new SpeechSynthesisUtterance(t);u.lang='ko-KR';u.rate=1;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+function labRe(a){return new RegExp(a.split('').map(c=>c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('\\s*'),'i')}
+function afterLabel(raw,a){const m=String(raw).match(labRe(a));return m?String(raw).slice(m.index+m[0].length):String(raw)}
+function fillField(raw){const form=$('#form');if(!form)return null;const n=nz(raw);
+ const ear=n.match(/(오른|우측|우|왼|좌측|좌)귀?/);if(form.querySelector('[data-k=r500]')&&ear){const side=/오른|우/.test(ear[1])?'r':'l';const nums=(String(raw).match(/\d+/g)||[]).map(Number);
+  const fq={500:'500',1000:'1k',2000:'2k',4000:'4k'};if(nums.length>=2&&fq[nums[0]]){setVal(form.querySelector('[data-k='+side+fq[nums[0]]+']'),String(nums[1]));return (side==='r'?'오른귀 ':'왼귀 ')+nums[0]+'Hz '+nums[1]+'dB'}
+  if(nums.length>=4){['500','1k','2k','4k'].forEach((q,i)=>setVal(form.querySelector('[data-k='+side+q+']'),String(nums[i])));return (side==='r'?'오른귀':'왼귀')+' 4개 주파수 입력'}}
+ const ho=n.match(/(심하지않은|심한)(\d+|[일이삼사오육칠팔구십]+)호/);if(ho&&form.querySelector('input[type=radio][data-k=item]')){const no=parseInt(ho[2])||knum(ho[2]);const v=(ho[1]==='심한'?'S':'M')+':'+(no-1);const r=form.querySelector('input[type=radio][value="'+v+'"]');if(r){r.checked=true;r.dispatchEvent(new Event('change',{bubbles:true}));return ho[1].replace('않은',' 않은')+' '+no+'호 선택'}}
+ const cands=[];[...form.querySelectorAll('[data-k]')].filter(e=>e.type!=='radio').forEach(e=>{const k=e.dataset.k.replace(/^sv$/,e.type==='checkbox'?'sv2':'sv');const lab=e.closest('.row')?nz(e.closest('.row').querySelector('label,.lab')?.textContent):nz(e.closest('label')?.textContent);
+  [lab].concat(FIELD_AL[k]||[]).filter(x=>x&&x.length>=1).forEach(a=>{const i=n.indexOf(a);if(i>=0)cands.push({e,a,i})})});
+ cands.sort((x,y)=>y.a.length-x.a.length||(y.e.type==='checkbox'?-1:1)*(/체크|해제|있음|없음/.test(n)?-1:1));
+ for(const c of cands){const e=c.e,rest=afterLabel(raw,c.a),rn=nz(rest);
+  if(e.type==='checkbox'){if(firstNum(rest)!==null&&!/체크|해제|있음|없음|받음|있어/.test(n))continue;const off=/해제|아니|없음|없어|빼|끄/.test(n);e.checked=!off;e.dispatchEvent(new Event('change',{bubbles:true}));return c.a+(off?' 해제':' 체크')}
+  if(e.tagName==='SELECT'){const num=firstNum(rest);let opt=[...e.options].find(o=>o.value!==''&&rn&&nz(o.textContent).includes(rn.replace(/점$/,'')));
+   if(!opt&&num!==null)opt=[...e.options].find(o=>o.value===num||nz(o.textContent).startsWith(num+'점'));if(!opt)opt=[...e.options].filter(o=>o.value!=='').find(o=>nz(o.textContent).split(/[·,]/).some(p=>p.length>=2&&rn.includes(p)));
+   if(opt){e.value=opt.value;e.dispatchEvent(new Event('change',{bubbles:true}));return c.a+' → '+opt.textContent.trim()}continue}
+  if(e.dataset.date){const d=parseSpokenDate(rest);if(d){setVal(e,d);return c.a+' '+d}continue}
+  const num=firstNum(rest);if(num!==null){setVal(e,num);return c.a+' '+num}}
+ return null}
+function setVal(e,v){if(!e)return;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}))}
+function handleVoice(text){const t=String(text||'').trim();if(!t)return;vHeard(t);const n=nz(t),s=strip(t);const ok=m=>{vSay(m,true);return true};
+ const has=(...w)=>w.some(x=>n.includes(x));
+ if(has('도움말','명령어','뭐라고말해','사용법'))return ok(showVoiceHelp()||'도움말을 열었습니다');
+ if(has('듣기중지','듣기끝','마이크꺼','음성끝','그만들어'))return voiceStop(),ok('말로 조작을 껐습니다');
+ if(has('처음으로','첫화면','처음화면')||s==='홈')return goHome(),ok('첫 화면으로 갔습니다');
+ if(/^(닫기|닫아|닫아줘|창닫기)/.test(s)||s==='닫'){if($('.modal')){$('.modal').remove();return ok('창을 닫았습니다')}if($('#viewer')){closeViewer();return ok('민원인 화면을 닫았습니다')}if(!$('#procSec').classList.contains('hidden')){toggleProc();return ok('판정 절차를 닫았습니다')}if(!$('#rec').classList.contains('hidden')){toggleRec();return ok('기록으로 찾기를 닫았습니다')}}
+ if($('.modal')){const b=[...document.querySelectorAll('.modal [data-mb]')].find(x=>n.includes(nz(x.textContent))||(has('확인','예','네','지워')&&x.classList.contains('btn')&&!x.classList.contains('ghost')));if(b){b.click();return ok(b.textContent.trim())}if(has('취소','아니'))return $('.modal').remove(),ok('취소했습니다')}
+ const fe=document.activeElement,txt=fe&&fe.id!=='q'&&(fe.tagName==='TEXTAREA'||(fe.tagName==='INPUT'&&fe.type==='text'&&!fe.dataset.date&&!/^20\d{6}$/.test(fe.placeholder||'')));
+ if(txt&&!has('듣기중지','다음탭','이전탭','의사용','직원용','복사','저장','분석해')){fe.value=(fe.value&&!/\s$/.test(fe.value)?fe.value+' ':fe.value)+t;fe.dispatchEvent(new Event('input',{bubbles:true}));return ok('입력 칸에 적었습니다')}
+ if(has('의사용'))return setMode('doctor'),ok('의사용 화면');if(has('직원용','민원상담용'))return setMode('family'),ok('직원용 화면');
+ if($('#viewer')){const L={한국어:'ko',영어:'en',중국어:'zh',베트남어:'vi'};for(const k in L)if(n.includes(k)){vLang=L[k];store.set('vlang',vLang);openViewer();return ok(k+' 안내로 바꿨습니다')}if(has('복사')){$('#vCopy').click();return ok('안내를 복사했습니다')}}
+ const sm=t.match(/^(?:검색|찾기)\s*(.+)$/)||t.match(/^(.+?)\s*(?:검색해\s*줘|검색해\s*주세요|검색해|검색|찾아\s*줘|찾아\s*주세요|찾아)$/);
+ if(sm&&!has('기록으로','유형찾기')){const q=sm[1].trim();if(!mode)setMode('family');$('#q').value=q;$('#qBtn').click();return ok('「'+q+'」 검색 결과 '+$('#qRes').querySelectorAll('[data-go]').length+'건')}
+ if(has('기록으로찾기','기록으로유형찾기','기록분석')){if(!mode)setMode('family');if($('#rec').classList.contains('hidden'))toggleRec();return ok('기록으로 찾기를 열었습니다')}
+ if(has('분석해','분석시작')&&$('#recGo')){$('#recGo').click();return ok('기록을 분석했습니다')}
+ if(has('상담시작')&&mode==='family'){if(!store.get('sess',null))sessClick();return ok('상담을 시작했습니다')}
+ if(has('상담종료','상담끝','새환자','입력지우기','다지워')){if(has('입력지우기')&&$('#reset')){$('#reset').click();return ok('입력을 지웠습니다')}sessClick();return ok('확인 창을 열었습니다. "확인" 또는 "취소"라고 말하세요')}
+ if(has('민원인화면','보여주는화면')){if(!mode)setMode('family');openViewer();return ok('민원인 화면을 열었습니다')}
+ if(has('판정절차','절차','순서도')){const r=goTab('appeal');return ok(r?'판정 절차를 열었습니다':'판정 절차')}
+ if(has('큰글씨','글씨크게','글자크게'))return setBig(true),ok('큰 글씨로 바꿨습니다');if(has('글씨작게','보통글씨','글자작게'))return setBig(false),ok('보통 글씨로 바꿨습니다');
+ if(has('결과읽어','판정읽어','결과말해')){const o=$('#out')||$('#tmOut');if(o){speakShort(o.innerText.replace(/\n+/g,'. ').slice(0,300));return ok('결과를 읽습니다')}}
+ if(has('읽어줘','읽어주기','읽어주세요')){if($('#ttsBtn').getAttribute('aria-pressed')!=='true')$('#ttsBtn').click();return ok('화면을 읽습니다')}
+ if(has('멈춰','그만읽어','조용','읽기멈춤')){stopTTS();try{speechSynthesis.cancel()}catch(e){}return ok('읽기를 멈췄습니다')}
+ if(has('즐겨찾기')&&mode){toggleFav();return ok(favs().includes(cur)?'즐겨찾기에 넣었습니다':'즐겨찾기에서 뺐습니다')}
+ if(has('맨위'))return scrollTo({top:0,behavior:'smooth'}),ok('맨 위로');if(has('맨아래'))return scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),ok('맨 아래로');
+ if(/^(아래로|내려|스크롤다운)/.test(s))return scrollBy({top:innerHeight*.7,behavior:'smooth'}),ok('아래로');if(/^(위로|올려)/.test(s))return scrollBy({top:-innerHeight*.7,behavior:'smooth'}),ok('위로');
+ if(mode&&has('다음탭','이전탭')){const L=TABS[mode],i=L.findIndex(x=>x[0]===tab),j=(i+(has('다음탭')?1:-1)+L.length)%L.length;goTab(L[j][0]);return ok(L[j][1])}
+ if(mode&&has('다음유형','이전유형')){const i=T.findIndex(x=>x.id===cur),j=(i+(has('다음유형')?1:-1)+T.length)%T.length;pickType(T[j].id);return ok(T[j].name)}
+ if(has('복사')){const b=['#cdCopy','#copy','#smsLC','#lgCopy','#qrCopy','#dCopy','#stCopy'].map(x=>$(x)).find(x=>x&&x.offsetParent!==null);if(b){b.click();return ok('복사했습니다')}}
+ if(has('저장')&&$('#saveH')){$('#saveH').click();return ok('이력에 저장했습니다')}
+ // 유형 + 탭 동시: "신장 판정 계산"
+ let tid=null;for(const t2 of T){const st=[nz(t2.name)].concat(STEM[t2.id]);if(st.some(x=>x.length>=2&&n.includes(x))||STEM[t2.id].some(x=>s===x)){tid=t2.id;break}}
+ let tk=null,tl=0;Object.entries(TAB_AL).forEach(([k,a])=>a.forEach(x=>{if(n.includes(x)&&x.length>tl&&(!mode||TABS[mode].some(y=>y[0]===k)||k==='appeal')){tk=k;tl=x.length}}));
+ if(tid&&(tk||!$('#form')||s.length<=6||n.includes('장애'))){pickType(tid);if(tk)goTab(tk);return ok(T.find(x=>x.id===tid).name+(tk?' · '+TABS[mode].find(x=>x[0]===tk)?.[1]:''))}
+ // 계산 칸 값 넣기
+ if(tab==='calc'&&$('#form')){const c=ty().calcs;for(let i=0;i<c.length;i++){const ti=nz(C[c[i]].t).split(/[(（]/)[0];if(ti.length>=2&&n.includes(ti)&&i!==calcIdx&&n.length<=ti.length+6){click('[data-ci="'+i+'"]');return ok(C[c[i]].t)}}
+  const r=fillField(t);if(r)return ok(r+' — '+($('#out .stamp')?.innerText.split('\n')[0]||''))}
+ if(tk){goTab(tk);return ok(TABS[mode].find(x=>x[0]===tk)?.[1]||'')}
+ if(tid){pickType(tid);return ok(T.find(x=>x.id===tid).name)}
+ if(fe&&(fe.tagName==='TEXTAREA'||(fe.tagName==='INPUT'&&/text|search/.test(fe.type)))){fe.value=(fe.value&&!/\s$/.test(fe.value)?fe.value+' ':fe.value)+t;fe.dispatchEvent(new Event('input',{bubbles:true}));return ok('입력 칸에 적었습니다')}
+ vSay('알아듣지 못했습니다. "도움말"이라고 말하면 쓸 수 있는 말을 보여 줍니다.',false);return false}
+function showVoiceHelp(){modal('<h3 style="margin-top:0">이렇게 말해 보세요</h3><table class="vhelp"><tbody>'+[
+ ['이동','처음으로 · 의사용 · 직원용 · 닫기 · 맨 위로 · 아래로'],['유형','신장장애 · 뇌병변 · 간장애 판정 계산 · 다음 유형'],['탭','판정 계산 · 판정기준 · 진단 시기 · 준비 서류 · 상담 안내문 · 다음 탭'],
+ ['검색','투석 검색 · 검색 바델 · 근력등급 찾아 줘'],['값 넣기','아이큐 65 · 빌리루빈 3.2 · 알부민 2.7 · 최초 투석일 2026년 3월 15일 · 오른귀 60 70 80 90 · 심한 3호 · 폐이식 체크'],
+ ['버튼','기록으로 찾기 · 분석해 · 판정 절차 · 상담 시작 · 상담 종료 · 민원인 화면 · 영어로 · 복사 · 이력 저장 · 즐겨찾기'],['읽기','결과 읽어 줘 · 읽어 줘 · 멈춰 · 큰 글씨'],['끄기','듣기 중지 (또는 마이크 단추, Alt+M)']].map(r=>'<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>').join('')+'</tbody></table><p class="note">입력 칸에 커서가 있을 때 명령이 아닌 말을 하면 그 칸에 적습니다.</p>',[['닫기',null,1]]);return '도움말을 열었습니다'}
+function voiceUI(){if($('#vfab'))return;const f=document.createElement('button');f.id='vfab';f.type='button';f.className='vfab';f.setAttribute('aria-pressed','false');f.title='말로 조작 (Alt+M)';f.innerHTML='<span class="vdot"></span><span class="vlab">말로 조작</span>';f.onclick=voiceToggle;document.body.appendChild(f);
+ const b=document.createElement('div');b.id='vbar';b.className='vbar2 hidden';b.setAttribute('aria-live','polite');b.innerHTML='<span class="vheard"></span><span class="vmsg">듣고 있습니다. 예) "신장장애 판정 계산", "도움말"</span><button type="button" class="btn ghost" id="vHelp">도움말</button>';document.body.appendChild(b);$('#vHelp').onclick=showVoiceHelp}
+function voiceSet(on){VX.on=on;$('#vfab').setAttribute('aria-pressed',on);$('#vfab .vlab').textContent=on?'듣는 중':'말로 조작';$('#vbar').classList.toggle('hidden',!on)}
+function voiceStop(){VX.on=false;try{if(VX.eng==='dict'&&DICT)DICT.stop().catch(()=>{});if(VX.eng==='sr'&&VX.rec)VX.rec.stop()}catch(e){}voiceSet(false)}
+function voiceToggle(){if(VX.on){voiceStop();return}
+ if(DICT){VX.eng='dict';micEl=null;micBtn=null;voiceSet(true);DICT.start().catch(e=>{voiceSet(false);toast(e&&e.code==='not_granted'?'마이크 사용이 허용되지 않았습니다.':'음성 인식을 시작하지 못했습니다.')});return}
+ if(SR){VX.eng='sr';const r=new SR();VX.rec=r;r.lang='ko-KR';r.continuous=true;r.interimResults=true;
+  r.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal)handleVoice(x[0].transcript);else vHeard(x[0].transcript,true)}};
+  r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){VX.on=false;voiceSet(false);toast('마이크 사용이 막혀 있습니다. 주소창의 마이크 권한을 허용하세요.')}else if(e.error==='network'){VX.on=false;voiceSet(false);toast('음성 인식 서버에 연결하지 못했습니다(인터넷 필요).')}};
+  r.onend=()=>{if(VX.on){try{r.start()}catch(e){voiceSet(false)}}};
+  try{r.start();voiceSet(true)}catch(e){toast('음성 인식을 시작하지 못했습니다.')}return}
+ toast('이 브라우저에서는 음성 인식을 쓸 수 없습니다. 크롬이나 엣지를 쓰세요.')}
+voiceUI();if(!SR)$('#vfab').classList.add('hidden');
+document.addEventListener('keydown',e=>{if(e.altKey&&(e.key==='m'||e.key==='M'||e.key==='ㅡ')){e.preventDefault();if(!$('#vfab').classList.contains('hidden'))voiceToggle()}});
+
 /* 검색 */
 function search(){const q=$('#q').value.trim();const box=$('#qRes');if(!q){box.classList.add('hidden');return}const out=[];
  T.forEach(t=>{t.sec.forEach(s=>{[[S,s.s],[M,s.m]].forEach(([lv,a])=>a.forEach((x,i)=>{if((s.t+x).includes(q))out.push({t,lv,txt:s.t+' '+(i+1)+'호 — '+x})}))});
