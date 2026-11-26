@@ -204,6 +204,14 @@ footer .disc{color:#8a5a00;background:#fff8e6;border:1px solid #f3dca6;border-ra
   .searchbar,.more,.star,footer,.warn,.quick{display:none!important}
   header{background:none;color:#000}.pill{border:1px solid #999}
 }
+.sbox input{padding-right:84px!important}
+.sclear{right:46px!important}
+.qmic{position:absolute;right:8px;top:8px;width:32px;height:32px;border:0;border-radius:8px;background:#e6f4f2;color:var(--teal);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.qmic svg{width:18px;height:18px}
+.qmic.on{background:#e0453a;color:#fff;animation:micp 1.2s infinite}
+.qmic.nosr{opacity:.45}
+@keyframes micp{0%{box-shadow:0 0 0 0 rgba(224,69,58,.5)}70%{box-shadow:0 0 0 9px rgba(224,69,58,0)}100%{box-shadow:0 0 0 0 rgba(224,69,58,0)}}
+@media (max-width:640px){.qmic{top:6px}}
 </style>
 </head>
 <body>
@@ -223,7 +231,7 @@ footer .disc{color:#8a5a00;background:#fff8e6;border:1px solid #f3dca6;border-ra
     <div class="srow">
       <div class="sbox">
         <input id="q" type="text" enterkeyhint="search" autocomplete="off" placeholder="이름 · 부서 · 업무 · 번호 · 초성 — 한/영 안 바꿔도, 조금 틀려도 찾습니다">
-        <button class="sclear" id="qclear" title="지우기 (Esc)">✕</button>
+        <button class="sclear" id="qclear" title="지우기 (Esc)">✕</button><button class="qmic" id="qmic" title="말로 찾기" aria-label="말로 찾기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
       </div>
     </div>
     <div class="chips" id="chips"></div>
@@ -1264,6 +1272,43 @@ function copy(text,key){
 
 // ===== 이벤트 =====
 let tmr; $('q').addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(render,70);});
+// ===== 말로 찾기 (음성 검색) =====
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const KNUM={'영':0,'공':0,'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'륙':6,'칠':7,'팔':8,'구':9};
+function voiceClean(t){
+  let s=String(t||'').trim().replace(/[.?!,。]/g,' ');
+  // 부탁·질문 말투 걷어내기
+  s=s.replace(/\s*(전화\s*번호|내선\s*번호|번호|연락처|전화)?\s*(좀\s*)?(알려\s*(줘|주세요|줄래|주실래요)|찾아\s*(줘|주세요|줄래|봐)|가르쳐\s*(줘|주세요)|보여\s*(줘|주세요)|뭐(야|예요|에요|지)?|어떻게\s*(돼|되나요|돼요)|어디(야|예요|에요)?|부탁(해|합니다|드려요)?)\s*$/,'');
+  s=s.replace(/\s*(의\s*)?(전화\s*번호|내선\s*번호|연락처)\s*$/,'').replace(/(으로|로)?\s*전화\s*(걸어|해)\s*(줘|주세요)?\s*$/,'');
+  s=s.replace(/^(내선|구내)\s*/,'');
+  // 숫자를 한 자씩 읽은 경우: "이 삼 사 구" → 2349, "2 3 4 9" → 2349
+  if(/^([영공일이삼사오육륙칠팔구]\s*){3,}$/.test(s)) s=s.replace(/\s/g,'').split('').map(c=>KNUM[c]).join('');
+  s=s.replace(/(\d)\s+(?=\d)/g,'$1');
+  // "가 6 병동" → "가6병동"
+  s=s.replace(/([가나])\s+(\d{1,2})\s*(병동)?/g,'$1$2$3').replace(/(\d)\s+병동/g,'$1병동');
+  return s.replace(/\s+/g,' ').trim();
+}
+let rec=null, recOn=false;
+function setMic(on){ recOn=on; const b=$('qmic'); if(!b) return; b.classList.toggle('on',on); b.title=on?'듣는 중 — 누르면 멈춤':'말로 찾기'; $('q').placeholder=on?'말씀하세요… (예: 산재 담당, 나사, 김영민 교수)':$('q').dataset.ph; }
+function startVoice(){
+  if(!SR){ toast('이 브라우저는 말로 찾기를 지원하지 않습니다. 크롬이나 휴대폰 키보드의 🎤 버튼을 써 주세요.'); return; }
+  if(recOn&&rec){ rec.stop(); return; }
+  try{
+    rec=new SR(); rec.lang='ko-KR'; rec.interimResults=true; rec.continuous=false; rec.maxAlternatives=1;
+    let finalText='';
+    rec.onresult=ev=>{ let txt=''; for(let i=0;i<ev.results.length;i++){ txt+=ev.results[i][0].transcript; if(ev.results[i].isFinal) finalText=txt; }
+      $('q').value=voiceClean(txt); render(); };
+    rec.onerror=ev=>{ setMic(false);
+      toast(ev.error==='not-allowed'||ev.error==='service-not-allowed'?'마이크 사용을 허용해 주세요 (주소창 왼쪽 자물쇠 → 마이크 허용)':ev.error==='no-speech'?'말소리가 들리지 않았습니다. 다시 눌러 말씀해 주세요.':ev.error==='network'?'인터넷 연결이 있어야 말로 찾기를 쓸 수 있습니다.':ev.error==='audio-capture'?'마이크를 찾지 못했습니다.':ev.error==='aborted'?'':'말로 찾기를 하지 못했습니다 ('+ev.error+')'); };
+    rec.onend=()=>{ setMic(false); const q=$('q').value.trim();
+      if(finalText&&q){ recent=[q,...recent.filter(r=>r!==q)].slice(0,8); LS.set('recent',recent); render(); } };
+    rec.start(); setMic(true);
+  }catch(e){ setMic(false); toast('말로 찾기를 시작하지 못했습니다.'); }
+}
+(function(){ const b=$('qmic'); if(!b) return; $('q').dataset.ph=$('q').placeholder;
+  if(!SR){ b.classList.add('nosr'); }
+  b.onclick=startVoice; })();
+
 $('q').addEventListener('keydown',ev=>{
   if(ev.key==='Escape'){ $('q').value=''; render(); }
   else if(ev.key==='ArrowDown'){ ev.preventDefault(); moveSel(1); }
