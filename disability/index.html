@@ -32,6 +32,20 @@ header p{margin:6px 0 0;opacity:.85;font-size:14px}
 .modeSw button[aria-pressed=true]{background:#fff;color:#1f4c8f}
 .hidden{display:none!important}
 /* 첫 화면 */
+.sysPick{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;max-width:1240px;margin:0 auto}
+.sysCard{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:var(--paper);text-align:left;display:grid;grid-template-rows:auto 1fr auto;gap:8px;min-height:150px;font:inherit;color:var(--ink);cursor:pointer}
+.sysCard:hover,.sysCard:focus-visible{border-color:var(--blue);outline:2px solid var(--blue)}
+.sysCard b{font-size:19px;color:var(--blue)}.sysCard span{font-size:14px;color:var(--mute);line-height:1.5}
+.sysDis{cursor:default;border:2px solid var(--blue)}.sysDis:hover{outline:0}
+.sysBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sysBtns .btn{min-height:40px;padding:0 8px}
+@media(max-width:600px){.sysPick{grid-template-columns:1fr 1fr;gap:8px}.sysDis{grid-column:1/-1}.sysCard{padding:12px;min-height:0;gap:6px}.sysCard b{font-size:16px}.sysCard span{font-size:12.5px}.sysCard .sysGo{display:none}}
+.sysGo{font-style:normal;font-size:14px;font-weight:600;color:var(--blue);min-height:40px;display:flex;align-items:center}
+.sysbar{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40;padding:0 max(4vw,16px)}
+.sysin{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:10px 0}
+.sysb{min-height:42px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:2px 8px;font:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;line-height:1.25}
+.sysb[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+@media(max-width:900px){.sysin{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:600px){.sysbar{overflow-x:auto;scrollbar-width:none;padding:0 12px}.sysin{display:flex!important;gap:6px;padding:8px 0;width:max-content}.sysb{flex:0 0 auto;min-width:7em;white-space:nowrap;font-size:13px;padding:2px 12px}}
 .pick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;max-width:960px;margin:0 auto}
 .pickCard{border:1px solid var(--line);border-radius:14px;padding:28px;background:var(--paper);text-align:left;cursor:pointer;display:grid;gap:10px;min-height:220px;align-content:start}
 .pickCard:hover,.pickCard:focus-visible{border-color:var(--blue);outline:2px solid var(--blue)}
@@ -242,26 +256,19 @@ table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-bl
     <button type="button" data-mode="family" aria-pressed="false">직원용</button>
   </div>
 </div></header>
+<nav class="sysbar hidden" id="sysBar" aria-label="제도 선택"></nav>
 
 <main>
 <section class="band" id="start">
-  <p class="intro">누가 사용하시나요? 고른 화면은 다음에 열 때도 그대로 열립니다. 위쪽 단추로 언제든 바꿀 수 있습니다.</p>
-  <div class="pick">
-    <button class="pickCard" type="button" data-mode="doctor"><b>의사용</b>
-      <span>장애정도심사용 진단서를 쓰는 전문의를 위한 화면</span>
-      <ul><li>진료기록으로 유형 찾기·수치 자동 채우기</li><li>측정값 입력 → 장애정도 자동 판정</li><li>판정기준 원문 검색</li><li>진단서 기재사항·소견 문구 초안</li><li>진단 시기·진단 가능 전문의</li><li>의무기록·검사결과지 준비물</li></ul></button>
-    <button class="pickCard" type="button" data-mode="family"><b>직원용 (민원 상담)</b>
-      <span>원무·민원 창구 직원이 장애 진단·등록 민원을 상담할 때 쓰는 화면</span>
-      <ul><li>진단서·소견서 내용으로 유형 찾기</li><li>민원인에게 기준을 쉬운 말로 설명</li><li>검사 숫자로 예상 정도 확인</li><li>진단 가능일·이의신청 기한 계산</li><li>상담 안내문 복사·상담 기록</li></ul></button>
-    <button class="pickCard pickWide" type="button" id="schCard"><b>제도별 기준</b>
-      <span>장애인 등록 외에 진료하면서 자주 쓰는 장해·장애 관련 제도 11가지를 한곳에</span>
-      <ul><li>국민연금 장애연금</li><li>산재 장해급여(근로복지공단)</li><li>공무원 재해보상 장해등급(1~14급)</li><li>군인 재해보상</li><li>학교안전공제회 장해급여</li><li>근로능력평가용 진단서</li><li>장기요양 의사소견서</li><li>대한의사협회 진단서 작성지침</li><li>자동차보험 상해·후유장애 급별</li><li>민간보험 후유장해·맥브라이드</li><li>병역·병무용 진단서</li></ul></button>
+  <p class="intro" style="max-width:1240px">어떤 제도를 보시겠어요? 고른 뒤에도 위쪽 제도 탭으로 언제든 바꿀 수 있습니다.</p>
+  <div class="sysPick" id="sysPick">
+    <div class="sysCard sysDis"><b>장애정도 판정기준</b><span>장애인복지법 장애인 등록 · 16개 장애유형 판정, 진단서 점검 — 의사용 / 직원용(민원 상담)</span><div class="sysBtns"><button type="button" class="btn" data-mode="doctor">의사용</button><button type="button" class="btn ghost" data-mode="family">직원용</button></div></div>
   </div>
 </section>
 
 <section class="band hidden" id="app"><div class="wrap">
   <div class="toolbar">
-    <div class="btnRow"><button type="button" class="btn" id="recBtn" aria-pressed="false" title="진료기록·소견서로 장애유형 찾기">기록으로 찾기</button><button type="button" class="btn ghost" id="procBtn" aria-pressed="false">판정 절차</button><button type="button" class="btn ghost" id="sessBtn" aria-pressed="false">상담 시작</button><button type="button" class="btn ghost" id="schBtn" title="국민연금·산재·공무원·자동차보험 등 제도별 기준">제도별 기준</button><button type="button" class="btn ghost" id="showBtn" title="민원인에게 보여 주는 큰 글씨 안내 화면(다국어)">민원인 화면</button></div>
+    <div class="btnRow"><button type="button" class="btn" id="recBtn" aria-pressed="false" title="진료기록·소견서로 장애유형 찾기">기록으로 찾기</button><button type="button" class="btn ghost" id="procBtn" aria-pressed="false">판정 절차</button><button type="button" class="btn ghost" id="sessBtn" aria-pressed="false">상담 시작</button><button type="button" class="btn ghost" id="showBtn" title="민원인에게 보여 주는 큰 글씨 안내 화면(다국어)">민원인 화면</button></div>
     <div class="search"><input id="q" type="search" placeholder="기준 검색: 예) 바델, 투석, 0.02, 근력등급 3" aria-label="판정기준 검색"><button class="btn" id="qBtn" type="button">검색</button></div>
   </div>
   <div id="qRes" class="res hidden"></div>
@@ -273,9 +280,7 @@ table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-bl
   <div class="panel" id="panel" role="tabpanel"></div>
 </div></section>
 <section class="band hidden" id="sch"><div class="wrap" style="display:block">
-  <div class="schHead"><h2>제도별 기준</h2><button type="button" class="btn ghost" id="schBack">돌아가기</button></div>
-  <p class="sub" style="margin-top:6px">장애인복지법 장애정도와 별개로 운영되는 장해·장애 관련 제도의 기준, 진단서 작성 요령, 원문 연결과 간단 계산을 모았습니다.</p>
-  <div class="tabs" id="schTabs" role="tablist"></div>
+  <div class="tabs hidden" id="schTabs" role="tablist"></div>
   <div class="panel" id="schPanel" role="tabpanel"></div>
 </div></section>
 </main>
@@ -605,7 +610,7 @@ const $=s=>document.querySelector(s);
 const TABS={doctor:[['calc','판정 계산'],['crit','판정기준·중복'],['cert','진단서·보완 점검'],['time','진단 시기 계산'],['docs','준비 서류·QR'],['hist','판정 이력']],
  family:[['find','유형 찾기'],['easy','쉬운 설명'],['calc','예상 정도'],['time','언제 진단?'],['sym','증상 정리'],['card','상담 안내문'],['docs','준비물 안내'],['appeal','판정 절차'],['log','상담 기록']]};
 
-function setMode(m){mode=m;store.set('mode',m);$('#start').classList.add('hidden');$('#app').classList.remove('hidden');$('#modeSw').classList.remove('hidden');$('#tools').classList.remove('hidden');$('#homeBtn').classList.remove('hidden');
+function setMode(m){mode=m;store.set('mode',m);store.set('lastMode',m);store.set('sys','dis');$('#sch').classList.add('hidden');sysBar('dis');$('#start').classList.add('hidden');$('#app').classList.remove('hidden');$('#modeSw').classList.remove('hidden');$('#tools').classList.remove('hidden');$('#homeBtn').classList.remove('hidden');
  document.querySelectorAll('#modeSw button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m));tab=TABS[m][0][0];$('#procBtn').classList.toggle('hidden',m!=='doctor');$('#showBtn').classList.toggle('hidden',m==='doctor');sessLabel();if(m!=='doctor'&&!$('#procSec').classList.contains('hidden'))toggleProc();if(!$('#rec').classList.contains('hidden')){const tx=$('#recTxt').value;$('#rec').innerHTML=recHTML();bindRec();$('#recTxt').value=tx}try{if(location.hash!=='#'+m)history.replaceState(null,'','#'+m)}catch(e){}render()}
 function ty(){return T.find(t=>t.id===cur)||T[0]}
 
@@ -1070,7 +1075,7 @@ function bindViewer(){const v=$('#viewer');v.querySelectorAll('[data-vl]').forEa
   try{const r=await SAMPLE('Translate each line of this Korean list of hospital documents for disability registration into '+{en:'English',zh:'Simplified Chinese',vi:'Vietnamese'}[l]+'. Keep medical test names accurate. Return only the translated lines, one per line, same order, no numbering.\n\n'+src.join('\n'),{modelTier:'quick'});
    const lines=String(r.text).split('\n').map(x=>x.replace(/^[-•\d.\s]+/,'').trim()).filter(Boolean);if(lines.length)vTr[t.id+l]=lines.slice(0,src.length);openViewer()}
   catch(e){tr.disabled=false;tr.textContent='이 목록 번역(Claude)';toast(e&&e.code==='rate_limited'?'잠시 후 다시 시도하세요.':'번역하지 못했습니다.')}}}
-function goHome(){if($('.modal'))$('.modal').remove();closeViewer();stopTTS();$('#sch').classList.add('hidden');
+function goHome(){if($('.modal'))$('.modal').remove();closeViewer();stopTTS();$('#sch').classList.add('hidden');sysBar('');store.set('sys','');
  if(!$('#rec').classList.contains('hidden'))toggleRec();if(!$('#procSec').classList.contains('hidden'))toggleProc();
  $('#qRes').classList.add('hidden');$('#app').classList.add('hidden');$('#start').classList.remove('hidden');$('#modeSw').classList.add('hidden');$('#homeBtn').classList.add('hidden');
  mode='';store.set('mode','');try{if(location.hash)history.replaceState(null,'',location.pathname+location.search)}catch(e){}scrollTo(0,0)}
@@ -1463,9 +1468,10 @@ function guideHTML(id){const a=GUIDE[id];if(!a)return '';return '<h3>관련 지�
 
 let schCur=store.get('sch','nps'),schPrev='start',schV=store.get('schv',{});
 function schOpen(){return !$('#sch').classList.contains('hidden')}
-function openSch(id){if(!schOpen()){schPrev=$('#start').classList.contains('hidden')?'app':'start';$('#start').classList.add('hidden');$('#app').classList.add('hidden');$('#sch').classList.remove('hidden');$('#tools').classList.remove('hidden');$('#homeBtn').classList.remove('hidden')}
- if(id&&SCH.some(s=>s.id===id))schCur=id;store.set('sch',schCur);renderSch();scrollTo(0,0)}
-function closeSch(){$('#sch').classList.add('hidden');if(schPrev==='app'&&mode){$('#app').classList.remove('hidden')}else{$('#start').classList.remove('hidden');$('#homeBtn').classList.add('hidden')}scrollTo(0,0)}
+function openSch(id){$('#start').classList.add('hidden');$('#app').classList.add('hidden');$('#sch').classList.remove('hidden');$('#tools').classList.remove('hidden');$('#homeBtn').classList.remove('hidden');$('#modeSw').classList.add('hidden');
+ if(!$('#rec').classList.contains('hidden'))toggleRec();if(!$('#procSec').classList.contains('hidden'))toggleProc();
+ if(id&&SCH.some(s=>s.id===id))schCur=id;store.set('sch',schCur);mode='';store.set('mode','');store.set('sys',schCur);sysBar(schCur);try{if(location.hash!=='#'+schCur)history.replaceState(null,'','#'+schCur)}catch(e){}renderSch();scrollTo(0,0)}
+function closeSch(){goHome()}
 function renderSch(){const s=SCH.find(x=>x.id===schCur)||SCH[0];
  $('#schTabs').innerHTML=SCH.map(x=>'<button class="tab" role="tab" type="button" data-sc="'+x.id+'" aria-selected="'+(x.id===s.id)+'">'+x.name+'</button>').join('');
  const v=schV[s.id]||{};
@@ -1477,17 +1483,26 @@ function renderSch(){const s=SCH.find(x=>x.id===schCur)||SCH[0];
  bindOrig();if(s.calc){document.querySelectorAll('#schPanel [data-sk]').forEach(el=>el.addEventListener(el.type==='checkbox'||el.tagName==='SELECT'?'change':'input',e=>{if(el.dataset.date)dateFmt(el);else if(el.inputMode==='numeric'&&el.type==='text'&&!el.dataset.date){el.value=el.value.replace(/[^\d.]/g,'')}schEval(true)}));schEval(false)}}
 function schEval(user){const s=SCH.find(x=>x.id===schCur);const v={};document.querySelectorAll('#schPanel [data-sk]').forEach(el=>v[el.dataset.sk]=el.type==='checkbox'?el.checked:el.value);if(user){schV[s.id]=v;store.set('schv',schV)}$('#scOut').innerHTML=s.calc.ev(v)}
 $('#schTabs').addEventListener('click',e=>{const b=e.target.closest('[data-sc]');if(b){schCur=b.dataset.sc;store.set('sch',schCur);renderSch()}});
-$('#schBack').onclick=closeSch;$('#schBtn').onclick=()=>openSch();$('#schCard').onclick=()=>openSch();
-function schVoice(s){if(/제도별/.test(s)){const hit=SCH.find(x=>x.kw.test(s));openSch(hit&&hit.id);return '제도별 기준'+(hit?' · '+hit.name:'')+'을 열었습니다'}
+
+function schVoice(s){if(/장애정도판정|장애정도기준|장애인등록/.test(s)&&schOpen()){setMode(store.get('lastMode','doctor'));return '장애정도 판정기준을 열었습니다'}
+ if(!$('#start').classList.contains('hidden')||schOpen()||!$('#app').classList.contains('hidden')){const hit=SCH.find(x=>x.kw.test(s));if(hit&&!/판정계산|진단서보완/.test(s)&&(schOpen()||/제도|탭|열어|보기|으로$|로$/.test(s)||!$('#start').classList.contains('hidden'))){openSch(hit.id);return hit.name+'을 열었습니다'}}
+ if(/제도별/.test(s)){const hit=SCH.find(x=>x.kw.test(s));openSch(hit&&hit.id);return '제도별 기준'+(hit?' · '+hit.name:'')+'을 열었습니다'}
  if(schOpen()){const hit=SCH.find(x=>x.kw.test(s));if(hit){openSch(hit.id);return hit.name+'을 열었습니다'}if(/^(돌아가|뒤로|닫기|닫아)/.test(s)){closeSch();return '제도별 기준을 닫았습니다'}}
  return null}
 
+
+const SYSD={nps:'국민연금법 장애연금 1~4급 · 결정 기준일·진단서·판정기준 원문',iaci:'근로복지공단 장해등급 1~14급 · 연금·일시금 계산',gov:'공무원 재해보상법 장해등급 1~14급 · 장해연금 계산',mil:'군인 재해보상법 상이등급 1~7급 · 장애보상금',school:'학교안전공제회 장해급여 · 등급별 노동력상실률',work:'기초생활수급자 근로능력 판정 · 진단서 요건·별표 원문',ltc:'노인장기요양 등급판정 · 의사소견서 비용·작성 항목',kma:'의료법·형법 · 진단서 작성·교부 원칙, 상해 치료기간',car:'자배법 상해 1~14급·후유장애 1~14급 한도',priv:'표준약관 장해분류표 · 맥브라이드·AMA·대한의학회 기준',mma:'병역판정 신체등급 · 병무용진단서 요건·유효기간'};
+function sysBar(id){const B=$('#sysBar');if(!B.innerHTML)B.innerHTML='<div class="wrap sysin">'+[['dis','장애정도 판정기준']].concat(SCH.map(s=>[s.id,s.name])).map(([k,n])=>'<button type="button" class="sysb" data-sys="'+k+'" aria-pressed="false">'+n+'</button>').join('')+'</div>';
+ B.classList.toggle('hidden',!id);B.querySelectorAll('[data-sys]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sys===id));const a=B.querySelector('[aria-pressed=true]');if(a&&B.scrollWidth>B.clientWidth)a.scrollIntoView({block:'nearest',inline:'center'})}
+$('#sysBar').addEventListener('click',e=>{const b=e.target.closest('[data-sys]');if(!b)return;if(b.dataset.sys==='dis'){if(mode&&!$('#app').classList.contains('hidden'))return;setMode(store.get('lastMode','doctor'))}else openSch(b.dataset.sys)});
+$('#sysPick').insertAdjacentHTML('beforeend',SCH.map(s=>'<button type="button" class="sysCard" data-go="'+s.id+'"><b>'+s.name+'</b><span>'+(SYSD[s.id]||'')+'</span><i class="sysGo">열기 →</i></button>').join(''));
+$('#sysPick').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)openSch(b.dataset.go)});
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
 $('#types').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;cur=b.dataset.t;store.set('type',cur);vals={};calcIdx=0;render()});
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;stopTTS();tab=b.dataset.tab;render()});
 $('#qBtn').onclick=search;$('#q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
-window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if((h==='doctor'||h==='family')&&h!==mode)setMode(h)});
-const h=location.hash.slice(1);if(h==='doctor'||h==='family')setMode(h);else if(mode==='doctor'||mode==='family')setMode(mode);
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if((h==='doctor'||h==='family')&&h!==mode)setMode(h);else if(SCH.some(s=>s.id===h)&&!(schOpen()&&schCur===h))openSch(h)});
+const h=location.hash.slice(1);if(h==='doctor'||h==='family')setMode(h);else if(SCH.some(s=>s.id===h))openSch(h);else if(mode==='doctor'||mode==='family')setMode(mode);else if(SCH.some(s=>s.id===store.get('sys','')))openSch(store.get('sys',''));
 }
 </script>
 <script>if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
