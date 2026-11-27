@@ -1985,7 +1985,7 @@ body.locked .vafab{display:none}
    <tr><td>경찰 신고</td><td>‘현장 대응’ 체크리스트에서 112 신고를 체크하면 ‘112 신고·출동’</td></tr>
    <tr><td>가해자 성명·등록번호·구분</td><td>등록번호나 성명을 넣으면 사건 대장의 이전 사건 기록</td></tr>
    <tr><td rowspan="7">진술서</td><td>성명·직업</td><td>진술인 고르기 — 사건 기록의 피해 직원·목격자, 또는 사용자 설정</td></tr>
-   <tr><td>생년월일·성별</td><td>주민등록번호를 넣으면 앞 7자리로 계산 (주민등록번호 자체는 저장하지 않음). 등록 직원이면 사용자 설정의 생년월일</td></tr>
+   <tr><td>주민등록번호·생년월일</td><td>가져오지 않음 — 개인정보 보호를 위해 문서 내려받기 이후 작성바랍니다. 성별은 직접 고르세요</td></tr>
    <tr><td>나이</td><td>생년월일로 계산해 진술서에 표시</td></tr>
    <tr><td>직장 전화·직장 소재지</td><td>병원 정보 (1577-0675, 소사로 327)</td></tr>
    <tr><td>피의자 성명</td><td>사건 기록의 가해자 성명</td></tr>
@@ -4137,7 +4137,7 @@ function docFile(name,html){
 /* ============================================================
    음성 받아쓰기 (말로 쓰기)
    ============================================================ */
-var APPVER="2026.11.27-10";
+var APPVER="2026.11.27-11";
 function isTouch(){ try{ return window.matchMedia("(pointer:coarse)").matches||("ontouchstart" in window&&navigator.maxTouchPoints>0); }catch(e){ return false; } }
 /* 음성 입력 중 휴대폰 키보드 막기: 칸을 잠시 읽기 전용 + inputmode none */
 function kbLock(el,tag){ tag=tag||"sr"; kbHide(); if(!isTouch()||!el||el.dataset.kbl) return; el.dataset.kbl=tag; el.dataset.kbro=el.readOnly?"1":""; el.dataset.kbim=el.getAttribute("inputmode")||""; el.setAttribute("inputmode","none"); el.readOnly=true; }
@@ -4250,7 +4250,7 @@ function stDoc(){
   var h='<div class="page stp"><div class="poldoc"><span>경찰 제출용</span></div><div class="dt" style="margin:1mm 0 6mm;letter-spacing:.6em">진 술 서</div>';
   h+='<table class="fm"><colgroup><col style="width:15%"><col style="width:35%"><col style="width:15%"><col style="width:35%"></colgroup>';
   h+='<tr><td class="h">성 명</td><td><span class="val">'+esc(i.name||"")+'</span>&nbsp;&nbsp;(한자: <span class="val">'+esc(i.hanja||"")+'</span>)</td><td class="h">성 별</td><td class="c">'+ck(i.sex==="남")+'남 ‧ '+ck(i.sex==="여")+'여</td></tr>';
-  h+='<tr><td class="h">연 령</td><td><span class="val">'+esc(age(i.birth))+'</span> 세 ('+(b?'<span class="val">'+b[0]+'. '+(+b[1])+'. '+(+b[2])+'.</span>':'19&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;.')+'생)</td><td class="h">주민등록번호</td><td class="c"><span class="val">'+esc(x.rrn||"")+'</span>'+(x.rrn?'':'-')+'</td></tr>';
+  h+='<tr><td class="h">연 령</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;세 (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;생)</td><td class="h">주민등록번호</td><td class="c">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-</td></tr>';
   h+='<tr><td class="h">등록기준지</td><td colspan="3"><span class="val">'+esc(x.origin||"")+'</span></td></tr>';
   h+='<tr><td class="h">주 거</td><td colspan="3"><span class="val">'+esc(x.addr||"")+'</span>&nbsp;&nbsp;(<span class="val">'+esc(x.tong||"")+'</span>&nbsp;통&nbsp;&nbsp;<span class="val">'+esc(x.ban||"")+'</span>&nbsp;반)</td></tr>';
   h+='<tr><td class="h">자택 전화</td><td><span class="val">'+esc(x.hphone||"")+'</span></td><td class="h">직장 전화</td><td><span class="val">'+esc(i.wphone||"")+'</span></td></tr>';
@@ -4927,7 +4927,7 @@ var _openStmt=openStmt; openStmt=function(){ if(!ST.src) ST.src={}; if(ST.src.su
 $("#st-pick").addEventListener("change",function(){ var v=this.value, u=null; if(!ST.src) ST.src={};
   if(v.charAt(0)==="u"){ u=USERS[+v.slice(1)]; if(!u) return; ST.info.name=u.name; ST.info.job=u.job; ST.role="참고인"; }
   else { var p=stPeople()[+v]; if(!p) return; u=stUser(p.name); ST.src.name="사건 기록"; if(p.job) ST.src.job="사건 기록"; }
-  if(u){ ST.src.name="사용자 설정"; ST.src.job="사용자 설정"; ST.info.job=u.job||ST.info.job; if(u.birth){ ST.info.birth=u.birth; ST.src.birth="사용자 설정"; } }
+  if(u){ ST.src.name="사용자 설정"; ST.src.job="사용자 설정"; ST.info.job=u.job||ST.info.job;  }
   stSave(); stFillForm(); });
 $("#v-stmt").addEventListener("input",function(e){ var el=e.target; if(el.dataset.s!=="rrn") return; rrnFmt(el); STsec.rrn=el.value;
   var r=rrnInfo(el.value); if(!r) return; if(!ST.src) ST.src={};
@@ -5833,6 +5833,19 @@ function lfGapRefresh(){ var b=$("#lf-gap"); if(b){ gapBox("lf-gap",$("#mb-voice
 /* 서식·창을 바꾸면 안내를 닫음 */
 document.addEventListener("click",function(e){ if(e.target.closest(".choice,#home,[data-tab]")){ var b=$("#lf-gap"); if(b) b.classList.add("hidden"); } if(e.target.closest("#r-sb")){ var c=$("#sb-gap"); if(c) c.classList.add("hidden"); } },true);
 /*LFVEND*/
+/* 진술서 질문 칸은 질문 문장을 이름으로 */
+var _vfLabelQ=vfLabel; vfLabel=function(el){ if(el&&el.dataset&&el.dataset.qa!=null){ var it=el.closest(".qaitem"), sp=it&&it.querySelector(".qq2 span"); if(sp){ var c=sp.cloneNode(true); $$("small",c).forEach(function(x){x.remove();}); var t=c.textContent.trim(); if(t) return t; } } return _vfLabelQ(el); };
+
+/* ---------- 진술서: 주민등록번호·생년월일 막기 ---------- */
+var STPRIV=["rrn","birth"];
+function stPrivPurge(){ var ch=false; if(ST&&ST.info&&ST.info.birth){ delete ST.info.birth; ch=true; } if(ST&&ST.src&&ST.src.birth) delete ST.src.birth; STsec.rrn="";
+  (cur.stmts||[]).forEach(function(s){ if(s.info&&s.info.birth){ delete s.info.birth; ch=true; } }); if(ch){ try{ stSave(); }catch(e){} try{ saveCur(); }catch(e){} } }
+function stPrivLock(){ STPRIV.forEach(function(k){ $$('#v-stmt [data-s="'+k+'"]').forEach(function(el){ el.value=""; el.disabled=true; el.placeholder="문서 내려받기 이후 작성"; el.classList.add("privoff"); el.classList.remove("date8");
+    var f=el.closest(".f"); if(!f) return; var sm=f.querySelector("label.l small"); if(sm) sm.remove(); if(!f.querySelector(".privnote")){ var n=document.createElement("div"); n.className="privnote"; n.textContent=PRIVMSG+"."; f.appendChild(n); } }); }); }
+stPrivPurge(); stPrivLock();
+var _stFillForm=stFillForm; stFillForm=function(){ stPrivPurge(); _stFillForm(); stPrivLock(); };
+document.addEventListener("input",function(e){ var k=e.target.dataset&&e.target.dataset.s; if(k&&STPRIV.indexOf(k)>=0){ e.stopImmediatePropagation(); e.target.value=""; e.target.disabled=true; STsec.rrn=""; if(ST.info) delete ST.info.birth; toast(PRIVMSG); } },true);
+
 /*SBXJS*//* ============================================================
    상병경위보고서 — 자동 작성 뒤 직접 적을 칸 안내 + 엑셀 받기
    ============================================================ */
