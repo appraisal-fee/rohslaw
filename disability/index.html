@@ -4,10 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>장애정도 판정기준 길잡이</title>
-<meta name="theme-color" content="#1f4c8f">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -203,8 +199,21 @@ td.num,th.num{text-align:right;white-space:nowrap}
 table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:5.5em;margin-inline-start:-6em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}
 .ear{grid-template-columns:3em repeat(4,minmax(0,1fr))}}
 @media print{header .modeSw,.tabs,.toolbar,.types,.btns{display:none}}
+.pickWide{grid-column:1/-1;min-height:0}
+.pickWide ul{columns:2;column-gap:28px}
+@media(max-width:720px){.pickWide ul{columns:1}}
+#schTabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px;border-bottom:0;margin:16px 0 14px}
+#schTabs .tab{font-size:15px;padding:0 10px;border-bottom:1px solid var(--line);border-radius:8px;margin:0;text-align:center}
+#schPanel{border-top:1px solid var(--line);border-radius:10px}
+@media(max-width:520px){#schTabs{grid-template-columns:repeat(2,minmax(0,1fr))}#schTabs .tab{font-size:14px;padding:4px 6px;line-height:1.3}}
+.schHead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.schHead h2{margin:0}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+<meta name="theme-color" content="#1f4c8f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
 <header class="band"><div class="wrap">
@@ -227,12 +236,15 @@ table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-bl
     <button class="pickCard" type="button" data-mode="family"><b>직원용 (민원 상담)</b>
       <span>원무·민원 창구 직원이 장애 진단·등록 민원을 상담할 때 쓰는 화면</span>
       <ul><li>진단서·소견서 내용으로 유형 찾기</li><li>민원인에게 기준을 쉬운 말로 설명</li><li>검사 숫자로 예상 정도 확인</li><li>진단 가능일·이의신청 기한 계산</li><li>상담 안내문 복사·상담 기록</li></ul></button>
+    <button class="pickCard pickWide" type="button" id="schCard"><b>제도별 기준</b>
+      <span>장애인 등록 외에 진료하면서 자주 쓰는 장해·장애 관련 제도 11가지를 한곳에</span>
+      <ul><li>국민연금 장애연금</li><li>산재 장해급여(근로복지공단)</li><li>공무원 재해보상 장해등급(1~14급)</li><li>군인 재해보상</li><li>학교안전공제회 장해급여</li><li>근로능력평가용 진단서</li><li>장기요양 의사소견서</li><li>대한의사협회 진단서 작성지침</li><li>자동차보험 상해·후유장애 급별</li><li>민간보험 후유장해·맥브라이드</li><li>병역·병무용 진단서</li></ul></button>
   </div>
 </section>
 
 <section class="band hidden" id="app"><div class="wrap">
   <div class="toolbar">
-    <div class="btnRow"><button type="button" class="btn" id="recBtn" aria-pressed="false" title="진료기록·소견서로 장애유형 찾기">기록으로 찾기</button><button type="button" class="btn ghost" id="procBtn" aria-pressed="false">판정 절차</button><button type="button" class="btn ghost" id="sessBtn" aria-pressed="false">상담 시작</button><button type="button" class="btn ghost" id="showBtn" title="민원인에게 보여 주는 큰 글씨 안내 화면(다국어)">민원인 화면</button></div>
+    <div class="btnRow"><button type="button" class="btn" id="recBtn" aria-pressed="false" title="진료기록·소견서로 장애유형 찾기">기록으로 찾기</button><button type="button" class="btn ghost" id="procBtn" aria-pressed="false">판정 절차</button><button type="button" class="btn ghost" id="sessBtn" aria-pressed="false">상담 시작</button><button type="button" class="btn ghost" id="schBtn" title="국민연금·산재·공무원·자동차보험 등 제도별 기준">제도별 기준</button><button type="button" class="btn ghost" id="showBtn" title="민원인에게 보여 주는 큰 글씨 안내 화면(다국어)">민원인 화면</button></div>
     <div class="search"><input id="q" type="search" placeholder="기준 검색: 예) 바델, 투석, 0.02, 근력등급 3" aria-label="판정기준 검색"><button class="btn" id="qBtn" type="button">검색</button></div>
   </div>
   <div id="qRes" class="res hidden"></div>
@@ -242,6 +254,12 @@ table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-bl
   <div class="types" id="types" role="group" aria-label="장애유형"></div>
   <div class="tabs" id="tabs" role="tablist"></div>
   <div class="panel" id="panel" role="tabpanel"></div>
+</div></section>
+<section class="band hidden" id="sch"><div class="wrap" style="display:block">
+  <div class="schHead"><h2>제도별 기준</h2><button type="button" class="btn ghost" id="schBack">돌아가기</button></div>
+  <p class="sub" style="margin-top:6px">장애인복지법 장애정도와 별개로 운영되는 장해·장애 관련 제도의 기준, 진단서 작성 요령, 원문 연결과 간단 계산을 모았습니다.</p>
+  <div class="tabs" id="schTabs" role="tablist"></div>
+  <div class="panel" id="schPanel" role="tabpanel"></div>
 </div></section>
 </main>
 
@@ -1035,11 +1053,11 @@ function bindViewer(){const v=$('#viewer');v.querySelectorAll('[data-vl]').forEa
   try{const r=await SAMPLE('Translate each line of this Korean list of hospital documents for disability registration into '+{en:'English',zh:'Simplified Chinese',vi:'Vietnamese'}[l]+'. Keep medical test names accurate. Return only the translated lines, one per line, same order, no numbering.\n\n'+src.join('\n'),{modelTier:'quick'});
    const lines=String(r.text).split('\n').map(x=>x.replace(/^[-•\d.\s]+/,'').trim()).filter(Boolean);if(lines.length)vTr[t.id+l]=lines.slice(0,src.length);openViewer()}
   catch(e){tr.disabled=false;tr.textContent='이 목록 번역(Claude)';toast(e&&e.code==='rate_limited'?'잠시 후 다시 시도하세요.':'번역하지 못했습니다.')}}}
-function goHome(){if($('.modal'))$('.modal').remove();closeViewer();stopTTS();
+function goHome(){if($('.modal'))$('.modal').remove();closeViewer();stopTTS();$('#sch').classList.add('hidden');
  if(!$('#rec').classList.contains('hidden'))toggleRec();if(!$('#procSec').classList.contains('hidden'))toggleProc();
  $('#qRes').classList.add('hidden');$('#app').classList.add('hidden');$('#start').classList.remove('hidden');$('#modeSw').classList.add('hidden');$('#homeBtn').classList.add('hidden');
  mode='';store.set('mode','');try{if(location.hash)history.replaceState(null,'',location.pathname+location.search)}catch(e){}scrollTo(0,0)}
-document.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.isComposing)return;if($('.modal')){$('.modal').remove();return}if($('#viewer')){closeViewer();return}if(!$('#start').classList.contains('hidden'))return;e.preventDefault();goHome()});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.isComposing)return;if($('.modal')){$('.modal').remove();return}if($('#viewer')){closeViewer();return}if(schOpen()){e.preventDefault();closeSch();return}if(!$('#start').classList.contains('hidden'))return;e.preventDefault();goHome()});
 $('#homeBtn').onclick=goHome;$('#homeTitle').onclick=()=>{if($('#start').classList.contains('hidden'))goHome()};
 
 /* 문자 길이 맞춤 */
@@ -1142,6 +1160,7 @@ function handleVoice(text){const t=String(text||'').trim();if(!t)return;vHeard(t
  if(has('도움말','명령어','뭐라고말해','사용법'))return ok(showVoiceHelp()||'도움말을 열었습니다');
  if(has('듣기중지','듣기끝','마이크꺼','음성끝','그만들어'))return voiceStop(),ok('말로 조작을 껐습니다');
  if(has('처음으로','첫화면','처음화면')||s==='홈')return goHome(),ok('첫 화면으로 갔습니다');
+ {const r=schVoice(n);if(r)return ok(r)}
  if(/^(닫기|닫아|닫아줘|창닫기)/.test(s)||s==='닫'){if($('.modal')){$('.modal').remove();return ok('창을 닫았습니다')}if($('#viewer')){closeViewer();return ok('민원인 화면을 닫았습니다')}if(!$('#procSec').classList.contains('hidden')){toggleProc();return ok('판정 절차를 닫았습니다')}if(!$('#rec').classList.contains('hidden')){toggleRec();return ok('기록으로 찾기를 닫았습니다')}}
  if($('.modal')){const b=[...document.querySelectorAll('.modal [data-mb]')].find(x=>n.includes(nz(x.textContent))||(has('확인','예','네','지워')&&x.classList.contains('btn')&&!x.classList.contains('ghost')));if(b){b.click();return ok(b.textContent.trim())}if(has('취소','아니'))return $('.modal').remove(),ok('취소했습니다')}
  const fe=document.activeElement,txt=fe&&fe.id!=='q'&&(fe.tagName==='TEXTAREA'||(fe.tagName==='INPUT'&&fe.type==='text'&&!fe.dataset.date&&!/^20\d{6}$/.test(fe.placeholder||'')));
@@ -1182,7 +1201,7 @@ function handleVoice(text){const t=String(text||'').trim();if(!t)return;vHeard(t
 function showVoiceHelp(){modal('<h3 style="margin-top:0">이렇게 말해 보세요</h3><table class="vhelp"><tbody>'+[
  ['이동','처음으로 · 의사용 · 직원용 · 닫기 · 맨 위로 · 아래로'],['유형','신장장애 · 뇌병변 · 간장애 판정 계산 · 다음 유형'],['탭','판정 계산 · 판정기준 · 진단 시기 · 준비 서류 · 상담 안내문 · 다음 탭'],
  ['검색','투석 검색 · 검색 바델 · 근력등급 찾아 줘'],['값 넣기','아이큐 65 · 빌리루빈 3.2 · 알부민 2.7 · 최초 투석일 2026년 3월 15일 · 오른귀 60 70 80 90 · 심한 3호 · 폐이식 체크'],
- ['버튼','기록으로 찾기 · 분석해 · 판정 절차 · 상담 시작 · 상담 종료 · 민원인 화면 · 영어로 · 복사 · 이력 저장 · 즐겨찾기'],['읽기','결과 읽어 줘 · 읽어 줘 · 멈춰 · 큰 글씨'],['받아 적기','글 칸을 누르고 말하면 그 칸에 적음 · 적기 끝'],['끄기','듣기 중지 (또는 마이크 단추, Alt+M)']].map(r=>'<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>').join('')+'</tbody></table><p class="note">음성 기능을 켜 두면 휴대폰 키보드가 올라오지 않습니다. 글 칸을 누르면 그 칸에 말로 받아 적고, 「신장장애 예상 정도」처럼 명령만 말하면 그대로 이동합니다.</p>',[['닫기',null,1]]);return '도움말을 열었습니다'}
+ ['제도별','제도별 기준 · 제도별 산재 · 국민연금 · 공무원 · 자동차보험 · 장기요양 · 병역 · 돌아가기'],['버튼','기록으로 찾기 · 분석해 · 판정 절차 · 상담 시작 · 상담 종료 · 민원인 화면 · 영어로 · 복사 · 이력 저장 · 즐겨찾기'],['읽기','결과 읽어 줘 · 읽어 줘 · 멈춰 · 큰 글씨'],['받아 적기','글 칸을 누르고 말하면 그 칸에 적음 · 적기 끝'],['끄기','듣기 중지 (또는 마이크 단추, Alt+M)']].map(r=>'<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>').join('')+'</tbody></table><p class="note">음성 기능을 켜 두면 휴대폰 키보드가 올라오지 않습니다. 글 칸을 누르면 그 칸에 말로 받아 적고, 「신장장애 예상 정도」처럼 명령만 말하면 그대로 이동합니다.</p>',[['닫기',null,1]]);return '도움말을 열었습니다'}
 function voiceUI(){if($('#vfab'))return;const f=document.createElement('button');f.id='vfab';f.type='button';f.className='vfab';f.setAttribute('aria-pressed','false');f.title='말로 조작 (Alt+M)';f.innerHTML='<span class="vdot"></span><span class="vlab">말로 조작</span>';f.onclick=voiceToggle;f.addEventListener('pointerdown',e=>e.preventDefault());f.addEventListener('mousedown',e=>e.preventDefault());document.body.appendChild(f);
  const b=document.createElement('div');b.id='vbar';b.className='vbar2 hidden';b.setAttribute('aria-live','polite');b.innerHTML='<span class="vheard"></span><span class="vmsg">듣고 있습니다. 예) "신장장애 판정 계산", "도움말"</span><button type="button" class="btn ghost" id="vHelp">도움말</button>';document.body.appendChild(b);$('#vHelp').onclick=showVoiceHelp}
 const KB_SEL='input[type=text],input[type=search],input[type=number],input:not([type]),textarea';
@@ -1212,6 +1231,182 @@ function search(){const q=$('#q').value.trim();const box=$('#qRes');if(!q){box.c
  box.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{cur=b.dataset.go;store.set('type',cur);vals={};calcIdx=0;const want=b.dataset.k;tab=TABS[mode].some(x=>x[0]===want)?want:(want==='crit'?'easy':'docs');box.classList.add('hidden');render();$('#panel').scrollIntoView({behavior:'smooth',block:'start'})})}
 
 /* 이벤트 */
+/* ───────── 제도별 기준 ───────── */
+const LG=n=>'https://www.law.go.kr/법령/'+n.replace(/\s/g,''),LA=n=>'https://www.law.go.kr/행정규칙/'+n.replace(/\s/g,'');
+const won=n=>Math.round(n).toLocaleString('ko-KR')+'원';
+const numv=s=>{const x=+String(s||'').replace(/[^\d.]/g,'');return isFinite(x)&&x>0?x:0};
+const tbl=(h,rows,cls)=>'<table class="stack'+(cls?' '+cls:'')+'"><thead><tr>'+h.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map((c,i)=>'<td'+(i===0?' class="no"':'')+'>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+const ul=a=>'<ul class="clean">'+a.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+const G14=[...Array(14)].map((_,i)=>i+1);
+const SJ_P=[329,291,257,224,193,164,138],SJ_L=[1474,1309,1155,1012,869,737,616,495,385,297,220,154,99,55];
+const GW_P=G14.map(g=>52-3.25*(g-1));
+const MIL_P=[52,48.75,45.5,42.25,39,35.75,32.5];
+const SCH_L=[100,100,100,90,80,70,60,50,40,30,20,15,10,5];
+const CAR_I=[3000,1500,1200,1000,900,700,500,300,240,200,160,120,80,50],CAR_D=[15000,13500,12000,10500,9000,7500,6000,4500,3800,2700,2300,1900,1500,1000];
+const man=n=>n>=10000?(n%10000?Math.floor(n/10000)+'억'+(n%10000).toLocaleString('ko-KR')+'만원':n/10000+'억원'):n.toLocaleString('ko-KR')+'만원';
+const gOpt=(n,from)=>[...Array(n)].map((_,i)=>[String(i+(from||1)),(i+(from||1))+'급']);
+
+const SCH=[
+{id:'nps',name:'국민연금 장애연금',kw:/국민연금|장애연금/,
+ law:[['국민연금법','법률 제67조~제70조',LG('국민연금법')],['국민연금법 시행령 별표 2','장애등급 구분 기준',LG('국민연금법 시행령')],['국민연금 장애심사규정','보건복지부 고시 제2025-216호',LA('국민연금 장애심사규정')]],
+ body:()=>
+ '<h3>제도 개요</h3><p>가입 중 생긴 질병·부상으로 완치 후에도 장애가 남으면 소득 감소분을 보전하는 연금입니다. 장애인복지법의 「장애정도(심한·심하지 않은)」와는 별개 제도로, 국민연금은 <b>1~4급</b>으로 따로 결정합니다.</p>'+
+ '<h3>장애 결정 기준일</h3>'+ul(['<b>초진일</b>: 장애의 주된 원인이 된 상병의 전형적 증상으로 처음 의사의 진찰을 받은 날(전형적이지 않으면 진단일로 볼 수 있음)','<b>완치일</b>: 의학적으로 치유된 날, 더 이상 치료 효과를 기대할 수 없어 증상이 고정된 날, 또는 증상 정도상 완치로 볼 수 있는 날','완치되지 않은 채 진행 중이면 <b>초진일부터 1년 6개월이 지난 날</b>을 기준으로 장애 정도를 결정','기준일 당시 장애가 없거나 가벼웠다가 나중에 악화되면 「청구일」 기준으로 다시 심사(65세 전까지 청구)'])+
+ '<h3>등급별 지급 수준</h3>'+tbl(['등급','급여','지급 수준'],[['1급','장애연금','기본연금액 100% + 부양가족연금액'],['2급','장애연금','기본연금액 80% + 부양가족연금액'],['3급','장애연금','기본연금액 60% + 부양가족연금액'],['4급','장애일시보상금','기본연금액 225% (일시금)']])+
+ '<h3>의사가 준비할 서류</h3>'+ul(['국민연금 장애심사용 진단서 1부 — 주요 치료 내용(치료기간·경과), 장애 상태, 각종 검사 소견을 구체적으로','국민연금 장애분류별 소견서 1부(눈·귀·지체·정신·심장 등 분류별 서식)','초진기록지, 완치일(증상 고정) 판단 근거가 되는 진료기록·검사결과지 사본','장애인복지법 장애정도 진단서와 서식·기준이 달라 그대로 대체되지 않음'])+
+ '<h3>청구 기한</h3><p>급여를 받을 권리는 <b>5년</b>간 행사하지 않으면 시효로 소멸합니다(국민연금법 제115조). 결정에 이의가 있으면 처분을 안 날부터 90일 이내 심사청구할 수 있습니다.</p>',
+ calc:{f:[{k:'a',lab:'초진일',type:'date'},{k:'b',lab:'완치일(있으면)',type:'date'}],
+  ev(v){const a=pd(v.a),b=pd(v.b);if(!a)return wait('초진일');const lim=addMonths(a,18);let d,why;
+   if(b&&b<a)return '<div class="stamp S">확인 필요<span>완치일이 초진일보다 빠름</span></div>';
+   if(b&&b<=lim){d=b;why='1년 6개월 안에 완치(증상 고정) → 완치일 기준'}else{d=lim;why=b?'완치일이 1년 6개월 뒤 → 1년 6개월 지난 날 기준':'완치되지 않음 → 초진일부터 1년 6개월 지난 날 기준'}
+   const left=Math.round((d-today())/864e5);
+   return '<div class="stamp '+(left>0?'S':'M')+'">'+(left>0?left+'일 남음':'심사 가능')+'<span>기준일 '+fd(d)+'</span></div><ul class="basis"><li>'+why+'</li><li>초진일 + 1년 6개월 → '+fd(lim)+'</li><li>청구권 시효(5년) 참고 → '+fd(addMonths(d,60))+'</li></ul><p class="note">공단 실무의 「경과일」 산정과 하루 차이가 날 수 있으니 접수 전 확인하세요.</p>'}}},
+
+{id:'iaci',name:'산재 장해급여',kw:/산재|근로복지공단|장해보상/,
+ law:[['산업재해보상보험법 별표 2','장해급여표',LG('산업재해보상보험법')],['같은 법 시행령 별표 6','장해등급의 기준',LG('산업재해보상보험법 시행령')],['같은 법 시행규칙','신체부위별 장해등급 판정 세부기준',LG('산업재해보상보험법 시행규칙')]],
+ body:()=>
+ '<h3>제도 개요</h3><p>업무상 부상·질병이 <b>치유(증상 고정)</b>된 뒤 장해가 남으면 1~14급 장해등급에 따라 평균임금 기준 일수만큼 연금 또는 일시금을 지급합니다.</p>'+
+ '<h3>장해급여표(평균임금 기준)</h3>'+tbl(['등급','장해보상연금(연)','장해보상일시금','지급 방법'],G14.map(g=>[g+'급',g<=7?SJ_P[g-1]+'일분':'—',SJ_L[g-1].toLocaleString('ko-KR')+'일분',g<=3?'연금만':g<=7?'연금·일시금 선택':'일시금']))+
+ '<p class="note">※ 2026년 보상기준: 평균임금 최고 268,299원·최저 82,560원(근로복지공단 고시값 — 적용 급여와 시기는 공단 확인).</p>'+
+ '<h3>장해진단서 작성 요령</h3>'+ul(['치유 판정 후(더 이상 치료 효과를 기대할 수 없고 증상이 고정된 때) 작성','관절 운동범위는 건측과 비교해 각도로, 측정 방법(능동/수동)을 함께 기재','신경·척추·정신 장해는 객관적 검사(근전도·MRI·신경심리검사 등) 근거를 첨부','두 가지 이상 장해는 부위별로 나누어 기재 — 등급 조정(조정·가중)은 공단이 결정','장해등급 판정은 공단 자문의 심사로 결정되며 진단서의 등급 의견은 참고자료'])+
+ '<h3>재판정·기한</h3>'+ul(['장해보상연금 수급자 중 대상자는 연금 지급 결정일부터 2년이 지난 날 이후 1년 이내 재판정(1회)','보험급여 청구권 시효: 3년(장해급여·유족급여 등은 5년)','결정에 불복: 결정을 안 날부터 90일 이내 공단에 심사청구, 이후 재심사청구'])+
+ '<p class="note">산재 장해등급과 장애인복지법 장애정도는 서로 다른 기준입니다. 산재 등급을 받았다고 장애인 등록이 되는 것은 아닙니다.</p>',
+ calc:{f:[{k:'g',lab:'장해등급',type:'sel',opts:gOpt(14)},{k:'w',lab:'평균임금(1일, 원)',type:'num',ph:'예) 150000'},{k:'c',lab:'최고·최저 보상기준 적용',type:'chk'}],
+  ev(v){const g=+(v.g||1),w0=numv(v.w);if(!w0)return wait('평균임금');let w=w0,adj='';if(v.c){if(w>268299){w=268299;adj='최고 보상기준 적용'}else if(w<82560){w=82560;adj='최저 보상기준 적용'}}
+   const L=SJ_L[g-1]*w,P=g<=7?SJ_P[g-1]*w:0;
+   return '<div class="stamp M">'+g+'급<span>'+(g<=3?'연금만':g<=7?'연금·일시금 선택':'일시금')+'</span></div><ul class="basis">'+(P?'<li>연금(연) '+SJ_P[g-1]+'일분 → '+won(P)+'</li><li>연금(월 환산) → '+won(P/12)+'</li>':'')+(g>3?'<li>일시금 '+SJ_L[g-1].toLocaleString('ko-KR')+'일분 → '+won(L)+'</li>':'')+'<li>적용 평균임금 '+won(w)+(adj?' ('+adj+')':'')+'</li></ul><p class="note">예상액입니다. 실제 금액은 평균임금 증감·선급 등으로 달라집니다.</p>'}}},
+
+{id:'gov',name:'공무원 재해보상',kw:/공무원/,
+ law:[['공무원 재해보상법','장해급여 제28조 등',LG('공무원 재해보상법')],['같은 법 시행령','장해등급(1~14급) 기준',LG('공무원 재해보상법 시행령')],['같은 법 시행규칙','장해 판정 세부',LG('공무원 재해보상법 시행규칙')]],
+ body:()=>
+ '<h3>제도 개요</h3><p>공무상 부상·질병으로 장해상태가 되어 퇴직하거나, 퇴직 후 그 부상·질병으로 장해상태가 된 경우 <b>장해등급 1~14급</b>에 따라 장해연금 또는 장해일시금을 지급합니다. 공무상 재해 여부는 공무원재해보상심의회 심의를 거쳐 인사혁신처장이 결정하고, 지급은 공무원연금공단이 맡습니다.</p>'+
+ '<h3>장해등급별 장해연금(기준소득월액 대비)</h3>'+tbl(['등급','장해연금','등급','장해연금'],[...Array(7)].map((_,i)=>[(i+1)+'급',GW_P[i].toFixed(2).replace(/\.?0+$/,'')+'%',(i+8)+'급',GW_P[i+7].toFixed(2).replace(/\.?0+$/,'')+'%']),'pair')+
+ ul(['장해일시금: 장해연금에 갈음해 받을 때 <b>5년분</b>의 장해연금 상당액','간병급여: 요양 종료 후 상시·수시 간병이 필요하면 산재보험 기준 준용','장해유족연금: 장해연금 수급자 사망 시 장해연금액의 60%'])+
+ '<h3>진단서·서류</h3>'+ul(['요양 종료(증상 고정) 시점의 장해진단서 — 장해 부위별 측정치·검사 근거 기재','공무상 요양 승인 이력, 장해경위 조사서(소속기관 작성)','등급 체계는 산재보험과 유사하나 결정 기관·서식이 다르므로 공단 서식 사용'])+
+ '<h3>불복</h3><p>급여에 관한 결정에 이의가 있으면 결정이 있었던 날부터 <b>180일</b>, 그 사실을 안 날부터 <b>90일</b> 이내에 공무원재해보상연금위원회에 심사를 청구할 수 있습니다.</p>',
+ calc:{f:[{k:'g',lab:'장해등급',type:'sel',opts:gOpt(14)},{k:'w',lab:'기준소득월액(원)',type:'num',ph:'예) 4500000'}],
+  ev(v){const g=+(v.g||1),w=numv(v.w),p=GW_P[g-1];if(!w)return wait('기준소득월액');const m=w*p/100;
+   return '<div class="stamp M">'+g+'급<span>'+p+'%</span></div><ul class="basis"><li>장해연금(월) → '+won(m)+'</li><li>장해연금(연) → '+won(m*12)+'</li><li>장해일시금(5년분) → '+won(m*60)+'</li></ul><p class="note">예상액입니다. 실제 지급액은 공무원연금공단 결정에 따릅니다.</p>'}}},
+
+{id:'mil',name:'군인 재해보상',kw:/군인|상이연금|상이등급/,
+ law:[['군인 재해보상법','상이연금·장애보상금',LG('군인 재해보상법')],['같은 법 시행령','상이등급 구분',LG('군인 재해보상법 시행령')]],
+ body:()=>
+ '<h3>제도 개요</h3><p>군인이 공무상 부상·질병으로 장애상태가 되어 전역·퇴직하거나 그 후 장애상태가 된 경우 <b>상이등급</b>에 따라 상이연금을 지급합니다. 전상·특수직무공상은 가산됩니다.</p>'+
+ '<h3>상이연금(기준소득월액 대비)</h3>'+tbl(['상이등급','상이연금'],MIL_P.map((p,i)=>[(i+1)+'급',p+'%']))+
+ '<h3>장애보상금</h3>'+ul(['장애보상금: 장애등급에 따라 평균 기준소득월액의 9배·6배·4.5배·3배(1~4급)','전상은 2.5배, 특수직무공상은 1.88배를 곱해 가산','국가유공자법의 상이등급(보훈 신체검사)과는 별개 — 보훈은 국가보훈부 신체검사로 결정'])+
+ '<h3>진단서·서류</h3>'+ul(['전역 전 군 병원 또는 민간 의료기관의 장애진단서 — 부위별 측정치·검사결과','공무상 요양 승인·심의 결과, 전공상 확인 자료','국군재정관리단(군인연금) 서식 확인'])+
+ '<h3>시효</h3><p>급여를 받을 권리는 <b>5년</b>(요양급여·재활급여 등 일부는 3년)간 행사하지 않으면 소멸합니다.</p>',
+ calc:{f:[{k:'g',lab:'상이등급',type:'sel',opts:gOpt(7)},{k:'w',lab:'기준소득월액(원)',type:'num',ph:'예) 4000000'}],
+  ev(v){const g=+(v.g||1),w=numv(v.w),p=MIL_P[g-1];if(!w)return wait('기준소득월액');const m=w*p/100;
+   return '<div class="stamp M">'+g+'급<span>'+p+'%</span></div><ul class="basis"><li>상이연금(월) → '+won(m)+'</li><li>상이연금(연) → '+won(m*12)+'</li></ul><p class="note">전상·특수직무공상 가산 전 예상액입니다.</p>'}}},
+
+{id:'school',name:'학교안전공제',kw:/학교|공제회/,
+ law:[['학교안전사고 예방 및 보상에 관한 법률','공제급여 제36조~',LG('학교안전사고 예방 및 보상에 관한 법률')],['같은 법 시행령 별표 2','신체장해 등급과 노동력상실률',LG('학교안전사고 예방 및 보상에 관한 법률 시행령')]],
+ body:()=>
+ '<h3>제도 개요</h3><p>교육활동 중 사고로 학생·교직원·교육활동참여자가 다친 경우 학교안전공제회가 요양급여·장해급여·간병급여·유족급여·장의비·위로금을 지급합니다. 장해급여는 치료 후 남은 장해를 <b>1~14급 신체장해 등급</b>과 <b>노동력상실률</b>로 평가해 정형화된 기준으로 산정합니다.</p>'+
+ '<h3>신체장해 등급과 노동력상실률(시행령 별표 2)</h3>'+tbl(['등급','상실률','등급','상실률'],[...Array(7)].map((_,i)=>[(i+1)+'급',SCH_L[i]+'%',(i+8)+'급',SCH_L[i+7]+'%']),'pair')+
+ '<h3>장해진단서 작성 요령</h3>'+ul(['치료 종료·증상 고정 후 작성 — 성장기 학생은 성장에 따른 변화 가능성을 소견에 적기','등급 기준 문구(예: 「한 눈의 시력이 0.02 이하」)에 맞춰 측정치를 구체적으로','흉터(추상)는 크기(cm)·위치·사진을 함께','기왕증이 있으면 사고 전후 상태를 구분해 기재(기왕증 참작 대상)'])+
+ '<h3>알아 둘 점</h3>'+ul(['공제급여를 받으면 그 금액 범위에서 학교 등의 다른 배상 책임이 면제됨(법 제45조) — 위자료 등 부족분은 별도 손해배상 청구 가능','청구는 시·도 학교안전공제회(학교를 통해 사고 통지 후 청구)']),
+ calc:{f:[{k:'g',lab:'신체장해 등급',type:'sel',opts:gOpt(14)}],
+  ev(v){const g=+(v.g||1);return '<div class="stamp M">'+SCH_L[g-1]+'%<span>'+g+'급 노동력상실률</span></div><p class="note">장해급여액은 이 상실률과 급여 기초 금액으로 공제회가 산정합니다.</p>'}}}
+,
+{id:'work',name:'근로능력평가',kw:/근로능력|기초생활|수급자/,
+ law:[['근로능력평가의 기준 등에 관한 고시','보건복지부 고시',LA('근로능력평가의 기준 등에 관한 고시')],['국민연금공단 근로능력평가 안내','진단서 발급 주체·서류','https://nps.or.kr/comm/pop/getOHAH0015P0.do']],
+ body:()=>
+ '<h3>제도 개요</h3><p>기초생활보장 수급(신청)자의 근로능력 유무를 판정합니다. 국민연금공단 자문의사가 진단서·진료기록으로 <b>의학적 평가</b>(서면 원칙)를 하고, 공단 직원이 대면상담으로 <b>활동능력 평가</b>를 한 뒤, 시·군·구가 최종 판정합니다.</p>'+
+ '<h3>판정 구조</h3>'+tbl(['의학적 단계','활동능력평가','판정'],[['단계 외','비대상','근로능력 있음'],['1단계','56점 이상 / 55점 이하','있음 / 없음'],['2단계','64점 이상 / 63점 이하','있음 / 없음'],['3단계','비대상','근로능력 없음'],['4단계','비대상','근로능력 없음']])+
+ '<h3>판정 유효기간</h3>'+tbl(['호전 가능성','의학적 단계','유효기간','연속 3회 이상 「없음」'],[['고착','1단계','2년','3년'],['고착','2~4단계','3년','5년'],['비고착','1단계','1년','—'],['비고착','2~4단계','2년','4년']])+
+ '<h3>진단서 발급 주체(11개 질환 유형)</h3>'+tbl(['질환 유형','발급 가능'],[['근골격계·신경기능계','의사 또는 한의사'],['정신신경계','정신건강의학과 전문의(전문의 없는 일부 지역은 의사). 기질성 정신질환은 신경과·신경외과·재활의학과 전문의, 입원 중 담당의사도 가능'],['감각기능·심혈관·호흡기·소화기·비뇨생식·내분비·혈액 및 종양·피부질환계','의사']])+
+ '<h3>제출 서류</h3>'+ul(['근로능력평가용 진단서 — <b>최근 2개월 이내 발급</b>','진료기록지 사본 최근 2개월분(정신신경계는 누적 치료 3개월 이상 확인 필요)','복용 약물이 있으면 약물처방지·투약기록지(약물명·용량·투여일수)','관련 수술 이력 또는 최근 1년 내 입원이 있으면 입·퇴원 요약지','공단의 의학적 평가가 끝나면 추가 자료 제출 불가 — 처음에 빠짐없이'])+
+ '<p class="note">두 질환 이상이면 가장 높은 단계보다 1단계 높게 평가하는 규정이 있습니다. 세부 단계 기준은 고시 별표 1을 확인하세요.</p>',
+ calc:{f:[{k:'s',lab:'의학적 평가 단계',type:'sel',opts:[['0','단계 외'],['1','1단계'],['2','2단계'],['3','3단계'],['4','4단계']]},{k:'p',lab:'활동능력 점수',type:'num',ph:'1·2단계만'},{k:'f',lab:'고착(호전 가능성 없음)',type:'chk'},{k:'d',lab:'진단서 발급일',type:'date'}],
+  ev(v){const s=+(v.s||0),p=numv(v.p),d=pd(v.d);let r,c;
+   if(s===0){r='있음';c='P'}else if(s>=3){r='없음';c='S'}else if(!v.p){return wait('활동능력 점수')}else{r=p<=(s===1?55:63)?'없음':'있음';c=r==='없음'?'S':'P'}
+   const val=s===0?'':(v.f?(s===1?'2년':'3년'):(s===1?'1년':'2년'));
+   let ex='';if(d){const e=addDays(addMonths(d,2),-1),left=Math.round((e-today())/864e5);ex='<li>진단서 제출 기한(발급 후 2개월) → '+fd(e)+(left<0?' <b class="S">지남</b>':' ('+left+'일 남음)')+'</li>'}
+   return '<div class="stamp '+c+'">근로능력 '+r+'<span>'+(s?s+'단계':'단계 외')+'</span></div><ul class="basis">'+(val?'<li>판정 유효기간(기본) → '+val+'</li>':'')+ex+'</ul><p class="note">최종 판정은 시·군·구가 합니다.</p>'}}},
+
+{id:'ltc',name:'장기요양 의사소견서',kw:/장기요양|의사소견서|요양등급/,
+ law:[['노인장기요양보험법','제13조 의사소견서',LG('노인장기요양보험법')],['같은 법 시행령','유효기간·노인성 질병 별표 1',LG('노인장기요양보험법 시행령')],['같은 법 시행규칙','의사소견서 서식(별지 제2호)·발급비용 부담',LG('노인장기요양보험법 시행규칙')]],
+ body:()=>
+ '<h3>누가 쓰나</h3><p>의사 또는 한의사(치과의사 제외)가 작성합니다. 신청인이 공단에서 받은 <b>의사소견서 발급의뢰서</b>를 지참해 오면 공단이 비용 일부를 부담합니다. 의뢰서 없이 발급하면 전액 본인 부담(수급자로 결정된 뒤 공단 부담분 청구 가능).</p>'+
+ '<h3>발급 비용(2026. 1. 1. 기준, 1회)</h3>'+tbl(['구분','의료기관','보건소·보건지소'],[['의사소견서','62,020원','60,570원'],['치매진단 보완서류','29,690원','27,230원']])+
+ tbl(['대상','본인 부담'],[['65세 이상 또는 노인성 질병 가진 65세 미만','20%'],['의료급여 1종(의료급여법 제3조제1항제1호)','0%'],['그 밖의 의료급여 수급권자','10%'],['저소득 감경 대상·생계곤란자','10%']])+
+ '<h3>소견서에 꼭 담을 내용</h3>'+ul(['주 상병·부 상병(KCD 코드) — 65세 미만은 <b>노인성 질병</b>(치매·뇌혈관질환·파킨슨병 등) 진단 근거 필수','치매가 있으면 진단명과 근거(인지검사 등)를 명확히 — 5등급·인지지원등급은 치매 확인이 요건','신체기능: 마비·관절 구축 부위, 보행·이동 상태','특별 의료처치: 흡인, 산소요법, 욕창 간호, 경관영양, 도뇨관, 투석, 장루 간호 등','행동변화(망상·배회·공격성 등)와 향후 의료 필요성 의견'])+
+ '<h3>등급 판정 점수(장기요양인정점수)</h3>'+tbl(['등급','점수'],[['1등급','95점 이상'],['2등급','75점 이상 95점 미만'],['3등급','60점 이상 75점 미만'],['4등급','51점 이상 60점 미만'],['5등급','45점 이상 51점 미만(치매)'],['인지지원등급','45점 미만(치매)']])+
+ '<h3>기한·유효기간</h3>'+ul(['신청부터 판정까지 원칙 30일 — 의사소견서는 공단이 등급판정위원회에 자료를 내기 전까지 제출','최초 인정 유효기간 2년, 갱신 시 1등급 5년·2~4등급 4년·5등급·인지지원등급 2년','갱신 신청: 유효기간 끝나기 90일 전부터 30일 전까지(의사소견서 첨부)','결정에 이의: 처분을 안 날부터 90일 이내 공단에 심사청구']),
+ calc:{f:[{k:'p',lab:'장기요양인정점수',type:'num',ph:'예) 68.5'},{k:'d',lab:'치매 확인됨',type:'chk'},{k:'b',lab:'소견서 발급처',type:'sel',opts:[['0','의료기관'],['1','보건소·보건지소']]},{k:'r',lab:'본인 부담 구분',type:'sel',opts:[['20','일반(20%)'],['10','감경·의료급여(10%)'],['0','의료급여 1종(0%)']]}],
+  ev(v){const p=+String(v.p||'').replace(/[^\d.]/g,'');const fee=v.b==='1'?60570:62020,r=+(v.r||20);
+   let g='—';if(v.p!==''&&isFinite(p)){g=p>=95?'1등급':p>=75?'2등급':p>=60?'3등급':p>=51?'4등급':p>=45?(v.d?'5등급':'등급 외(치매 확인 필요)'):(v.d?'인지지원등급':'등급 외')}
+   return '<div class="stamp '+(g.startsWith('등급 외')||g==='—'?'P':'M')+'">'+g+'<span>'+(v.p!==''?p+'점':'점수 입력 시 표시')+'</span></div><ul class="basis"><li>의사소견서 '+won(fee)+' 중 본인 부담('+r+'%) → '+won(Math.floor(fee*r/100/10)*10)+'</li>'+(v.d?'<li>치매 보완서류 별도('+(v.b==='1'?'27,230원':'29,690원')+')</li>':'')+'</ul><p class="note">등급은 등급판정위원회가 최종 결정합니다. 10원 미만은 버렸습니다.</p>'}}}
+,
+{id:'kma',name:'진단서 작성지침(의협)',kw:/의협|의사협회|진단서작성|작성지침|상해진단서/,
+ law:[['의료법','제17조 진단서 등·제22조',LG('의료법')],['의료법 시행규칙','제9조 진단서 기재사항·제15조 보존',LG('의료법 시행규칙')],['형법','제233조 허위진단서 작성',LG('형법')]],
+ body:()=>
+ '<p class="sub">대한의사협회 「진단서 등 작성·교부 지침」(의료정책연구소)의 핵심과 관련 법령 요약입니다.</p>'+
+ '<h3>작성·교부 원칙</h3>'+ul(['<b>직접 진찰</b>한 의사만 작성(의료법 제17조제1항) — 위반 시 의료법 제89조 벌칙 대상','정당한 사유 없이 교부를 거부할 수 없음(제17조제3항). 정당한 사유: 환자 본인·적법한 대리인이 아닌 요구, 범죄 이용 의심 등','교부 대상: 환자 본인(사망·의식불명 시 직계존비속·배우자 등). 생존 환자의 진단서를 배우자에게 주면 비밀누설 문제','교수가 진찰하고 전공의가 교수 명의로 작성하는 것은 작성 보조로 볼 수 있음 — 명의자가 진찰자여야 함','병무용 진단서는 의료법상 의무 교부 대상이 아님(법제처 2024. 2. 해석)'])+
+ '<h3>필수 기재사항(시행규칙 제9조)</h3>'+ul(['환자 성명·주민등록번호·주소','병명과 한국표준질병·사인분류 코드','발병 연월일, 진단 연월일','치료 내용과 향후 치료에 대한 소견','용도, 의료기관 명칭·주소, 의사 성명·면허번호, 서명 또는 날인','진단서 부본(사본)은 3년 보존'])+
+ '<h3>상해진단서 치료기간</h3>'+ul(['「치료기간」은 형태·기능이 최대한 회복되거나 증상·징후가 고정될 때까지 걸릴 것으로 예상되는 기간','수상일부터 기산하고, 진찰 당시 예상되는 기간을 적되 합병증 등 변동 가능성은 소견에 명시','상해 원인(가해 수단)은 환자 진술이면 「환자 진술에 의함」으로 구분','추가 진단서는 경과·새 소견을 근거로 — 이전 진단서와 치료기간을 겹쳐 합산하지 않도록 기재','교통사고 「상해급별」(자배법 별표 1)과 치료기간(주수)은 다른 개념'])+
+ '<h3>제증명 수수료 상한(보건복지부 고시)</h3>'+tbl(['서류','상한'],[['일반진단서','20,000원'],['상해진단서(3주 미만)','100,000원'],['상해진단서(3주 이상)','150,000원'],['후유장애진단서','100,000원'],['사망진단서','10,000원']])+
+ '<h3>허위 작성의 책임</h3>'+ul(['형법 제233조: 3년 이하 징역·금고, 7년 이하 자격정지 또는 3천만원 이하 벌금','의료법 제66조: 거짓 진단서 작성 시 자격정지 처분','보험사기방지 특별법: 보험금 편취에 가담하면 10년 이하 징역 또는 5천만원 이하 벌금']),
+ calc:{f:[{k:'a',lab:'수상일',type:'date'},{k:'w',lab:'치료기간(주)',type:'num',ph:'예) 3'}],
+  ev(v){const a=pd(v.a),w=numv(v.w);if(!w)return wait('치료기간');if(w>520)return '<div class="stamp S">확인 필요<span>치료기간(주)이 너무 큼</span></div>';const fee=w<3?100000:150000;
+   return '<div class="stamp M">'+w+'주<span>'+(w<3?'3주 미만':'3주 이상')+' 상해진단서</span></div><ul class="basis"><li>수수료 상한 → '+won(fee)+'</li>'+(a?'<li>예상 치료 종료일 → '+fd(addDays(a,w*7-1))+'</li>':'')+'</ul>'}}},
+
+{id:'car',name:'자동차보험 상해·후유장애',kw:/자동차|교통사고|상해급|후유장애/,
+ law:[['자동차손해배상 보장법','제5조 책임보험',LG('자동차손해배상 보장법')],['같은 법 시행령 별표 1·2','상해 구분·후유장애 구분과 한도',LG('자동차손해배상 보장법 시행령')]],
+ body:()=>
+ '<h3>제도 개요</h3><p>대인배상Ⅰ(책임보험)은 피해자 1명당 사망 1억 5천만원(손해액 2천만원 미만이면 2천만원), 부상은 <b>별표 1 상해급별</b>, 후유장애는 <b>별표 2 장애급별</b> 한도 안에서 실제 손해액을 지급합니다. 한도를 넘는 손해는 대인배상Ⅱ(임의보험)에서 보상합니다.</p>'+
+ '<h3>급별 한도</h3>'+tbl(['급','상해(별표 1)','후유장애(별표 2)'],G14.map(g=>[g+'급',man(CAR_I[g-1]),man(CAR_D[g-1])]))+
+ '<h3>의사가 알아 둘 점</h3>'+ul(['상해급별은 진단명과 시행한 수술·처치로 정해짐(예: 수술 여부, 신경학적 증상 지속 시간) — 진단서에 수술명·시술명을 정확히','두 가지 이상 상해는 별표 1 세부지침에 따라 높은 급 기준으로 조정','부상 손해액이 진료비 해당액에 못 미치면 과실과 무관하게 한도 안에서 진료비 해당액 지급','후유장애진단서는 치료 종료·증상 고정 후 별표 2 문구에 맞춰 측정치 기재','민사 소송의 노동능력상실률(맥브라이드·AMA·대한의학회 기준)과 별표 2 장애급은 별개'])+
+ '<h3>기한</h3><p>보험금 청구권은 <b>3년</b>간 행사하지 않으면 소멸합니다. 정부보장사업(무보험·뺑소니)도 손해를 안 날부터 3년 이내 청구.</p>',
+ calc:{f:[{k:'g',lab:'급',type:'sel',opts:gOpt(14)}],
+  ev(v){const g=+(v.g||1);return '<div class="stamp M">'+g+'급<span>책임보험 한도</span></div><ul class="basis"><li>상해 한도 → '+man(CAR_I[g-1])+'</li><li>후유장애 한도 → '+man(CAR_D[g-1])+'</li></ul><p class="note">한도 안에서 실제 손해액을 지급합니다.</p>'}}},
+
+{id:'priv',name:'민간보험·맥브라이드',kw:/민간보험|후유장해|맥브라이드|ama|장해분류표|지급률/i,
+ law:[['보험업감독업무시행세칙','별표 15 표준약관(장해분류표)',LA('보험업감독업무시행세칙')],['대법원 2023. 11. 16. 선고 2020다292671','대한의학회 기준 적용 사례','https://www.scourt.go.kr']],
+ body:()=>
+ '<h3>표준약관 장해분류표</h3>'+ul(['장해 = 상해·질병 치료 후 증상이 고정되어 남은 <b>영구적</b> 훼손 상태(한시장해는 5년 이상이면 해당 지급률의 20%)','<b>13개 신체부위</b>: 눈, 귀, 코, 씹어먹거나 말하는 기능, 외모, 척추, 체간골, 팔, 다리, 손가락, 발가락, 흉·복부장기 및 비뇨생식기, 신경계·정신행동','보험금 = 보험가입금액 × 장해지급률','같은 부위에 장해가 둘 이상이면 가장 높은 지급률 하나만, 다른 부위는 합산','장해지급률이 사고일(또는 진단확정일)부터 <b>180일</b> 안에 확정되지 않으면 180일이 되는 날의 의사 진단에 따라 고정될 것으로 인정되는 상태로 결정(분류표에 판정시기를 따로 정한 경우는 그에 따름)'])+
+ '<h3>장해진단서 작성 요령</h3>'+ul(['약관 장해분류표 문구(예: 「한 팔의 3대 관절 중 1관절에 뚜렷한 장해」)와 측정 근거를 대응시켜 기재','관절 운동범위는 AMA 방식 측정값과 정상각도 대비 %를 함께','척추·신경계·정신행동은 분류표가 요구하는 검사(영상·근전도·신경심리검사 등)를 첨부','기왕 장해가 있으면 사고 전후를 구분'])+
+ '<h3>손해배상 소송의 노동능력상실률</h3>'+ul(['맥브라이드 평가표: 직업별 노동능력상실률을 정하는 오래된 표(1963년 판). 법원 신체감정에서 가장 많이 쓰였으나 현대 의학과 맞지 않는 항목이 있다는 비판','AMA 장해평가지침: 신체 부위·장기의 기능 손실을 백분율로 직접 산정(전신장애율)','대한의학회(KAMS) 장애평가기준: AMA를 바탕으로 우리 직업 분포를 반영 — 대법원 2023. 11. 16. 선고 2020다292671 판결은 사안에 따라 KAMS 기준을 적용한 원심을 확정','최종 노동능력상실률은 의학적 장애율에 연령·직업·경력 등을 참작해 법원이 규범적으로 결정']),
+ calc:{f:[{k:'a',lab:'상해 발생일(진단확정일)',type:'date'},{k:'m',lab:'보험가입금액(원)',type:'num',ph:'예) 100000000'},{k:'r',lab:'장해지급률(%)',type:'num',ph:'예) 15'},{k:'t',lab:'한시장해(5년 이상)',type:'chk'}],
+  ev(v){const a=pd(v.a),m=numv(v.m),r=numv(v.r);if(r>100)return '<div class="stamp S">확인 필요<span>지급률은 100% 이하</span></div>';if(!a&&!(m&&r))return wait('상해 발생일 또는 금액');const rr=v.t?r*0.2:r;
+   return '<div class="stamp M">'+(m&&r?won(m*rr/100):'180일')+'<span>'+(m&&r?'예상 장해보험금':'장해 판정 기준일')+'</span></div><ul class="basis">'+(a?'<li>180일이 되는 날 → '+fd(addDays(a,179))+'</li>':'')+(m&&r?'<li>적용 지급률 → '+(+rr.toFixed(2))+'%'+(v.t?' (한시장해 20%)':'')+'</li>':'')+'</ul><p class="note">180일은 상해 발생일을 1일로 센 날입니다. 약관 문구를 확인하세요.</p>'}}},
+
+{id:'mma',name:'병역·병무용 진단서',kw:/병역|병무|병사용|군대|신체검사|신검/,
+ law:[['병역판정 신체검사 등 검사규칙','질병·심신장애 정도와 평가기준',LG('병역판정 신체검사 등 검사규칙')],['병역법 시행규칙','별지 제106호 병무용진단서',LG('병역법 시행규칙')],['병무청 과목·질환별 구비서류','진단서 요건 안내','https://www.mma.go.kr/minwon/contents.do?mc=mma0000976']],
+ body:()=>
+ '<h3>신체등급과 병역처분</h3>'+tbl(['신체등급','병역처분'],[['1~3급','현역병 입영 대상'],['4급','보충역'],['5급','전시근로역'],['6급','병역면제'],['7급','재신체검사(치료 중이라 일정 기간 후 재검)']])+
+ '<p class="note">5·6급 대상자는 중앙병역판정검사소 정밀검사 후 확정(질환이 명백한 일부는 지방 신체등급판정심의위원회에서 확정). 여러 질환이면 가장 낮은(무거운) 등급으로 판정.</p>'+
+ '<h3>병무용 진단서 요건</h3>'+ul(['서식: 병역법 시행규칙 별지 제106호 병무용진단서','유효기간: <b>발행일부터 3개월</b> 이내(선천성 또는 질병 상태가 변하지 않는 질환은 1년 이내)','최근 6개월 이내 촬영한 같은 원판 사진 2매(3.5×4.5cm) 필요','원칙적으로 병역판정검사 전담 지정병원 등에서 발행 — 수술한 경우, 병원급 7일 이상 입원 후 3개월 이상 계속 통원, 의원급 1개월 이상 입원 후 6개월 이상 계속 통원이면 비지정병원도 가능','진단서와 함께 과목·질환별 구비서류(영상 판독지, 검사결과지, 진료기록 사본 등)를 확인'])+
+ '<h3>주의</h3>'+ul(['병무용 진단서는 의료법상 의무 교부 대상이 아니어서 발급을 거부할 수 있음(법제처 2024. 2. 14. 회신)','병역을 피하려고 신체를 손상하거나 속임수를 쓰면 병역법 제86조로 처벌 — 허위 진단서는 형법 제233조','병역처분에 불복하면 결과서를 받은 날부터 90일 이내 행정심판·행정소송']),
+ calc:{f:[{k:'d',lab:'진단서 발행일',type:'date'},{k:'f',lab:'선천성·상태 불변 질환',type:'chk'}],
+  ev(v){const d=pd(v.d);if(!d)return wait('발행일');const e=addDays(addMonths(d,v.f?12:3),-1),left=Math.round((e-today())/864e5);
+   return '<div class="stamp '+(left<0?'S':'M')+'">'+(left<0?'기한 지남':left+'일 남음')+'<span>'+fd(e)+'까지</span></div><ul class="basis"><li>유효기간 '+(v.f?'1년':'3개월')+' 기준</li></ul>'}}}
+];
+function wait(x){return '<div class="stamp P">입력 대기<span>'+x+'</span></div>'}
+
+let schCur=store.get('sch','nps'),schPrev='start',schV=store.get('schv',{});
+function schOpen(){return !$('#sch').classList.contains('hidden')}
+function openSch(id){if(!schOpen()){schPrev=$('#start').classList.contains('hidden')?'app':'start';$('#start').classList.add('hidden');$('#app').classList.add('hidden');$('#sch').classList.remove('hidden');$('#tools').classList.remove('hidden');$('#homeBtn').classList.remove('hidden')}
+ if(id&&SCH.some(s=>s.id===id))schCur=id;store.set('sch',schCur);renderSch();scrollTo(0,0)}
+function closeSch(){$('#sch').classList.add('hidden');if(schPrev==='app'&&mode){$('#app').classList.remove('hidden')}else{$('#start').classList.remove('hidden');$('#homeBtn').classList.add('hidden')}scrollTo(0,0)}
+function renderSch(){const s=SCH.find(x=>x.id===schCur)||SCH[0];
+ $('#schTabs').innerHTML=SCH.map(x=>'<button class="tab" role="tab" type="button" data-sc="'+x.id+'" aria-selected="'+(x.id===s.id)+'">'+x.name+'</button>').join('');
+ const v=schV[s.id]||{};
+ const calc=s.calc?'<h3>바로 계산</h3><div class="calc"><div class="form">'+s.calc.f.map(f=>{const id='sc_'+f.k,val=v[f.k]??'';
+   if(f.type==='chk')return '<label class="chk"><input type="checkbox" id="'+id+'" data-sk="'+f.k+'"'+(val?' checked':'')+'><span>'+f.lab+'</span></label>';
+   if(f.type==='sel')return '<div class="row"><label for="'+id+'">'+f.lab+'</label><select id="'+id+'" data-sk="'+f.k+'">'+f.opts.map(o=>'<option value="'+o[0]+'"'+(String(val)===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></div>';
+   return '<div class="row"><label for="'+id+'">'+f.lab+'</label><input id="'+id+'" data-sk="'+f.k+'" type="text" inputmode="numeric" placeholder="'+(f.type==='date'?'20240814':esc(f.ph||''))+'" value="'+esc(val)+'"'+(f.type==='date'?' data-date="1"':'')+'></div>'}).join('')+'</div><div class="stampBox" id="scOut" aria-live="polite"></div></div>':'';
+ $('#schPanel').innerHTML='<div class="phead"><h2>'+s.name+'</h2></div><div class="srcs">'+s.law.map(l=>'<a class="src" href="'+encodeURI(l[2])+'" target="_blank" rel="noopener noreferrer"><b>'+l[0]+'</b><small>'+l[1]+'</small></a>').join('')+'</div>'+calc+s.body()+'<p class="note" style="margin-top:18px">요약 안내입니다. 금액·기한은 개정될 수 있으니 결정 전에 원문과 담당 기관에 확인하세요.</p>';
+ if(s.calc){document.querySelectorAll('#schPanel [data-sk]').forEach(el=>el.addEventListener(el.type==='checkbox'||el.tagName==='SELECT'?'change':'input',e=>{if(el.dataset.date)dateFmt(el);else if(el.inputMode==='numeric'&&el.type==='text'&&!el.dataset.date){el.value=el.value.replace(/[^\d.]/g,'')}schEval(true)}));schEval(false)}}
+function schEval(user){const s=SCH.find(x=>x.id===schCur);const v={};document.querySelectorAll('#schPanel [data-sk]').forEach(el=>v[el.dataset.sk]=el.type==='checkbox'?el.checked:el.value);if(user){schV[s.id]=v;store.set('schv',schV)}$('#scOut').innerHTML=s.calc.ev(v)}
+$('#schTabs').addEventListener('click',e=>{const b=e.target.closest('[data-sc]');if(b){schCur=b.dataset.sc;store.set('sch',schCur);renderSch()}});
+$('#schBack').onclick=closeSch;$('#schBtn').onclick=()=>openSch();$('#schCard').onclick=()=>openSch();
+function schVoice(s){if(/제도별/.test(s)){const hit=SCH.find(x=>x.kw.test(s));openSch(hit&&hit.id);return '제도별 기준'+(hit?' · '+hit.name:'')+'을 열었습니다'}
+ if(schOpen()){const hit=SCH.find(x=>x.kw.test(s));if(hit){openSch(hit.id);return hit.name+'을 열었습니다'}if(/^(돌아가|뒤로|닫기|닫아)/.test(s)){closeSch();return '제도별 기준을 닫았습니다'}}
+ return null}
+
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
 $('#types').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;cur=b.dataset.t;store.set('type',cur);vals={};calcIdx=0;render()});
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;stopTTS();tab=b.dataset.tab;render()});
