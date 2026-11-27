@@ -949,6 +949,20 @@ body.locked .vafab{display:none}
 #modebar .mbtools{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 #modebar .mbtools>*{min-height:46px}
 @media (max-width:760px){#modebar .mbtools{grid-template-columns:1fr 1fr}#modebar .mbtools #mb-user{grid-column:auto}}
+
+.gapbox{border:1.5px solid #f5c26b;background:#fffaf0;border-radius:10px;padding:12px 14px;margin:0 0 12px}
+.gaphd{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.gaphd b{font-size:15px;color:#8a5300}
+.gapsub,.gapnote{margin:6px 0 8px;font-size:13px;color:#6b5a3a}
+.gapnote{color:#b42318;margin:8px 0 0}
+.gaplist{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin:0 0 10px}
+.gapi{display:flex;justify-content:space-between;align-items:center;gap:6px;min-height:38px;padding:6px 10px;border:1px solid #e8d3a8;border-radius:7px;background:#fff;font:inherit;font-size:13.5px;text-align:left;cursor:pointer}
+.gapi i{font-style:normal;font-size:11px;color:#fff;background:#d92d20;border-radius:4px;padding:1px 5px;flex:none}
+.gapi:hover{border-color:#f59e0b}
+.gapbox .gapv{width:100%}
+.gapflash{outline:3px solid #f59e0b!important;outline-offset:2px;transition:outline-color .3s}
+.gapbox .gapnote.u{color:#475467}
+#sb-gap .gapnote{color:#475467}
 </style>
 <meta name="theme-color" content="#1f3a68">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4068,7 +4082,7 @@ function docFile(name,html){
 /* ============================================================
    음성 받아쓰기 (말로 쓰기)
    ============================================================ */
-var APPVER="2026.11.27-7";
+var APPVER="2026.11.27-8";
 function isTouch(){ try{ return window.matchMedia("(pointer:coarse)").matches||("ontouchstart" in window&&navigator.maxTouchPoints>0); }catch(e){ return false; } }
 /* 음성 입력 중 휴대폰 키보드 막기: 칸을 잠시 읽기 전용 + inputmode none */
 function kbLock(el,tag){ tag=tag||"sr"; kbHide(); if(!isTouch()||!el||el.dataset.kbl) return; el.dataset.kbl=tag; el.dataset.kbro=el.readOnly?"1":""; el.dataset.kbim=el.getAttribute("inputmode")||""; el.setAttribute("inputmode","none"); el.readOnly=true; }
@@ -4816,8 +4830,8 @@ function stPick(name){ var L=(cur.stmts||[]).slice(); if(ST&&(ST.body||"").trim(
   return (m.length?m:v.length?v:L)[(m.length?m:v.length?v:L).length-1]; }
 function stPlain(b){ return String(b||"").replace(/\n*이상의 진술은 사실과 다름없습니다\.?\s*$/,"").trim(); }
 $("#sb-fromst").addEventListener("click",function(){ var s=stPick(cur.sb.name); if(!s||!stPlain(s.body)){ toast("저장한 진술서가 없습니다 — 진술서를 먼저 쓰세요"); return; }
-  if(cur.sb.story&&!confirm((s.name||(s.info&&s.info.name)||"진술인")+" 님 진술서 내용으로 구체적 경위를 바꿀까요?")) return;
-  cur.sb.story=stPlain(s.body); if(!cur.sb.src) cur.sb.src={}; cur.sb.src.story="진술서"; $("#sb-story").value=cur.sb.story; saveCur(); sbRender(); paint("[data-sb]","sb",cur.sb.src); toast("진술서 내용으로 채웠습니다"); });
+  if(cur.sb.story&&cur.sb.src&&cur.sb.src.story!=="진술서"&&!confirm((s.name||(s.info&&s.info.name)||"진술인")+" 님 진술 내용으로 구체적 경위를 바꿀까요?")) return;
+  cur.sb.story=stPlain(s.body); if(!cur.sb.src) cur.sb.src={}; cur.sb.src.story="진술서"; $("#sb-story").value=cur.sb.story; saveCur(); sbRender(); paint("[data-sb]","sb",cur.sb.src); toast("진술 내용을 가져왔습니다"); });
 
 $("#sb-doc").addEventListener("click",function(){ docFile("상병경위보고서_"+(cur.sb.name||"직원")+"_"+ymd(),sbDoc()); });
 $$('[data-k="v_dept"],[data-r="place"]').forEach(function(el){el.setAttribute("list","dl-dept");});
@@ -5721,6 +5735,43 @@ var _vfMark2=vfMark; vfMark=function(){ var x=VF.list[VF.i]; if(x&&x.el){ var st
   var nm=function(){ var d=LF.collect(); return LF.MODES[LF.S.mode].file+"_"+(d.v_name||"교직원")+"_"+ymd(); };
   mk("a-pdfdl","PDF 파일 받기","서식을 PDF 파일로 바로 내려받습니다. 주소·주민등록번호는 내려받은 뒤 적어 주세요.").addEventListener("click",function(){ savePdf(LF.docFirst(),nm()); });
   mk("a-hwpx","한글 파일 받기","한/글에서 고칠 수 있는 .hwpx 파일로 내려받습니다. 주소·주민등록번호는 내려받은 뒤 적어 주세요.").addEventListener("click",function(){ saveHwpx(LF.docFirst(),nm()); }); })();
+
+/* ---------- 진술 내용 가져오기 후, 가져오지 못한 칸 안내 ---------- */
+function gapLab(el,fb){ var t=""; try{ t=vfLabel(el); }catch(e){} if(!t||t==="입력 칸"){ var g=el.closest&&el.closest("[data-radio]"); if(g){ var f=g.closest(".f"); var l=f&&f.querySelector("label.l"); if(l) t=l.textContent.replace(/[*\s]+/g," ").trim(); } } return (t&&t!=="입력 칸"?t:fb||"").replace(/\s*(숫자 8자리|24시간제.*)$/,""); }
+function gapJump(el){ if(!el) return; var st=el.closest(".step"); if(st&&!st.classList.contains("unfold")&&!el.offsetParent){ st.classList.add("unfold"); if(typeof xtogLabel==="function") xtogLabel(st); }
+  var t=el.closest(".opts")||el; t.scrollIntoView({block:"center",behavior:"smooth"}); t.classList.add("gapflash"); setTimeout(function(){ t.classList.remove("gapflash"); },1800); if(!isTouch()&&el.focus) try{ el.focus({preventScroll:true}); }catch(e){} }
+function gapBox(id,where,items,note){ var b=$("#"+id); if(!b){ b=document.createElement("div"); b.id=id; b.className="gapbox"; where.parentNode.insertBefore(b,where.nextSibling);
+    b.addEventListener("click",function(e){ var x=e.target.closest("[data-gi]"); if(x){ gapJump(b._els[+x.dataset.gi]); return; } if(e.target.closest(".gapx")) b.classList.add("hidden"); if(e.target.closest(".gapv")) (b._voice||function(){})(); }); }
+  b._els=items.map(function(x){return x.el;}); b.classList.remove("hidden");
+  b.innerHTML='<div class="gaphd"><b>'+(items.length?'가져오지 못한 내용 '+items.length+'곳 — 직접 적어 주세요':'필요한 내용을 모두 가져왔습니다')+'</b><button type="button" class="linkbtn gapx">닫기</button></div>'
+   +(items.length?'<p class="gapsub">진술서·사용자 설정·사건 기록에 없는 내용입니다. 항목을 누르면 그 칸으로 갑니다.</p><div class="gaplist">'+items.map(function(x,i){ return '<button type="button" class="gapi'+(x.req?' req':'')+'" data-gi="'+i+'">'+esc(x.lab)+(x.req?'<i>필수</i>':'')+'</button>'; }).join("")+'</div><button type="button" class="btn ghost gapv">남은 칸 말로 채우기</button>':'')
+   +(note?'<p class="gapnote">'+note+'</p>':''); return b; }
+/* 법률지원 서식 */
+function lfGaps(){ var out=[], seen={};
+  (ASKQ[LF.S.mode]||[]).forEach(function(q){ if(!aCond(q)||aVal(q[0])||PRIVK.indexOf(q[0])>=0||seen[q[0]]) return; seen[q[0]]=1;
+    var el=$('[data-k="'+q[0]+'"]',LF.pane())||$('#s-work input[name="'+q[0]+'"]')||$('input[data-c="'+q[0]+'"]',LF.pane()); if(!el||el.disabled) return;
+    out.push({el:el,lab:({dmg:"피해 종류",req:"원하는 조치",d_weapon:"흉기 사용 여부",e_112:"112 신고 여부"})[q[0]]||gapLab(el,q[2]),req:!!q[4]}); }); return out; }
+function lfGapShow(){ var b=gapBox("lf-gap",$("#mb-voice"),lfGaps(),LF.S.mode==="A"?"주소·주민등록번호는 개인정보 보호를 위해 문서 내려받기 이후 작성바랍니다.":""); b._voice=lfVoice; b.scrollIntoView({block:"nearest",behavior:"smooth"}); }
+/* 상병경위보고서 */
+function sbGaps(){ var out=[], seenR={};
+  $$("#sb-form input,#sb-form textarea").forEach(function(el){ if(el.closest(".hidden")||el.disabled||el.type==="checkbox"||el.id==="sb-optpl"||el.closest(".uadd")) return;
+    if(el.type==="radio"){ if(seenR[el.name]) return; seenR[el.name]=1; if($('#sb-form input[name="'+el.name+'"]:checked')) return; out.push({el:el,lab:gapLab(el,"선택")}); return; }
+    if(!el.dataset.sb||(el.value||"").trim()) return; if(el.dataset.sb==="afterTxt"&&(($('input[name="sb_after"]:checked')||{}).value!=="추가 치료 필요")) return; if(el.dataset.sb==="time") { out.push({el:el,lab:"상병 시각",u:0}); return; }
+    out.push({el:el,lab:gapLab(el,""),u:["birth","regno","boss","job","dept","name"].indexOf(el.dataset.sb)>=0}); }); return out.filter(function(x){return x.lab;}); }
+function sbGapShow(){ var g=sbGaps(), us=g.filter(function(x){return x.u;}).map(function(x){return x.lab;}); var b=gapBox("sb-gap",$("#sb-voice"),g,us.length?"사용자 설정(오른쪽 위)에 "+esc(eul(us.join("·")))+" 등록해 두면 다음부터 자동으로 들어갑니다.":""); b._voice=function(){ $("#sb-voice").click(); }; }
+(function(){ /* 버튼 이름: 진술 내용 가져오기 */
+  var a=$("#sb-fromst"); if(a){ a.textContent="진술 내용 가져오기"; a.addEventListener("click",function(){ setTimeout(function(){ sbGapShow(); var g=$("#sb-gap"); if(g) g.scrollIntoView({block:"nearest",behavior:"smooth"}); },350); }); }
+  var m=$("#mb-base"); if(m){ m.textContent="진술 내용 가져오기"; m.addEventListener("click",function(){ setTimeout(lfGapShow,100); }); }
+  var v=$("#mb-voice small"); if(v) v.textContent="진술 내용을 먼저 가져오고, 남은 칸을 묻습니다";
+  /* 값을 넣으면 목록에서 빠지도록 */
+  var re=function(id,fn){ var b=$("#"+id); if(b&&!b.classList.contains("hidden")) fn(); };
+  document.addEventListener("change",function(e){ if(e.target.closest("#sb-form")) re("sb-gap",sbGapShow); else if(e.target.closest("#s-work")) re("lf-gap",lfGapShow); });
+  var t=null; document.addEventListener("input",function(e){ clearTimeout(t); t=setTimeout(function(){ if(e.target.closest("#sb-form")) re("sb-gap",sbGapRefresh); else if(e.target.closest("#s-work")) re("lf-gap",lfGapRefresh); },600); });
+})();
+function sbGapRefresh(){ if($("#sb-gap")) sbGapShow(); }
+function lfGapRefresh(){ var b=$("#lf-gap"); if(b){ gapBox("lf-gap",$("#mb-voice"),lfGaps(),LF.S.mode==="A"?"주소·주민등록번호는 개인정보 보호를 위해 문서 내려받기 이후 작성바랍니다.":""); } }
+/* 서식·창을 바꾸면 안내를 닫음 */
+document.addEventListener("click",function(e){ if(e.target.closest(".choice,#home,[data-tab]")){ var b=$("#lf-gap"); if(b) b.classList.add("hidden"); } if(e.target.closest("#r-sb")){ var c=$("#sb-gap"); if(c) c.classList.add("hidden"); } },true);
 /*LFVEND*/
 /* 시작 */
 renderField(); setInterval(renderContacts,60000); shInit();
