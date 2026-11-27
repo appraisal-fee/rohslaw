@@ -1,5 +1,5 @@
 // 처방전 대리수령 요건 검토 - 서비스 워커: 페이지는 최신 우선, 인터넷이 끊기면 저장본
-const CACHE = 'rx-proxy-v1-5-1';
+const CACHE = 'rx-proxy-v1-6-0';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('rx-proxy') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

@@ -303,6 +303,27 @@ mark.hl{background:var(--warn-soft);color:inherit;padding:0 1px;border-radius:2p
 .relres button:hover{border-color:var(--accent)}
 .relres .rw{font-weight:700}.relres .rk{color:var(--ink-2);font-size:13px}.relres .rgo{font-size:12.5px;font-weight:700;color:var(--accent)}
 .relres .rn{grid-column:1/-1;font-size:12.5px;color:var(--warn)}
+.relres .rt{font-size:12px;color:var(--ink-3,var(--ink-2));border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-left:4px}
+.finder{grid-template-columns:minmax(0,1fr)}
+.nkbox{min-width:0;max-width:100%;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin-top:4px}
+.nkbox>summary{cursor:pointer;padding:9px 12px;font-weight:700;font-size:14px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.nkbox>summary .rk{font-weight:400;font-size:12.5px;color:var(--ink-2)}
+.nkbox .tbl-wrap{overflow-x:auto;border-top:1px solid var(--line)}
+.nktbl{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px;line-height:1.5;min-width:560px}
+.nktbl th,.nktbl td{border-bottom:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:middle}
+.nktbl thead th{background:var(--surface-2,var(--surface));font-size:12.5px;color:var(--ink-2)}
+.nktbl tbody th{font-weight:700}
+.nktbl td.nk-o{color:var(--warn);font-weight:700}.nktbl td.nk-k{color:var(--ok,var(--accent));font-weight:700}
+.nktbl td:last-child{text-align:center}.nktbl td:last-child .btn{white-space:nowrap}.nktbl td.nk-q{color:var(--ink);font-weight:700}
+.nkbox .note{padding:0 12px 10px}
+@media (max-width:640px){
+ .nktbl,.nktbl tbody{display:block;min-width:0}.nktbl colgroup,.nktbl thead{display:none}
+ .nktbl tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;row-gap:3px;padding:10px 12px;border-bottom:1px solid var(--line)}
+ .nktbl th,.nktbl td{display:block;border:0;padding:0}
+ .nktbl tbody th,.nktbl td.nk-o,.nktbl td.nk-k,.nktbl td.nk-q,.nktbl td:nth-child(3){grid-column:1}
+ .nktbl td:last-child{grid-column:2;grid-row:1/span 3;align-self:center}
+ .nktbl td:nth-child(3){color:var(--ink-2);font-size:12.5px}
+}
 .prev-box{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:20px;display:grid;gap:10px}
 .prev-row{display:grid;grid-template-columns:minmax(0,320px);gap:10px;align-items:start}
 .prev-list{display:grid;gap:6px}
@@ -646,9 +667,10 @@ mark.hl{background:var(--warn-soft);color:inherit;padding:0 1px;border-radius:2p
 /* ---------------- 버전 ---------------- */
 const CFG_DEFAULT={vKin:3,vEmp:1,vJail:1,vAdmit:1,noticeUrl:"https://appraisal-fee.github.io/rohslaw/rx-proxy-notice.json",configUrl:"https://appraisal-fee.github.io/rohslaw/rx-proxy-config.json"};
 let CFG=Object.assign({},CFG_DEFAULT);
-const APP_VERSION={ver:"v1.5.1",date:"2026. 11. 27.",name:"처방전대리수령 검토앱",dev:"노상엽"};
+const APP_VERSION={ver:"v1.6.0",date:"2026. 11. 27.",name:"처방전대리수령 검토앱",dev:"노상엽"};
 const UPD_DEFAULT="https://appraisal-fee.github.io/rohslaw/rx-proxy-version.json";
 const CHANGELOG=[
+ {v:"v1.6.0",d:"2026. 11. 27.",items:["법률상 가족관계가 없는 관계 15가지 반영: 사실혼 배우자, 수양아들·딸, 수양부모, 계부·계모, 의붓자녀·형제, 이혼한 배우자, 가정위탁 보호자, 후견인, 대부·대모 등","법적 양자녀·양부모(입양신고), 이복·이부 형제자매, 사별한 배우자의 부모는 친족 여부와 확인 서류 안내","관계로 찾기·자연어 판단·전화 문의에서 ‘수양아들’을 ‘아들’로 잘못 알아듣지 않도록 긴 말을 먼저 찾음","3단계에 ‘법률상 가족관계가 없거나 헷갈리는 경우’ 표 추가 · 누르면 바로 선택"]},
  {v:"v1.5.1",d:"2026. 11. 27.",items:["말로 입력: 휴대폰(안드로이드)에서 같은 말이 여러 번 겹쳐 적히던 문제 해결 (예: \"사실은 사실은 … 사실혼 배우자\" → \"사실혼 배우자\")","말로 입력: 고쳐 들은 말·반복된 말은 마지막 것만 남기고 정리"]},
  {v:"v1.5.0",d:"2026. 11. 27.",items:["웹앱으로 배포: 휴대폰·PC에 설치해 앱처럼 사용, 인터넷이 끊겨도 마지막 화면으로 열림","말로 찾기: 위쪽 🎤 단추로 말하면 요건 판단·질문·시설·등록번호 중 알맞은 곳으로 찾아 줌","검색칸마다 🎤 단추, 말로 찾는 동안 휴대폰 키보드가 올라오지 않음","질문·시설 검색을 낱말 단위로 찾도록 개선"]},
  {v:"v1.4.1",d:"2026. 11. 2.",items:["다시 오신 분: 환자 등록번호만으로 이전 판단 조회, 등록번호를 기록 대장·HIS 붙여넣기에 추가","보행상 장애 표준 기준표: 마우스를 올리면 장애 유형 설명·세부 기준, 누르면 표 안에 펼쳐 보기"]},
@@ -770,6 +792,38 @@ const REL = [ // [낱말들, 대리수령자 구분, 덧붙일 말]
   ["간병인 요양보호사 방문간호사 사회복지사 시설직원 이웃 지인 친구 동거인 직장동료","other","건강상태 숙지·평소 동행 조건이 필요하고, 신청서에는 환자 서명만 받습니다"],
   ["사실혼 동거 내연","other","법률상 배우자가 아니므로 친족으로 볼 수 없습니다. 기준문의 후 판단하세요"]
 ];
+/* 법률상 가족관계가 없거나 헷갈리는 관계 (민법 제767~769조·제772조·제775조, 원내 안내 라.7)마) 기준 정리) */
+const NONKIN = [ // {t:표시, w:찾는 말, k:구분, j:판단, c:확인할 것}
+  {t:"사실혼 배우자",w:"사실혼배우자 사실혼남편 사실혼아내 사실혼부인 사실상배우자 사실혼관계 동거남 동거녀 내연남 내연녀",k:"other",j:"배우자 아님 → 그 밖의 사람",c:"혼인신고가 없으면 법률상 배우자가 아닙니다. 건강상태를 잘 알고 평소 진료에 동행했는지 확인하고, 신청서는 환자 서명만 받습니다"},
+  {t:"수양아들 · 수양딸",w:"수양아들 수양딸 수양자녀 수양자식 수양손자 수양손녀",k:"other",j:"직계비속 아님 → 그 밖의 사람",c:"입양신고 없이 자식처럼 지내는 관계는 법률상 친족이 아닙니다. 가족관계증명서에 양자로 나오면 ‘법적 양자녀’로 고르세요"},
+  {t:"수양어머니 · 수양아버지",w:"수양어머니 수양아버지 수양엄마 수양아빠 수양부모 수양모 수양부",k:"other",j:"직계존속 아님 → 그 밖의 사람",c:"입양신고가 없으면 법률상 부모가 아닙니다. 건강상태 숙지·평소 동행 조건으로 판단합니다"},
+  {t:"법적 양자녀 (입양신고)",w:"양아들 양딸 양자 양녀 친양자 입양자녀 입양아들 입양딸 입양한아들 입양한딸",k:"desc",j:"직계비속 (민법 제772조)",c:"입양신고가 된 양자·친양자는 친자녀와 같습니다. 가족관계증명서에 양자(친양자)로 나오는지 꼭 확인하고, 없으면 수양자녀(그 밖의 사람)로 고르세요"},
+  {t:"법적 양부모 (입양신고)",w:"양부 양모 양아버지 양어머니 양부모 입양부모",k:"asc",j:"직계존속 (민법 제772조)",c:"가족관계증명서에 양부·양모로 나오는지 확인합니다. 신고가 없으면 수양부모(그 밖의 사람)입니다"},
+  {t:"계부 · 계모 (새아버지·새어머니)",w:"계부 계모 새엄마 새아빠 새어머니 새아버지 의붓아버지 의붓어머니 의붓엄마 의붓아빠",k:"other",j:"직계존속 아님(인척) → 그 밖의 사람",c:"부모의 재혼 배우자는 혈족이 아닌 인척입니다(민법 제769조). 환자를 입양신고했다면 양부모(직계존속)로 고르세요"},
+  {t:"의붓아들 · 의붓딸",w:"의붓아들 의붓딸 의붓자식 의붓자녀 배우자의자녀 배우자의아들 배우자의딸",k:"other",j:"직계비속 아님(인척) → 그 밖의 사람",c:"배우자가 데려온 자녀는 입양하지 않으면 직계비속이 아닙니다. 입양신고가 있으면 법적 양자녀(직계비속)로 고르세요"},
+  {t:"의붓형제 · 의붓자매",w:"의붓형제 의붓자매 의붓오빠 의붓언니 의붓누나 의붓형 의붓동생",k:"other",j:"형제자매 아님 → 그 밖의 사람",c:"부모의 재혼으로 생긴 피가 섞이지 않은 형제는 형제자매가 아닙니다"},
+  {t:"이복 · 이부 형제자매",w:"이복형제 이복자매 이복동생 이복형 이복누나 이복언니 이복오빠 이부형제 이부동생 배다른형제 배다른동생 씨다른형제",k:"sib",j:"형제자매 (혈족)",c:"아버지나 어머니 한쪽만 같아도 형제자매입니다. 가족관계증명서나 부모의 가족관계증명서로 확인합니다"},
+  {t:"이혼한 배우자",w:"전남편 전처 전부인 전아내 전배우자 이혼한배우자 이혼한남편 이혼한아내 전와이프",k:"other",j:"배우자 아님 → 그 밖의 사람",c:"이혼하면 배우자 관계와 인척관계가 끝납니다(민법 제775조). 두 사람의 자녀라면 자녀(직계비속)로 대신 받을 수 있습니다"},
+  {t:"사별한 배우자의 부모",w:"사별한배우자의부모 돌아가신남편의어머니 돌아가신남편의아버지 돌아가신아내의어머니 돌아가신아내의아버지",k:"spAsc",j:"배우자의 직계존속으로 볼 여지 · 기준문의",c:"배우자가 사망해도 재혼 전까지는 인척관계가 이어집니다(민법 제775조 제2항). 재혼했다면 해당하지 않습니다. 기준문의를 권합니다"},
+  {t:"가정위탁 보호자",w:"위탁부모 위탁모 위탁부 위탁엄마 위탁아빠 위탁가정 가정위탁 위탁보호자",k:"other",j:"친족 아님 → 그 밖의 사람",c:"가정위탁 보호자는 실질적 보호자로 봅니다. 가정위탁 확인 서류와 건강상태 숙지·동행 여부를 확인합니다"},
+  {t:"후견인",w:"후견인 성년후견인 한정후견인 특정후견인 미성년후견인",k:"other",j:"대리수령자 목록에 없음 → 그 밖의 사람 · 기준문의",c:"후견인이어도 시행령 대리수령자로 따로 정해져 있지 않습니다. 후견등기사항증명서를 확인하고 기준문의를 권합니다"},
+  {t:"대부 · 대모 (세례)",w:"대부 대모 대자 대녀",k:"other",j:"친족 아님 → 그 밖의 사람",c:"신앙상 맺은 관계는 친족이 아닙니다. 건강상태 숙지·평소 동행 조건으로 판단합니다"},
+  {t:"사실혼 배우자의 부모·자녀",w:"사실혼배우자의부모 사실혼배우자의어머니 사실혼배우자의아버지 사실혼배우자의자녀 사실혼배우자의아들 사실혼배우자의딸",k:"other",j:"친족 아님 → 그 밖의 사람",c:"혼인신고가 없으면 상대방의 부모·자녀와도 인척관계가 생기지 않습니다"}
+];
+NONKIN.forEach(n=>REL.push([n.w,n.k,n.c]));
+const NK_DISP={}; NONKIN.forEach(n=>n.w.split(" ").forEach(w=>{NK_DISP[w]=n.t;}));
+const NK_WORD={}; // 띄어 쓴 표시용 낱말
+"사실혼배우자:사실혼 배우자,사실혼남편:사실혼 남편,사실혼아내:사실혼 아내,사실혼부인:사실혼 부인,사실상배우자:사실상 배우자,사실혼관계:사실혼 관계,입양자녀:입양 자녀,입양아들:입양 아들,입양딸:입양 딸,입양한아들:입양한 아들,입양한딸:입양한 딸,배우자의자녀:배우자의 자녀,배우자의아들:배우자의 아들,배우자의딸:배우자의 딸,배다른형제:배다른 형제,배다른동생:배다른 동생,씨다른형제:씨다른 형제,이혼한배우자:이혼한 배우자,이혼한남편:이혼한 남편,이혼한아내:이혼한 아내,사별한배우자의부모:사별한 배우자의 부모,돌아가신남편의어머니:돌아가신 남편의 어머니,돌아가신남편의아버지:돌아가신 남편의 아버지,돌아가신아내의어머니:돌아가신 아내의 어머니,돌아가신아내의아버지:돌아가신 아내의 아버지,가정위탁:가정위탁,위탁보호자:위탁 보호자,사실혼배우자의부모:사실혼 배우자의 부모,사실혼배우자의어머니:사실혼 배우자의 어머니,사실혼배우자의아버지:사실혼 배우자의 아버지,사실혼배우자의자녀:사실혼 배우자의 자녀,사실혼배우자의아들:사실혼 배우자의 아들,사실혼배우자의딸:사실혼 배우자의 딸".split(",").forEach(x=>{const [a,b]=x.split(":");NK_WORD[a]=b;});
+function relDisp(w){return NK_WORD[w]||w;}
+function relHits(q){ // 관계 찾기: 더 긴 말에 포함된 짧은 말(예: 수양아들 속 '아들')은 빼고, 정확히 같은 말을 앞에
+  q=(q||"").replace(/\s+/g,""); const hits=[];
+  if(!q) return hits;
+  REL.forEach(([words,key,note])=>words.split(" ").forEach(w=>{if(w.includes(q)||(q.length>=2&&q.includes(w)))hits.push({w,key,note});}));
+  const inQ=hits.filter(h=>q.includes(h.w));
+  const out=hits.filter(h=>!(q.includes(h.w)&&inQ.some(o=>o.w.length>h.w.length&&o.w.includes(h.w))));
+  out.sort((a,b)=>(b.w===q)-(a.w===q)||(q.includes(b.w))-(q.includes(a.w))||a.w.length-b.w.length);
+  const seen=new Set(); return out.filter(h=>{const k=h.w+h.key;if(seen.has(k))return false;seen.add(k);return true;});
+}
 
 /* ---------------- 상태 ---------------- */
 const S = {
@@ -1162,7 +1216,10 @@ function renderPanel(){
   }
   if(S.step===2){
     h+=head(3,"누가 처방전을 대신 받나요?","대리수령자는 시행령 제10조의2에 정한 사람만 될 수 있습니다. 해당 칸을 고르세요.");
-    h+=`<div class="finder"><label for="relq">관계로 찾기</label><div class="vrow"><button type="button" class="vbtn" data-vfor="relq" aria-label="말로 찾기">🎤</button><input id="relq" type="search" placeholder="예) 며느리, 장모, 조카, 요양보호사" autocomplete="off"></div><div class="relres" id="relres"></div></div>`;
+    h+=`<div class="finder"><label for="relq">관계로 찾기</label><div class="vrow"><button type="button" class="vbtn" data-vfor="relq" aria-label="말로 찾기">🎤</button><input id="relq" type="search" placeholder="예) 며느리, 장모, 조카, 요양보호사" autocomplete="off"></div><div class="relres" id="relres"></div>
+      <details class="nkbox"${S.nkOpen?" open":""}><summary>법률상 가족관계가 없거나 헷갈리는 경우 <span class="rk">사실혼 배우자 · 수양아들·딸 · 계부모 · 이혼한 배우자 등 ${NONKIN.length}가지</span></summary>
+      <div class="tbl-wrap"><table class="nktbl"><colgroup><col style="width:26%"><col style="width:27%"><col><col style="width:76px"></colgroup><thead><tr><th>관계</th><th>판단</th><th>확인할 것</th><th></th></tr></thead><tbody>${NONKIN.map((n,i)=>`<tr><th scope="row">${esc(n.t)}</th><td class="${n.k==="other"?"nk-o":n.j.includes("기준문의")?"nk-q":"nk-k"}">${esc(n.j)}</td><td>${esc(n.c)}</td><td><button type="button" class="btn sm" data-nkpick="${i}">선택</button></td></tr>`).join("")}</tbody></table></div>
+      <p class="note" style="margin:6px 0 0">민법상 친족은 혈족·배우자·인척이며(제767조), 입양신고가 된 양자만 친자녀와 같습니다(제772조). 가족관계증명서·주민등록등본으로 법적 관계가 확인되지 않으면 ‘그 밖의 사람’ 기준을 적용합니다.</p></details></div>`;
     const grp=(g,title)=>`<div class="group-label">${title}</div><div class="opts">${Object.entries(PROXY).filter(([,v])=>v.grp===g).map(([k,v])=>radio("proxy",k,S.proxy,v.label,[v.desc,v.basis].filter(Boolean).join(" · "))).join("")}</div>`;
     h+=`<div class="q">${grp("kin","친족 · 시행령 §10의2 1~3호")}${grp("fac","노인의료복지시설 · 시행령 §10의2 4호")}${grp("mohw","보건복지부장관이 인정하는 사람 · 시행령 §10의2 5호")}</div>`;
     if(S.proxy==="other"){
@@ -1499,10 +1556,8 @@ function renderRel(q){
   const box=$("#relres"); if(!box) return;
   q=(q||"").trim().replace(/\s+/g,"");
   if(!q){box.innerHTML="";return;}
-  const hits=[];
-  REL.forEach(([words,key,note])=>words.split(" ").forEach(w=>{if(w.includes(q)||(q.length>=2&&q.includes(w)))hits.push({w,key,note});}));
-  const seen=new Set(); const list=hits.filter(h=>{const k=h.w+h.key;if(seen.has(k))return false;seen.add(k);return true;}).slice(0,6);
-  box.innerHTML=list.length?list.map(h=>`<button type="button" data-relpick="${h.key}" data-word="${esc(h.w)}"><span><span class="rw">${esc(h.w)}</span> <span class="rk">→ ${esc(PROXY[h.key].label)} · ${esc(PROXY[h.key].basis)}</span></span><span class="rgo">선택</span>${h.note?`<span class="rn">${esc(h.note)}</span>`:""}</button>`).join(""):`<p class="note" style="margin:0">찾는 관계가 없습니다. 아래 목록에서 직접 고르세요. 목록에 없는 관계는 ‘그 밖의 사람’으로 판단합니다.</p>`;
+  const list=relHits(q).slice(0,6);
+  box.innerHTML=list.length?list.map(h=>`<button type="button" data-relpick="${h.key}" data-word="${esc(relDisp(h.w))}"><span><span class="rw">${esc(relDisp(h.w))}</span>${NK_DISP[h.w]?` <span class="rt">${esc(NK_DISP[h.w])}</span>`:""} <span class="rk">→ ${esc(PROXY[h.key].label)} · ${esc(PROXY[h.key].basis)}</span></span><span class="rgo">선택</span>${h.note?`<span class="rn">${esc(h.note)}</span>`:""}</button>`).join(""):`<p class="note" style="margin:0">찾는 관계가 없습니다. 아래 목록에서 직접 고르세요. 목록에 없는 관계는 ‘그 밖의 사람’으로 판단합니다.</p>`;
 }
 function clearJudgment(){Object.assign(S,{savedId:null,prev:null,docWarned:false,nlBlink:false,nlRes:null,nlPhysHint:null,visit:null,reason:null,mob:null,phys:null,social:null,socialEtc:"",sameRx:null,record:null,proxy:null,minor:null,minor14:null,otherKnow:false,otherWith:false,facListed:null,ptNoId:false,ptUnder14:false,docs:{}});S.form.reasonTouched=false;S.form.pRel="";}
 function preparePrint(src){
@@ -1618,6 +1673,7 @@ document.addEventListener("click",e=>{
   if(e.target.closest("#nlGo")){nlRun();return;}
   const nx=e.target.closest("[data-nlex]"); if(nx){const ta=$("#nlText");ta.value=NL_EX[+nx.dataset.nlex].x;S.nlText=ta.value;ta.focus();return;}
   if(e.target.closest("#ph-start")){phoneToJudge();return;}
+  const nkp=e.target.closest("[data-nkpick]"); if(nkp){const n=NONKIN[+nkp.dataset.nkpick]; S.proxy=n.k; S.nkOpen=true; S.form.pRel=n.t.replace(/\s*\(.*\)$/,"").split(" · ")[0]; renderJudge(); toast(n.t+" → "+PROXY[n.k].label+(n.k==="other"?" · 두 조건을 확인하세요":"")); return;}
   const prp=e.target.closest("[data-phrel]"); if(prp){$("#ph-proxy").value=prp.dataset.phrel;$("#ph-relres").innerHTML="";$("#ph-rel").value=prp.dataset.word;renderPhone();return;}
   if(e.target.closest("#st-copy")){const b=$("#led-stats");copyText(b._text||"");return;}
   if(e.target.closest("#led-backup")){backupLedger();return;}
@@ -2032,7 +2088,8 @@ function nlParse(text){
   let px=hits.find(h=>/^(님)?(이|가|께서|분이|분께서|은|는|이고|인데|분)/.test(after(h))&&!/^(님)?(의|약|을|를|처방|대신)/.test(after(h)));
   let pt=hits.find(h=>h!==px&&/^(님)?(의|약|을|를|처방|대신|께|이못|가못)/.test(after(h)));
   if(!px&&hits.length===1&&!pt) px=hits[0];
-  if(px){set.proxy=px.k;set._rel=px.w;found.push("대리수령자: "+px.w+" → "+PROXY[px.k].label);if(px.n)note.push(px.w+": "+px.n);}
+  if(px){set.proxy=px.k;set._rel=relDisp(px.w);found.push("대리수령자: "+relDisp(px.w)+" → "+PROXY[px.k].label);if(px.n)note.push(relDisp(px.w)+": "+px.n);}
+  else if(pt&&pt.k==="other"&&NK_DISP[pt.w]){set.proxy="other";found.push("환자가 ‘"+relDisp(pt.w)+"’이므로 대리수령자: "+PROXY.other.label);note.push(relDisp(pt.w)+": "+pt.n);assumed.push("대리수령자 관계를 환자 호칭에서 거꾸로 추정함 · 확인 필요");}
   else if(pt&&INV[pt.k]){set.proxy=INV[pt.k];found.push("환자가 ‘"+pt.w+"’이므로 대리수령자: "+PROXY[set.proxy].label);assumed.push("대리수령자 관계를 환자 호칭에서 거꾸로 추정함 · 확인 필요");}
   if(set.proxy==="other"){if(has(/(동행|같이와|같이오|함께와|함께오|모시고다니|늘같이)/)){set.otherWith=true;found.push("평소 진료 동행");}if(has(/(상태(를)?잘알|건강상태(를)?(잘)?알|잘알아|사정을잘)/)){set.otherKnow=true;found.push("건강상태를 잘 앎");}}
   // 나이
@@ -2271,8 +2328,7 @@ function renderPhone(){
 }
 function renderPhoneRel(q){
   const box=$("#ph-relres"); q=(q||"").trim().replace(/\s+/g,""); if(!q){box.innerHTML="";return;}
-  const hits=[];REL.forEach(([w,k,n])=>w.split(" ").forEach(x=>{if(x.includes(q)||(q.length>=2&&q.includes(x)))hits.push({w:x,k,n});}));
-  const seen=new Set();box.innerHTML=hits.filter(h=>{const s=h.w+h.k;if(seen.has(s))return false;seen.add(s);return true;}).slice(0,5).map(h=>`<button type="button" data-phrel="${h.k}" data-word="${esc(h.w)}"><span><span class="rw">${esc(h.w)}</span> <span class="rk">→ ${esc(PROXY[h.k].label)}</span></span><span class="rgo">선택</span>${h.n?`<span class="rn">${esc(h.n)}</span>`:""}</button>`).join("")||`<p class="note" style="margin:0">찾는 관계가 없습니다. 아래 목록에서 고르세요.</p>`;
+  box.innerHTML=relHits(q).map(h=>({w:h.w,k:h.key,n:h.note})).slice(0,5).map(h=>`<button type="button" data-phrel="${h.k}" data-word="${esc(relDisp(h.w))}"><span><span class="rw">${esc(relDisp(h.w))}</span> <span class="rk">→ ${esc(PROXY[h.k].label)}</span></span><span class="rgo">선택</span>${h.n?`<span class="rn">${esc(h.n)}</span>`:""}</button>`).join("")||`<p class="note" style="margin:0">찾는 관계가 없습니다. 아래 목록에서 고르세요.</p>`;
 }
 function phoneToJudge(){
   const px=$("#ph-proxy").value, sit=$("#ph-sit").value; if(!px||!sit) return;
