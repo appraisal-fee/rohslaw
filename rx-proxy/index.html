@@ -417,6 +417,17 @@ mark.hl{background:var(--warn-soft);color:inherit;padding:0 1px;border-radius:2p
 .nl-chip{font-size:13px;border-radius:6px;padding:3px 9px;background:var(--ok-soft);color:var(--ok);font-weight:600}
 .nl-chip.as{background:var(--surface-2);color:var(--ink-2)}
 .nl-chip.miss{background:var(--bad-soft);color:var(--bad)}
+button.nl-chip.go{border:1px solid transparent;cursor:pointer;font:inherit;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;text-align:left;line-height:1.45}
+button.nl-chip.go:hover,button.nl-chip.go:focus-visible{border-color:currentColor;outline:none}
+.nl-chip .nl-st{font-size:11.5px;font-weight:700;opacity:.75;white-space:nowrap}
+.nl-tip{margin:0;font-size:12.5px;color:var(--ink-2)}
+.nl-mini{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin:0 0 14px}
+.nl-mini>summary{cursor:pointer;padding:8px 12px;font-weight:700;font-size:14px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
+.nl-mini>summary .rk{font-weight:400;font-size:12.5px;color:var(--ink-2)}
+.nl-mini>summary .btn{margin-left:auto}
+.nl-mini .nl-res{margin:0;border-top:1px solid var(--line);padding:10px 12px 12px}
+.nl-spot{animation:nlspot 1.3s ease-in-out 2;outline:2px solid var(--accent);outline-offset:3px;border-radius:var(--r)}
+@keyframes nlspot{0%,100%{background-color:transparent}50%{background-color:var(--ok-soft)}}
 .rail button.rail-need{animation:needblink .45s ease-in-out 0s 8 alternate;outline:2px solid var(--bad);outline-offset:2px}
 .rail button.rail-need .n{border-color:var(--bad);color:var(--bad)}
 @media (prefers-reduced-motion:reduce){.rail button.rail-need{animation:none}}
@@ -667,9 +678,10 @@ mark.hl{background:var(--warn-soft);color:inherit;padding:0 1px;border-radius:2p
 /* ---------------- 버전 ---------------- */
 const CFG_DEFAULT={vKin:3,vEmp:1,vJail:1,vAdmit:1,noticeUrl:"https://appraisal-fee.github.io/rohslaw/rx-proxy-notice.json",configUrl:"https://appraisal-fee.github.io/rohslaw/rx-proxy-config.json"};
 let CFG=Object.assign({},CFG_DEFAULT);
-const APP_VERSION={ver:"v1.6.0",date:"2026. 11. 27.",name:"처방전대리수령 검토앱",dev:"노상엽"};
+const APP_VERSION={ver:"v1.6.1",date:"2026. 11. 27.",name:"처방전대리수령 검토앱",dev:"노상엽"};
 const UPD_DEFAULT="https://appraisal-fee.github.io/rohslaw/rx-proxy-version.json";
 const CHANGELOG=[
+ {v:"v1.6.1",d:"2026. 11. 27.",items:["글·말로 자동 판단한 결과의 각 항목을 누르면 해당 단계의 질문으로 바로 이동 (답한 곳은 초록 테두리, 빠진 곳은 깜빡임)","2~4단계 위쪽에도 ‘글로 판단한 결과’를 띄워 단계를 오가며 바로 이동"]},
  {v:"v1.6.0",d:"2026. 11. 27.",items:["법률상 가족관계가 없는 관계 15가지 반영: 사실혼 배우자, 수양아들·딸, 수양부모, 계부·계모, 의붓자녀·형제, 이혼한 배우자, 가정위탁 보호자, 후견인, 대부·대모 등","법적 양자녀·양부모(입양신고), 이복·이부 형제자매, 사별한 배우자의 부모는 친족 여부와 확인 서류 안내","관계로 찾기·자연어 판단·전화 문의에서 ‘수양아들’을 ‘아들’로 잘못 알아듣지 않도록 긴 말을 먼저 찾음","3단계에 ‘법률상 가족관계가 없거나 헷갈리는 경우’ 표 추가 · 누르면 바로 선택"]},
  {v:"v1.5.1",d:"2026. 11. 27.",items:["말로 입력: 휴대폰(안드로이드)에서 같은 말이 여러 번 겹쳐 적히던 문제 해결 (예: \"사실은 사실은 … 사실혼 배우자\" → \"사실혼 배우자\")","말로 입력: 고쳐 들은 말·반복된 말은 마지막 것만 남기고 정리"]},
  {v:"v1.5.0",d:"2026. 11. 27.",items:["웹앱으로 배포: 휴대폰·PC에 설치해 앱처럼 사용, 인터넷이 끊겨도 마지막 화면으로 열림","말로 찾기: 위쪽 🎤 단추로 말하면 요건 판단·질문·시설·등록번호 중 알맞은 곳으로 찾아 줌","검색칸마다 🎤 단추, 말로 찾는 동안 휴대폰 키보드가 올라오지 않음","질문·시설 검색을 낱말 단위로 찾도록 개선"]},
@@ -1150,6 +1162,7 @@ function renderPanel(){
   if(S.practice) h+=`<div class="practice-bar"><span>연습 중입니다 · 가상의 환자로 해 보는 중이며 기록 대장에 저장되지 않습니다</span><button class="btn sm" type="button" id="endPractice">연습 끝내기</button></div>`;
   h+=`<div class="todo" id="todo"></div>`;
   const head=(n,t,lead)=>`<div class="step-head"><span class="step-no">${n}단계</span></div><h2>${t}</h2><p class="lead">${lead}</p>${n<=3?`<p class="kbd-hint">키보드: <kbd>1</kbd>~<kbd>9</kbd> 숫자로 고르고 <kbd>Enter</kbd> 다음 단계</p>`:""}`;
+  if(S.nlRes&&S.step>0&&S.step<4) h+=nlResHTML(S.nlRes,true);
   if(S.step===0){
     h+=`<div class="nlbox"><label for="nlText" class="nl-title">글로 판단하기 <span class="basis">상황을 적으면 요건을 자동으로 채웁니다</span></label>
       <textarea id="nlText" placeholder="예) 며느리가 왔어요. 시어머니가 양쪽 다리 절단(심한 장애)으로 못 오시고, 같은 혈압약을 계속 드세요. 재진입니다.">${esc(S.nlText||"")}</textarea>
@@ -1579,6 +1592,7 @@ function renderStatus(){
    <div class="contact">최종 판단은 진료의가 합니다. 기준문의 원무팀 법무Unit 노상엽 (원내 2349)</div>`;
 }
 
+document.addEventListener("toggle",e=>{if(e.target.classList&&e.target.classList.contains("nl-mini"))S.nlMiniOpen=e.target.open;},true);
 function renderJudge(){applyAge();autosave();$(".judge").classList.toggle("wide",S.step===4);renderRail();renderPanel();renderStatus();}
 function refresh(){ // 입력 중에는 패널을 다시 그리지 않고 현황만
   autosave();
@@ -1622,6 +1636,7 @@ document.addEventListener("click",e=>{
     const s={};["visit","reason","mob","phys","social","sameRx","record","proxy","minor","minor14","otherKnow","otherWith"].forEach(k=>{if(S[k]!==null&&S[k]!==undefined&&S[k]!==false&&S[k]!=="")s[k]=S[k];});
     if(!Object.keys(s).length){toast("요건 판단 화면에서 답을 먼저 고른 뒤 추가하세요");return;}
     const c=cfgGet()||{cfg:Object.assign({},CFG),faq:FAQ.slice(),quiz:QUIZ.slice()};c.presets=(c.presets||[]).concat([{t:ti,s,rel:S.form.pRel||undefined}]);c.updated=new Date().toISOString();c.src="이 PC";adminSave(c,"사례를 추가했습니다");return;}
+  const nlg=e.target.closest("[data-nlgo]"); if(nlg){e.preventDefault();nlGo(nlg.dataset.nlgo);return;}
   const go=e.target.closest("[data-go]"); if(go){S.step=+go.dataset.go;renderJudge();$("#panel").scrollIntoView({block:"nearest"});return;}
   if(e.target.closest("#next")){
     const g=gaps(S.step);
@@ -2106,12 +2121,43 @@ function nlParse(text){
   if(Object.keys(D).length){set.docs=D;found.push("가져온 서류: "+Object.keys(D).length+"종");}
   return {set,found,assumed,note};
 }
-function nlResHTML(r){
-  const g=[0,1,2].flatMap(i=>gaps(i).map(x=>x[1]+" ("+(i+1)+"단계)"));
-  return `<div class="nl-res"><div><div class="nl-k">알아들은 내용</div><div class="nl-chips">${r.found.length?r.found.map(x=>`<span class="nl-chip">${esc(x)}</span>`).join(""):`<span class="nl-chip miss">알아들은 내용이 없습니다. 관계(며느리·간병인 등), 못 오는 이유, 같은 약 복용 여부를 넣어 보세요</span>`}</div></div>
-   ${r.assumed.length?`<div><div class="nl-k">가정한 내용 · 다르면 고치세요</div><div class="nl-chips">${r.assumed.map(x=>`<span class="nl-chip as">${esc(x)}</span>`).join("")}</div></div>`:""}
-   ${r.note.length?`<div><div class="nl-k">주의</div><div class="nl-chips">${r.note.map(x=>`<span class="nl-chip as">${esc(x)}</span>`).join("")}</div></div>`:""}
-   <div><div class="nl-k">더 확인할 것 (깜빡이는 곳)</div><div class="nl-chips">${g.length?g.map(x=>`<span class="nl-chip miss">${esc(x)}</span>`).join(""):`<span class="nl-chip">질문은 모두 채워졌습니다 · 4단계에서 서류를 확인하세요</span>`}</div></div></div>`;
+const NL_STEP={visit:0,ptNoId:0,reason:1,mob:1,phys:1,social:1,sameRx:1,record:1,proxy:2,otherCond:2,minor:2,minor14:2,docs:3};
+function nlKey(t){ // 알아들은 말 → 이동할 질문
+  const R=[[/^(초진|재진)/,"visit"],[/^의식 없음|^개인 사정/,"reason"],[/^사회적 사유/,"social"],[/^신체적/,"phys"],[/^일시적|^거동 곤란/,"mob"],[/처방이 바뀜|같은 약/,"sameRx"],[/의무기록|진단서·소견서/,"record"],
+    [/주민등록증/,"ptNoId"],[/평소 진료 동행|건강상태를 잘/,"otherCond"],[/미성년|성인으로/,"minor"],[/대리수령자|환자가 ‘/,"proxy"],[/가져온 서류/,"docs"]];
+  const m=R.find(([re])=>re.test(t)); return m?m[1]:null;
+}
+function nlChip(text,cls,key){
+  if(!key) return `<span class="nl-chip ${cls||""}">${esc(text)}</span>`;
+  const st=NL_STEP[key]; return `<button type="button" class="nl-chip go ${cls||""}" data-nlgo="${key}" title="${st+1}단계 해당 질문으로 이동">${esc(text)}<span class="nl-st">${st+1}단계 ›</span></button>`;
+}
+function nlResHTML(r,mini){
+  const g=[0,1,2].flatMap(i=>gaps(i).map(x=>[x[1],x[0]]));
+  const found=r.found.length?r.found.map(x=>nlChip(x,"",nlKey(x))).join(""):`<span class="nl-chip miss">알아들은 내용이 없습니다. 관계(며느리·간병인 등), 못 오는 이유, 같은 약 복용 여부를 넣어 보세요</span>`;
+  const gap=g.length?g.map(([t,k])=>nlChip(t,"miss",k)).join(""):nlChip("질문은 모두 채워졌습니다 · 서류 확인으로","", "docs");
+  if(mini) return `<details class="nl-mini" ${S.nlMiniOpen===false?"":"open"}><summary>글로 판단한 결과 <span class="rk">누르면 해당 질문으로 이동</span><button type="button" class="btn sm" data-go="0">글 고치기</button></summary><div class="nl-res">
+    <div><div class="nl-k">알아들은 내용</div><div class="nl-chips">${found}</div></div>
+    <div><div class="nl-k">더 확인할 것</div><div class="nl-chips">${gap}</div></div></div></details>`;
+  return `<div class="nl-res"><p class="nl-tip">항목을 누르면 해당 질문으로 바로 이동합니다</p><div><div class="nl-k">알아들은 내용</div><div class="nl-chips">${found}</div></div>
+   ${r.assumed.length?`<div><div class="nl-k">가정한 내용 · 다르면 고치세요</div><div class="nl-chips">${r.assumed.map(x=>nlChip(x,"as",nlKey(x))).join("")}</div></div>`:""}
+   ${r.note.length?`<div><div class="nl-k">주의</div><div class="nl-chips">${r.note.map(x=>nlChip(x,"as","proxy")).join("")}</div></div>`:""}
+   <div><div class="nl-k">더 확인할 것 (깜빡이는 곳)</div><div class="nl-chips">${gap}</div></div></div>`;
+}
+function nlGo(key){
+  const st=NL_STEP[key]; if(st===undefined) return;
+  S.step=st; renderJudge();
+  setTimeout(()=>{
+    let el=null;
+    if(key==="docs") el=document.querySelector("#panel .step-head")||$("#panel");
+    else if(key==="ptNoId"){const i=$("#ptNoId"); el=i?(i.closest(".sub")||i.closest(".opt")):null;}
+    else el=qEl(key);
+    if(!el){$("#panel").scrollIntoView({behavior:"smooth",block:"start"});return;}
+    const open=gaps(st).some(x=>x[0]===key);
+    if(open){flagGap(key);return;}
+    document.querySelectorAll(".nl-spot").forEach(x=>x.classList.remove("nl-spot"));
+    void el.offsetWidth; el.classList.add("nl-spot"); el.scrollIntoView({behavior:"smooth",block:"center"});
+    setTimeout(()=>el.classList.remove("nl-spot"),2600);
+  },60);
 }
 function nlRun(){
   const ta=$("#nlText"); const text=ta?ta.value.trim():""; if(!text){flagEls([ta]);toast("상황을 한두 문장으로 적어 주세요");return;}
