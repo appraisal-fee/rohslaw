@@ -941,6 +941,14 @@ body.locked .vafab{display:none}
 .xrender{position:fixed;left:-10000px;top:0;width:794px;pointer-events:none}
 .xpdf .page{margin:0!important;box-shadow:none!important;width:794px!important;min-height:1123px!important}
 .xpdf .val,.xpdf .val *{color:#000!important}
+
+.privoff{background:#f3f4f6!important;color:#9ca3af!important;cursor:not-allowed}
+.privnote{margin-top:6px;font-size:13px;color:#b42318;background:#fef3f2;border:1px solid #fecdca;border-radius:6px;padding:6px 10px}
+#mb-voice{margin:0 0 12px}
+#sb-voice{margin:4px 0 10px}
+#modebar .mbtools{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#modebar .mbtools>*{min-height:46px}
+@media (max-width:760px){#modebar .mbtools{grid-template-columns:1fr 1fr}#modebar .mbtools #mb-user{grid-column:auto}}
 </style>
 <meta name="theme-color" content="#1f3a68">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1355,7 +1363,7 @@ body.locked .vafab{display:none}
       <div class="card step" data-step="1">
         <h2>피해 교직원 정보</h2>
         <div class="guide" data-guide></div>
-        <div class="ocrbar"><span><b>경찰 진술서가 있나요?</b> 사진을 올리면 성명·연락처·주소·사건 내용을 찾아 채워드립니다.</span><button type="button" class="linkbtn" data-ocr>진술서 사진으로 채우기</button></div>
+        <div class="ocrbar"><span><b>경찰 진술서가 있나요?</b> 사진을 올리면 성명·연락처·사건 내용을 찾아 채워드립니다.</span><button type="button" class="linkbtn" data-ocr>진술서 사진으로 채우기</button></div>
         <div class="row">
           <div class="f"><label class="l">성명<i class="r">*</i></label><input type="text" data-k="v_name"></div>
           <div class="f"><label class="l">근무부서<i class="r">*</i></label><input type="text" data-k="v_dept" placeholder="예: 응급의료센터"></div>
@@ -1442,7 +1450,7 @@ body.locked .vafab{display:none}
       <div class="card step" data-step="4">
         <h2>피해 경위</h2>
         <div class="guide" data-guide></div>
-        <div class="ocrbar"><span><b>경찰 진술서가 있나요?</b> 사진을 올리면 성명·연락처·주소·사건 내용을 찾아 채워드립니다.</span><button type="button" class="linkbtn" data-ocr>진술서 사진으로 채우기</button></div>
+        <div class="ocrbar"><span><b>경찰 진술서가 있나요?</b> 사진을 올리면 성명·연락처·사건 내용을 찾아 채워드립니다.</span><button type="button" class="linkbtn" data-ocr>진술서 사진으로 채우기</button></div>
         <div class="row">
           <div class="f"><label class="l">발생 날짜<i class="r">*</i><small>숫자 8자리</small></label><div class="dfield"><input type="text" class="date8" inputmode="numeric" data-k="e_date" id="e_date" placeholder="예: 20261125" autocomplete="off"><button type="button" class="linkbtn dtoday" data-today="e_date">오늘</button></div></div>
           <div class="f"><label class="l">발생 시각<small>24시간제, 예: 14:30</small></label><input type="text" inputmode="numeric" data-k="e_time" id="e_time" class="time24" maxlength="5" placeholder="예: 14:30" autocomplete="off"></div>
@@ -2132,7 +2140,7 @@ function collect(){
   var d={};
   scopes().forEach(function(sc){
     if(!sc) return;
-    $$("[data-k]",sc).forEach(function(el){ var v=el.value.trim(); if(v) d[el.dataset.k]=v; });
+    $$("[data-k]",sc).forEach(function(el){ var v=el.value.trim(); if(v&&!/^(v_rrn|v_addr|v_addr2|v_zip)$/.test(el.dataset.k)) d[el.dataset.k]=v; });
     $$("[data-radio]",sc).forEach(function(g){ var c=$('input[name="'+g.dataset.radio+'"]:checked',g); if(c) d[g.dataset.radio]=c.value; });
     var cs={};
     $$("[data-c]",sc).forEach(function(el){ (cs[el.dataset.c]=cs[el.dataset.c]||[]); if(el.checked) cs[el.dataset.c].push(el.value); });
@@ -2257,7 +2265,7 @@ function docA(d, forWord, onlyFirst){
 
   /* 피해자 정보 */
   h+='<tr data-sec="victim"><td class="h" rowspan="7">피 해 자<br>정&nbsp;&nbsp;&nbsp;&nbsp;보<br>****<br><br>등록번호<br><span class="val">['+(d.v_regno?V(d,"v_regno"):"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")+']</span></td>';
-  h+='<td class="h">성&nbsp;&nbsp;&nbsp;&nbsp;명</td><td class="c val">'+V(d,"v_name")+'</td><td class="h">주민번호</td><td class="c val" colspan="2">'+(d.v_rrn?V(d,"v_rrn"):"-")+'</td><td class="h">연락처</td><td class="c val" colspan="2">'+V(d,"v_tel")+'</td></tr>';
+  h+='<td class="h">성&nbsp;&nbsp;&nbsp;&nbsp;명</td><td class="c val">'+V(d,"v_name")+'</td><td class="h">주민번호</td><td class="c val" colspan="2">'+""+'</td><td class="h">연락처</td><td class="c val" colspan="2">'+V(d,"v_tel")+'</td></tr>';
   h+='<tr data-sec="victim"><td class="h">근무부서</td><td class="c val">'+V(d,"v_dept")+(d.v_emp?'<br>('+V(d,"v_emp")+')':'')+'</td><td class="h">주&nbsp;&nbsp;&nbsp;&nbsp;소</td><td colspan="5" class="val">'+(d.v_zip?'('+V(d,"v_zip")+') ':'')+V(d,"v_addr")+(d.v_addr2?', '+V(d,"v_addr2"):'')+'</td></tr>';
   h+='<tr data-sec="medical"><td class="h">진료여부</td><td>과목 : <span class="val">'+V(d,"m_subject")+'</span></td><td>'+cb(d.d_care==="시행함")+' 시행함</td><td colspan="2">'+cb(d.d_care==="시행하지 않음")+' 시행하지 않음</td><td class="h">진료날짜</td><td colspan="2" class="c val">'+(d.m_date?dot(d.m_date):'<span style="color:#000">&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;.</span>')+'</td></tr>';
   h+='<tr data-sec="medical"><td class="h">진 단 명<br><span class="small">(R/O구분)</span></td><td>1.<br>2.</td><td class="h">상해주수</td><td colspan="2">(1번 상병)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;주<br>(2번 상병)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;주</td><td class="h">진 단 서<br>작성여부</td><td>□ 발급</td><td>□ 미발급</td></tr>';
@@ -2538,8 +2546,8 @@ function renderCheck(){
   var emptyWarn=[];
   if(S.mode==="A"){
     if(!d.p_name && !d.p_regno) emptyWarn.push("가해자 성명·등록번호가 모두 비어 있습니다. 모르면 그대로 두셔도 됩니다.");
-    if(!d.v_addr) emptyWarn.push("주소가 비어 있습니다. 고소장 작성 시 필요하니 출력 후 적어주세요.");
-    if(!d.v_rrn && d.cs_rrn==="동의") emptyWarn.push("주민등록번호 처리에 동의했지만 번호가 비어 있습니다. 법무 Unit에게 직접 전달해 주세요.");
+    emptyWarn.push("주소·주민등록번호는 개인정보 보호를 위해 문서 내려받기 이후 작성바랍니다.");
+    
     if(d.cs_gen==="부동의"||d.cs_med==="부동의") items.push('<div class="flag amber"><b>동의하지 않은 항목이 있습니다</b>제출은 가능하지만 법적 조치에 제약이 생길 수 있습니다. 법무 Unit이 따로 안내드립니다.</div>');
     var a=assess(d);
     if(a.length) items.push('<div class="flag alert"><b>병원이 직접 고발을 검토할 수 있는 사건입니다</b>'+a.map(function(x){return "· "+esc(x);}).join("<br>")+'</div>');
@@ -2895,7 +2903,7 @@ function parseStatement(raw){
 
   /* 주민등록번호 */
   m=all.match(/(\d{6})\s*-\s*([1-4]\d{6})/);
-  if(m) add("v_rrn","주민등록번호",m[1]+"-"+m[2],{off:true,warn:"민감정보 — 필요할 때만 체크"});
+  /* 주민등록번호: 개인정보 보호로 받지 않음 */
 
   /* 연락처 */
   m=all.match(/(01[016789])\s*[-.)]?\s*(\d{3,4})\s*[-.]?\s*(\d{4})/);
@@ -2906,7 +2914,7 @@ function parseStatement(raw){
     var am=lines[i].match(/주\s*소\s*[:.]?\s*(.+)/);
     if(am){
       var a=tidyAddr(am[1].split(/(?:\(?\s*(?:전\s*화|연\s*락\s*처|휴\s*대|직\s*업|직\s*장)\s*[:.]?)/)[0]);
-      if(a.length>=6){ add("v_addr","주소",a,{warn:"주소 검색으로 도로명 주소를 확인하면 더 정확합니다"}); break; }
+      break; /* 주소: 개인정보 보호로 받지 않음 */
     }
   }
 
@@ -3016,7 +3024,7 @@ $("#ocr-file").addEventListener("change",function(e){ runOcr(e.target.files[0]);
 
 window.addEventListener("beforeunload",function(e){ if(S.dirty && !S.printed){ e.preventDefault(); e.returnValue=""; } });
 
-window.__LF={start:start,pane:pane,goStep:goStep,MODES:MODES,missing:missing,collect:collect,docHTML:function(){return docHTML(false,false);},sizeSig:function(){sizeSig();},syncShow:syncShow,renderPreview:renderPreview,S:S,toast:function(m){toast(m);},hospital:CONFIG.hospital};
+window.__LF={start:start,pane:pane,goStep:goStep,MODES:MODES,missing:missing,collect:collect,docHTML:function(){return docHTML(false,false);},docFirst:function(){var c=document.getElementById("printall");return docHTML(false,!(c&&c.checked));},sizeSig:function(){sizeSig();},syncShow:syncShow,renderPreview:renderPreview,S:S,toast:function(m){toast(m);},hospital:CONFIG.hospital};
 var tt; function toast(m){ var e=$("#toast"); e.textContent=m; e.classList.add("on"); clearTimeout(tt); tt=setTimeout(function(){e.classList.remove("on");},2600); }
 })();
 </script>
@@ -4060,7 +4068,7 @@ function docFile(name,html){
 /* ============================================================
    음성 받아쓰기 (말로 쓰기)
    ============================================================ */
-var APPVER="2026.11.27-6";
+var APPVER="2026.11.27-7";
 function isTouch(){ try{ return window.matchMedia("(pointer:coarse)").matches||("ontouchstart" in window&&navigator.maxTouchPoints>0); }catch(e){ return false; } }
 /* 음성 입력 중 휴대폰 키보드 막기: 칸을 잠시 읽기 전용 + inputmode none */
 function kbLock(el,tag){ tag=tag||"sr"; kbHide(); if(!isTouch()||!el||el.dataset.kbl) return; el.dataset.kbl=tag; el.dataset.kbro=el.readOnly?"1":""; el.dataset.kbim=el.getAttribute("inputmode")||""; el.setAttribute("inputmode","none"); el.readOnly=true; }
@@ -5637,6 +5645,83 @@ function xBtns(where,getHtml,getName,cls){ var c=$(where); if(!c) return; var b1
     b1.addEventListener("click",function(){ grab(function(h){ savePdf(h,"사건서류_"+ymd()); }); }); b2.addEventListener("click",function(){ grab(function(h){ saveHwpx(h,"사건서류_"+ymd()); }); }); }
 })();
 /*EXEND*/
+/*LFVJS*//* ============================================================
+   상병경위보고서·법률지원 서식 — 진술서·사용자 정보로 뼈대 채우기 + 말로 채우기
+   ============================================================ */
+var PRIVK=["v_rrn","v_addr","v_addr2","v_zip"], PRIVMSG="개인정보 보호를 위해 문서 내려받기 이후 작성바랍니다";
+/* 진술인 이름에 맞는 진술서 (strict: 이름이 다르면 쓰지 않음) */
+function stFor(name,strict){ var L=(cur.stmts||[]).slice(); if(ST&&(ST.body||"").trim()&&!(ST.editId&&L.some(function(x){return x.id===ST.editId;}))) L.push({name:(ST.info&&ST.info.name)||"",role:ST.role,body:ST.body,info:ST.info||{}});
+  L=L.filter(function(x){return stPlain(x.body);}); if(!L.length) return null;
+  var nm=function(x){return (x.name||(x.info&&x.info.name)||"").replace(/\s/g,"");}, n=(name||"").replace(/\s/g,"");
+  var m=L.filter(function(x){return n&&nm(x)===n;}); if(m.length) return m[m.length-1]; if(strict&&n) return null;
+  var v=L.filter(function(x){return x.role==="피해자";}); return (v.length?v:L)[(v.length?v:L).length-1]; }
+
+/* ---------- 상병경위보고서: 경위는 진술서가 있으면 진술서로 ---------- */
+var _sbInit2=sbInit; sbInit=function(){ if(cur.sb&&cur.sb.src&&cur.sb.src.story==="진술서"){ delete cur.sb.story; delete cur.sb.src.story; }
+  _sbInit2(); var sb=cur.sb; if(!sb.src) sb.src={};
+  if(!sb.src.story||sb.src.story==="사건 기록"){ var s=stFor(sb.name,true); if(s&&(!sb.story||sb.src.story==="사건 기록")){ sb.story=stPlain(s.body); sb.src.story="진술서"; } } };
+(function(){ var h=$("#m-sb .mnote"); if(!h) return; h.textContent="진술서·사건 기록·사용자 설정으로 자동 작성합니다. 칸을 고치면 오른쪽 서식에 바로 반영됩니다.";
+  var b=document.createElement("button"); b.type="button"; b.className="btn sitvoice"; b.id="sb-voice"; b.innerHTML='<i></i>말로 채우기 <small>빈 칸을 차례로 묻고 받아 적습니다</small>'; h.parentNode.insertBefore(b,h.nextSibling);
+  b.addEventListener("click",function(){ if(VF.on) vfStop(); var e=VF.empty; VF.empty=true; vfStart(); VF.empty=e; }); })();
+
+/* ---------- 법률지원 서식: 주소·주민등록번호 막기 ---------- */
+function privLock(){ PRIVK.forEach(function(k){ $$('[data-k="'+k+'"]').forEach(function(el){ el.value=""; el.disabled=true; el.placeholder=k==="v_zip"?"":"문서 내려받기 이후 작성"; el.classList.add("privoff"); }); });
+  var ao=$("#addr-open"); if(ao){ ao.disabled=true; ao.classList.add("hidden"); }
+  [$('[data-k="v_rrn"]'),$("#v_addr")].forEach(function(el){ var f=el&&el.closest(".f"); if(!f) return; var sm=f.querySelector("label.l small"); if(sm) sm.remove();
+    if(!f.querySelector(".privnote")){ var n=document.createElement("div"); n.className="privnote"; n.textContent=PRIVMSG+"."; f.appendChild(n); } }); }
+privLock();
+document.addEventListener("input",function(e){ var k=e.target.dataset&&e.target.dataset.k; if(k&&PRIVK.indexOf(k)>=0){ e.target.value=""; toast(PRIVMSG); } },true);
+
+/* ---------- 법률지원 서식: 진술서·사용자 정보로 채우기 ---------- */
+function lfPut(k,v,src){ var el=$('[data-k="'+k+'"]',LF.pane()); if(!el||!v||PRIVK.indexOf(k)>=0||(el.value||"").trim()) return 0; el.value=v; el.dispatchEvent(new Event("input",{bubbles:true})); chip(el,src); return 1; }
+function lfBase(){ var mode=LF.S.mode; if(!mode) return 0; var n=0; fillReset(mode);
+  var nmEl=$('[data-k="v_name"]',LF.pane()), nm=nmEl?nmEl.value.trim():"";
+  if(!nm){ var fv=firstVictim().name; if(fv){ n+=lfPut("v_name",fv,"사건 기록 피해 직원"); nm=fv; } }
+  var s=stFor(nm,!!nm);
+  if(!nm&&s&&s.role==="피해자"){ var sn=s.name||(s.info&&s.info.name); if(sn){ n+=lfPut("v_name",sn,"진술서"); nm=sn; } }
+  var u=nm?stUser(nm):uMe(); if(!nm&&u){ n+=lfPut("v_name",u.name,"사용자 설정"); nm=u.name; }
+  if(u){ n+=lfPut("v_dept",u.dept,"사용자 설정")+lfPut("v_emp",u.emp,"사용자 설정")+lfPut("v_tel",u.tel,"사용자 설정")+lfPut("v_regno",u.regno,"사용자 설정"); }
+  if(s){ var sk={A:"e_story",B:"b_body",C:"c_fact"}[mode]; if(lfPut(sk,stPlain(s.body),"진술서")){ n++; if(mode==="A") LF.S.touchedStory=true; }
+    if(s.info&&s.info.suspect) n+=lfPut("p_name",s.info.suspect,"진술서"); }
+  if(!recEmpty()) fillForm(mode,true);
+  LF.S.dirty=true; LF.syncShow(); LF.renderPreview(true); if(typeof markEmpty==="function") markEmpty(); return n; }
+(function(){ var t=$("#modebar .mbtools"); if(!t) return;
+  var b=document.createElement("button"); b.type="button"; b.className="linkbtn"; b.id="mb-base"; b.textContent="진술서·사용자 정보로 채우기"; t.insertBefore(b,$("#mb-fill").nextSibling);
+  b.addEventListener("click",function(){ var s=stFor("",false), n=lfBase(); toast(n?"진술서·사용자 정보로 "+n+"칸을 채웠습니다":(s||USERS.length?"채울 빈 칸이 없습니다":"저장한 진술서나 사용자 설정이 없습니다")); });
+  var v=document.createElement("button"); v.type="button"; v.className="btn sitvoice"; v.id="mb-voice"; v.innerHTML='<i></i>말로 채우기 <small>진술서·사용자 정보로 먼저 채우고, 남은 칸을 묻습니다</small>';
+  $("#modebar").parentNode.insertBefore(v,$("#modebar").nextSibling); v.addEventListener("click",lfVoice); })();
+function lfVoiceList(){ var mode=LF.S.mode, out=[];
+  (ASKQ[mode]||[]).forEach(function(q){ var k=q[0], t=q[1], x=null; if(PRIVK.indexOf(k)>=0) return;
+    if(t==="radio"){ var r=$('#s-work input[name="'+k+'"]'); if(r) x={el:r,radio:k}; }
+    else if(t==="check"){ var cs=$$('input[data-c="'+k+'"]',LF.pane()); if(cs.length){ var box=cs[0].closest(".opts")||cs[0].parentNode; box.value=cs.filter(function(c){return c.checked;}).map(function(c){return (c.nextElementSibling||{}).textContent||c.value;}).join(", "); x={el:box,check:k}; } }
+    else { var el=fieldEl(k); if(el&&!el.disabled) x={el:el}; }
+    if(!x) return; x.q=q; x.qlab=q[2]; x.qsub=q[3]||""; out.push(x); });
+  var empty=out.filter(function(x){ return !aVal(x.q[0]); }); return empty.length?empty:out; }
+function lfVoice(){ if(!LF.S.mode){ toast("먼저 작성할 서식을 고르세요"); return; } if(VF.on) vfStop();
+  if(VIEW!=="quick"){ var q=$('#modebar [data-v="quick"]'); if(q) q.click(); }
+  var n=lfBase(); var list=lfVoiceList(); if(!list.length){ toast("물어볼 칸이 없습니다"); return; }
+  if(n) toast("진술서·사용자 정보로 "+n+"칸을 먼저 채웠습니다"); list=list.filter(function(x){return !x.q||aCond(x.q);}); if(!list.length){ toast("물어볼 칸이 없습니다"); return; }
+  setTimeout(function(){ vfStartList(list,function(){ LF.S.dirty=true; LF.syncShow(); LF.renderPreview(true); if(typeof markEmpty==="function") markEmpty(); vSay("질문을 모두 마쳤습니다. 서식을 확인하세요.",null,true); toast("질문을 모두 마쳤습니다 — 오른쪽 서식을 확인하세요"); }); },n?600:0); }
+/* 고르기(여러 개) 칸을 말로 */
+var CHKSYN={"req:형사":["처벌","고소","고발","형사"],"req:민사":["손해배상","배상","치료비","위자료","민사","돈"],"req:기타":["상담","출입","기타"],"dmg:인적":["다쳤","다침","부상","상처","몸","인적","맞"],"dmg:물적":["부서","파손","깨","망가","물건","물적"]};
+var _vfApply3=vfApply; vfApply=function(x,said){ if(!x.check) return _vfApply3(x,said);
+  var sz=said.replace(/\s/g,""), cs0=$$('input[data-c="'+x.check+'"]',LF.pane()), hit0=cs0.filter(function(c){ var lab=((c.nextElementSibling||{}).textContent||"").split(/[—-]/)[0].replace(/\s/g,""); return [c.value,lab].concat(CHKSYN[x.check+":"+c.value]||[]).some(function(w){ return w&&sz.indexOf(w.replace(/\s/g,""))>=0; }); });
+  if(hit0.length){ hit0.forEach(function(c){ if(!c.checked){ c.checked=true; c.dispatchEvent(new Event("change",{bubbles:true})); } }); x.el.value=cs0.filter(function(c){return c.checked;}).map(function(c){return c.value;}).join(", "); return true; }
+  var cs=$$('input[data-c="'+x.check+'"]',LF.pane()), parts=said.split(/\s*(?:,|그리고|하고|이랑|랑|및|와\s|과\s)\s*/).filter(Boolean), hit=[];
+  parts.forEach(function(p){ var m=vfMatch(cs.map(function(c){return {t:(c.nextElementSibling?c.nextElementSibling.textContent:c.value),c:c};}),p); if(m&&hit.indexOf(m.c)<0) hit.push(m.c); });
+  if(!hit.length) return false; hit.forEach(function(c){ if(!c.checked){ c.checked=true; c.dispatchEvent(new Event("change",{bubbles:true})); } });
+  x.el.value=cs.filter(function(c){return c.checked;}).map(function(c){return (c.nextElementSibling||{}).textContent||c.value;}).join(", "); return true; };
+var _vfFilled=vfFilled; vfFilled=function(x){ if(x.check) return $$('input[data-c="'+x.check+'"]:checked',LF.pane()).length>0; return _vfFilled(x); };
+/* 조건이 맞지 않는 질문은 건너뜀, 접힌 칸은 펼침 */
+var _vfNext2=vfNext; vfNext=function(step){ _vfNext2(step); var g=0; while(VF.on&&g++<60){ var x=VF.list[VF.i]; if(!(x&&x.q&&!aCond(x.q))) break; var i0=VF.i; _vfNext2(step<0?-1:1); if(VF.i===i0) break; } };
+var _vfMark2=vfMark; vfMark=function(){ var x=VF.list[VF.i]; if(x&&x.el){ var st=x.el.closest&&x.el.closest(".step"); if(st&&!st.classList.contains("unfold")&&!x.el.offsetParent){ st.classList.add("unfold"); if(typeof xtogLabel==="function") xtogLabel(st); } } _vfMark2(); };
+/* 서식 파일 받기: 주소·주민번호는 비운 채로 */
+(function(){ var a=$("#a-doc"); if(!a) return; a.classList.add("hidden");
+  var mk=function(id,b,s){ var x=document.createElement("button"); x.className="act"; x.type="button"; x.id=id; x.innerHTML='<b>'+b+'</b><span>'+s+'</span>'; a.parentNode.insertBefore(x,a); return x; };
+  var nm=function(){ var d=LF.collect(); return LF.MODES[LF.S.mode].file+"_"+(d.v_name||"교직원")+"_"+ymd(); };
+  mk("a-pdfdl","PDF 파일 받기","서식을 PDF 파일로 바로 내려받습니다. 주소·주민등록번호는 내려받은 뒤 적어 주세요.").addEventListener("click",function(){ savePdf(LF.docFirst(),nm()); });
+  mk("a-hwpx","한글 파일 받기","한/글에서 고칠 수 있는 .hwpx 파일로 내려받습니다. 주소·주민등록번호는 내려받은 뒤 적어 주세요.").addEventListener("click",function(){ saveHwpx(LF.docFirst(),nm()); }); })();
+/*LFVEND*/
 /* 시작 */
 renderField(); setInterval(renderContacts,60000); shInit();
 tab(ls.get("lfv_tab","field"));
