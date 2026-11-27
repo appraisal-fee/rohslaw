@@ -963,6 +963,24 @@ body.locked .vafab{display:none}
 .gapflash{outline:3px solid #f59e0b!important;outline-offset:2px;transition:outline-color .3s}
 .gapbox .gapnote.u{color:#475467}
 #sb-gap .gapnote{color:#475467}
+
+.sbgap .gaphd .gapopen{display:none}
+.sbgap.mini .gaphd .gapx{display:none}.sbgap.mini .gaphd .gapopen{display:inline-flex}
+.sbgap.mini>*:not(.gaphd){display:none}
+.gapt{margin:10px 0 2px;font-size:14px;color:#344054}
+.gapt em{font-style:normal;font-size:11.5px;color:#fff;background:#b54708;border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+.sbgap .gapi>span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.sbgap .gapi small{font-size:11.5px;color:#8a7350;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gapi.chk{background:#fffdf5}
+.gapi i.c{background:#b54708}
+.gapsub.dl{margin:10px 0 0;color:#475467}
+.sbgap .gaplist{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+#m-sb .sbpv .acts3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#m-sb .sbpv .acts3 .btn{padding-left:6px;padding-right:6px;white-space:nowrap}
+.sbgap p.gapsub.dl{display:block!important;border:0!important;background:none!important;padding:0!important;min-height:0!important;box-shadow:none!important}
+.gaphd .linkbtn{white-space:nowrap;flex:none}
+@media (max-width:600px){.sbgap .gaplist{grid-template-columns:1fr 1fr}.sbgap .gapi{align-items:flex-start;font-size:13px}.sbgap .gapi small{white-space:normal}.modal .box{padding-bottom:96px}}
+@media (max-width:1000px){.sbwrap{grid-template-columns:minmax(0,1fr)}.sbwrap>*{min-width:0}}
 </style>
 <meta name="theme-color" content="#1f3a68">
 <link rel="manifest" href="manifest.webmanifest">
@@ -4082,7 +4100,7 @@ function docFile(name,html){
 /* ============================================================
    음성 받아쓰기 (말로 쓰기)
    ============================================================ */
-var APPVER="2026.11.27-8";
+var APPVER="2026.11.27-9";
 function isTouch(){ try{ return window.matchMedia("(pointer:coarse)").matches||("ontouchstart" in window&&navigator.maxTouchPoints>0); }catch(e){ return false; } }
 /* 음성 입력 중 휴대폰 키보드 막기: 칸을 잠시 읽기 전용 + inputmode none */
 function kbLock(el,tag){ tag=tag||"sr"; kbHide(); if(!isTouch()||!el||el.dataset.kbl) return; el.dataset.kbl=tag; el.dataset.kbro=el.readOnly?"1":""; el.dataset.kbim=el.getAttribute("inputmode")||""; el.setAttribute("inputmode","none"); el.readOnly=true; }
@@ -5773,6 +5791,85 @@ function lfGapRefresh(){ var b=$("#lf-gap"); if(b){ gapBox("lf-gap",$("#mb-voice
 /* 서식·창을 바꾸면 안내를 닫음 */
 document.addEventListener("click",function(e){ if(e.target.closest(".choice,#home,[data-tab]")){ var b=$("#lf-gap"); if(b) b.classList.add("hidden"); } if(e.target.closest("#r-sb")){ var c=$("#sb-gap"); if(c) c.classList.add("hidden"); } },true);
 /*LFVEND*/
+/*SBXJS*//* ============================================================
+   상병경위보고서 — 자동 작성 뒤 직접 적을 칸 안내 + 엑셀 받기
+   ============================================================ */
+var SBMED=[["dx","상병명","진단서의 병명"],["clinic","진료과",""],["doctor","진료의",""],["cdate","초진일자","처음 진료받은 날"],["rest","안정가료 처방일수","진단서의 치료 기간"],["absent","실제 결근일수","공상처리일수"],["sb_after","향후 치료일정",""],["sb_pen","사학연금 공상 요청",""]];
+var SBGUESS={"상병일":"상병일로 넣음","사건 기록 피해 내용":"사건 기록에서 가져옴"};
+function sbEl(k){ return k.indexOf("sb_")===0?$('#sb-form input[name="'+k+'"]'):$('#sb-form [data-sb="'+k+'"]'); }
+function sbHas(k){ return k.indexOf("sb_")===0?!!$('#sb-form input[name="'+k+'"]:checked'):!!((sbEl(k)||{}).value||"").trim(); }
+function sbGuide(){ var src=(cur.sb&&cur.sb.src)||{}, med=[], etc=[], us=[];
+  SBMED.forEach(function(m){ var el=sbEl(m[0]); if(!el) return; var has=sbHas(m[0]), g=SBGUESS[src[m[0]]];
+    if(!has) med.push({el:el,lab:m[1],sub:m[2],st:"need"}); else if(g) med.push({el:el,lab:m[1],sub:g,st:"chk"}); });
+  if(($('#sb-form input[name="sb_after"]:checked')||{}).value==="추가 치료 필요"&&!sbHas("afterTxt")) med.push({el:sbEl("afterTxt"),lab:"추가 치료 내용",sub:"예: 정형외과 외래 2주 추적",st:"need"});
+  var medK=SBMED.map(function(m){return m[0];}).concat(["afterTxt"]);
+  $$("#sb-form [data-sb]").forEach(function(el){ var k=el.dataset.sb; if(medK.indexOf(k)>=0||el.closest(".hidden")||(el.value||"").trim()) return;
+    var lab=k==="time"?"상병 시각":k==="yy"||k==="mm"?"근무년수":gapLab(el,""); if(!lab||etc.some(function(x){return x.lab===lab;})) return;
+    etc.push({el:el,lab:lab}); if(["birth","regno","boss","job","dept","name","yy","mm"].indexOf(k)>=0&&us.indexOf(lab)<0) us.push(k==="yy"||k==="mm"?"입사일":lab); });
+  return {med:med,etc:etc,us:us}; }
+function sbGapShow(){ var g=sbGuide(), b=$("#sb-gap"), w=$("#sb-voice");
+  if(!b){ b=document.createElement("div"); b.id="sb-gap"; b.className="gapbox sbgap"; w.parentNode.insertBefore(b,w.nextSibling);
+    b.addEventListener("click",function(e){ var x=e.target.closest("[data-gi]"); if(x){ gapJump(b._els[+x.dataset.gi]); return; } if(e.target.closest(".gapx")){ b.classList.add("mini"); return; } if(e.target.closest(".gapopen")){ b.classList.remove("mini"); return; } if(e.target.closest(".gapv")) $("#sb-voice").click(); }); }
+  var els=[], item=function(x){ els.push(x.el); return '<button type="button" class="gapi '+(x.st||"")+'" data-gi="'+(els.length-1)+'"><span>'+esc(x.lab)+(x.sub?'<small>'+esc(x.sub)+'</small>':'')+'</span>'+(x.st==="need"?'<i>적기</i>':x.st==="chk"?'<i class="c">확인</i>':'')+'</button>'; };
+  var nMed=g.med.filter(function(x){return x.st==="need";}).length, n=g.med.length+g.etc.length;
+  var h='<div class="gaphd"><b>'+(n?'자동으로 채운 뒤 남은 칸 — '+(nMed?'진료 내용을 적어 주세요':'확인해 주세요'):'모든 칸이 채워졌습니다 — 오른쪽 서식을 확인하고 받으세요')+'</b><button type="button" class="linkbtn gapx">접기</button><button type="button" class="linkbtn gapopen">'+(n?'남은 칸 '+n+'곳 보기':'안내 보기')+'</button></div>';
+  if(g.med.length) h+='<h4 class="gapt">진료받은 내용 <em>직접 적기</em></h4><p class="gapsub">진단서·진료비 영수증을 보고 적으세요. ‘확인’ 표시는 자동으로 넣은 값이니 맞는지 보고 다르면 고치세요. 아직 진료 전이면 진료 후 이 창을 다시 열어 적어도 됩니다.</p><div class="gaplist">'+g.med.map(item).join("")+'</div>';
+  if(g.etc.length) h+='<h4 class="gapt">그 밖에 빈 칸</h4><div class="gaplist">'+g.etc.map(item).join("")+'</div>'+(g.us.length?'<p class="gapnote u">사용자 설정(오른쪽 위)에 '+esc(eul(g.us.join("·")))+' 등록해 두면 다음부터 자동으로 들어갑니다.</p>':'');
+  if(n) h+='<button type="button" class="btn ghost gapv">남은 칸 말로 채우기</button>';
+  h+='<p class="gapsub dl">다 적었으면 서식 미리보기 위의 버튼으로 <span style="font-weight:700;display:inline">PDF · 한글 · 엑셀</span> 파일을 받을 수 있습니다.</p>';
+  b._els=els; b.innerHTML=h; b.classList.remove("hidden"); return b; }
+/* 창을 열 때마다 자동으로 안내 */
+var _sbFill3=sbFill; sbFill=function(){ _sbFill3(); setTimeout(function(){ if(!$("#m-sb").classList.contains("hidden")) sbGapShow(); },0); };
+(function(){ var l=$('#sb-form [data-sb="cdate"]'); var lb=l&&l.closest(".f").querySelector("label.l"); if(lb) lb.innerHTML='초진일자<small>진료일 · 8자리</small>'; })();
+
+/* ---------- 엑셀(.xlsx) ---------- */
+function xEsc(s){ return hxEsc(s).replace(/\n/g,"&#10;"); }
+function colName(i){ var s=""; i++; while(i>0){ var m=(i-1)%26; s=String.fromCharCode(65+m)+s; i=Math.floor((i-1)/26); } return s; }
+function xlsxFromPages(root,sheet){ var rows=[], merges=[], bounds={0:1,100:1}, tabs=[];
+  $$(".page",root).forEach(function(pg){ (function blocks(box){ Array.prototype.forEach.call(box.children,function(el){ if(getComputedStyle(el).display==="none") return;
+      if(el.tagName==="TABLE"){ tabs.push(el); rows.push({tbl:el}); return; } if(el.querySelector&&el.querySelector("table")){ blocks(el); return; }
+      var ls=hxLines(el); if(!ls.length) return; rows.push({p:ls,al:hxAlign(el),st:hxSt(el),h:el.offsetHeight}); }); })(pg); });
+  /* 표마다 칸 경계(%)를 모아 하나의 열 격자로 */
+  function tGrid(t){ var trs=$$("tr",t).filter(function(tr){return tr.closest("table")===t;}), nC=0; trs.forEach(function(tr){ var n=0; Array.prototype.forEach.call(tr.cells,function(td){ n+=td.colSpan||1; }); nC=Math.max(nC,n); });
+    var cols=$$("col",t), pc=[]; if(cols.length===nC) pc=cols.map(function(c){ var m=/([\d.]+)%/.exec(c.getAttribute("style")||c.getAttribute("width")||""); return m?+m[1]:0; });
+    if(!pc.length||pc.reduce(function(a,b){return a+b;},0)<=0){ pc=[]; for(var i=0;i<nC;i++) pc.push(1); } var s=pc.reduce(function(a,b){return a+b;},0), acc=0, bd=[0];
+    pc.forEach(function(p){ acc+=p/s*100; bd.push(Math.round(acc*2)/2); }); bd[bd.length-1]=100; return {trs:trs,nC:nC,bd:bd}; }
+  var grids=tabs.map(tGrid); grids.forEach(function(g){ g.bd.forEach(function(b){ bounds[b]=1; }); });
+  var B=Object.keys(bounds).map(Number).sort(function(a,b){return a-b;}); var nCol=B.length-1, ci=function(p){ var k=B.indexOf(p); if(k<0){ k=0; for(var i=0;i<B.length;i++) if(Math.abs(B[i]-p)<Math.abs(B[k]-p)) k=i; } return k; };
+  var STY=[], styKey={}; function sty(o){ var k=[o.b?1:0,o.f?1:0,o.bold?1:0,o.al||"L",o.sz||"N",o.v||"C"].join(""); if(styKey[k]==null){ styKey[k]=STY.length+1; STY.push(o); } return styKey[k]; }
+  var out=[], R=0, gi=0;
+  rows.forEach(function(r){
+    if(r.p){ R++; var s=sty({al:r.al,bold:/[BTH]/.test(r.st),sz:r.st==="H"||r.st==="T"?"T":r.st==="S"?"S":"N",v:"C"}); out.push({r:R,h:Math.max(15,Math.round((r.h||20)*0.75)),cells:[{c:0,t:r.p.join("\n"),s:s}],fill:{s:s}}); if(nCol>1) merges.push("A"+R+":"+colName(nCol-1)+R); return; }
+    var g=grids[gi++], occ={}, r0=R;
+    g.trs.forEach(function(tr,ri){ R++; var row={r:R,h:Math.max(15,Math.round(tr.offsetHeight*0.75)),cells:[]}; out.push(row); var c=0;
+      Array.prototype.forEach.call(tr.cells,function(td){ while(occ[ri+":"+c]) c++; var cs=td.colSpan||1, rs=td.rowSpan||1; for(var a=0;a<rs;a++) for(var b=0;b<cs;b++) occ[(ri+a)+":"+(c+b)]=1;
+        var x0=ci(g.bd[c]), x1=ci(g.bd[Math.min(c+cs,g.nC)])-1; if(x1<x0) x1=x0; var head=td.classList.contains("h"), tdcs=getComputedStyle(td);
+        var al=hxAlign(td), sub=$$("div,p",td).filter(function(x){return (x.textContent||"").trim();}).map(hxAlign); if(sub.length>1&&sub.some(function(x){return x!==sub[0];})) al="C"; else if(sub.length) al=sub[0]; var s=sty({b:1,f:head?1:0,bold:head||hxSt(td)==="B",al:al,sz:hxSt(td)==="S"?"S":"N",v:/top/.test(tdcs.verticalAlign)?"T":"C"});
+        row.cells.push({c:x0,t:hxLines(td).join("\n"),s:s,span:[x0,x1,R,R+rs-1]}); if(x1>x0||rs>1) merges.push(colName(x0)+R+":"+colName(x1)+(R+rs-1)); c+=cs; }); });
+    R++; out.push({r:R,h:8,cells:[]}); });
+  /* 병합된 칸에도 테두리 */
+  var byR={}; out.forEach(function(r){ byR[r.r]=r; }); out.forEach(function(r){ r.cells.slice().forEach(function(c){ if(!c.span) return; for(var y=c.span[2];y<=c.span[3];y++) for(var x=c.span[0];x<=c.span[1];x++){ if(y===c.span[2]&&x===c.span[0]) continue; var rr=byR[y]; if(rr&&!rr.cells.some(function(q){return q.c===x;})) rr.cells.push({c:x,t:"",s:c.s}); } }); });
+  var totalW=92, cols=''; for(var i=0;i<nCol;i++) cols+='<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+(Math.max(1,(B[i+1]-B[i])/100*totalW)).toFixed(2)+'" customWidth="1"/>';
+  var sd=out.map(function(r){ r.cells.sort(function(a,b){return a.c-b.c;}); return '<row r="'+r.r+'" ht="'+r.h+'" customHeight="1">'+r.cells.map(function(c){ var ref=colName(c.c)+r.r; return c.t?'<c r="'+ref+'" s="'+c.s+'" t="inlineStr"><is><t xml:space="preserve">'+xEsc(c.t)+'</t></is></c>':'<c r="'+ref+'" s="'+c.s+'"/>'; }).join("")+'</row>'; }).join("");
+  var ws='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews><sheetFormatPr defaultRowHeight="16.5"/><cols>'+cols+'</cols><sheetData>'+sd+'</sheetData>'
+    +(merges.length?'<mergeCells count="'+merges.length+'">'+merges.map(function(m){return '<mergeCell ref="'+m+'"/>';}).join("")+'</mergeCells>':'')
+    +'<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="0"/></worksheet>';
+  var fonts='<font><sz val="10"/><name val="맑은 고딕"/><family val="3"/></font><font><b/><sz val="10"/><name val="맑은 고딕"/><family val="3"/></font><font><b/><sz val="15"/><name val="맑은 고딕"/><family val="3"/></font><font><sz val="9"/><name val="맑은 고딕"/><family val="3"/></font><font><b/><sz val="9"/><name val="맑은 고딕"/><family val="3"/></font>';
+  var xfs='<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'+STY.map(function(o){ var f=o.sz==="T"?2:o.sz==="S"?(o.bold?4:3):(o.bold?1:0), h={L:"left",C:"center",R:"right",J:"justify"}[o.al]||"left";
+      return '<xf numFmtId="0" fontId="'+f+'" fillId="'+(o.f?2:0)+'" borderId="'+(o.b?1:0)+'" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="'+h+'" vertical="'+(o.v==="T"?"top":"center")+'" wrapText="1"/></xf>'; }).join("");
+  var styles='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="5">'+fonts+'</fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF2F2F2"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color auto="1"/></left><right style="thin"><color auto="1"/></right><top style="thin"><color auto="1"/></top><bottom style="thin"><color auto="1"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="'+(STY.length+1)+'">'+xfs+'</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+  var sn=hxEsc((sheet||"서식").replace(/[\\\/?*\[\]:]/g,"").slice(0,31));
+  var F={"[Content_Types].xml":'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>',
+    "_rels/.rels":'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+    "xl/workbook.xml":'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="'+sn+'" sheetId="1" r:id="rId1"/></sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">\''+sn+'\'!$A$1:$'+colName(nCol-1)+'$'+R+'</definedName></definedNames></workbook>',
+    "xl/_rels/workbook.xml.rels":'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>',
+    "xl/worksheets/sheet1.xml":ws,"xl/styles.xml":styles};
+  var enc=new TextEncoder(); var blob=zipStore(Object.keys(F).map(function(n){return {n:n,d:enc.encode(F[n])};}));
+  return new Blob([blob],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}); }
+function saveXlsx(html,name,sheet){ try{ var b=withRendered(html,function(box){ return xlsxFromPages(box,sheet); }); download(name+".xlsx",b); toast("엑셀 파일(.xlsx)을 저장했습니다"); }catch(e){ console.error(e); toast("엑셀 파일을 만들지 못했습니다"); } }
+(function(){ var c=$("#m-sb .sbpv .acts3"); if(!c) return; var b=document.createElement("button"); b.type="button"; b.className="btn ghost"; b.id="sb-xlsx"; b.textContent="엑셀 파일 받기"; c.appendChild(b);
+  b.addEventListener("click",function(){ saveXlsx(sbDoc(),"상병경위보고서_"+(cur.sb.name||"직원")+"_"+ymd(),"상병경위보고서"); }); })();
+/*SBXEND*/
 /* 시작 */
 renderField(); setInterval(renderContacts,60000); shInit();
 tab(ls.get("lfv_tab","field"));
