@@ -199,6 +199,7 @@ td.num,th.num{text-align:right;white-space:nowrap}
 table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:5.5em;margin-inline-start:-6em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}
 .ear{grid-template-columns:3em repeat(4,minmax(0,1fr))}}
 @media print{header .modeSw,.tabs,.toolbar,.types,.btns{display:none}}
+.meta td:nth-child(1){width:24%}.meta td:nth-child(2){width:20%}.meta td:nth-child(3){width:16%}.meta .clean{font-size:14px}
 .pickWide{grid-column:1/-1;min-height:0}
 .pickWide ul{columns:2;column-gap:28px}
 @media(max-width:720px){.pickWide ul{columns:1}}
@@ -1280,7 +1281,7 @@ const SCH=[
  law:[['공무원 재해보상법','장해급여 제28조 등',LG('공무원 재해보상법')],['같은 법 시행령','장해등급(1~14급) 기준',LG('공무원 재해보상법 시행령')],['같은 법 시행규칙','장해 판정 세부',LG('공무원 재해보상법 시행규칙')]],
  body:()=>
  '<h3>제도 개요</h3><p>공무상 부상·질병으로 장해상태가 되어 퇴직하거나, 퇴직 후 그 부상·질병으로 장해상태가 된 경우 <b>장해등급 1~14급</b>에 따라 장해연금 또는 장해일시금을 지급합니다. 공무상 재해 여부는 공무원재해보상심의회 심의를 거쳐 인사혁신처장이 결정하고, 지급은 공무원연금공단이 맡습니다.</p>'+
- '<h3>장해등급별 장해연금(기준소득월액 대비)</h3>'+tbl(['등급','장해연금','등급','장해연금'],[...Array(7)].map((_,i)=>[(i+1)+'급',GW_P[i].toFixed(2).replace(/\.?0+$/,'')+'%',(i+8)+'급',GW_P[i+7].toFixed(2).replace(/\.?0+$/,'')+'%']),'pair')+
+ '<h3>장해등급별 장해연금(법 제29조, 기준소득월액 대비)</h3>'+tbl(['등급','장해연금','등급','장해연금'],[...Array(7)].map((_,i)=>[(i+1)+'급',GW_P[i].toFixed(2).replace(/\.?0+$/,'')+'%',(i+8)+'급',GW_P[i+7].toFixed(2).replace(/\.?0+$/,'')+'%']),'pair')+
  ul(['장해일시금: 장해연금에 갈음해 받을 때 <b>5년분</b>의 장해연금 상당액','간병급여: 요양 종료 후 상시·수시 간병이 필요하면 산재보험 기준 준용','장해유족연금: 장해연금 수급자 사망 시 장해연금액의 60%'])+
  '<h3>진단서·서류</h3>'+ul(['요양 종료(증상 고정) 시점의 장해진단서 — 장해 부위별 측정치·검사 근거 기재','공무상 요양 승인 이력, 장해경위 조사서(소속기관 작성)','등급 체계는 산재보험과 유사하나 결정 기관·서식이 다르므로 공단 서식 사용'])+
  '<h3>불복</h3><p>급여에 관한 결정에 이의가 있으면 결정이 있었던 날부터 <b>180일</b>, 그 사실을 안 날부터 <b>90일</b> 이내에 공무원재해보상연금위원회에 심사를 청구할 수 있습니다.</p>',
@@ -1292,8 +1293,8 @@ const SCH=[
  law:[['군인 재해보상법','상이연금·장애보상금',LG('군인 재해보상법')],['같은 법 시행령','상이등급 구분',LG('군인 재해보상법 시행령')]],
  body:()=>
  '<h3>제도 개요</h3><p>군인이 공무상 부상·질병으로 장애상태가 되어 전역·퇴직하거나 그 후 장애상태가 된 경우 <b>상이등급</b>에 따라 상이연금을 지급합니다. 전상·특수직무공상은 가산됩니다.</p>'+
- '<h3>상이연금(기준소득월액 대비)</h3>'+tbl(['상이등급','상이연금'],MIL_P.map((p,i)=>[(i+1)+'급',p+'%']))+
- '<h3>장애보상금</h3>'+ul(['장애보상금: 장애등급에 따라 평균 기준소득월액의 9배·6배·4.5배·3배(1~4급)','전상은 2.5배, 특수직무공상은 1.88배를 곱해 가산','국가유공자법의 상이등급(보훈 신체검사)과는 별개 — 보훈은 국가보훈부 신체검사로 결정'])+
+ '<h3>상이연금(법 제27조, 기준소득월액 대비)</h3>'+tbl(['상이등급','상이연금'],MIL_P.map((p,i)=>[(i+1)+'급',p+'%']))+
+ '<h3>장애보상금(법 제33조)</h3>'+ul(['대상: 지원에 의하지 않고 임용된 부사관 등(의무복무자)이 복무 중 부상·질병으로 심신장애 판정을 받고 퇴직하거나 퇴직 후 6개월 이내 판정을 받은 경우','금액: 공무원 전체 기준소득월액 평균액의 9배(1급)·6배(2급)·4.5배(3급)·3배(4급) — 4급은 전공사상심사위원회에서 공무상으로 인정된 경우만','전상은 위 금액의 2.5배, 특수직무공상은 1.88배. 그 밖의 군인도 전상·특수직무공상이면 이 장애보상금 대상','국가유공자법의 상이등급(보훈 신체검사)과는 별개'])+
  '<h3>진단서·서류</h3>'+ul(['전역 전 군 병원 또는 민간 의료기관의 장애진단서 — 부위별 측정치·검사결과','공무상 요양 승인·심의 결과, 전공상 확인 자료','국군재정관리단(군인연금) 서식 확인'])+
  '<h3>시효</h3><p>급여를 받을 권리는 <b>5년</b>(요양급여·재활급여 등 일부는 3년)간 행사하지 않으면 소멸합니다.</p>',
  calc:{f:[{k:'g',lab:'상이등급',type:'sel',opts:gOpt(7)},{k:'w',lab:'기준소득월액(원)',type:'num',ph:'예) 4000000'}],
@@ -1386,6 +1387,28 @@ const SCH=[
 ];
 function wait(x){return '<div class="stamp P">입력 대기<span>'+x+'</span></div>'}
 
+
+const SCH_META={
+nps:[['국민연금법 시행령','대통령령 제35909호','2025. 12. 16.',LG('국민연금법 시행령'),['별표 2 장애등급 구분의 기준(제46조제1항 관련)']],
+ ['국민연금 장애심사규정','보건복지부 고시 제2025-216호','2026. 1. 1.',LA('국민연금 장애심사규정'),['별표 국민연금 장애등급 판정기준','별지 제1호 국민연금 장애심사용 진단서','별지 제2~16호 장애분류별 소견서(눈·귀·입·팔다리·척추·사지마비·정신신경·호흡기·심장·신장·간·혈액조혈기·복부골반·안면·고형암)']]],
+iaci:[['산업재해보상보험법','법률 제22025호','2027. 3. 30. 시행 예정(현행 별표 2 동일 여부 확인)',LG('산업재해보상보험법'),['별표 2 장해급여표(제57조제2항 관련)']],
+ ['산업재해보상보험법 시행령','대통령령 제36473호','2026. 7. 1.',LG('산업재해보상보험법 시행령'),['별표 6 장해등급의 기준(제53조제1항 관련)','별표 9 장해등급 및 진폐장해등급별 노동력 상실률(제73조제2항 관련)']],
+ ['산업재해보상보험법 시행규칙','고용노동부령 제461호','2026. 2. 2.',LG('산업재해보상보험법 시행규칙'),['별표 3 장해계열표','별표 4 비장해인의 신체 각 관절에 대한 평균 운동가능영역','별표 5 신체부위별 장해등급 판정에 관한 세부기준']]],
+gov:[['공무원 재해보상법','법률 제22049호','2026. 10. 2.',LG('공무원 재해보상법'),['제29조 장해연금 등급별 비율(본문 조문)']],
+ ['공무원 재해보상법 시행령','대통령령 제36359호','2026. 5. 28.',LG('공무원 재해보상법 시행령'),['별표 3 장해등급(제40조제1항 관련)','별표 4 2개 이상의 장해에 대한 종합장해등급표']]],
+mil:[['군인 재해보상법','법률','2026. 5. 19. 개정 반영',LG('군인 재해보상법'),['제27조 상이연금 등급별 비율','제33조 장애보상금']],
+ ['군인 재해보상법 시행령','대통령령 제36728호','2026. 10. 2.',LG('군인 재해보상법 시행령'),['별표 3 상이등급의 구분(제31조 관련)','별표 4 2개 이상의 장해에 대한 종합상이등급표']]],
+school:[['학교안전사고 예방 및 보상에 관한 법률 시행령','대통령령 제36672호','2026. 9. 15.',LG('학교안전사고 예방 및 보상에 관한 법률 시행령'),['별표 2 신체장해의 등급과 노동력상실률표(제16조제1항 관련)','별표 3 2개 부위 이상의 신체장해 종합평가 등급표','별표 5 신체장해에 대한 위자료 기준표(제19조 관련)']]],
+work:[['근로능력평가의 기준 등에 관한 고시','보건복지부 고시 제2025-30호','2025. 2. 20.',LA('근로능력평가의 기준 등에 관한 고시'),['별표 1 의학적 평가기준(제8조제4항 관련)','별표 2 활동능력 평가기준(제10조제4항 관련)','별지 제1호 근로능력평가 신청서','별지 제4호 근로능력판정 결과서']]],
+ltc:[['노인장기요양보험법 시행령','대통령령 제36325호','2026. 5. 12.',LG('노인장기요양보험법 시행령'),['별표 1 노인성 질병의 종류(제2조 관련)']],
+ ['노인장기요양보험법 시행규칙','보건복지부령 제1138호','2025. 12. 12.',LG('노인장기요양보험법 시행규칙'),['별지 제2호 의사소견서','별지 제3호 의사소견서 발급의뢰서','별지 제4호 의사소견서 발급비용 청구서']]],
+kma:[['의료법 시행규칙','보건복지부령 제1177호','2026. 6. 12.',LG('의료법 시행규칙'),['별지 제5호의2 진단서','별지 제5호의3 상해진단서','별지 제6호 사망진단서(시체검안서)']],
+ ['의료기관의 제증명수수료 항목 및 금액에 관한 기준','보건복지부 고시 제2021-34호','2021. 2. 5.',LA('의료기관의 제증명수수료 항목 및 금액에 관한 기준'),['별표 제증명수수료 항목 및 금액(제4조제2항 관련)']]],
+car:[['자동차손해배상 보장법 시행령','대통령령 제36689호','2026. 9. 15.',LG('자동차손해배상 보장법 시행령'),['별표 1 상해의 구분과 책임보험금의 한도금액(제3조제1항제2호 관련)','별표 2 후유장애의 구분과 책임보험금의 한도금액(제3조제1항제3호 관련)']]],
+priv:[['보험업감독업무시행세칙','금융감독원 세칙','2026. 9. 10.',LA('보험업감독업무시행세칙'),['별표 15 표준약관(제5-13조제1항 관련) — 상해·질병보험 장해분류표 포함']]],
+mma:[['병역판정 신체검사 등 검사규칙','국방부령 제1139호','2024. 2. 1.',LG('병역판정 신체검사 등 검사규칙'),['별표 2 신장·체중에 따른 신체등급의 판정기준','별표 3 질병·심신장애의 정도 및 평가기준(제11조 등 관련)']],
+ ['병역법 시행규칙','국방부령 제1235호','2026. 10. 29.',LG('병역법 시행규칙'),['별지 제106호 병무용진단서','별지 제109호 질병·심신장애 발생경위서']]]};
+function metaHTML(id){const a=SCH_META[id];if(!a)return '';return '<h3>근거 법령·별표·별지</h3><table class="stack meta"><thead><tr><th>법령</th><th>번호</th><th>시행</th><th>별표·별지</th></tr></thead><tbody>'+a.map(r=>'<tr><td><a href="'+encodeURI(r[3])+'" target="_blank" rel="noopener noreferrer">'+r[0]+'</a></td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+ul(r[4])+'</td></tr>').join('')+'</tbody></table><p class="note">별표·별지 원문은 법령 화면 아래 「별표·서식」에서 내려받을 수 있습니다. 기준일 2026. 11. 27.</p>'}
 let schCur=store.get('sch','nps'),schPrev='start',schV=store.get('schv',{});
 function schOpen(){return !$('#sch').classList.contains('hidden')}
 function openSch(id){if(!schOpen()){schPrev=$('#start').classList.contains('hidden')?'app':'start';$('#start').classList.add('hidden');$('#app').classList.add('hidden');$('#sch').classList.remove('hidden');$('#tools').classList.remove('hidden');$('#homeBtn').classList.remove('hidden')}
@@ -1398,7 +1421,7 @@ function renderSch(){const s=SCH.find(x=>x.id===schCur)||SCH[0];
    if(f.type==='chk')return '<label class="chk"><input type="checkbox" id="'+id+'" data-sk="'+f.k+'"'+(val?' checked':'')+'><span>'+f.lab+'</span></label>';
    if(f.type==='sel')return '<div class="row"><label for="'+id+'">'+f.lab+'</label><select id="'+id+'" data-sk="'+f.k+'">'+f.opts.map(o=>'<option value="'+o[0]+'"'+(String(val)===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></div>';
    return '<div class="row"><label for="'+id+'">'+f.lab+'</label><input id="'+id+'" data-sk="'+f.k+'" type="text" inputmode="numeric" placeholder="'+(f.type==='date'?'20240814':esc(f.ph||''))+'" value="'+esc(val)+'"'+(f.type==='date'?' data-date="1"':'')+'></div>'}).join('')+'</div><div class="stampBox" id="scOut" aria-live="polite"></div></div>':'';
- $('#schPanel').innerHTML='<div class="phead"><h2>'+s.name+'</h2></div><div class="srcs">'+s.law.map(l=>'<a class="src" href="'+encodeURI(l[2])+'" target="_blank" rel="noopener noreferrer"><b>'+l[0]+'</b><small>'+l[1]+'</small></a>').join('')+'</div>'+calc+s.body()+'<p class="note" style="margin-top:18px">요약 안내입니다. 금액·기한은 개정될 수 있으니 결정 전에 원문과 담당 기관에 확인하세요.</p>';
+ $('#schPanel').innerHTML='<div class="phead"><h2>'+s.name+'</h2></div><div class="srcs">'+s.law.map(l=>'<a class="src" href="'+encodeURI(l[2])+'" target="_blank" rel="noopener noreferrer"><b>'+l[0]+'</b><small>'+l[1]+'</small></a>').join('')+'</div>'+calc+s.body()+metaHTML(s.id)+'<p class="note" style="margin-top:18px">요약 안내입니다. 금액·기한은 개정될 수 있으니 결정 전에 원문과 담당 기관에 확인하세요.</p>';
  if(s.calc){document.querySelectorAll('#schPanel [data-sk]').forEach(el=>el.addEventListener(el.type==='checkbox'||el.tagName==='SELECT'?'change':'input',e=>{if(el.dataset.date)dateFmt(el);else if(el.inputMode==='numeric'&&el.type==='text'&&!el.dataset.date){el.value=el.value.replace(/[^\d.]/g,'')}schEval(true)}));schEval(false)}}
 function schEval(user){const s=SCH.find(x=>x.id===schCur);const v={};document.querySelectorAll('#schPanel [data-sk]').forEach(el=>v[el.dataset.sk]=el.type==='checkbox'?el.checked:el.value);if(user){schV[s.id]=v;store.set('schv',schV)}$('#scOut').innerHTML=s.calc.ev(v)}
 $('#schTabs').addEventListener('click',e=>{const b=e.target.closest('[data-sc]');if(b){schCur=b.dataset.sc;store.set('sch',schCur);renderSch()}});
