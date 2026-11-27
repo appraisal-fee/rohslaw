@@ -635,7 +635,7 @@ const TABS={doctor:[['calc','판정 계산'],['crit','판정기준·중복'],['c
  family:[['find','유형 찾기'],['easy','쉬운 설명'],['calc','예상 정도'],['time','언제 진단?'],['sym','증상 정리'],['card','상담 안내문'],['docs','준비물 안내'],['appeal','판정 절차'],['log','상담 기록']]};
 
 function setMode(m){mode=m;sessMode=m;store.set('mode',m);store.set('lastMode',m);store.set('sys','dis');$('#sch').classList.add('hidden');$('#disPick').classList.add('hidden');sysBar('dis');$('#start').classList.add('hidden');$('#app').classList.remove('hidden');$('#modeSw').classList.remove('hidden');$('#tools').classList.remove('hidden');$('#homeBtn').classList.remove('hidden');
- document.querySelectorAll('#modeSw button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m));tab=TABS[m][0][0];$('#procBtn').classList.toggle('hidden',m!=='doctor');$('#showBtn').classList.toggle('hidden',m==='doctor');sessLabel();if(m!=='doctor'&&!$('#procSec').classList.contains('hidden'))toggleProc();if(!$('#rec').classList.contains('hidden')){const tx=$('#recTxt').value;$('#rec').innerHTML=recHTML();bindRec();$('#recTxt').value=tx}try{if(location.hash!=='#'+m)history.replaceState(null,'','#'+m)}catch(e){}render()}
+ document.querySelectorAll('#modeSw button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m));tab=TABS[m][0][0];$('#procBtn').classList.toggle('hidden',m!=='doctor');$('#showBtn').classList.toggle('hidden',m==='doctor');sessLabel();if(m!=='doctor'&&!$('#procSec').classList.contains('hidden'))toggleProc();if(!$('#rec').classList.contains('hidden')){const tx=$('#recTxt').value;$('#rec').innerHTML=recHTML();bindRec();$('#recTxt').value=tx}render()}
 function ty(){return T.find(t=>t.id===cur)||T[0]}
 
 function render(){
@@ -1548,7 +1548,7 @@ let schCur=store.get('sch','nps'),schPrev='start',schV=store.get('schv',{});
 function schOpen(){return !$('#sch').classList.contains('hidden')}
 function openSch(id){$('#start').classList.add('hidden');$('#disPick').classList.add('hidden');$('#app').classList.add('hidden');$('#sch').classList.remove('hidden');$('#tools').classList.remove('hidden');$('#homeBtn').classList.remove('hidden');$('#modeSw').classList.add('hidden');
  if(!$('#rec').classList.contains('hidden'))toggleRec();if(!$('#procSec').classList.contains('hidden'))toggleProc();
- if(id&&SCH.some(s=>s.id===id))schCur=id;store.set('sch',schCur);mode='';store.set('mode','');store.set('sys',schCur);sysBar(schCur);try{if(location.hash!=='#'+schCur)history.replaceState(null,'','#'+schCur)}catch(e){}renderSch();scrollTo(0,0)}
+ if(id&&SCH.some(s=>s.id===id))schCur=id;store.set('sch',schCur);mode='';store.set('mode','');store.set('sys',schCur);sysBar(schCur);renderSch();scrollTo(0,0)}
 function closeSch(){goHome()}
 function renderSch(){const s=SCH.find(x=>x.id===schCur)||SCH[0];
  $('#schTabs').innerHTML=SCH.map(x=>'<button class="tab" role="tab" type="button" data-sc="'+x.id+'" aria-selected="'+(x.id===s.id)+'">'+x.name+'</button>').join('');
@@ -1576,15 +1576,15 @@ $('#sysBar').addEventListener('click',e=>{const b=e.target.closest('[data-sys]')
 $('#sysPick').insertAdjacentHTML('beforeend',SCH.map(s=>'<button type="button" class="sysCard" data-go="'+s.id+'"><b>'+s.name+'</b><span>'+(SYSD[s.id]||'')+'</span><i class="sysGo">열기 →</i></button>').join(''));
 $('#sysPick').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;if(b.dataset.go==='dis')openDis();else openSch(b.dataset.go)});
 let sessMode='';
-function openDis(){if(sessMode){setMode(sessMode);return}if($('.modal'))$('.modal').remove();$('#start').classList.add('hidden');$('#app').classList.add('hidden');$('#sch').classList.add('hidden');$('#disPick').classList.remove('hidden');$('#tools').classList.remove('hidden');$('#homeBtn').classList.remove('hidden');$('#modeSw').classList.add('hidden');sysBar('dis');try{if(location.hash!=='#dis')history.replaceState(null,'','#dis')}catch(e){}scrollTo(0,0)}
+function openDis(){if(sessMode){setMode(sessMode);return}if($('.modal'))$('.modal').remove();$('#start').classList.add('hidden');$('#app').classList.add('hidden');$('#sch').classList.add('hidden');$('#disPick').classList.remove('hidden');$('#tools').classList.remove('hidden');$('#homeBtn').classList.remove('hidden');$('#modeSw').classList.add('hidden');sysBar('dis');scrollTo(0,0)}
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
 $('#types').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;cur=b.dataset.t;store.set('type',cur);vals={};calcIdx=0;render()});
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;stopTTS();tab=b.dataset.tab;render()});
 $('#qBtn').onclick=search;$('#q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
 window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h==='dis'&&$('#disPick').classList.contains('hidden')){openDis();return}if((h==='doctor'||h==='family')&&h!==mode)setMode(h);else if(SCH.some(s=>s.id===h)&&!(schOpen()&&schCur===h))openSch(h)});
-const h=location.hash.slice(1);if(h==='doctor'||h==='family')setMode(h);else if(h==='dis')openDis();else if(SCH.some(s=>s.id===h))openSch(h);else{mode='';store.set('mode','')}
+{let nv='';try{nv=(performance.getEntriesByType('navigation')[0]||{}).type||''}catch(e){}const h=nv==='reload'?'':location.hash.slice(1);mode='';store.set('mode','');if(h==='doctor'||h==='family')setMode(h);else if(h==='dis')openDis();else if(SCH.some(s=>s.id===h))openSch(h);try{if(location.hash)history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
 }
 </script>
-<script>if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
+<script>if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{try{r.update()}catch(e){}}).catch(()=>{});</script>
 </body>
 </html>
