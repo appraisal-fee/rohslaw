@@ -1060,6 +1060,15 @@ input.linked,textarea.linked,select.linked{background:#eaf3ff!important;border-c
  .fl-acts .btn{min-height:34px;padding:4px 10px;font-size:12.5px}
  .fl-acts .fl-v i{width:8px;height:8px}
 }
+
+/* ===== 주소 검색 ===== */
+.addrrow{display:flex;gap:8px;align-items:stretch}
+.addrrow>input{flex:1;min-width:0}
+.addrbtn{flex:none;white-space:nowrap;padding:8px 16px!important;font-size:14px!important}
+.addrembed{height:470px;border:1px solid #d0d5dd;border-radius:8px;overflow:hidden;margin-top:6px;background:#fff}
+.addrembed .msg{padding:24px;text-align:center;color:#475467;font-size:14px;line-height:1.6}
+.addrfoot{margin:10px 0 0;font-size:12.5px;color:#667085}
+@media (max-width:760px){ #m-addr .box{padding:16px 14px} .addrembed{height:calc(100vh - 260px);min-height:380px} .addrbtn{padding:8px 12px!important} }
 </style>
 <meta name="theme-color" content="#1f3a68">
 <link rel="manifest" href="manifest.webmanifest">
@@ -2876,11 +2885,7 @@ function addrSearch(more){
       var b=document.createElement("button"); b.type="button";
       b.innerHTML='<span class="zp">'+esc(a.zip)+'</span><div class="rd">'+esc(a.road)+'</div><div class="jb">지번 '+esc(a.jibun)+'</div>';
       b.addEventListener("click",function(){
-        $("#v_addr").value=a.road; $("#v_zip").value=a.zip||"";
-        $("#m-addr").classList.add("hidden");
-        S.dirty=true; syncShow(); queuePreview();
-        $("#v_addr2").focus();
-        toast("동·호수를 상세주소 칸에 적어주세요");
+        addrDone({roadAddress:a.road,zonecode:a.zip}); S.dirty=true; syncShow(); queuePreview();
       });
       box.appendChild(b);
     });
@@ -4180,7 +4185,7 @@ function docFile(name,html){
 /* ============================================================
    음성 받아쓰기 (말로 쓰기)
    ============================================================ */
-var APPVER="2026.11.27-12";
+var APPVER="2026.11.27-13";
 function isTouch(){ try{ return window.matchMedia("(pointer:coarse)").matches||("ontouchstart" in window&&navigator.maxTouchPoints>0); }catch(e){ return false; } }
 /* 음성 입력 중 휴대폰 키보드 막기: 칸을 잠시 읽기 전용 + inputmode none */
 function kbLock(el,tag){ tag=tag||"sr"; kbHide(); if(!isTouch()||!el||el.dataset.kbl) return; el.dataset.kbl=tag; el.dataset.kbro=el.readOnly?"1":""; el.dataset.kbim=el.getAttribute("inputmode")||""; el.setAttribute("inputmode","none"); el.readOnly=true; }
@@ -6036,6 +6041,42 @@ function flowVoice(){ var S=flowSteps(), nx=S.filter(function(x){return !x.done;
 var _vfApplyV=vfApply; vfApply=function(x,said){ var r=_vfApplyV(x,said); try{ var el=x&&x.el; if(r&&el&&el.dataset&&el.dataset.r==="victims"&&el.value.indexOf("/")<0){ var m=/^\s*([가-힣]{2,4})(?:\s*씨)?\s+([가-힣A-Za-z]+?)(?:이고|이며|이고요)?\s+(.+?)\s*$/.exec(el.value);
   if(m){ el.value=m[1]+" / "+m[2]+" / "+m[3].replace(/\s*(소속|근무)(이에요|입니다|이요)?$/,""); el.dispatchEvent(new Event("input",{bubbles:true})); } } }catch(e){} return r; };
 /*LINKEND*/
+/*ADDRJS*//* ============================================================
+   주소 검색 — 주소 칸 어디서든 (카카오 우편번호 서비스, 승인키 불필요)
+   juso.go.kr 승인키가 설정되어 있으면 기존 도로명주소 검색도 함께 씀
+   ============================================================ */
+var DAUMPC="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js", ADDRT=null;
+(function(){ var m=$("#m-addr .box"); if(!m) return; var h=m.querySelector("h2"); if(h) h.textContent="주소 검색";
+  var note=m.querySelector(".mnote"); if(note) note.innerHTML='도로명(예: 소사로 327), 건물명(예: 부천성모병원), 동 이름+지번(예: 소사동 2) 중 편한 것으로 찾은 뒤 <b>결과를 누르면</b> 주소 칸에 들어갑니다.';
+  var j=document.createElement("div"); j.id="addr-juso"; ["asearch","alist"].forEach(function(c){ var e=m.querySelector("."+c); if(e) j.appendChild(e); });
+  var foot=$("#addr-more")&&$("#addr-more").parentNode; if(foot) j.appendChild(foot); m.appendChild(j);
+  var e=document.createElement("div"); e.id="addr-embed"; e.className="addrembed"; m.appendChild(e);
+  var f=document.createElement("p"); f.className="addrfoot"; f.id="addr-foot"; f.innerHTML='검색이 안 되면 주소 칸에 직접 적어도 됩니다. <a href="https://www.juso.go.kr" target="_blank" rel="noopener">도로명주소 누리집(juso.go.kr)</a>에서 찾아 붙여넣을 수도 있습니다.'; m.appendChild(f); })();
+function addrOpenFor(t){ ADDRT=t; var q=(t.addr.value||"").replace(/\(.*?\)/g,"").trim(); $("#m-addr").classList.remove("hidden");
+  var useJuso=!!(window.CONFIG&&CONFIG.jusoKey)||!!(typeof CONFIG!=="undefined"&&CONFIG.jusoKey);
+  $("#addr-juso").classList.toggle("hidden",!useJuso); $("#addr-embed").classList.toggle("hidden",useJuso);
+  if(useJuso){ var qi=$("#addr-q"); qi.value=q; setTimeout(function(){ qi.focus(); qi.select(); },30); return; }
+  var box=$("#addr-embed"); box.innerHTML='<div class="msg">주소 검색 화면을 불러오는 중입니다…</div>';
+  (window.daum&&daum.Postcode?Promise.resolve():loadScript(DAUMPC)).then(function(){
+    box.innerHTML=""; new daum.Postcode({oncomplete:addrDone,width:"100%",height:"100%",animation:false,hideMapBtn:true,hideEngBtn:true,theme:{outlineColor:"#1d3557",emphTextColor:"#1d4ed8"}}).embed(box,{q:q,autoClose:false});
+  }).catch(function(){ box.innerHTML='<div class="msg">주소 검색 화면을 불러오지 못했습니다. 인터넷 연결이나 병원 방화벽을 확인해 주세요.<br><br>주소 칸에 직접 적어도 됩니다.</div>'; }); }
+function addrDone(d){ if(!ADDRT) return; var road=d.roadAddress||d.address||d.autoRoadAddress||d.jibunAddress||"", ex=[];
+  if(d.bname&&/[동로가]$/.test(d.bname)) ex.push(d.bname); if(d.buildingName&&d.apartment==="Y") ex.push(d.buildingName);
+  var full=road+(ex.length?" ("+ex.join(", ")+")":""), t=ADDRT;
+  var set=function(el,v){ if(!el) return; el.value=v; el.dispatchEvent(new Event("input",{bubbles:true})); el.dispatchEvent(new Event("change",{bubbles:true})); };
+  set(t.addr,full+(t.addr2?"":" ")); if(t.zip) set(t.zip,d.zonecode||d.zip||"");
+  $("#m-addr").classList.add("hidden"); var nx=t.addr2||t.addr;
+  setTimeout(function(){ try{ nx.focus(); if(nx===t.addr){ var n=nx.value.length; nx.setSelectionRange(n,n); } }catch(e){} },60);
+  toast(t.addr2?"동·호수를 상세주소 칸에 적어 주세요":"주소 뒤에 동·호수를 이어서 적어 주세요"); }
+/* 주소 칸마다 [주소 검색] 버튼 */
+function addrBtn(el,addr2,zip){ if(!el||el.dataset.addrb) return; el.dataset.addrb="1"; var wrap=el.parentNode;
+  if(!wrap.classList.contains("addrrow")){ var w=document.createElement("div"); w.className="addrrow"; el.parentNode.insertBefore(w,el); w.appendChild(el); wrap=w; }
+  var b=document.createElement("button"); b.type="button"; b.className="btn addrbtn"; b.textContent="주소 검색"; wrap.appendChild(b);
+  b.addEventListener("click",function(){ addrOpenFor({addr:el,addr2:addr2?$(addr2):null,zip:zip?$(zip):null}); }); }
+(function(){ /* 법률지원 서식: 기존 버튼을 새 방식으로 */
+  var ao=$("#addr-open"); if(ao){ var nb=ao.cloneNode(true); ao.parentNode.replaceChild(nb,ao); nb.classList.add("addrbtn"); nb.addEventListener("click",function(){ addrOpenFor({addr:$("#v_addr"),addr2:$("#v_addr2"),zip:$("#v_zip")}); }); $("#v_addr").dataset.addrb="1"; $("#v_addr").placeholder="주소 검색을 누르거나 직접 적으세요"; }
+  addrBtn($('#v-stmt [data-s="addr"]')); addrBtn($('#v-stmt [data-s="origin"]')); addrBtn($('#v-stmt [data-s="waddr"]')); })();
+/*ADDREND*/
 /* 시작 */
 renderField(); setInterval(renderContacts,60000); shInit();
 tab(ls.get("lfv_tab","field"));
