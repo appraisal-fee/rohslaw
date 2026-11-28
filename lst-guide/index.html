@@ -3,18 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f6b73">
-<meta name="description" content="전공의·인턴용 연명의료결정 절차 안내 웹앱 (가톨릭대학교 부천성모병원)">
-<meta name="author" content="노상엽 (ace@cmcnu.or.kr)">
+<meta name="theme-color" content="#f4f6f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1418" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<meta name="description" content="전공의·인턴을 위한 연명의료결정 절차 안내 웹앱">
+<meta name="author" content="노상엽">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<style>*,*::before,*::after{box-sizing:border-box}:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px "Malgun Gothic","맑은 고딕",sans-serif;background:#fdf8e4}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>*,*::before,*::after{box-sizing:border-box}:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px "Malgun Gothic","맑은 고딕",sans-serif;background:#f4f6f8}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
-<title>연명의료 현장 길라잡이 (공개판)</title>
+<title>연명의료 현장 길라잡이</title>
 <script src="vendor/html2canvas.min.js"></script>
 <script src="vendor/jspdf.umd.min.js"></script>
 <style>
@@ -320,19 +323,234 @@ details{padding-block:2px}
 #dataSec,#lockSec{display:flex;flex-direction:column;gap:14px}
 #dataSec:empty,#bkBox:empty,#adminChgBox:empty{display:none}
 @media print{.appbar,nav.tabs,.cover-box,.notice,footer{display:none!important}}
+/* ===================== 2.1 새 화면 (디자인 토큰 재정의) ===================== */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --surface-2:#f7f9fa; --fg:#15202b; --muted:#5d6b78; --line:#e2e7ec; --ctl:#cbd4dc;
+  --accent:#0b7a71; --accent-2:#0f9488; --accent-soft:#e3f4f1; --on-accent:#ffffff;
+  --law:#3a4fb5; --law-soft:#edf0fc; --nibp:#8a5a00; --nibp-soft:#fcf2dc; --hosp:#9b3358; --hosp-soft:#fbeaf0;
+  --stop:#c2392b; --stop-soft:#fdecea; --ok:#1b7c46; --ok-soft:#e5f4eb;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif; --f-mono:var(--f-body);
+  --r-lg:20px; --r-md:14px; --r-sm:10px;
+  --sh-1:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.04);
+  --sh-2:0 8px 24px rgba(16,24,40,.08),0 2px 6px rgba(16,24,40,.04);
+  --ring:0 0 0 3px color-mix(in srgb,var(--accent) 28%,transparent);
+}
+html[data-theme="dark"]{
+  --bg:#0e1317; --surface:#161d23; --surface-2:#1b232a; --fg:#e7edf2; --muted:#98a6b3; --line:#25303a; --ctl:#3a4753;
+  --accent:#45cbbd; --accent-2:#2fb3a6; --accent-soft:#123330; --on-accent:#05211e;
+  --law:#a8b6f5; --law-soft:#1f2645; --nibp:#efc56b; --nibp-soft:#342a15; --hosp:#f3a5c2; --hosp-soft:#3a2230;
+  --stop:#f58e7d; --stop-soft:#3d1f1b; --ok:#7fd6a0; --ok-soft:#173022;
+  --sh-1:0 1px 2px rgba(0,0,0,.35); --sh-2:0 10px 30px rgba(0,0,0,.45);
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);letter-spacing:-.01em;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+h1,h2,h3,.q{letter-spacing:-.02em}
+::selection{background:color-mix(in srgb,var(--accent) 25%,transparent)}
+.wrap{padding-block:14px calc(108px + env(safe-area-inset-bottom,0px))}
+
+/* 상단바 */
+.appbar{background:color-mix(in srgb,var(--surface) 82%,transparent);backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px);border-bottom:1px solid transparent;transition:border-color .2s,box-shadow .2s}
+.appbar.scrolled{border-bottom-color:var(--line);box-shadow:0 4px 16px rgba(16,24,40,.05)}
+.appbar-in{padding:10px 16px}
+.mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--accent-2),var(--accent));box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 35%,transparent)}
+.apptitle b{font-size:1.02rem;font-weight:800;letter-spacing:-.03em}
+.appsub{font-size:.74rem;color:var(--muted);font-weight:500}
+.iconbtn{border:0;background:var(--surface-2);border-radius:12px;transition:background .15s,transform .1s}
+.iconbtn:hover{background:var(--accent-soft);color:var(--accent)}
+.iconbtn:active{transform:scale(.94)}
+.netpill{flex:0 0 auto;font-size:.72rem;font-weight:700;color:var(--nibp);background:var(--nibp-soft);border-radius:999px;padding:4px 10px}
+
+/* 첫 화면 */
+.hero{position:relative;overflow:hidden;border-radius:24px;padding:22px 20px 20px;margin-block:2px 16px;color:#fff;
+  background:radial-gradient(120% 140% at 100% 0%,#1fb5a5 0%,transparent 55%),radial-gradient(90% 120% at 0% 100%,#0a4f6e 0%,transparent 60%),linear-gradient(135deg,#0b7a71,#0d5c73);
+  box-shadow:0 14px 34px rgba(11,122,113,.22);display:flex;flex-direction:column;gap:12px}
+.hero::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;border:28px solid rgba(255,255,255,.07);pointer-events:none}
+html[data-theme="dark"] .hero{background:radial-gradient(120% 140% at 100% 0%,#137b70 0%,transparent 55%),radial-gradient(90% 120% at 0% 100%,#0a2f44 0%,transparent 60%),linear-gradient(135deg,#0c3f3b,#0b2b3a);box-shadow:none;border:1px solid var(--line)}
+body:not([data-tab="path"]) .hero{display:none}
+.hero-eyebrow{margin:0;font-size:.78rem;font-weight:700;opacity:.85;letter-spacing:.02em}
+.hero-h{margin:0;font-size:clamp(1.35rem,4.6vw,1.75rem);line-height:1.3;font-weight:800;letter-spacing:-.035em;text-wrap:balance}
+.hero-sub{margin:0;font-size:.9rem;opacity:.88;max-width:34em}
+.hero-search{display:flex;align-items:center;gap:10px;width:100%;min-height:50px;border:0;border-radius:16px;padding:0 14px;background:rgba(255,255,255,.96);color:#5d6b78;font:inherit;font-size:.95rem;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.12);text-align:left}
+html[data-theme="dark"] .hero-search{background:rgba(255,255,255,.1);color:#d6e1ea}
+.hero-search svg{width:20px;height:20px;flex:0 0 auto;color:var(--accent)}
+html[data-theme="dark"] .hero-search svg{color:#7fe3d7}
+.hero-search span{flex:1}
+.hero-search kbd{font:inherit;font-size:.72rem;border:1px solid #d9e0e6;border-radius:6px;padding:1px 6px;color:#8a97a3}
+@media (hover:none){.hero-search kbd{display:none}}
+.hero-acts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:560px){.hero-acts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.hero-acts button{font:inherit;color:#fff;text-align:left;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.1);border-radius:16px;padding:12px;min-height:86px;cursor:pointer;display:flex;flex-direction:column;gap:2px;transition:background .15s,transform .1s}
+.hero-acts button:hover{background:rgba(255,255,255,.18)}
+.hero-acts button:active{transform:scale(.97)}
+.hero-acts i{width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.95);color:#0b7a71;display:grid;place-items:center;margin-bottom:6px}
+html[data-theme="dark"] .hero-acts i{background:rgba(127,227,215,.16);color:#7fe3d7}
+.hero-acts i svg{width:18px;height:18px}
+.hero-acts b{font-size:.92rem;font-weight:700}
+.hero-acts small{font-size:.74rem;opacity:.8}
+.hero-install{align-self:flex-start;font:inherit;font-size:.82rem;font-weight:700;color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:8px 14px;cursor:pointer}
+
+/* 안내 띠 */
+.notice{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--nibp);border-radius:var(--r-md);padding:12px 12px 12px 14px;font-size:.84rem;line-height:1.6;box-shadow:var(--sh-1);margin-block:0 16px}
+.notice b{color:var(--fg)}
+.notice-ic{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--nibp-soft);color:var(--nibp);display:grid;place-items:center;font-weight:800;font-size:.8rem;margin-top:1px}
+.notice > div{flex:1;min-width:0}
+.notice-x{flex:0 0 auto;width:32px;height:32px;border:0;border-radius:10px;background:transparent;color:var(--muted);cursor:pointer;font-size:.9rem}
+.notice-x:hover{background:var(--surface-2)}
+
+/* 카드 · 글자 */
+section.panel{gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;box-shadow:var(--sh-1)}
+html[data-theme="dark"] .card{box-shadow:none}
+.q{font-weight:700;font-size:1.05rem;line-height:1.45}
+.qhint{font-size:.86rem;line-height:1.6}
+@media (prefers-reduced-motion:no-preference){section.panel:not([hidden]){animation:pnl .22s ease-out}@keyframes pnl{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
+
+/* 버튼 · 입력 */
+.btn{border-radius:12px;border:1px solid var(--ctl);background:var(--surface);font-weight:600;transition:background .15s,border-color .15s,transform .1s,box-shadow .15s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 28%,transparent)}
+.btn.primary:hover{background:var(--accent-2);border-color:var(--accent-2);color:var(--on-accent)}
+.btn.danger-fill{background:var(--stop);border-color:var(--stop);color:#fff}
+html[data-theme="dark"] .btn.danger-fill{color:#1a0a08}
+.btn:focus-visible,.iconbtn:focus-visible,.hero-acts button:focus-visible,.hero-search:focus-visible,nav.tabs button:focus-visible{outline:none;box-shadow:var(--ring)}
+select,textarea,input[type=text],input[type=search],input[type=password],input[type=date],input[type=tel],.gate-card input{border-radius:12px;border:1px solid var(--ctl);background:var(--surface);color:var(--fg);transition:border-color .15s,box-shadow .15s}
+input[type=tel]{font:inherit;padding:8px 10px;min-height:44px}
+select:focus,textarea:focus,input:focus{outline:none;border-color:var(--accent);box-shadow:var(--ring)}
+input[type=search]{background:var(--surface-2);border-color:transparent;padding-left:40px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235d6b78' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='m20 20-4.2-4.2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px 50%;background-size:18px}
+.stepper{border-radius:12px;border-color:var(--ctl);background:var(--surface)}
+.chk input,.chkline input{accent-color:var(--accent)}
+.chkline{display:flex;gap:8px;align-items:center;font-size:.86rem;color:var(--fg)}
+.lbl-note{font-size:.74rem;color:var(--muted);font-weight:400;margin-left:4px}
+
+/* 선택 버튼(결정 경로) */
+.choices{gap:10px}
+.choices button{position:relative;border-radius:16px;border:1px solid var(--ctl);background:var(--surface);padding:14px 44px 14px 16px;font-weight:600;line-height:1.45;transition:border-color .15s,background .15s,transform .1s,box-shadow .15s}
+.choices button small{font-weight:400;margin-top:2px}
+.choices button::after{content:"";position:absolute;right:18px;top:50%;width:8px;height:8px;border-right:2px solid var(--muted);border-top:2px solid var(--muted);transform:translateY(-50%) rotate(45deg);transition:right .15s,border-color .15s}
+.choices button:hover{border-color:var(--accent);background:var(--accent-soft);box-shadow:var(--sh-1)}
+.choices button:hover::after{right:14px;border-color:var(--accent)}
+.choices button:active{transform:scale(.99)}
+.choices button.go-next::after{border-color:var(--on-accent)}
+.trail{gap:6px}
+.trail span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.78rem;font-weight:600;color:var(--muted)}
+.trail span:last-child{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+
+/* 칩 · 구분 버튼 */
+.filters button,.seg button{border-radius:999px;border-color:var(--ctl);background:var(--surface);font-weight:600;transition:background .15s,border-color .15s}
+.filters button[aria-pressed="true"],.seg button[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--surface)}
+.qs button,.quiz-opt button{border-radius:14px;border-color:var(--ctl);background:var(--surface);transition:border-color .15s,background .15s}
+.qs button:hover,.quiz-opt button:hover,.citem:hover{border-color:var(--accent);background:var(--accent-soft)}
+.citem{border-radius:14px;background:var(--surface);border-color:var(--line)}
+.chk label{border-radius:12px;background:var(--surface);border-color:var(--line)}
+.chk label:has(input:checked){background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.out .box{border-radius:14px;background:var(--surface-2);border-color:transparent}
+.fnode,.fr2,.fq2,.fl2-col,.fl2-s4{border-radius:14px}
+.fl2-col,.fl2-s4{background:var(--surface-2)}
+.tag,.result .tag,.formno,.pill,.src{border-radius:999px}
+.result h2{font-weight:800;letter-spacing:-.03em}
+
+/* 표 · 접는 칸 */
+.tbl{border:1px solid var(--line);border-radius:14px;overflow:auto}
+.tbl table{font-size:.86rem}
+.tbl th{background:var(--surface-2);color:var(--muted);font-weight:700}
+.tbl th,.tbl td{padding:10px 12px}
+.tbl tr:last-child td{border-bottom:0}
+summary{list-style:none;position:relative;padding-right:30px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";position:absolute;right:8px;top:50%;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-70%) rotate(45deg);transition:transform .18s}
+details[open]>summary::after{transform:translateY(-30%) rotate(-135deg)}
+details.card>summary{padding-right:34px}
+
+/* 하단 탭 */
+nav.tabs{background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:saturate(1.6) blur(16px);-webkit-backdrop-filter:saturate(1.6) blur(16px);border-top:1px solid var(--line);padding:6px 6px calc(8px + env(safe-area-inset-bottom,0px))}
+nav.tabs button{background:transparent!important;gap:4px;font-size:.7rem;font-weight:600;padding:4px 2px 2px;transition:color .15s}
+nav.tabs button svg{width:42px;height:30px;padding:4px 10px;border-radius:999px;transition:background .2s}
+nav.tabs button[aria-selected="true"]{color:var(--accent);font-weight:800}
+nav.tabs button[aria-selected="true"] svg{background:var(--accent-soft)}
+nav.tabs button:not([aria-selected="true"]):hover svg{background:var(--surface-2)}
+
+/* 설정 시트 · 검색 */
+.sheet-bg,.srch-bg{background:rgba(10,16,22,.42);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.sheet{border-radius:24px 24px 0 0;padding-top:12px;box-shadow:0 -10px 40px rgba(0,0,0,.18)}
+.sheet::before{content:"";align-self:center;width:40px;height:5px;border-radius:3px;background:var(--line);flex:0 0 auto}
+.sheet .row2{padding:4px 0}
+@media (min-width:600px){.sheet-bg{align-items:center}.sheet{border-radius:24px;max-height:86vh}.sheet::before{display:none}}
+.srch{border-radius:20px;box-shadow:var(--sh-2)}
+.switch{border-color:var(--ctl);background:var(--surface-2)}
+
+/* 바로 연락 */
+.ctlist{display:flex;flex-direction:column;gap:8px}
+.ctitem{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2)}
+.ct-av{width:36px;height:36px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:800;flex:0 0 auto}
+.ct-tx{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.35}.ct-tx small{color:var(--muted);font-size:.78rem}
+.ct-call{text-decoration:none;flex:0 0 auto}.ct-del{flex:0 0 auto}
+.ctform{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;margin-bottom:12px;padding:12px;border-radius:14px;background:var(--surface-2)}
+.ctform .row{grid-column:1/-1}
+@media (max-width:480px){.ctform{grid-template-columns:1fr}}
+.linklist{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.linkitem{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;text-decoration:none;color:var(--fg);background:var(--surface);transition:border-color .15s,background .15s}
+.linkitem b{color:var(--accent);font-size:.9rem}.linkitem small{color:var(--muted);font-size:.78rem}
+.linkitem:hover{border-color:var(--accent);background:var(--accent-soft)}
+
+/* 둘러보기 */
+.guest-cta{display:none;gap:14px;align-items:flex-start}
+html.guest .guest-cta{display:flex}
+html.guest #caseListCard,html.guest #caseEditor{display:none!important}
+.gc-ic{width:44px;height:44px;border-radius:14px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:0 0 auto}.gc-ic svg{width:22px;height:22px}
+
+/* 입장 화면 */
+.gate{background:radial-gradient(80% 60% at 100% 0%,color-mix(in srgb,var(--accent) 18%,transparent),transparent 70%),radial-gradient(70% 60% at 0% 100%,color-mix(in srgb,#0a4f6e 16%,transparent),transparent 70%),var(--bg);align-items:center}
+.gate-card{max-width:400px;border-radius:24px;padding:26px 22px;box-shadow:var(--sh-2);border-color:var(--line);gap:14px}
+.gate-brand{display:flex;gap:12px;align-items:center}
+.gate-brand h2{font-size:1.15rem;font-weight:800;letter-spacing:-.03em;margin:0}
+.gate-foot{margin:0;text-align:center}
+.gate-h{font-size:.95rem}
+.uitem{border-radius:14px;background:var(--surface);padding:10px 12px}
+.uav{border-radius:12px;background:linear-gradient(135deg,var(--accent-2),var(--accent))}
+.gate-card input{background:var(--surface);min-height:46px}
+.gate-or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.78rem}
+.gate-or::before,.gate-or::after{content:"";flex:1;height:1px;background:var(--line)}
+@media (max-width:720px){.gate{align-items:center}}
+
+/* 바닥글 · 알림 · 맨 위로 */
+footer{margin-top:28px;gap:4px}
+.credit{font-size:.78rem;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);z-index:90;background:var(--fg);color:var(--surface);font-size:.86rem;font-weight:600;padding:10px 16px;border-radius:999px;box-shadow:var(--sh-2);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px);text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.totop{position:fixed;right:16px;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:25;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);box-shadow:var(--sh-2);display:grid;place-items:center;cursor:pointer;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .2s,transform .2s}
+.totop svg{width:20px;height:20px}
+.totop.on{opacity:1;transform:none;pointer-events:auto}
+@media (min-width:860px){.totop{right:max(16px,calc(50% - 420px))}}
+html.gated .totop{display:none}
+@media print{.hero,.totop,.toast{display:none!important}}
+body:not([data-tab="path"]) .notice{display:none}
+
 </style>
 
 <header class="appbar">
   <div class="appbar-in">
     <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></span>
-    <div class="apptitle"><b>연명의료 현장 길라잡이 <span style="font-size:.7rem;color:var(--muted);font-weight:600">공개판</span></b><select id="hospSel" aria-label="적용 병원 내규"></select></div>
+    <div class="apptitle"><b>연명의료 현장 길라잡이</b><small class="appsub">연명의료결정 절차 안내</small><select id="hospSel" aria-label="적용 병원 내규" hidden></select></div>
+    <span class="netpill" id="netPill" hidden>오프라인</span>
     <button class="iconbtn" id="searchBtn" aria-label="통합 검색" title="통합 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button>
     <button class="iconbtn" id="menuBtn" aria-label="설정" title="설정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
 </header>
 <div class="wrap">
-  <div class="cover-box"><div class="cover"><img class="cover-bg" alt="" aria-hidden="true"><img class="cover-main" src="assets/cover.jpg" alt="학교법인 가톨릭학원 新 경영방침 '기대와 용기': 하느님의 사랑이 항상 있기 때문에 어떤 상황에서도 더 좋은 것을 주시리라는 기대를 갖고 힘들 때 좌절하지 않으며 용기를 냅시다" onerror="this.closest('.cover-box').classList.add('noimg')"></div><div class="cover-dev"><span>개발자 노상엽</span><span class="sep">·</span><span>ace@cmcnu.or.kr</span><span class="sep">·</span><span>개발일자 2026-10-06</span><span class="sep">·</span><span>수정일자 <span class="js-mod">2026-10-07</span></span></div></div>
-  <div class="notice" id="notice"><b>안내</b> · 절차 안내용입니다. 임종과정 판단과 이행은 담당의사·해당 분야 전문의와 의료기관윤리위원회 절차를 따르고, 실제 조회·등록은 연명의료 정보처리시스템에서 합니다. 환자 케이스에는 <b>익명 정보만</b> 적으세요. 이름·주민번호·등록번호·연락처는 자동으로 <b>일부</b> 가리지만 모두 걸러지지는 않으니, 저장 전에 보여 주는 가림 결과를 꼭 확인하세요. <button class="btn" id="noticeClose" style="padding:2px 8px;font-size:.75rem;margin-left:4px">닫기</button></div>
+  <section class="hero" id="hero" aria-labelledby="heroH">
+    <p class="hero-eyebrow">전공의·인턴을 위한 연명의료결정 안내</p>
+    <h1 class="hero-h" id="heroH"><span id="heroHi">오늘은</span> 어떤 결정을 도와드릴까요?</h1>
+    <p class="hero-sub">질문에 차례로 답하면 법정 절차, 필요한 서식, 확인할 가족이 한 번에 정리됩니다.</p>
+    <button class="hero-search" type="button" id="heroSearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><span>용어·지침·서식 검색</span><kbd>Ctrl K</kbd></button>
+    <div class="hero-acts">
+      <button type="button" data-go="start"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i><b>결정 경로</b><small>처음부터 판단</small></button>
+      <button type="button" data-go="case"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></i><b>새 케이스</b><small>익명 기록·체크</small></button>
+      <button type="button" data-go="forms"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></i><b>서식 찾기</b><small>법정 서식 길잡이</small></button>
+      <button type="button" data-go="family"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M14.5 20a4 4 0 0 1 6.5-3.2"/></svg></i><b>가족 범위</b><small>진술·합의 대상</small></button>
+    </div>
+    <button class="hero-install" type="button" id="installBtn" hidden>홈 화면에 앱으로 설치</button>
+  </section>
+  <div class="notice" id="notice"><span class="notice-ic" aria-hidden="true">!</span><div><b>절차 안내용 도구입니다.</b> 임종과정 판단과 이행은 담당의사·해당 분야 전문의와 의료기관윤리위원회 절차를 따르고, 조회·등록은 연명의료 정보처리시스템에서 합니다. 케이스에는 <b>익명 정보만</b> 적으세요. 식별정보 자동 가림은 일부만 걸러지니 저장 전 가림 결과를 꼭 확인하세요.</div><button class="notice-x" id="noticeClose" aria-label="안내 닫기">✕</button></div>
 
   <nav class="tabs" role="tablist"><div class="tabs-in">
     <button role="tab" id="t-path" aria-selected="true" data-tab="path"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="6" rx="1.5"/><rect x="14" y="15" width="7" height="6" rx="1.5"/><path d="M6.5 9v4a2 2 0 0 0 2 2H14"/></svg>결정 경로</button>
@@ -361,6 +579,7 @@ details{padding-block:2px}
       <div class="clist" id="caseList"></div>
     </div>
     <div id="caseEditor" hidden></div>
+    <div class="card guest-cta" id="guestCase"><div class="gc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><div><p class="q" style="margin:0">케이스 저장은 사용자 등록 후에 할 수 있어요</p><p class="qhint" style="margin:4px 0 12px">이름·아이디·비밀번호만 정하면 됩니다. 케이스는 비밀번호로 암호화해 이 기기에만 저장되고, 서버로 보내지 않습니다.</p><button class="btn primary" type="button" id="guestReg">사용자 등록하기</button></div></div>
   </section>
 
   <section class="panel" id="p-ref" hidden></section>
@@ -452,7 +671,7 @@ details{padding-block:2px}
       <p class="qhint" id="ruleAdminHint">병원별 내규를 조항 단위로 등록하면 지침·해석 탭과, 지정한 경로의 결과 화면에 함께 나옵니다.</p>
       <div id="ruleForm" hidden>
         <div class="grid3">
-          <div class="field"><label for="rHosp">병원</label><input type="text" id="rHosp" placeholder="부천성모병원"></div>
+          <div class="field"><label for="rHosp">병원</label><input type="text" id="rHosp" placeholder="병원 이름"></div>
           <div class="field"><label for="rRef">조항·문서</label><input type="text" id="rRef" placeholder="연명의료 업무 지침 제5조"></div>
         </div>
         <div class="field" style="margin-top:10px"><label for="rQ">제목</label><input type="text" id="rQ" placeholder="예: 중단 전 원무팀 통보"></div>
@@ -465,12 +684,10 @@ details{padding-block:2px}
   </section>
 
   <footer>
-    <img class="flogo flogo-l" src="assets/logo.svg" alt="가톨릭대학교 부천성모병원" onerror="this.hidden=true">
+    <span class="credit">개발자 노상엽 · 버전 <span class="js-ver"></span> · 수정일자 <span class="js-mod"></span></span>
     <span class="srcline">법령 기준: 연명의료결정법, 시행령, 시행규칙 · 내용 기준일 <span class="js-basis">2026-11-27</span></span>
     <span class="srcline">참고: 찾기쉬운 생활법령정보 「연명의료결정제도」</span>
     <span class="srcline">참고: 국가생명윤리정책원 「의료인을 위한 연명의료결정 사례집」(2020) · 서울대학교병원 의료기관윤리위원회 표준운영지침(2021) · 서울대학교병원 완화의료·임상윤리센터 심포지엄 초록집(2021)</span>
-    <span class="srcline">부천성모병원: 「임상의료윤리위원회 운영내규」(9.1-5-48, 2026.4.1) · 「임상의료윤리위원회 표준내규 및 운영지침」(2026.4.1)</span>
-    <span class="srcline">병원 지침: 가톨릭중앙의료원 「연명의료의 유보/중단에 관한 지침」(2020.9.15) · 「심폐소생술 유보에 관한 지침」(2026.4.17)</span>
     <span class="srcline">행정지침 기준: 보건복지부·국가생명윤리정책원 「연명의료결정제도 안내(의료기관용)」 2024판 (쪽수 표기) · 서식: 시행규칙 별지(2023.7.31 개정)</span>
     <span class="srcline">원문: 국가법령정보센터 law.go.kr · 국립연명의료관리기관 lst.go.kr · 정보처리시스템 intra.lst.go.kr</span>
   </footer>
@@ -482,26 +699,27 @@ details{padding-block:2px}
     <div class="row2"><span>사용자</span><span class="who" id="whoami"></span></div>
     <div class="row2"><span>로그아웃<br><span class="who">공용 PC에서는 사용 후 꼭 로그아웃하세요</span></span><button class="btn" type="button" id="logoutBtn">로그아웃</button></div>
     <div id="lockSec"></div>
-    <label class="row2" for="hospSel2"><span>적용 병원 내규</span><select id="hospSel2"></select></label>
+    <label class="row2" for="hospSel2" hidden><span>적용 병원 내규</span><select id="hospSel2"></select></label>
     <div class="row2"><span>근거·출처 표시<br><span class="who">조문, 안내서 쪽수, 지침 번호를 함께 보여 줍니다</span></span><button class="switch" id="srcToggle" role="switch" aria-checked="false" aria-label="근거·출처 표시"></button></div>
     <div class="row2"><span>안내 문구 다시 보기</span><button class="btn" id="noticeShow">보기</button></div>
     <div class="row2"><span>글자 크기</span><div class="seg" role="group" aria-label="글자 크기" id="fsSeg"><button type="button" data-v="1">보통</button><button type="button" data-v="1.15">크게</button><button type="button" data-v="1.3">아주 크게</button></div></div>
-    <div class="row2"><span>화면</span><div class="seg" role="group" aria-label="화면 밝기" id="thSeg"><button type="button" data-v="light">밝게</button><button type="button" data-v="dark">어둡게(야간)</button></div></div>
+    <div class="row2"><span>화면</span><div class="seg" role="group" aria-label="화면 밝기" id="thSeg"><button type="button" data-v="auto">자동</button><button type="button" data-v="light">밝게</button><button type="button" data-v="dark">어둡게</button></div></div>
     <label class="row2" for="idleSel"><span>자동 잠금<br><span class="who">쓰지 않으면 이 시간 뒤 입장 화면으로 돌아갑니다</span></span><select id="idleSel"><option value="5">5분</option><option value="10">10분</option><option value="15">15분</option><option value="30">30분</option></select></label>
     <div id="dataSec"></div>
-    <div class="row2"><span>의견·오류 보내기<br><span class="who">메일 앱으로 개발자에게 보냅니다</span></span><button class="btn" id="fbBtn">보내기</button></div>
+    <div class="row2"><span>앱 주소 공유<br><span class="who">동료에게 링크를 보내거나 복사합니다</span></span><button class="btn" type="button" id="shareBtn">공유</button></div>
+    <div class="row2" id="installRow"><span>홈 화면에 설치<br><span class="who" id="installHint">설치하면 인터넷 없이도 열립니다</span></span><button class="btn" type="button" id="installBtn2">설치</button></div>
+    <button id="fbBtn" hidden></button>
     <details><summary>변경 이력</summary><div id="changelog"></div></details>
     <details><summary>내 사용 기록(이 기기)</summary><div id="usageStat"></div></details>
     <dl class="info">
       <dt>앱 이름</dt><dd>연명의료 현장 길라잡이</dd>
       <dt>개발자</dt><dd>노상엽</dd>
-      <dt>이메일</dt><dd>ace@cmcnu.or.kr</dd>
       <dt>개발일자</dt><dd>2026-10-06</dd>
       <dt>수정일자</dt><dd class="js-mod">2026-10-07</dd>
       <dt>버전</dt><dd class="js-ver"></dd>
       <dt>내용 기준일</dt><dd class="js-basis"></dd>
       <dt>내용 검수</dt><dd class="js-review"></dd>
-      <dt>내용 기준</dt><dd>연명의료결정법·시행령·시행규칙, 「연명의료결정제도 안내(의료기관용)」 2024, 가톨릭중앙의료원 지침, 부천성모병원 임상의료윤리위원회 운영내규·표준운영지침(2026.4.1)</dd>
+      <dt>내용 기준</dt><dd>연명의료결정법·시행령·시행규칙, 「연명의료결정제도 안내(의료기관용)」 2024, 「의료인을 위한 연명의료결정 사례집」 2020</dd>
     </dl>
     <p class="who" style="margin:0">절차 안내용 도구입니다. 실제 판단과 이행은 담당의사·해당 분야 전문의와 의료기관윤리위원회 절차를 따릅니다.</p>
   </div>
@@ -564,10 +782,10 @@ if(!window.claude){
 }
 
 
-const SRC = {law:{label:"법령",cls:"law"}, nibp:{label:"행정지침·해석",cls:"nibp"}, cmc:{label:"가톨릭중앙의료원",cls:"hosp"}, hosp:{label:"병원 내규",cls:"hosp"}, ref:{label:"참고(타 기관)",cls:"nibp"}};
+const SRC = {law:{label:"법령",cls:"law"}, nibp:{label:"행정지침·해석",cls:"nibp"}, cmc:{label:"원내 지침",cls:"hosp"}, hosp:{label:"병원 내규",cls:"hosp"}, ref:{label:"참고(타 기관)",cls:"nibp"}};
 /* 병원 내규: 코드에 직접 넣을 때는 GUIDES에 {src:"hosp", hospital:"병원명", ...}, 운영 중에는 지침·해석 탭에서 등록(db 'hosprules') */
 let HOSP_RULES = [];           // db에서 읽은 내규
-let curHosp = "부천성모병원";
+let curHosp = "우리 병원";
 try{ curHosp = localStorage.getItem("lst-hosp") || curHosp; }catch(e){}
 function allGuides(){
   const fromCode = GUIDES.filter(g=>g.src!=="hosp" || !g.hospital || g.hospital===curHosp);
@@ -798,7 +1016,7 @@ function renderResult(key){
   pPath.innerHTML = trailHTML() + `<div class="card result fade">
     <span class="tag ${r.tag[0]}">${r.tag[1]}</span>
     <h2>${r.title}</h2><span class="src law">${r.law}</span>
-    ${guideUnlocked()?`<div class="hospbox"><div class="ttl">가톨릭중앙의료원 지침 · ${esc(curHosp)} 내규 (필수 적용)</div>${hosp.map(guideP).join("")}${hosp.some(g=>g.src==="hosp")?"":`<p class="empty" style="margin:6px 0 0">${esc(curHosp)} 내규 중 이 경로에 등록된 항목은 아직 없습니다.</p>`}</div>`:lockedBox("원내 지침 · 내규 · 행정해석")}
+    ${guideUnlocked()?`<div class="hospbox"><div class="ttl">원내 지침 · ${esc(curHosp)} 내규 (필수 적용)</div>${hosp.map(guideP).join("")}${hosp.some(g=>g.src==="hosp")?"":`<p class="empty" style="margin:6px 0 0">${esc(curHosp)} 내규 중 이 경로에 등록된 항목은 아직 없습니다.</p>`}</div>`:lockedBox("원내 지침 · 내규 · 행정해석")}
     <h3>확인하는 사람</h3><ul>${r.who.map(w=>`<li>${w}</li>`).join("")}</ul>
     ${r.docs.length?`<h3>남길 서류</h3><ul>${r.docs.map(d=>`<li>${d}</li>`).join("")}</ul>`:""}
     <h3>절차와 주의</h3><ul>${r.steps.map(s=>`<li>${linkTerms(s)}</li>`).join("")}</ul>
@@ -915,6 +1133,7 @@ tabBtns.forEach(b=>{ const k=b.dataset.tab, pn=document.getElementById("p-"+k); 
 function selectTab(b,focus){
   tabBtns.forEach(x=>{x.setAttribute("aria-selected",x===b); x.tabIndex=x===b?0:-1;});
   TAB_KEYS.forEach(k=>{const pn=document.getElementById("p-"+k); if(pn) pn.hidden = k!==b.dataset.tab;});
+  document.body.dataset.tab=b.dataset.tab;
   try{localStorage.setItem("lst-tab",b.dataset.tab);}catch(e){}
   if(focus) b.focus();
   window.scrollTo({top:0});
@@ -1016,7 +1235,7 @@ const CK = {
   f13:"이행서(제13호): 실제 유보·중단 항목 체크, 이행일 ≥ 제9호 작성일",
   sys:"정보처리시스템 통보(이행 후 7일 이내)",
   fee:"해당 수가 코드로 행위료 처방",
-  eth:"의료기관윤리위원회(임상의료윤리위원회) 상담·자문 요청",
+  eth:"의료기관윤리위원회 상담·자문 요청",
   dnr:"DNR 판단 시 원내 지침 확인",
 };
 function checklist(route,f){
@@ -1148,7 +1367,7 @@ function refreshFlow(){
     ${["A","A2","B1","B","C","D","M"].includes(fl.route)?`<div class="grid3" style="margin-top:10px"><div class="field"><label for="cImpl">이행일 (숫자 8자리 입력 가능)</label><input type="text" inputmode="numeric" id="cImpl" class="datein" placeholder="예: 20261127" value="${esc(c.implDate||"")}"></div></div>`:""}
     <h3 style="font-size:.82rem;color:var(--muted);margin:14px 0 6px">체크리스트</h3>
     <div class="chk">${ck.map(k=>{const t=c.checks?.[k]; const lbl=ckLabel(k); let due=""; if(k==="sys"&&f13&&!t){const d=new Date(new Date(f13).getTime()+7*864e5); due=` <span class="due">통보 기한 ${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}${implISO?"":" (제13호 체크 시각 기준 · 이행일을 넣으면 정확해집니다)"}</span>`;} return `<label><input type="checkbox" data-k="${k}" ${t?"checked":""}><span>${esc(lbl)}${t?`<span class="ts">완료 ${fmt(t)}</span>`:due?`<span class="ts">${due}</span>`:""}</span></label>`;}).join("")}</div>
-    ${guideUnlocked()?`<div class="hospbox"><div class="ttl">가톨릭중앙의료원 지침 · ${esc(curHosp)} 내규</div>${must.map(guideP).join("")||'<p class="empty" style="margin:4px 0 0">해당 항목 없음</p>'}</div>`:lockedBox("원내 지침 · 내규")}
+    ${guideUnlocked()?`<div class="hospbox"><div class="ttl">원내 지침 · ${esc(curHosp)} 내규</div>${must.map(guideP).join("")||'<p class="empty" style="margin:4px 0 0">해당 항목 없음</p>'}</div>`:lockedBox("원내 지침 · 내규")}
     <h3 style="font-size:.82rem;color:var(--muted);margin:14px 0 6px">확인하는 사람</h3><ul>${r.who.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>
     <div class="row" style="margin-top:12px"><button class="btn" type="button" id="handoverBtn">인수인계용 한 장 요약</button></div>`;
   const ci=document.getElementById("cImpl"); if(ci){ bindDateInput(ci,v=>{ if(v!==(c.implDate||"")){ c.implDate=v; c.log.push({t:now(),m:v?`이행일 ${v}`:"이행일 지움"}); renderLog(); refreshFlow(); if(c.id) saveCase(null);} }); }
@@ -1276,7 +1495,7 @@ function applyExtract(o){
 /* ---------- 병원 선택 · 내규 관리 ---------- */
 const hospSel=document.getElementById("hospSel");
 function renderHospSel(){
-  const set=new Set(["부천성모병원",curHosp]); GUIDES.forEach(g=>g.hospital&&set.add(g.hospital)); HOSP_RULES.forEach(r=>r.hospital&&set.add(r.hospital));
+  const set=new Set([curHosp]); GUIDES.forEach(g=>g.hospital&&set.add(g.hospital)); HOSP_RULES.forEach(r=>r.hospital&&set.add(r.hospital));
   hospSel.innerHTML=[...set].map(h=>`<option ${h===curHosp?"selected":""}>${esc(h)}</option>`).join("");
 }
 hospSel.onchange=()=>{curHosp=hospSel.value; try{localStorage.setItem("lst-hosp",curHosp);}catch(e){} renderGuides(); if(cur) refreshFlow(); rerenderPath();};
@@ -1322,7 +1541,7 @@ window._capsReady=(async()=>{
 
 /* ============================================================
    윤리 자문·심의 의뢰 (표준운영지침 별지1 심의/자문 의뢰서)
-   - 내 의뢰: referrals/<내 id> 문서의 items 맵 (본인 쓰기, 편집 권한자=의료윤리사무국 읽기·상태 변경)
+   - 내 의뢰: referrals/<내 id> 문서의 items 맵 (본인 쓰기, 편집 권한자=윤리위원회 사무국 읽기·상태 변경)
    - 환자 식별정보는 저장하지 않음(자동 마스킹)
    ============================================================ */
 const REF_STATUS = ["제출됨","접수","검토 중","신속자문 완료","소위원회 회부","위원회 상정","결과 통보","종결"];
@@ -1353,12 +1572,12 @@ function refRender(){
   <div class="card">
     <p class="q">윤리 자문·심의 의뢰</p>
     <p class="qhint" style="margin:0 0 6px">의뢰서는 윤리적 의사결정 4분면(의학적 문제 · 환자의 선호 · 삶의 질 · 맥락)에 맞춰 정리됩니다.</p>
-    <p class="qhint" style="margin:0">진료 중 겪는 윤리적 딜레마를 적으면 표준운영지침의 <b>별지1 심의/자문 의뢰서</b> 형식으로 정리해 임상의료윤리위원회(의료윤리사무국)에 제출합니다. 응급이면 먼저 <b>032-340-2019</b>로 전화하세요. 자문은 24시간 의뢰할 수 있고, 익명 의뢰는 안 되며 담당 의료진에게 접수 사실이 통지됩니다.</p>
+    <p class="qhint" style="margin:0">진료 중 겪는 윤리적 딜레마를 적으면 <b>심의/자문 의뢰서</b> 형식으로 정리해 줍니다. 응급이면 먼저 소속 병원 윤리위원회 사무국에 전화하세요. 바로 연락할 번호는 핵심 탭의 「바로 연락」에 저장해 둘 수 있습니다.</p>
     <div class="row" style="margin-top:10px"><button class="btn primary" id="refNew">새 의뢰서 작성</button></div>
   </div>
   <div id="refEdit"></div>
   <div class="card online-only"><p class="q">내 의뢰</p><div class="clist" id="refMineList"></div></div>
-  <div class="card online-only" id="refInboxCard" hidden><p class="q">접수함 (의료윤리사무국)</p><p class="qhint" style="margin:0 0 8px">편집 권한자에게만 보입니다. 상태와 회신을 적으면 요청인 화면에 바로 반영됩니다.</p><div class="clist" id="refInboxList"></div></div>`;
+  <div class="card online-only" id="refInboxCard" hidden><p class="q">접수함 (윤리위원회 사무국)</p><p class="qhint" style="margin:0 0 8px">편집 권한자에게만 보입니다. 상태와 회신을 적으면 요청인 화면에 바로 반영됩니다.</p><div class="clist" id="refInboxList"></div></div>`;
   document.getElementById("refNew").onclick=()=>{refCur=refBlank(); refEditor();};
   refLists();
   if(refCur) refEditor();
@@ -1400,7 +1619,7 @@ function refEditor(readonly){
     <p class="fq" style="margin-top:12px">${locked?"":"4. "}심의/자문 요청 내용</p>
     <div style="display:flex;flex-direction:column;gap:10px">${REF_SECTIONS.map(([k,l,rows])=>`<div class="field"><label for="rf-${k}">${l}</label>${rows===1?`<input type="text" id="rf-${k}" value="${esc(r[k])}" ${locked?"disabled":""}>`:`<textarea id="rf-${k}" style="min-height:${rows*26}px" ${locked?"disabled":""}>${esc(r[k])}</textarea>`}</div>`).join("")}</div>
     <div class="row" style="margin-top:14px"><button class="btn" id="refPrev">미리보기</button>${locked?"":`<button class="btn primary online-only" id="refSubmit">위원회에 제출</button>`}<span class="status" id="refSt"></span></div>
-    ${locked?"":`<p class="qhint standalone-only" style="margin:6px 0 0">미리보기에서 PDF로 저장하거나 인쇄해 병원정보시스템 또는 의료윤리사무국(032-340-2019)으로 의뢰하세요.</p><p class="qhint online-only" style="margin:6px 0 0">제출하면 의료윤리사무국 접수함에 들어갑니다. 원내 규정에 따라 병원정보시스템 의뢰가 필요하면 미리보기에서 PDF로 저장해 첨부하세요.</p>`}
+    ${locked?"":`<p class="qhint standalone-only" style="margin:6px 0 0">미리보기에서 PDF로 저장하거나 인쇄해 소속 병원의 윤리위원회 의뢰 절차에 따라 제출하세요.</p><p class="qhint online-only" style="margin:6px 0 0">제출하면 윤리위원회 사무국 접수함에 들어갑니다. 원내 규정에 따라 병원정보시스템 의뢰가 필요하면 미리보기에서 PDF로 저장해 첨부하세요.</p>`}
   </div>`;
   document.getElementById("refClose").onclick=()=>{refPull(); refDraftSave(true); refCur=null; el.innerHTML="";};
   document.getElementById("refPrev").onclick=()=>{refPull(); refPreview(refCur);};
@@ -1428,7 +1647,7 @@ async function refAI(){
   const text=maskPII(r.raw).text.trim(); const cs=r.caseId?caseSummary(r.caseId):"";
   if(!text&&!cs){st.className="status err"; st.textContent="딜레마 내용을 먼저 적어 주세요."; return;}
   if(!SAMPLE){st.className="status err"; st.textContent="이 보기에서는 자동 정리를 쓸 수 없습니다. 아래 칸을 직접 채워 주세요."; return;}
-  const prompt=`당신은 가톨릭대학교 부천성모병원 임상의료윤리위원회의 의뢰 접수를 돕는 도우미입니다. 의료진이 적은 윤리적 딜레마를 표준운영지침의 심의/자문 의뢰서(별지1)와 자문 기록지 항목에 맞게 정리하세요.
+  const prompt=`당신은 의료기관윤리위원회의 의뢰 접수를 돕는 도우미입니다. 의료진이 적은 윤리적 딜레마를 표준운영지침의 심의/자문 의뢰서(별지1)와 자문 기록지 항목에 맞게 정리하세요.
 규칙: 환자·가족·의료진의 이름, 등록번호, 생년월일, 연락처, 구체적 날짜 등 식별정보는 쓰지 마세요. 적힌 내용만 정리하고 없는 사실을 지어내지 마세요. 정보가 없으면 "확인 필요"라고 쓰세요. 존댓말 문장, 각 항목 300자 이내.
 판단 기준: "심의"는 연명의료중단등결정·이행에 관한 요청 사항이나 담당의사 교체처럼 위원회 의결이 필요한 경우, 그 밖의 윤리적 딜레마 해결 도움은 "자문". 특정 환자 사례면 "사례", 기관 정책이면 "비사례(정책)". 지금 바로 결정이 필요하면 "응급", 하루 안이면 "24시간 이내", 아니면 "일반".
 정리 틀은 윤리적 의사결정 4분면(의학적 문제, 환자의 선호, 삶의 질, 맥락적 특성)을 따르세요. medical에는 기저질환·치료 경과·현재 상태·임종과정 판단 여부, prognosis에는 생존 가능성과 삶의 질 측면의 예후, decider에는 주 의사결정자(관계만, 이름 금지), legal에는 법적 분쟁 진행 여부를 적으세요.
@@ -1442,7 +1661,7 @@ ${cs}`;
     if(["자문","심의"].includes(o.type)) r.type=o.type; if(["사례","비사례(정책)"].includes(o.kind)) r.kind=o.kind; if(["응급","24시간 이내","일반"].includes(o.urgency)) r.urgency=o.urgency;
     REF_SECTIONS.forEach(([k])=>{if(typeof o[k]==="string") r[k]=maskPII(o[k].slice(0,600)).text;});
     refEditor(); document.getElementById("refAIst").textContent="정리했습니다. 내용을 확인·수정한 뒤 미리보기와 제출을 하세요.";
-    if(r.urgency==="응급") document.getElementById("refAIst").textContent+=" 응급이면 032-340-2019로 먼저 전화하세요.";
+    if(r.urgency==="응급") document.getElementById("refAIst").textContent+=" 응급이면 윤리위원회 사무국에 먼저 전화하세요.";
   }catch(e){ st.className="status err"; st.textContent=({not_granted:"사용을 허락하지 않아 정리하지 못했습니다. 칸을 직접 채워 주세요.",rate_limited:"요청이 많습니다. 잠시 뒤 다시 누르세요."})[e?.code]||"정리하지 못했습니다. 칸을 직접 채워 주세요."; }
   finally{ const b=document.getElementById("refAI"); if(b) b.disabled=false; }
 }
@@ -1462,7 +1681,7 @@ async function refSubmit(){
     const ref=DB.doc("referrals/"+UID); const snap=await ref.get(); const cur=snap.exists?snap.data():{items:{}};
     const items={...(cur.items||{})}; items[r.id]=r;
     await ref.set({items, updatedAt:now()});
-    st.textContent="제출했습니다. 의료윤리사무국이 확인하면 상태가 바뀝니다."; refCur=JSON.parse(JSON.stringify(r)); refDraftClear(); refEditor(true);
+    st.textContent="제출했습니다. 윤리위원회 사무국이 확인하면 상태가 바뀝니다."; refCur=JSON.parse(JSON.stringify(r)); refDraftClear(); refEditor(true);
   }catch(e){ r.status="작성 중"; st.className="status err"; st.textContent=e?.code==="quota_exceeded"?"저장 공간이 가득 찼습니다.":"제출하지 못했습니다. 권한(Contributor 이상)과 로그인 상태를 확인하세요."; }
 }
 async function refAdminSave(key,b){
@@ -1481,7 +1700,7 @@ function refFormHTML(r){
   const sec=rawSec+REF_SECTIONS.filter(([k])=>k!=="title"&&r[k]).map(([k,l])=>`<div class="pf-sec"><b>${esc(l)}</b><div>${esc(r[k]).replace(/\n/g,"<br>")}</div></div>`).join("");
   const box=k=>REQ_KIND.map(x=>`${r.reqKind===x?"■":"□"} ${x==="기타"?`기타[${esc(r.reqKindEtc||"")}]`:x}`).join(" / ");
   return `<div class="pf" id="pfSheet">
-    <div class="pf-tag">&lt;별지 1&gt; 심의/자문 의뢰서 CMC 10/2021</div>
+    <div class="pf-tag">심의/자문 의뢰서</div>
     <h1 class="pf-h">심의/자문 의뢰서</h1>
     <table class="pf-t">
       <tr><th rowspan="2">요청인</th><td><span class="pf-l">성명</span> ${esc(r.reqName)} ${r.reqDept?`(${esc(r.reqDept)})`:""}</td><td><span class="pf-l">연락처</span> ${esc(r.reqPhone)}</td></tr>
@@ -1491,7 +1710,7 @@ function refFormHTML(r){
     </table>
     <p class="pf-date">${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.</p>
     <p class="pf-sign">요청인 : ${esc(r.reqName)} <span class="pf-l">(서명 또는 인)</span></p>
-    <p class="pf-to">가톨릭대학교 부천성모병원 임상의료윤리위원회 위원장 귀중</p>
+    <p class="pf-to">의료기관윤리위원회 위원장 귀중</p>
   </div>`;
 }
 function refPreview(r){
@@ -1577,7 +1796,7 @@ const _rg=renderGuides; renderGuides=function(){_rg(); renderHospCore();};
 
 document.getElementById("glossList").innerHTML=Object.entries(TERMS).map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
 /* ---------- 앱 셸 ---------- */
-const APP_INFO={developer:"노상엽",email:"ace@cmcnu.or.kr",created:"2026-10-06",modified:CONTENT_META.modified,version:CONTENT_META.version};
+const APP_INFO={developer:"노상엽",email:"",created:"2026-10-06",modified:CONTENT_META.modified,version:CONTENT_META.version};
 document.querySelectorAll(".js-mod").forEach(e=>e.textContent=APP_INFO.modified);
 document.querySelectorAll(".js-ver").forEach(e=>e.textContent=APP_INFO.version);
 document.querySelectorAll(".js-basis").forEach(e=>e.textContent=CONTENT_META.basis);
@@ -1667,7 +1886,7 @@ function checkAdmin(pw){
   return sha256("lst-admin:"+String(pw).replace(/\D/g,""))===ADMIN_HASH;
 }
 function guideUnlocked(){ return false; try{return sessionStorage.getItem("lst-gl")==="1";}catch(e){return false;} }
-function lockedBox(what){ return `<div class="lockbox"><b>${what}</b><span>공개판에는 원내 지침·내규·행정해석이 없습니다. 원내 배포판에서 확인하세요.</span></div>`; }
+function lockedBox(what){ return `<div class="lockbox"><b>${what}</b><span>이 앱에는 병원별 내규를 담지 않았습니다. 소속 병원의 지침을 함께 확인하세요.</span></div>`; }
 function salt(){ const a=new Uint8Array(12); (window.crypto||{}).getRandomValues?crypto.getRandomValues(a):a.forEach((_,i)=>a[i]=Math.random()*256|0); return [...a].map(x=>x.toString(16).padStart(2,"0")).join(""); }
 
 /* 로컬 사용자 저장소: 사번 → {name, no, salt, hash, createdAt} (원내 배포판·로그인 정보 없는 보기) */
@@ -1678,14 +1897,10 @@ const userKey=(name,no)=>`${name}(${no})`;
 const gate=document.createElement("div"); gate.className="gate"; document.body.appendChild(gate);
 let gateMode="local", gateUid=null, gateAuth=null;
 function gateShell(inner){
-  const art=document.querySelector(".cover-main"), logo=document.querySelector(".flogo-l");
-  const artOk=art&&art.complete&&art.naturalWidth>0, logoOk=logo&&!logo.hidden&&logo.naturalWidth>0;
-  return `<div class="gate-card${artOk?" art":""}">${artOk?`<div class="gate-art"><img class="ga-bg" src="${art.getAttribute("src")}" alt="" aria-hidden="true"><img class="ga-main" src="${art.getAttribute("src")}" alt="기대와 용기 · 가톨릭대학교 부천성모병원"></div>`:""}<div class="gate-body">
-    <h2>연명의료 현장 길라잡이</h2><p class="who" style="margin:0">가톨릭대학교 부천성모병원</p>
+  return `<div class="gate-card"><div class="gate-brand"><span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></span><div><h2>연명의료 현장 길라잡이</h2><p class="who" style="margin:0">전공의·인턴을 위한 연명의료결정 안내</p></div></div>
     ${inner}
-    ${logoOk?`<img class="gate-logo" src="${logo.getAttribute("src")}" alt="가톨릭대학교 부천성모병원">`:""}
-    <p class="who" style="margin:0;text-align:center">개발자 노상엽 · ace@cmcnu.or.kr</p>
-  </div></div>`;
+    <p class="who gate-foot">개발자 노상엽</p>
+  </div>`;
 }
 function localUsers(){ return Object.values(LU.all()).filter(r=>r&&r.no&&r.hash).sort((a,b)=>(b.lastAt||b.createdAt||"").localeCompare(a.lastAt||a.createdAt||"")); }
 function defaultView(){ return gateMode==="db" ? (gateAuth?"pw":"reg") : (localUsers().length?"list":"reg"); }
@@ -1698,16 +1913,17 @@ function showGate(msg,view){
     const us=localUsers(); const last=ls.get("lst-last"); const sel=us.some(u=>u.no===last)?last:us[0].no;
     inner=`<form id="gateForm" autocomplete="off">
       <p class="gate-h">사용자를 고르고 비밀번호를 입력하세요</p>
-      <div class="ulist" role="radiogroup" aria-label="등록된 사용자">${us.map(u=>`<label class="uitem"><input type="radio" name="gU" value="${esc(u.no)}" ${u.no===sel?"checked":""}><span class="uav" aria-hidden="true">${esc(u.name.slice(0,1))}</span><span class="un"><b>${esc(u.name)}</b><small>사번 ${esc(maskNo(u.no))}</small></span></label>`).join("")}</div>
+      <div class="ulist" role="radiogroup" aria-label="등록된 사용자">${us.map(u=>`<label class="uitem"><input type="radio" name="gU" value="${esc(u.no)}" ${u.no===sel?"checked":""}><span class="uav" aria-hidden="true">${esc(u.name.slice(0,1))}</span><span class="un"><b>${esc(u.name)}</b><small>아이디 ${esc(maskNo(u.no))}</small></span></label>`).join("")}</div>
       <div class="field"><label for="gPw">비밀번호</label><input type="password" id="gPw" required maxlength="64" autocomplete="current-password"></div>
       ${errP}
       <button class="btn primary" type="submit" style="width:100%">입장</button>
       <div class="row" style="justify-content:space-between;gap:6px"><button class="linkbtn" type="button" id="gNew">+ 새 사용자 등록</button><button class="linkbtn" type="button" id="gForgot">비밀번호를 잊었어요</button></div>
+      <div class="gate-or"><span>또는</span></div><button class="btn" type="button" id="gGuest" style="width:100%">등록 없이 둘러보기</button><p class="who" style="margin:0;text-align:center">둘러보기에서는 케이스를 저장하지 않습니다.</p>
     </form>`;
   } else if(view==="pw"){
     inner=`<form id="gateForm" autocomplete="off">
       <p class="gate-h">비밀번호를 입력하세요</p>
-      <div class="ulist"><div class="uitem on"><span class="uav" aria-hidden="true">${esc(gateAuth.name.slice(0,1))}</span><span class="un"><b>${esc(gateAuth.name)}</b><small>사번 ${esc(gateAuth.no)}</small></span></div></div>
+      <div class="ulist"><div class="uitem on"><span class="uav" aria-hidden="true">${esc(gateAuth.name.slice(0,1))}</span><span class="un"><b>${esc(gateAuth.name)}</b><small>아이디 ${esc(gateAuth.no)}</small></span></div></div>
       <div class="field"><label for="gPw">비밀번호</label><input type="password" id="gPw" required maxlength="64" autocomplete="current-password"></div>
       ${errP}
       <button class="btn primary" type="submit" style="width:100%">입장</button>
@@ -1717,14 +1933,15 @@ function showGate(msg,view){
     const back = gateMode==="local" && localUsers().length;
     inner=`<form id="gateForm" autocomplete="off">
       <p class="gate-h">처음 사용 · 사용자 등록</p>
-      <div class="field"><label for="gName">이름</label><input type="text" id="gName" required maxlength="20"></div>
-      <div class="field"><label for="gNo">사번</label><input type="text" id="gNo" required maxlength="20" inputmode="numeric"></div>
+      <div class="field"><label for="gName">이름 <span class="lbl-note">목록에 보일 이름</span></label><input type="text" id="gName" required maxlength="20"></div>
+      <div class="field"><label for="gNo">아이디 <span class="lbl-note">사번·별명 등 기억하기 쉬운 것</span></label><input type="text" id="gNo" required maxlength="20" autocapitalize="off" spellcheck="false"></div>
       <div class="field"><label for="gPw">비밀번호 (4자 이상)</label><input type="password" id="gPw" required minlength="4" maxlength="64" autocomplete="new-password"></div>
       <div class="field"><label for="gPw2">비밀번호 확인</label><input type="password" id="gPw2" required maxlength="64" autocomplete="new-password"></div>
       ${errP}
       <button class="btn primary" type="submit" style="width:100%">등록하고 입장</button>
       ${back?`<button class="btn" type="button" id="gBack" style="width:100%">등록된 사용자 목록으로</button>`:""}
-      <p class="who" style="margin:0">등록 후에는 목록에서 이름을 고르고 비밀번호만 입력하면 됩니다.</p>
+      <p class="who" style="margin:0">케이스는 비밀번호로 암호화해 이 기기에만 저장합니다. 등록 후에는 이름을 고르고 비밀번호만 입력하면 됩니다.</p>
+      <div class="gate-or"><span>또는</span></div><button class="btn" type="button" id="gGuest" style="width:100%">등록 없이 둘러보기</button><p class="who" style="margin:0;text-align:center">둘러보기에서는 케이스를 저장하지 않습니다.</p>
     </form>`;
   }
   gate.innerHTML=gateShell(inner);
@@ -1733,6 +1950,7 @@ function showGate(msg,view){
   document.getElementById("gForgot")?.addEventListener("click",()=>forgot());
   document.getElementById("gNew")?.addEventListener("click",()=>showGate("","reg"));
   document.getElementById("gBack")?.addEventListener("click",()=>showGate("","list"));
+  document.getElementById("gGuest")?.addEventListener("click",()=>enterGuest());
   f.querySelectorAll('input[name="gU"]').forEach(r=>{ r.addEventListener("change",()=>{document.getElementById("gPw").value=""; document.getElementById("gMsg").textContent="";}); r.closest("label").addEventListener("click",ev=>{ if(ev.detail>0) setTimeout(()=>document.getElementById("gPw").focus(),0); }); });
   f.onsubmit=e=>{e.preventDefault(); view==="reg"?doRegister():doEnter(view);};
 }
@@ -1761,32 +1979,32 @@ function doEnter(view){
 function doRegister(){
   const name=document.getElementById("gName").value.trim(), no=normNo(document.getElementById("gNo").value), pw=document.getElementById("gPw").value, pw2=document.getElementById("gPw2").value;
   const again=m=>{ showGate(m,"reg"); document.getElementById("gName").value=name; document.getElementById("gNo").value=no; };
-  if(!name||!no) return again("이름과 사번을 입력하세요.");
+  if(!name||!no) return again("이름과 아이디를 입력하세요.");
   if(pw.length<4) return again("비밀번호는 4자 이상으로 정하세요.");
   if(pw!==pw2) return again("비밀번호 확인이 일치하지 않습니다.");
   const sl=salt(), rec={name,no,salt:sl,hash:pwHash(sl,pw),createdAt:now()};
   if(gateMode==="db"){
     DB.doc("data/users/"+gateUid+"/_auth").set(rec).then(()=>{gateAuth=rec; finish(name,no);}).catch(()=>again("등록하지 못했습니다. 권한(Contributor 이상)을 확인하세요."));
   } else {
-    const all=LU.all(); if(all[no]){ ls.set("lst-last",no); return showGate("이미 등록된 사번입니다. 목록에서 고르고 비밀번호를 입력하세요.","list"); }
+    const all=LU.all(); if(all[no]){ ls.set("lst-last",no); return showGate("이미 등록된 아이디입니다. 목록에서 고르고 비밀번호를 입력하세요.","list"); }
     rec.ksalt=salt(); all[no]=rec; LU.save(all); ss.set("lst-ck",LSTK.derive(pw,rec.ksalt)); finish(name,no);
   }
 }
 function forgot(){
-  gate.innerHTML=`<div class="gate-card"><h2>비밀번호 · 등록 정보 초기화</h2>
-    <p class="qhint" style="margin:0">관리자 비밀번호를 입력하면 ${gateMode==="db"?"이 계정의 등록 정보(이름·비밀번호)를 지우고 다시 등록할 수 있습니다. 저장된 케이스는 그대로 남습니다.":"해당 사번의 등록 정보와 <b>그 사용자의 케이스를 모두 지웁니다</b>. 케이스는 본인 비밀번호로 잠겨 있어 비밀번호 없이는 열 수 없기 때문입니다. 백업 파일이 있으면 다시 등록한 뒤 가져올 수 있습니다."} 관리자 비밀번호는 관리자(개발자 노상엽)에게 문의하세요.</p>
-    <form id="fgForm" autocomplete="off">${gateMode==="local"?`<div class="field"><label for="fgNo">사번</label><input type="text" id="fgNo" required value="${esc((document.querySelector('input[name="gU"]:checked')||{}).value||"")}"></div>`:""}
-    <div class="field"><label for="fgPw">관리자 비밀번호</label><input type="password" id="fgPw" required></div>
-    <p class="status err" id="fgMsg"></p><button class="btn primary" type="submit" style="width:100%">초기화</button><button class="btn" type="button" id="fgBack" style="width:100%">돌아가기</button></form></div>`;
+  const pre=(document.querySelector('input[name="gU"]:checked')||{}).value||"";
+  gate.innerHTML=`<div class="gate-card"><div class="gate-brand"><div><h2>비밀번호를 잊었어요</h2><p class="who" style="margin:0">등록 정보를 지우고 다시 등록합니다</p></div></div>
+    <p class="qhint" style="margin:0">케이스는 그 비밀번호로 암호화되어 있어 비밀번호 없이는 열 수 없습니다. 초기화하면 <b>그 사용자의 등록 정보와 케이스가 함께 지워집니다</b>. 백업 파일이 있으면 다시 등록한 뒤 설정 → '백업 가져오기'로 되살릴 수 있습니다.</p>
+    <form id="fgForm" autocomplete="off"><div class="field"><label for="fgNo">아이디</label><input type="text" id="fgNo" required value="${esc(pre)}"></div>
+    <label class="chkline"><input type="checkbox" id="fgOk" required> 케이스가 지워지는 것을 확인했습니다</label>
+    <p class="status err" id="fgMsg"></p><button class="btn danger-fill" type="submit" style="width:100%">초기화</button><button class="btn" type="button" id="fgBack" style="width:100%">돌아가기</button></form></div>`;
   document.getElementById("fgBack").onclick=()=>showGate();
-  document.getElementById("fgForm").onsubmit=async e=>{e.preventDefault(); const msg=document.getElementById("fgMsg");
-    const aw=failWait("admin"); if(aw){ msg.textContent=`여러 번 틀려 ${aw}초 뒤에 다시 입력할 수 있습니다.`; return; }
-    if(!checkAdmin(document.getElementById("fgPw").value)){ const w=failNote("admin"); msg.textContent="관리자 비밀번호가 맞지 않습니다."+(w?` ${w}초 뒤에 다시 입력하세요.`:""); return; }
-    failClear("admin");
-    if(gateMode==="db"){ try{ await DB.doc("data/users/"+gateUid+"/_auth").delete(); gateAuth=null; showGate("등록 정보를 지웠습니다. 새로 입력하세요."); }catch(_){ msg.textContent="초기화하지 못했습니다."; } }
-    else { const n=normNo(document.getElementById("fgNo").value), all=LU.all(); if(!all[n]){ msg.textContent="등록되지 않은 사번입니다."; return; } const gone=all[n]; delete all[n]; LU.save(all); const wiped=window.LST_LOCAL?LST_LOCAL.wipe("data/users/local:"+userKey(gone.name,gone.no)+"/"):0; showGate(`등록 정보${wiped?`와 케이스 ${wiped}건`:""}을 지웠습니다. 다시 등록하세요.`,"reg"); }
+  document.getElementById("fgForm").onsubmit=e=>{e.preventDefault(); const msg=document.getElementById("fgMsg");
+    const n=normNo(document.getElementById("fgNo").value), all=LU.all(); if(!all[n]){ msg.textContent="등록되지 않은 아이디입니다."; return; }
+    const gone=all[n]; delete all[n]; LU.save(all); const wiped=window.LST_LOCAL?LST_LOCAL.wipe("data/users/local:"+userKey(gone.name,gone.no)+"/"):0;
+    showGate(`등록 정보${wiped?`와 케이스 ${wiped}건`:""}을 지웠습니다. 다시 등록하세요.`,"reg");
   };
 }
+function enterGuest(){ ss.set("lst-auth","guest"); ss.del("lst-ck"); window._who="둘러보기 (저장 안 함)"; document.documentElement.classList.add("guest"); enter(); }
 async function initGate(){
   const cm=document.querySelector(".cover-main"), cb=document.querySelector(".cover-bg"); if(cm&&cb) cb.src=cm.getAttribute("src");
   const imgReady=im=>new Promise(r=>{ if(!im||im.complete) return r(); im.addEventListener("load",r,{once:true}); im.addEventListener("error",r,{once:true}); setTimeout(r,2500); });
@@ -1801,6 +2019,7 @@ async function initGate(){
     showGate();
   } else {
     gateMode="local"; const cur=ls.get("lst-user");
+    if(ss.get("lst-auth")==="guest") return enterGuest();
     if(cur && ss.get("lst-auth")===cur && ss.get("lst-ck") && Object.values(LU.all()).some(r=>userKey(r.name,r.no)===cur)){ window._who=cur; return enter(); }
     showGate();
   }
@@ -1808,7 +2027,7 @@ async function initGate(){
 function logout(){ ss.del("lst-auth"); ss.del("lst-gl"); ss.del("lst-ck"); location.reload(); }
 
 /* 톱니바퀴: 내규·행정해석 잠금 해제 */
-function renderLockSection(){ const el0=document.getElementById("lockSec"); if(el0){ el0.innerHTML=`<div class="row2"><span>공개판<br><span class="who">법령 기준 내용만 담았습니다. 원내 지침·내규·행정해석은 원내 배포판에서 보세요.</span></span></div>`; } return;
+function renderLockSection(){ const el0=document.getElementById("lockSec"); if(el0){ el0.innerHTML=`<div class="row2"><span>담긴 내용<br><span class="who">법령·공식 안내서 기준입니다. 병원별 내규는 담지 않았습니다.</span></span></div>`; } return;
   const el=document.getElementById("lockSec"); if(!el) return; const on=guideUnlocked();
   el.innerHTML = on ? `<div class="row2"><span>내규·행정해석 <b style="color:var(--ok)">열림</b><br><span class="who">브라우저를 닫으면 다시 잠깁니다</span></span><button class="btn" type="button" id="glLock">잠그기</button></div><div class="row2"><span>관리자 비밀번호 변경<br><span class="who">이 기기에만 적용됩니다</span></span><button class="btn" type="button" id="adminChg">변경</button></div><div id="adminChgBox"></div>`
     : `<form class="row2" id="glForm" autocomplete="off"><span>내규·행정해석 <b style="color:var(--stop)">잠김</b><br><span class="who">비밀번호를 입력하세요</span></span><span class="row" style="flex-wrap:nowrap"><input type="password" id="glPw" placeholder="비밀번호" style="width:9rem"><button class="btn primary" type="submit">열기</button></span></form><p class="status err" id="glMsg" style="margin:0"></p>`;
@@ -1932,8 +2151,20 @@ function checkOrder(){
 /* ---------- 연락처 · 개정 동향 ---------- */
 function renderContacts(){
   const el=document.getElementById("contactCard"); if(!el) return;
-  el.innerHTML=`<p class="q">바로 연락</p><div style="display:flex;flex-direction:column;gap:8px">${CONTACTS.map(c=>`<div class="row" style="align-items:center;justify-content:space-between"><span><b>${esc(c.name)}</b><br><span class="inline-note">${esc(c.note)}</span></span><a class="btn primary" href="tel:${esc(c.tel.replace(/\D/g,""))}" style="text-decoration:none">${esc(c.tel)} 전화</a></div>`).join("")}</div>
-    <p class="q" style="margin-top:12px;font-size:.92rem">관련 누리집</p><ul style="margin:0;padding-left:1.1em">${LINKS.map(l=>`<li><a href="${esc(l.url)}" target="_blank" rel="noopener" style="color:var(--accent)">${esc(l.name)}</a> <span class="inline-note">${esc(l.note)}</span></li>`).join("")}</ul>`;
+  let my=[]; try{ my=JSON.parse(localStorage.getItem("lst-mycontacts")||"[]"); }catch(e){}
+  const list=[...CONTACTS,...my.map((c,i)=>({...c,mine:i}))];
+  el.innerHTML=`<div class="toolbar"><p class="q" style="margin:0">바로 연락</p><button class="btn" type="button" id="ctAdd">+ 번호 추가</button></div>
+    <p class="qhint" style="margin:6px 0 10px">윤리위원회 사무국·당직 등 자주 거는 번호를 저장해 두면 한 번에 걸 수 있습니다. 이 기기에만 저장됩니다.</p>
+    <div id="ctForm"></div>
+    <div class="ctlist">${list.length?list.map(c=>`<div class="ctitem"><span class="ct-av" aria-hidden="true">${esc((c.name||"?").slice(0,1))}</span><span class="ct-tx"><b>${esc(c.name)}</b>${c.note?`<small>${esc(c.note)}</small>`:`<small>${esc(c.tel)}</small>`}</span><a class="btn primary ct-call" href="tel:${esc(String(c.tel).replace(/[^\d+]/g,""))}">전화</a>${c.mine!==undefined?`<button class="btn ct-del" type="button" data-ctdel="${c.mine}" aria-label="${esc(c.name)} 삭제">삭제</button>`:""}</div>`).join(""):`<p class="empty" style="margin:0">아직 저장한 번호가 없습니다.</p>`}</div>
+    <p class="q" style="margin-top:16px;font-size:.92rem">관련 누리집</p><div class="linklist">${LINKS.map(l=>`<a class="linkitem" href="${esc(l.url)}" target="_blank" rel="noopener"><b>${esc(l.name)}</b><small>${esc(l.note)}</small></a>`).join("")}</div>`;
+  const save=a=>{ try{ localStorage.setItem("lst-mycontacts",JSON.stringify(a)); }catch(e){} renderContacts(); };
+  el.querySelectorAll("[data-ctdel]").forEach(b=>b.onclick=()=>{ if(b.dataset.confirm!=="1"){ b.dataset.confirm="1"; b.textContent="삭제 확인"; return; } my.splice(+b.dataset.ctdel,1); save(my); });
+  document.getElementById("ctAdd").onclick=()=>{ const f=document.getElementById("ctForm"); if(f.innerHTML){ f.innerHTML=""; return; }
+    f.innerHTML=`<form class="ctform" id="ctF" autocomplete="off"><div class="field"><label for="ctN">이름</label><input type="text" id="ctN" required maxlength="30" placeholder="예: 윤리위원회 사무국"></div><div class="field"><label for="ctT">전화번호</label><input type="tel" id="ctT" required maxlength="20" inputmode="tel" placeholder="예: 02-000-0000"></div><div class="row"><button class="btn primary" type="submit">저장</button><button class="btn" type="button" id="ctX">취소</button></div></form>`;
+    document.getElementById("ctN").focus(); document.getElementById("ctX").onclick=()=>{ f.innerHTML=""; };
+    document.getElementById("ctF").onsubmit=e=>{ e.preventDefault(); my.push({name:document.getElementById("ctN").value.trim(),tel:document.getElementById("ctT").value.trim()}); save(my); toast("번호를 저장했습니다"); };
+  };
 }
 function renderLawNews(){
   const el=document.getElementById("lawNews"); if(!el) return;
@@ -2076,8 +2307,9 @@ document.addEventListener("keydown",e=>{ if((e.ctrlKey||e.metaKey)&&e.key.toLowe
 
 /* ---------- 큰 글씨 · 야간 보기 ---------- */
 function applyView(){
-  const fs=lsGet("lst-fs","1"), th=lsGet("lst-theme","light");
-  document.documentElement.style.setProperty("--fs",fs); document.documentElement.dataset.theme=th;
+  const fs=lsGet("lst-fs","1"), th=lsGet("lst-theme","auto");
+  const dark=th==="dark"||(th==="auto"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.style.setProperty("--fs",fs); document.documentElement.dataset.theme=dark?"dark":"light";
   document.querySelectorAll("#fsSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===String(fs)));
   document.querySelectorAll("#thSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===th));
 }
@@ -2090,8 +2322,8 @@ var IDLE_LAST=Date.now();
 ["pointerdown","keydown","scroll","touchstart","input"].forEach(ev=>document.addEventListener(ev,()=>{ IDLE_LAST=Date.now(); },{passive:true,capture:true}));
 function idleMinutes(){ const v=+lsGet("lst-idle",15); return [5,10,15,30].includes(v)?v:15; }
 function lockNow(){ try{ sessionStorage.removeItem("lst-auth"); sessionStorage.removeItem("lst-ck"); sessionStorage.removeItem("lst-gl"); }catch(e){} location.reload(); }
-setInterval(()=>{ if(document.documentElement.classList.contains("gated")) return; if(Date.now()-IDLE_LAST>idleMinutes()*60000) lockNow(); },15000);
-document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&!document.documentElement.classList.contains("gated")&&Date.now()-IDLE_LAST>idleMinutes()*60000) lockNow(); });
+setInterval(()=>{ if(document.documentElement.classList.contains("gated")||document.documentElement.classList.contains("guest")) return; if(Date.now()-IDLE_LAST>idleMinutes()*60000) lockNow(); },15000);
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&!document.documentElement.classList.contains("gated")&&!document.documentElement.classList.contains("guest")&&Date.now()-IDLE_LAST>idleMinutes()*60000) lockNow(); });
 const idleSel=document.getElementById("idleSel"); idleSel.value=String(idleMinutes()); idleSel.onchange=()=>lsSet("lst-idle",+idleSel.value);
 
 /* ---------- 관리자 비밀번호 변경 ---------- */
@@ -2185,6 +2417,66 @@ renderQuick(); renderContacts(); renderLawNews(); renderEdu();
 renderNode("start");
 applyLockables();
 initGate();
+</script>
+<script>
+/* ===== 2.1 편의 기능: 첫 화면 바로가기 · 둘러보기 · 설치 · 공유 · 맨 위로 · 오프라인 표시 · 알림 ===== */
+function toast(msg){
+  let t=document.getElementById("toast");
+  if(!t){ t=document.createElement("div"); t.id="toast"; t.className="toast"; t.setAttribute("role","status"); t.setAttribute("aria-live","polite"); document.body.appendChild(t); }
+  t.textContent=msg; t.classList.add("on"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("on"),2200);
+}
+(function(){
+  const $=id=>document.getElementById(id);
+  const tabBtn=k=>document.querySelector(`nav.tabs [data-tab="${k}"]`);
+  /* 인사말: 시간대에 맞춰 */
+  const h=new Date().getHours(), hi=$("heroHi");
+  if(hi) hi.textContent = h<5?"늦은 밤,":h<11?"좋은 아침,":h<17?"오늘은":h<21?"오늘 저녁,":"늦은 밤,";
+  /* 첫 화면 바로가기 */
+  document.querySelectorAll(".hero-acts [data-go]").forEach(b=>b.onclick=()=>{
+    const g=b.dataset.go;
+    if(g==="start"){ selectTab(tabBtn("path")); if(typeof restart==="function") restart(); document.getElementById("pathBody")?.scrollIntoView({behavior:"smooth",block:"start"}); return; }
+    if(g==="case"){ selectTab(tabBtn("case")); if(!document.documentElement.classList.contains("guest")) $("newCase")?.click(); return; }
+    selectTab(tabBtn(g));
+  });
+  $("heroSearch")?.addEventListener("click",()=>openSearch());
+  /* 둘러보기 → 등록 */
+  $("guestReg")?.addEventListener("click",()=>{ try{ sessionStorage.removeItem("lst-auth"); }catch(e){} document.documentElement.classList.remove("guest"); showGate("","reg"); });
+  /* 로그아웃 문구: 둘러보기일 때 */
+  const fixLogout=()=>{ const g=document.documentElement.classList.contains("guest"); const lb=$("logoutBtn"); if(lb) lb.textContent=g?"입장 화면으로":"로그아웃"; };
+  new MutationObserver(fixLogout).observe(document.documentElement,{attributes:true,attributeFilter:["class"]}); fixLogout();
+  /* 현재 탭 표시(히어로는 결정 경로 탭에서만) */
+  const sel=document.querySelector('nav.tabs [aria-selected="true"]'); if(sel) document.body.dataset.tab=sel.dataset.tab;
+  /* 홈 화면 설치 */
+  let deferred=null;
+  const isStandalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+  const iOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  const ins=$("installBtn"), ins2=$("installBtn2"), insRow=$("installRow"), insHint=$("installHint");
+  const doInstall=async()=>{ if(deferred){ deferred.prompt(); try{ await deferred.userChoice; }catch(e){} deferred=null; ins.hidden=true; }
+    else if(iOS) toast("Safari 아래쪽 공유 버튼 → '홈 화면에 추가'를 누르세요");
+    else toast("브라우저 메뉴에서 '앱 설치' 또는 '홈 화면에 추가'를 고르세요"); };
+  if(isStandalone()){ if(insRow) insRow.hidden=true; }
+  else if(iOS&&insHint){ insHint.textContent="Safari 공유 버튼 → '홈 화면에 추가'"; }
+  window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferred=e; if(ins) ins.hidden=false; });
+  window.addEventListener("appinstalled",()=>{ if(ins) ins.hidden=true; if(insRow) insRow.hidden=true; toast("설치했습니다"); });
+  ins?.addEventListener("click",doInstall); ins2?.addEventListener("click",doInstall);
+  /* 앱 주소 공유 */
+  $("shareBtn")?.addEventListener("click",async()=>{
+    const url=location.href.split("#")[0], data={title:"연명의료 현장 길라잡이",text:"전공의·인턴을 위한 연명의료결정 절차 안내",url};
+    try{ if(navigator.share){ await navigator.share(data); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+    try{ await navigator.clipboard.writeText(url); toast("주소를 복사했습니다"); }catch(e){ prompt("이 주소를 복사하세요",url); }
+  });
+  /* 맨 위로 */
+  const top=document.createElement("button"); top.className="totop"; top.type="button"; top.setAttribute("aria-label","맨 위로");
+  top.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  top.onclick=()=>window.scrollTo({top:0,behavior:"smooth"}); document.body.appendChild(top);
+  let ticking=false; window.addEventListener("scroll",()=>{ if(ticking) return; ticking=true; requestAnimationFrame(()=>{ top.classList.toggle("on",scrollY>700); document.querySelector(".appbar")?.classList.toggle("scrolled",scrollY>4); ticking=false; }); },{passive:true});
+  /* 오프라인 표시 */
+  const net=()=>{ const p=$("netPill"); if(p) p.hidden=navigator.onLine; };
+  window.addEventListener("online",()=>{ net(); toast("다시 연결되었습니다"); }); window.addEventListener("offline",()=>{ net(); toast("오프라인 — 저장된 내용으로 계속 쓸 수 있습니다"); }); net();
+  /* 야간 보기 '자동'은 기기 설정이 바뀌면 따라감 */
+  try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{ if(typeof applyView==="function") applyView(); }); }catch(e){}
+})();
+
 </script>
 <script>
 if("serviceWorker" in navigator && location.protocol!=="file:"){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }

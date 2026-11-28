@@ -1,13 +1,13 @@
 {
-  "name": "연명의료 현장 길라잡이 공개판",
+  "name": "연명의료 현장 길라잡이",
   "short_name": "연명의료 길라잡이",
   "description": "전공의·인턴용 연명의료결정 절차 안내 웹앱",
   "lang": "ko",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#fdf8e4",
-  "theme_color": "#0f6b73",
+  "background_color": "#f3f5f7",
+  "theme_color": "#0b7a71",
   "icons": [
     {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
     {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
