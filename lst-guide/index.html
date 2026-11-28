@@ -1,0 +1,2193 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f6b73">
+<meta name="description" content="전공의·인턴용 연명의료결정 절차 안내 웹앱 (가톨릭대학교 부천성모병원)">
+<meta name="author" content="노상엽 (ace@cmcnu.or.kr)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<style>*,*::before,*::after{box-sizing:border-box}:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px "Malgun Gothic","맑은 고딕",sans-serif;background:#fdf8e4}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>연명의료 현장 길라잡이 (공개판)</title>
+<script src="vendor/html2canvas.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<style>
+/* Layout: 한 손으로 쓰는 병동용 단일 컬럼 도구 — 상단 탭, 단계별 질문 카드, 결과 카드 */
+/* 밝고 연한 노란색 바탕의 단일(밝은) 테마 · 글꼴: 맑은 고딕 */
+:root{
+  --bg:#fdf8e4; --surface:#fffdf5; --fg:#2a2618; --muted:#6b6450; --line:#e9dfbd;
+  --accent:#0f6b73; --accent-soft:#e3f0e9; --law:#3b4fa0; --law-soft:#ebedf8;
+  --nibp:#80580d; --nibp-soft:#f8ecc8; --hosp:#8a2f4f; --hosp-soft:#f8e7ea;
+  --stop:#a8321f; --stop-soft:#fbe6dd; --ok:#24713f; --ok-soft:#e5f2df;
+  --f-body:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  --ctl:#958758; --on-accent:#fff; --fs:1;
+  --f-mono:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.6}
+button,input,select,textarea{font-family:var(--f-body)}
+.wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:12px calc(96px + env(safe-area-inset-bottom,0px))}
+header.top{display:flex;flex-direction:column;gap:4px;padding-block:8px 12px}
+.eyebrow{font-size:12px;letter-spacing:.06em;color:var(--accent);font-weight:600}
+h1{font-size:1.45rem;margin:0;line-height:1.3;text-wrap:balance}
+.sub{color:var(--muted);font-size:.9rem;margin:0}
+.notice{background:var(--stop-soft);color:var(--fg);border-radius:10px;padding:10px 12px;font-size:.85rem;margin-block:4px 14px}
+.notice b{color:var(--stop)}
+[hidden]{display:none!important}
+/* 앱 셸 */
+.appbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.appbar-in{max-width:720px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.mark{flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
+.mark svg{width:20px;height:20px}
+.apptitle{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.apptitle b{font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apptitle select{width:auto;align-self:flex-start;font-size:.78rem;padding:1px 4px;border:0;background:transparent;color:var(--muted);margin-left:-4px;max-width:100%}
+.iconbtn{flex:0 0 auto;width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);display:grid;place-items:center;cursor:pointer}
+.iconbtn svg{width:20px;height:20px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+nav.tabs .tabs-in{display:flex;width:100%;max-width:720px}
+nav.tabs button{flex:1 1 0;min-width:0;font:inherit;font-size:.7rem;font-weight:600;border:0;background:transparent;color:var(--muted);padding:6px 2px;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-selected="true"]{color:var(--accent);background:var(--accent-soft)}
+.sheet-bg{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);color:var(--fg);width:100%;max-width:560px;max-height:85%;overflow:auto;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.sheet h2{font-size:1.05rem;margin:0}
+.sheet .row2{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.9rem}
+.switch{width:44px;height:26px;border-radius:13px;border:1px solid var(--line);background:var(--bg);position:relative;cursor:pointer;flex:0 0 auto}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:left .15s}
+.switch[aria-checked="true"]{background:var(--accent);border-color:var(--accent)}
+.switch[aria-checked="true"]::after{left:20px;background:var(--bg)}
+.info{font-size:.85rem;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.info dt{color:var(--muted)} .info dd{margin:0;word-break:break-all}
+.pf-wrap{overflow:auto;background:#e9ecee;padding:12px;border-radius:8px}
+.pf-scale{margin:0 auto}
+.pf{width:720px;max-width:none;margin:0;background:#fff;color:#111;padding:40px 44px;font-family:var(--f-body);font-size:13.5px;line-height:1.65}
+.pf-tag{font-size:11px;color:#444;text-align:right}
+.pf-h{text-align:center;font-size:22px;letter-spacing:.3em;margin:14px 0 18px;color:#111}
+.pf-t{width:100%;border-collapse:collapse;font-size:13.5px}
+.pf-t th,.pf-t td{border:1px solid #333;padding:8px 10px;vertical-align:top;color:#111}
+.pf-t th{width:70px;background:#f2f2f2;text-align:center;vertical-align:middle;font-weight:700;font-size:13px;color:#111}
+.pf-l{color:#555;font-size:12px;margin-right:6px}
+.pf-body{height:420px}
+.pf-sec{margin-bottom:10px} .pf-sec b{display:block;font-size:12.5px;color:#222} .pf-sec div{word-break:keep-all}
+.pf-date{text-align:center;margin:26px 0 8px;color:#111} .pf-sign{text-align:right;margin:8px 0 26px;color:#111} .pf-to{text-align:center;font-weight:700;font-size:15px;color:#111}
+.term{border-bottom:1.5px dotted var(--accent);cursor:help;outline-offset:2px}
+.tip{position:fixed;z-index:70;background:var(--fg);color:var(--bg);font-size:.82rem;line-height:1.5;padding:9px 11px;border-radius:9px;box-shadow:0 6px 20px rgba(0,0,0,.25);pointer-events:none}
+.tip b{display:block;margin-bottom:2px}
+.gloss{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0;font-size:.86rem}
+.gloss dt{font-weight:700;white-space:nowrap} .gloss dd{margin:0;color:var(--fg)}
+@media (max-width:480px){.gloss{grid-template-columns:1fr}.gloss dd{margin-bottom:6px}}
+.ft{margin:0} .ft svg,.fc svg{width:100%;height:auto;display:block;max-width:520px;margin:0 auto}
+.ft-n rect{fill:var(--bg);stroke:var(--line);stroke-width:1.2}
+.ft-n text{fill:var(--fg)} .ft-l{font-size:13px;font-weight:700} .ft-s{font-size:10.5px;fill:var(--muted)!important}
+.ft-on rect{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+.ft-off rect{stroke-dasharray:4 3}
+.ft-none{opacity:.45}
+.ft-pt rect{fill:var(--accent);stroke:var(--accent)} .ft-pt text{fill:var(--bg)}
+.ft-badge rect{fill:var(--nibp-soft);stroke:var(--nibp)} .ft-badge text{fill:var(--nibp);font-size:9.5px;font-weight:700}
+.ft-line line,.ft-line polyline{stroke:var(--muted);stroke-width:1.3}
+.ft-e{fill:var(--muted);font-size:10px}
+.ft figcaption{font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;justify-content:center;margin-top:6px}
+.lg{display:inline-block;width:14px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.lg-on{background:var(--accent-soft);border:2px solid var(--accent)} .lg-off{border:1.5px dashed var(--line)}
+.lg-badge{width:auto;height:auto;padding:0 5px;font-size:.68rem;font-weight:700;color:var(--nibp);background:var(--nibp-soft);border:1px solid var(--nibp);border-radius:8px}
+#flowBox summary{cursor:pointer}
+.fl2{display:flex;flex-direction:column;gap:8px;font-size:.84rem;word-break:keep-all;overflow-wrap:anywhere}
+.fl2-row{display:flex}
+.fq2{flex:1;display:flex;gap:10px;align-items:center;text-align:left;font:inherit;color:var(--fg);background:var(--surface);border:1.5px solid var(--accent);border-radius:12px;padding:9px 12px;cursor:pointer;min-width:0}
+.fq2 b{display:block;font-size:.9rem;line-height:1.35} .fq2 small{display:block;font-size:.72rem;color:var(--muted);margin-top:1px}
+.fq2 .num{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:.78rem;font-weight:800;background:var(--accent-soft);color:var(--accent)}
+.fq2.on{background:var(--accent-soft)}
+.fq2.cur{background:var(--accent);color:var(--on-accent);box-shadow:0 0 0 4px var(--accent-soft)} .fq2.cur small{color:var(--on-accent);opacity:.85} .fq2.cur .num{background:var(--on-accent);color:var(--accent)}
+.fq2:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.fl2-side{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.fa2{height:16px;position:relative} .fa2::before{content:"";position:absolute;left:50%;top:0;bottom:5px;border-left:2px solid var(--line)} .fa2::after{content:"";position:absolute;left:calc(50% - 4px);bottom:1px;border:4px solid transparent;border-top:6px solid var(--line);border-bottom:0}
+.fl2-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:start}
+.fl2-col{display:flex;flex-direction:column;gap:6px;min-width:0;padding:8px 5px;border-radius:12px;background:var(--bg)}
+.fl2-col .fq2{padding:7px 6px;justify-content:center;text-align:center} .fl2-col .fq2 .num{display:none} .fl2-col .fq2 b{font-size:.8rem}
+.fl2-col .fr2{padding:6px 7px} .fl2-col .fr2 b{font-size:.76rem}
+.br{align-self:center;font-size:.74rem;font-weight:800;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.fl2-col .fa2{height:12px}
+.fl2-pair{display:grid;grid-template-columns:1fr;gap:6px}
+.fl2-pair.wide,.fl2-notes{grid-template-columns:1fr 1fr;display:grid;gap:6px}
+.fl2-s4{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:12px;background:var(--bg)}
+.fr2{position:relative;border:1px solid var(--line);border-radius:10px;padding:7px 9px;background:var(--surface);display:flex;flex-direction:column;min-width:0}
+.fr2 .lab{font-size:.68rem;font-weight:700;color:var(--muted)}
+.fr2 b{font-size:.8rem;line-height:1.35;display:flex;gap:5px;align-items:baseline}
+.fr2 b::before{content:"";flex:0 0 auto;width:7px;height:7px;border-radius:50%;background:var(--ok);transform:translateY(-1px)}
+.fr2-stop b::before{background:var(--stop)} .fr2-wait b::before{background:var(--nibp)}
+.fr2 small{font-size:.7rem;color:var(--muted)}
+.fr2-next{border-style:dashed;background:transparent} .fr2-next b::before{display:none}
+.fr2.hit{border-width:2px} .fr2-go.hit{background:var(--ok-soft);border-color:var(--ok)} .fr2-stop.hit{background:var(--stop-soft);border-color:var(--stop)} .fr2-wait.hit{background:var(--nibp-soft);border-color:var(--nibp)}
+.fl2 .dim{opacity:.32;filter:grayscale(1)}
+.fl2-legend{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center;font-size:.72rem;color:var(--muted);margin-top:2px}
+.lg2{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:4px;vertical-align:-2px;border:1.5px solid var(--accent)}
+.lg2.cur{background:var(--accent)} .lg2.on{background:var(--accent-soft)} .lg2.hit{background:var(--ok-soft);border-color:var(--ok)}
+
+html.standalone .online-only{display:none!important}
+html:not(.standalone) .standalone-only{display:none!important}
+.cover-box{position:relative;margin-block:4px 14px}
+.cover{position:relative;border-radius:14px;overflow:hidden;height:clamp(240px,42vw,360px);background:#2b2b2b;display:flex;justify-content:center}
+.cover-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(22px) brightness(.55) saturate(1.1);transform:scale(1.2)}
+.cover-main{position:relative;height:100%;width:auto;aspect-ratio:1600/1466;object-fit:cover;display:block;box-shadow:0 0 36px rgba(0,0,0,.4)}
+.cover-dev{position:absolute;right:0;bottom:0;padding:10px 14px;display:flex;flex-direction:column;align-items:flex-end;gap:1px;font-size:.7rem;line-height:1.4;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.cover-dev span.sep{display:none}
+@media (max-width:640px){.cover{height:clamp(220px,62vw,300px)}.cover-dev{position:static;flex-direction:row;flex-wrap:wrap;justify-content:flex-end;gap:0 6px;color:var(--muted);text-shadow:none;padding:5px 2px 0;font-size:.66rem}.cover-dev span.sep{display:inline}}
+.cover-box.noimg .cover{display:none}.cover-box.noimg .cover-dev{position:static;color:var(--muted);text-shadow:none;align-items:flex-start;padding:4px 2px}
+body:not(.show-src) .src, body:not(.show-src) .srcline{display:none!important}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+section.panel{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.q{font-weight:600;font-size:1.02rem;margin:0 0 4px}
+.qhint{color:var(--muted);font-size:.85rem;margin:0 0 10px}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choices button{font:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:10px;padding:11px 12px;cursor:pointer}
+.choices button:hover{border-color:var(--accent)}
+.choices button small{display:block;color:var(--muted);font-size:.8rem}
+.choices button.go-next{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700} .choices button.go-next small{color:var(--on-accent);opacity:.85}
+.trail{display:flex;flex-wrap:wrap;gap:6px;font-size:.8rem}
+.trail span{background:var(--accent-soft);color:var(--fg);border-radius:6px;padding:2px 8px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-size:.88rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;padding:7px 12px;cursor:pointer}
+.result h2{font-size:1.15rem;margin:0 0 2px;text-wrap:balance}
+.result .tag{display:inline-block;font-size:.75rem;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:8px}
+.tag.go{background:var(--ok-soft);color:var(--ok)} .tag.stop{background:var(--stop-soft);color:var(--stop)} .tag.wait{background:var(--nibp-soft);color:var(--nibp)}
+.result h3{font-size:.82rem;letter-spacing:.04em;color:var(--muted);margin:14px 0 6px;font-weight:700}
+.result ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:4px}
+.src{font-family:var(--f-mono);font-size:.72rem;border-radius:5px;padding:1px 6px;white-space:nowrap;vertical-align:1px}
+.src.law{background:var(--law-soft);color:var(--law)} .src.nibp{background:var(--nibp-soft);color:var(--nibp)} .src.hosp{background:var(--hosp-soft);color:var(--hosp)}
+.hospbox{border:1px dashed var(--hosp);border-radius:10px;padding:10px 12px;margin-top:12px;font-size:.85rem}
+.hospbox .ttl{color:var(--hosp);font-weight:700;font-size:.8rem}
+.empty{color:var(--muted)}
+/* 가족 계산기 */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:.83rem;color:var(--muted)}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg)}
+.stepper button{font:inherit;width:40px;height:38px;border:0;background:transparent;color:var(--fg);font-size:1.1rem;cursor:pointer}
+.stepper input{width:100%;min-width:0;text-align:center;border:0;background:transparent;color:var(--fg);font:inherit;font-variant-numeric:tabular-nums;height:38px}
+.out{display:grid;gap:10px}
+.out .box{border-radius:10px;padding:12px;background:var(--bg);border:1px solid var(--line)}
+.out .box b{display:block;margin-bottom:4px}
+.big{font-size:1.05rem;font-weight:700;color:var(--accent)}
+/* 정리 */
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+.tbl{overflow-x:auto}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;color:var(--muted);font-weight:700}
+details{border-top:1px solid var(--line);padding-block:10px}
+details:first-of-type{border-top:0}
+summary{cursor:pointer;font-weight:600;list-style-position:outside}
+details p{margin:8px 0 0;font-size:.9rem}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{font:inherit;font-size:.8rem;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:4px 10px;cursor:pointer}
+.filters button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+input[type=search]{font:inherit;width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+/* 케이스 · 플로우 차트 */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+select,textarea,input[type=text]{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+textarea{width:100%;min-height:110px;resize:vertical}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.danger{color:var(--stop)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:8px;padding:6px 10px;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.fq{font-size:.83rem;color:var(--muted);margin:0 0 4px}
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:12px;text-align:center;color:var(--muted);font-size:.85rem}
+.drop.on{border-color:var(--accent);color:var(--accent)}
+.redact{max-width:100%;border-radius:8px;border:1px solid var(--line);touch-action:none;cursor:crosshair;display:block}
+.pv{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:.82rem;max-height:180px;overflow:auto}
+.status{font-size:.82rem;color:var(--muted)}
+.status.err{color:var(--stop)}
+.flow{display:flex;flex-direction:column;align-items:stretch;gap:0}
+.fnode{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--bg);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.fnode .fqtxt{font-size:.86rem}
+.fnode.on{border-color:var(--accent);background:var(--accent-soft)}
+.fnode.need{border-style:dashed;border-color:var(--nibp)}
+.fnode.end{border-width:2px}
+.fnode.end.go{border-color:var(--ok);background:var(--ok-soft)}
+.fnode.end.stop{border-color:var(--stop);background:var(--stop-soft)}
+.fnode.end.wait{border-color:var(--nibp);background:var(--nibp-soft)}
+.fans{flex:0 0 auto;font-size:.78rem;font-weight:700;border-radius:6px;padding:2px 8px;background:var(--surface);border:1px solid var(--line)}
+.flink{width:2px;height:14px;background:var(--line);margin-left:22px}
+.chk{display:flex;flex-direction:column;gap:6px}
+.chk label{display:flex;gap:10px;align-items:flex-start;font-size:.88rem;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer}
+.chk input{margin-top:3px;flex:0 0 auto;width:18px;height:18px;accent-color:var(--accent)}
+.chk .ts{display:block;font-size:.75rem;color:var(--muted)}
+.chk .due{color:var(--stop);font-weight:600}
+.clist{display:flex;flex-direction:column;gap:6px}
+.citem{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);cursor:pointer;text-align:left;font:inherit;color:var(--fg);width:100%}
+.citem:hover{border-color:var(--accent)}
+.citem .meta{font-size:.78rem;color:var(--muted)}
+.log{margin:0;padding-left:1.1em;font-size:.82rem;color:var(--muted);display:flex;flex-direction:column;gap:2px;max-height:220px;overflow:auto}
+.who{font-size:.78rem;color:var(--muted)}
+footer{color:var(--muted);font-size:.78rem;margin-top:24px;display:flex;flex-direction:column;gap:2px;text-align:center}
+.dh{font-size:.8rem;color:var(--muted);margin:12px 0 4px}.dh:first-child{margin-top:0}
+.dl{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:5px;font-size:.88rem}
+.flogo{height:48px;width:auto;max-width:90%;align-self:center;margin:2px auto 8px;opacity:.95}
+@media (prefers-reduced-motion: no-preference){.card.fade{animation:f .18s ease-out}@keyframes f{from{transform:translateY(4px)}to{transform:none}}}
+/* 입장 화면 · 잠금 */
+html.gated{overflow:hidden}
+.gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.gate[hidden]{display:none!important}
+.gate-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 8px 30px rgba(80,60,0,.08)}
+.gate-card h2{margin:0;font-size:1.2rem}
+.gate-card.art{max-width:820px;padding:0;gap:0;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
+.gate-art{background:#2b2b2b;min-height:100%;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}.gate-art .ga-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(22px) brightness(.55);transform:scale(1.2)}.gate-art .ga-main{position:relative;width:100%;height:auto;aspect-ratio:1600/1466;object-fit:cover;display:block}
+.gate-body{padding:24px 22px;display:flex;flex-direction:column;gap:12px;justify-content:center}
+.ulist{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
+.uitem{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;cursor:pointer}
+.uitem:has(input:checked),.uitem.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent)}
+.uitem input{position:absolute;opacity:0;pointer-events:none}
+.uitem:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+.uav{width:32px;height:32px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:700;flex:0 0 auto}
+.un{display:flex;flex-direction:column;line-height:1.25}.un small{color:var(--muted);font-size:.75rem}
+.gate-logo{height:22px;width:auto;align-self:center;margin-top:2px}
+@media (max-width:720px){.gate{align-items:flex-start}.gate-card.art{grid-template-columns:1fr;max-width:420px}.gate-art{aspect-ratio:16/10;min-height:0}.gate-art .ga-main{position:absolute;inset:0;height:100%;object-position:50% 22%}.gate-body{padding:18px 18px 20px}}
+.gate-card form{display:flex;flex-direction:column;gap:10px}
+.gate-card .field{display:flex;flex-direction:column;gap:4px}
+.gate-card label{font-size:.82rem;color:var(--muted)}
+.gate-card input{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--fg)}
+.gate-h{margin:4px 0 0;font-weight:700}
+.status.err{color:var(--stop);min-height:1em;font-size:.82rem}
+.linkbtn{background:none;border:0;color:var(--accent);font:inherit;font-size:.82rem;cursor:pointer;text-decoration:underline;padding:2px}
+.lockbox{border:1px dashed var(--line);border-radius:10px;padding:12px;margin-top:12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;background:var(--bg);font-size:.85rem;color:var(--muted)}
+.lockbox b{color:var(--fg)}
+#lockSec input{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px}
+
+/* ===== 2026-11 정비: 정렬·접근성·큰 글씨·야간 보기 ===== */
+html{font-size:calc(16px * var(--fs))}
+body{font-size:calc(15px * var(--fs));word-break:keep-all;overflow-wrap:anywhere}
+html[data-theme="dark"]{--bg:#1c1a15;--surface:#26231c;--fg:#f1ebd8;--muted:#bcb196;--line:#3e392c;--ctl:#8f8360;--accent:#62c3ca;--accent-soft:#1d393b;--on-accent:#0c2325;--law:#a9b8f2;--law-soft:#262b44;--nibp:#e8c46e;--nibp-soft:#3a301a;--hosp:#f2a6c1;--hosp-soft:#3e2531;--stop:#f38d76;--stop-soft:#44241c;--ok:#86d39a;--ok-soft:#1f3725;color-scheme:dark}
+html[data-theme="dark"] body{background:var(--bg)}
+html[data-theme="dark"] .uitem,html[data-theme="dark"] .gate-card input{background:var(--bg);color:var(--fg)}
+html[data-theme="dark"] .cover-main{opacity:.92}
+.btn,.seg button,.filters button,.choices button,select,textarea,input[type=text],input[type=search],input[type=password],input[type=date],.stepper,.citem{border-color:var(--ctl)}
+.btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1.3}
+.seg button{min-height:44px}
+.filters button{min-height:44px;padding:6px 14px}
+select,input[type=text],input[type=search],input[type=password],input[type=date]{min-height:44px}
+.grid3 select,.grid3 input[type=text],.grid3 input[type=date]{height:44px}
+.stepper button{width:44px;height:44px}
+.stepper input{height:44px}
+.apptitle select{min-height:30px;padding:4px 4px}
+summary{list-style-position:inside;padding:10px 0;min-height:44px}
+details{padding-block:2px}
+#caseEditor:not([hidden]),#refEdit:not(:empty){display:flex;flex-direction:column;gap:14px}
+.status.err:empty{display:none}
+.fl2 .dim{opacity:.45}
+.lgi{white-space:nowrap;display:inline-flex;align-items:center;gap:2px}
+.pf-sec div,.pf-t td{overflow-wrap:anywhere;word-break:keep-all}
+.iconbtn{width:44px;height:44px}
+.inline-note{font-size:.8rem;color:var(--muted)}
+.mpv{border:1px solid var(--nibp);background:var(--nibp-soft);border-radius:10px;padding:10px 12px;font-size:.85rem;display:flex;flex-direction:column;gap:6px}
+.mpv dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px}.mpv dt{color:var(--muted)}.mpv dd{margin:0;white-space:pre-wrap}
+.star{font:inherit;background:none;border:0;cursor:pointer;color:var(--muted);min-width:44px;min-height:44px;font-size:1.1rem;line-height:1}
+.star[aria-pressed="true"]{color:var(--nibp)}
+.gitem{display:flex;align-items:flex-start;gap:4px}.gitem details{flex:1;min-width:0;border-top:0}
+.glist-row{border-top:1px solid var(--line)}.glist-row:first-child{border-top:0}
+.kv{display:grid;grid-template-columns:7.5em 1fr;gap:4px 10px;font-size:.88rem;margin:6px 0 0}.kv dt{color:var(--muted)}.kv dd{margin:0}
+.formcard h3{margin:0;font-size:1rem}
+.formno{display:inline-block;font-size:.75rem;font-weight:700;border-radius:6px;padding:2px 8px;background:var(--accent-soft);color:var(--accent);margin-right:6px}
+.warnlist{margin:6px 0 0;padding-left:1.1em;color:var(--stop);font-size:.86rem}
+.oklist{margin:6px 0 0;padding-left:1.1em;color:var(--ok);font-size:.86rem}
+.qs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.qs button{font:inherit;text-align:left;border:1px solid var(--ctl);background:var(--bg);color:var(--fg);border-radius:10px;padding:10px 12px;cursor:pointer;min-height:44px}
+.qs button b{display:block;font-size:.92rem}.qs button small{color:var(--muted);font-size:.78rem}
+.srch-bg{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.35);display:flex;justify-content:center;align-items:flex-start;padding:12px}
+.srch{background:var(--surface);color:var(--fg);width:100%;max-width:720px;max-height:calc(100% - 24px);overflow:auto;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.srch h3{font-size:.8rem;color:var(--muted);margin:8px 0 2px}
+.sres{border-top:1px solid var(--line);padding:8px 0}
+.sres:first-of-type{border-top:0}
+.sres b{display:block}
+.sres p{margin:4px 0 0;font-size:.88rem}
+.quiz-opt{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.quiz-opt button{font:inherit;text-align:left;border:1px solid var(--ctl);background:var(--bg);color:var(--fg);border-radius:10px;padding:10px 12px;cursor:pointer;min-height:44px}
+.quiz-opt button.right{border-color:var(--ok);background:var(--ok-soft)}.quiz-opt button.wrong{border-color:var(--stop);background:var(--stop-soft)}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--accent-soft);color:var(--accent)}
+.lockable[data-locked="1"] > :not(.lockbox):not(.q){display:none!important}
+.notice .btn{min-height:32px;padding:2px 10px;vertical-align:middle}
+.sheet .row2 .btn,.sheet .row2 label.btn{white-space:nowrap;flex:0 0 auto}
+#dataSec,#lockSec{display:flex;flex-direction:column;gap:14px}
+#dataSec:empty,#bkBox:empty,#adminChgBox:empty{display:none}
+@media print{.appbar,nav.tabs,.cover-box,.notice,footer{display:none!important}}
+</style>
+
+<header class="appbar">
+  <div class="appbar-in">
+    <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></span>
+    <div class="apptitle"><b>연명의료 현장 길라잡이 <span style="font-size:.7rem;color:var(--muted);font-weight:600">공개판</span></b><select id="hospSel" aria-label="적용 병원 내규"></select></div>
+    <button class="iconbtn" id="searchBtn" aria-label="통합 검색" title="통합 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button>
+    <button class="iconbtn" id="menuBtn" aria-label="설정" title="설정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+  </div>
+</header>
+<div class="wrap">
+  <div class="cover-box"><div class="cover"><img class="cover-bg" alt="" aria-hidden="true"><img class="cover-main" src="assets/cover.jpg" alt="학교법인 가톨릭학원 新 경영방침 '기대와 용기': 하느님의 사랑이 항상 있기 때문에 어떤 상황에서도 더 좋은 것을 주시리라는 기대를 갖고 힘들 때 좌절하지 않으며 용기를 냅시다" onerror="this.closest('.cover-box').classList.add('noimg')"></div><div class="cover-dev"><span>개발자 노상엽</span><span class="sep">·</span><span>ace@cmcnu.or.kr</span><span class="sep">·</span><span>개발일자 2026-10-06</span><span class="sep">·</span><span>수정일자 <span class="js-mod">2026-10-07</span></span></div></div>
+  <div class="notice" id="notice"><b>안내</b> · 절차 안내용입니다. 임종과정 판단과 이행은 담당의사·해당 분야 전문의와 의료기관윤리위원회 절차를 따르고, 실제 조회·등록은 연명의료 정보처리시스템에서 합니다. 환자 케이스에는 <b>익명 정보만</b> 적으세요. 이름·주민번호·등록번호·연락처는 자동으로 <b>일부</b> 가리지만 모두 걸러지지는 않으니, 저장 전에 보여 주는 가림 결과를 꼭 확인하세요. <button class="btn" id="noticeClose" style="padding:2px 8px;font-size:.75rem;margin-left:4px">닫기</button></div>
+
+  <nav class="tabs" role="tablist"><div class="tabs-in">
+    <button role="tab" id="t-path" aria-selected="true" data-tab="path"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="6" rx="1.5"/><rect x="14" y="15" width="7" height="6" rx="1.5"/><path d="M6.5 9v4a2 2 0 0 0 2 2H14"/></svg>결정 경로</button>
+    <button role="tab" id="t-case" aria-selected="false" data-tab="case"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/></svg>케이스</button>
+    <button role="tab" id="t-forms" aria-selected="false" data-tab="forms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>서식</button>
+    <button role="tab" id="t-ref" aria-selected="false" data-tab="ref"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 7.8 8 9 4.6-1.2 8-4.5 8-9V6z"/><path d="M9 12h6M12 9v6"/></svg>윤리 자문</button>
+    <button role="tab" id="t-family" aria-selected="false" data-tab="family"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M14.5 20a4 4 0 0 1 6.5-3.2"/></svg>가족</button>
+    <button role="tab" id="t-core" aria-selected="false" data-tab="core"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 8h6"/></svg>핵심</button>
+    <button role="tab" id="t-guide" aria-selected="false" data-tab="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>지침</button>
+  </div></nav>
+
+  <section class="panel" id="p-path">
+    <div id="pathBody" style="display:flex;flex-direction:column;gap:14px"></div>
+    <details class="card" id="quickBox"><summary class="q" style="margin:0">상황별 빠른 안내</summary><div id="quickStart" style="margin-top:10px"></div></details>
+    <details class="card" id="flowBox" open>
+      <summary class="q" style="margin:0">전체 흐름도</summary>
+      <figure class="fc" style="margin:10px 0 0"><div id="flowSvg"></div><figcaption class="qhint" style="margin:6px 0 0">지금 위치와 지나온 길이 색으로 표시됩니다. 지나온 질문 칸을 누르면 그 단계로 돌아갑니다.</figcaption></figure>
+    </details>
+  </section>
+  <section class="panel" id="p-forms" hidden></section>
+
+  <section class="panel" id="p-case" hidden>
+    <div class="card" id="caseListCard">
+      <div class="toolbar"><p class="q" style="margin:0">내 케이스 이력</p><button class="btn primary" id="newCase">새 케이스</button></div>
+      <p class="qhint" style="margin:6px 0 10px">케이스는 본인만 볼 수 있게 저장되고, 바뀐 내용은 이력으로 남습니다.</p>
+      <div class="clist" id="caseList"></div>
+    </div>
+    <div id="caseEditor" hidden></div>
+  </section>
+
+  <section class="panel" id="p-ref" hidden></section>
+
+  <section class="panel" id="p-family" hidden>
+    <div class="card">
+      <p class="q"><span class="term" tabindex="0" data-t="19세 이상">19세 이상</span> 가족을 관계별로 입력하세요</p>
+      <p class="qhint"><span class="term" tabindex="0" data-t="실종선고">실종선고</span>, <span class="term" tabindex="0" data-t="행방불명">행방불명</span> 신고 후 1년 이상, 의식불명·치매 등으로 의사표명이 불가하다고 전문의가 진단·확인한 가족은 빼고 셉니다. 해외 거주·거동 불편 가족은 녹취·녹화로 참여할 수 있으니 포함해서 셉니다. <span class="src law">시행령 §10</span> <span class="src nibp">안내서 Q8·Q9</span></p>
+      <div class="grid2" id="famInputs"></div>
+      <p class="inline-note" id="famMaxNote" style="margin:8px 0 0">부모는 일반양자의 친생부모를 포함해 최대 4명, 조부모는 최대 8명까지 넣을 수 있습니다.</p>
+    </div>
+    <div class="card"><p class="q">가족관계도</p><div id="famTree"></div>
+      <p class="qhint" style="margin:6px 0 0">용어에 점선이 있으면 마우스를 올리거나 눌러 뜻을 볼 수 있습니다: <span class="term" tabindex="0" data-t="직계존속">직계존속</span> · <span class="term" tabindex="0" data-t="직계비속">직계비속</span> · <span class="term" tabindex="0" data-t="촌수">촌수</span> · <span class="term" tabindex="0" data-t="방계혈족">방계혈족</span> · <span class="term" tabindex="0" data-t="배우자">배우자</span> · <span class="term" tabindex="0" data-t="사실혼">사실혼</span> · <span class="term" tabindex="0" data-t="가족관계증명서">가족관계증명서</span> · <span class="term" tabindex="0" data-t="제적등본">제적등본</span> · <span class="term" tabindex="0" data-t="양자">양자</span> · <span class="term" tabindex="0" data-t="친양자">친양자</span> · <span class="term" tabindex="0" data-t="인척">인척</span></p></div>
+    <div class="card"><div class="out" id="famOut"></div></div>
+    <div class="card"><p class="q">준비할 서류</p><p class="qhint" style="margin:0 0 8px">위에 입력한 가족 구성에 맞춰 바뀝니다. 법령은 "가족관계증명서 등 환자의 가족임을 증명할 수 있는 서류"로 확인하도록 정하고 있습니다. <span class="src law">시행규칙 별지 제11·12호</span> <span class="src nibp">안내서 p.11·52</span></p><div id="famDocs"></div></div>
+    <div class="card"><p class="q">입양한 가족 · <span class="term" tabindex="0" data-t="양자">양자</span>와 <span class="term" tabindex="0" data-t="친양자">친양자</span></p>
+      <div class="tbl"><table>
+        <tr><th></th><th>일반양자</th><th>친양자</th></tr>
+        <tr><td>근거</td><td>민법 제882조의2</td><td>민법 제908조의3</td></tr>
+        <tr><td>양부모와의 관계</td><td>입양된 때부터 친생자와 같은 지위 → <b>자녀·부모(1촌)</b></td><td>부부의 혼인 중 출생자로 봄 → <b>자녀·부모(1촌)</b></td></tr>
+        <tr><td>친생부모와의 관계</td><td><b>유지</b> → 친생부모도 직계존속, 가족 범위에 포함</td><td><b>종료</b> → 친생부모는 가족 아님 (배우자의 친생자를 단독 입양한 경우 그 배우자와는 유지)</td></tr>
+        <tr><td>확인 서류</td><td>가족관계증명서에는 양부모가 부모로 나옵니다. 친생부모 관계는 <span class="term" tabindex="0" data-t="입양관계증명서">입양관계증명서</span>로 확인</td><td>가족관계증명서로 충분 (<span class="term" tabindex="0" data-t="친양자입양관계증명서">친양자입양관계증명서</span>는 발급 제한, 보통 불필요)</td></tr>
+        <tr><td><span class="term" tabindex="0" data-t="파양">파양</span>된 경우</td><td colspan="2">입양으로 생긴 친족관계가 끝나 서로 가족이 아닙니다 (민법 제776조)</td></tr>
+      </table></div>
+      <p class="qhint" style="margin:8px 0 0">입양하지 않은 배우자의 자녀(계자녀), 며느리·사위, 계부모는 <span class="term" tabindex="0" data-t="인척">인척</span>이라 가족 범위에 들어가지 않습니다. 입양한 가족도 19세 이상이어야 진술·합의에 참여합니다.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="p-core" hidden>
+    <div class="card" id="contactCard"></div>
+    <div class="card" id="hospCore"></div>
+    <div class="card">
+      <p class="q">연명의료에 해당하는 시술</p>
+      <p class="qhint">임종과정에 있는 환자에게 치료 효과 없이 임종과정 기간만 연장하는 시술 <span class="src law">법 §2(4) · 시행령 §2</span></p>
+      <div class="tbl"><table>
+        <tr><th>구분</th><th>시술</th></tr>
+        <tr><td>법률</td><td>심폐소생술, 혈액투석, 항암제 투여, 인공호흡기 착용</td></tr>
+        <tr><td>시행령 (2019.3.28~)</td><td>체외생명유지술(ECLS), 수혈, 혈압상승제 투여, 그 밖에 담당의사가 유보·중단할 필요가 있다고 판단하는 시술</td></tr>
+      </table></div>
+      <p class="qhint" style="margin-top:10px"><b style="color:var(--stop)">중단 불가</b> · 통증 완화를 위한 의료행위, 영양분·물·산소의 단순 공급은 유보·중단할 수 없습니다. <span class="src law">법 §19②</span></p>
+    </div>
+    <div class="card" id="lawNews"></div>
+    <div class="card" id="eduCard"></div>
+    <div class="card">
+      <p class="q">용어 풀이</p>
+      <dl class="gloss" id="glossList"></dl>
+    </div>
+    <div class="card">
+      <p class="q">용어 구분</p>
+      <div class="tbl"><table>
+        <tr><th>용어</th><th>뜻</th><th>판단</th></tr>
+        <tr><td>말기환자</td><td>적극적 치료에도 근원적 회복 가능성이 없고 점차 악화되어 수개월 이내 사망이 예상되는 환자</td><td>담당의사 + 해당 분야 전문의 1명 진단</td></tr>
+        <tr><td>임종과정</td><td>회생 가능성이 없고, 치료에도 회복되지 않으며, 급속도로 악화되어 사망에 임박한 상태</td><td>담당의사 + 해당 분야 전문의 1명 판단 (호스피스전문기관에서 호스피스를 이용하는 말기환자는 담당의사 단독 가능)</td></tr>
+        <tr><td>유보 / 중단</td><td>유보는 처음부터 시행하지 않는 것, 중단은 시행 중인 것을 멈추는 것</td><td>이행은 임종과정 판단 후에만</td></tr>
+      </table></div>
+    </div>
+    <div class="card">
+      <p class="q">두 서류의 차이</p>
+      <div class="tbl"><table>
+        <tr><th></th><th>연명의료계획서</th><th>사전연명의료의향서</th></tr>
+        <tr><td>작성자</td><td>담당의사 (환자 요청)</td><td>19세 이상 본인</td></tr>
+        <tr><td>대상</td><td>말기환자 또는 임종과정 환자 (질환 제한 없음)</td><td>건강 상태와 무관</td></tr>
+        <tr><td>장소</td><td>의료기관윤리위원회 등록 의료기관</td><td>지정된 사전연명의료의향서 등록기관 (본인 방문)</td></tr>
+        <tr><td>이행 시 확인</td><td>등록되어 있으면 환자의 의사로 봄</td><td>환자에게 직접 확인, 의사능력 없으면 담당의사 + 전문의 1명이 적법 작성 확인</td></tr>
+        <tr><td>미성년자</td><td>환자와 법정대리인에게 설명</td><td>작성 불가 (19세 이상)</td></tr>
+      </table></div>
+    </div>
+    <div class="card">
+      <p class="q">이행 후 할 일</p>
+      <ul style="margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:4px">
+        <li>담당의사는 결정이 확인되면 즉시 이행합니다. 이행을 거부하는 담당의사는 의료기관윤리위원회를 통해 교체합니다. <span class="src law">법 §19①③</span></li>
+        <li>이행서(별지 제13호)를 이행 후 7일 이내 정보처리시스템으로 통보합니다. 사망·전원·퇴원 시에는 즉시 작성·통보를 권고합니다. <span class="src law">법 §19⑤</span> <span class="src nibp">안내서 p.13·68</span></li>
+        <li>이행일은 판단과 의사 확인이 끝나 이행을 결정한 날입니다. <span class="src nibp">안내서 p.67</span></li>
+        <li>관련 기록은 이행 후 10년간 보존합니다. 기록을 허위로 작성하면 형사처벌 대상입니다. <span class="src law">법 §20 · §39</span></li>
+        <li>의료인이 <b>과실로</b> 기록을 허위 작성하면 보건복지부장관이 의료기관의 장에게 소속 의료인 교육(2시간 이상)을 명할 수 있고, 따르지 않으면 과태료가 부과됩니다. 틀린 기재를 발견하면 숨기지 말고 바로 고치세요. <span class="src law">법 §20의2 · §43 (2025.10.2 시행) · 시행규칙 §15의2 (2026.1.13 시행)</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="panel" id="p-guide" hidden>
+    <div class="card">
+      <input type="search" id="gq" placeholder="검색: 미성년, 무연고, ㄱㅈㄱㄱ…" aria-label="지침 검색 (띄어쓰기·초성 검색 가능)">
+      <div class="filters" id="gf" style="margin-top:10px"></div>
+    </div>
+    <div class="card" id="gRecent" hidden></div>
+    <div class="card" id="glist"></div>
+    <div class="card online-only" id="ruleAdmin">
+      <p class="q">병원 내규 추가</p>
+      <p class="qhint" id="ruleAdminHint">병원별 내규를 조항 단위로 등록하면 지침·해석 탭과, 지정한 경로의 결과 화면에 함께 나옵니다.</p>
+      <div id="ruleForm" hidden>
+        <div class="grid3">
+          <div class="field"><label for="rHosp">병원</label><input type="text" id="rHosp" placeholder="부천성모병원"></div>
+          <div class="field"><label for="rRef">조항·문서</label><input type="text" id="rRef" placeholder="연명의료 업무 지침 제5조"></div>
+        </div>
+        <div class="field" style="margin-top:10px"><label for="rQ">제목</label><input type="text" id="rQ" placeholder="예: 중단 전 원무팀 통보"></div>
+        <div class="field" style="margin-top:10px"><label for="rA">내용</label><textarea id="rA" style="min-height:80px"></textarea></div>
+        <p class="fq" style="margin-top:10px">표시할 경로</p>
+        <div class="seg" id="rRoutes"></div>
+        <div class="row" style="margin-top:10px"><button class="btn primary" id="rSave">내규 등록</button><span class="status" id="rStatus"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <img class="flogo flogo-l" src="assets/logo.svg" alt="가톨릭대학교 부천성모병원" onerror="this.hidden=true">
+    <span class="srcline">법령 기준: 연명의료결정법, 시행령, 시행규칙 · 내용 기준일 <span class="js-basis">2026-11-27</span></span>
+    <span class="srcline">참고: 찾기쉬운 생활법령정보 「연명의료결정제도」</span>
+    <span class="srcline">참고: 국가생명윤리정책원 「의료인을 위한 연명의료결정 사례집」(2020) · 서울대학교병원 의료기관윤리위원회 표준운영지침(2021) · 서울대학교병원 완화의료·임상윤리센터 심포지엄 초록집(2021)</span>
+    <span class="srcline">부천성모병원: 「임상의료윤리위원회 운영내규」(9.1-5-48, 2026.4.1) · 「임상의료윤리위원회 표준내규 및 운영지침」(2026.4.1)</span>
+    <span class="srcline">병원 지침: 가톨릭중앙의료원 「연명의료의 유보/중단에 관한 지침」(2020.9.15) · 「심폐소생술 유보에 관한 지침」(2026.4.17)</span>
+    <span class="srcline">행정지침 기준: 보건복지부·국가생명윤리정책원 「연명의료결정제도 안내(의료기관용)」 2024판 (쪽수 표기) · 서식: 시행규칙 별지(2023.7.31 개정)</span>
+    <span class="srcline">원문: 국가법령정보센터 law.go.kr · 국립연명의료관리기관 lst.go.kr · 정보처리시스템 intra.lst.go.kr</span>
+  </footer>
+</div>
+
+<div class="sheet-bg" id="sheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="toolbar"><h2 id="sheetTitle">설정 · 앱 정보</h2><button class="btn" id="sheetClose">닫기</button></div>
+    <div class="row2"><span>사용자</span><span class="who" id="whoami"></span></div>
+    <div class="row2"><span>로그아웃<br><span class="who">공용 PC에서는 사용 후 꼭 로그아웃하세요</span></span><button class="btn" type="button" id="logoutBtn">로그아웃</button></div>
+    <div id="lockSec"></div>
+    <label class="row2" for="hospSel2"><span>적용 병원 내규</span><select id="hospSel2"></select></label>
+    <div class="row2"><span>근거·출처 표시<br><span class="who">조문, 안내서 쪽수, 지침 번호를 함께 보여 줍니다</span></span><button class="switch" id="srcToggle" role="switch" aria-checked="false" aria-label="근거·출처 표시"></button></div>
+    <div class="row2"><span>안내 문구 다시 보기</span><button class="btn" id="noticeShow">보기</button></div>
+    <div class="row2"><span>글자 크기</span><div class="seg" role="group" aria-label="글자 크기" id="fsSeg"><button type="button" data-v="1">보통</button><button type="button" data-v="1.15">크게</button><button type="button" data-v="1.3">아주 크게</button></div></div>
+    <div class="row2"><span>화면</span><div class="seg" role="group" aria-label="화면 밝기" id="thSeg"><button type="button" data-v="light">밝게</button><button type="button" data-v="dark">어둡게(야간)</button></div></div>
+    <label class="row2" for="idleSel"><span>자동 잠금<br><span class="who">쓰지 않으면 이 시간 뒤 입장 화면으로 돌아갑니다</span></span><select id="idleSel"><option value="5">5분</option><option value="10">10분</option><option value="15">15분</option><option value="30">30분</option></select></label>
+    <div id="dataSec"></div>
+    <div class="row2"><span>의견·오류 보내기<br><span class="who">메일 앱으로 개발자에게 보냅니다</span></span><button class="btn" id="fbBtn">보내기</button></div>
+    <details><summary>변경 이력</summary><div id="changelog"></div></details>
+    <details><summary>내 사용 기록(이 기기)</summary><div id="usageStat"></div></details>
+    <dl class="info">
+      <dt>앱 이름</dt><dd>연명의료 현장 길라잡이</dd>
+      <dt>개발자</dt><dd>노상엽</dd>
+      <dt>이메일</dt><dd>ace@cmcnu.or.kr</dd>
+      <dt>개발일자</dt><dd>2026-10-06</dd>
+      <dt>수정일자</dt><dd class="js-mod">2026-10-07</dd>
+      <dt>버전</dt><dd class="js-ver"></dd>
+      <dt>내용 기준일</dt><dd class="js-basis"></dd>
+      <dt>내용 검수</dt><dd class="js-review"></dd>
+      <dt>내용 기준</dt><dd>연명의료결정법·시행령·시행규칙, 「연명의료결정제도 안내(의료기관용)」 2024, 가톨릭중앙의료원 지침, 부천성모병원 임상의료윤리위원회 운영내규·표준운영지침(2026.4.1)</dd>
+    </dl>
+    <p class="who" style="margin:0">절차 안내용 도구입니다. 실제 판단과 이행은 담당의사·해당 분야 전문의와 의료기관윤리위원회 절차를 따릅니다.</p>
+  </div>
+</div>
+
+<script src="content.js"></script>
+<script>
+/* ============================================================
+   독립 실행(원내 서버 배포) 모드
+   claude.ai 밖에서 열리면 window.claude가 없으므로, 이 기기 브라우저 저장소를 쓰는 대체 기능을 붙입니다.
+   - 케이스 이력: 이 기기·이 브라우저에 사용자 이름별로 저장
+   - 파일 저장: 브라우저 다운로드
+   - 자동 추출·정리(AI), 위원회 접수함, 내규 온라인 등록: 사용 안 함
+   ============================================================ */
+if(!window.claude){
+  window.LST_STANDALONE=true;
+  document.documentElement.classList.add("standalone");
+  const KEY="lst-db-v1";
+  const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"{}");}catch(e){return {};}};
+  let store=load(); const subs=new Set();
+  const persist=()=>{const snap=JSON.stringify(store); try{localStorage.setItem(KEY,snap);}catch(e){store=load(); throw {code:"quota_exceeded",message:"저장 공간 부족"};} subs.forEach(f=>f());};
+  window.addEventListener("storage",e=>{if(e.key===KEY){store=load(); subs.forEach(f=>f());}});
+  const clone=o=>JSON.parse(JSON.stringify(o));
+  /* 사용자 케이스(data/users/…)는 로그인한 사용자의 비밀번호에서 만든 열쇠로 암호화해 저장합니다.
+     열쇠가 없으면(로그인 전·다른 사용자) 읽을 수 없고 목록에도 나오지 않습니다. */
+  const isEnc=p=>p.startsWith("data/users/")&&!p.endsWith("/_auth");
+  const decode=(p,raw)=>{ if(!raw||!isEnc(p)) return raw; if(!raw.__lk) return raw; try{ return JSON.parse(LSTK.open(raw)); }catch(e){ return undefined; } };
+  const encode=(p,d)=>{ if(!isEnc(p)) return d; if(!LSTK.key()) throw {code:"locked",message:"잠금 상태에서는 저장할 수 없습니다"}; return LSTK.seal(JSON.stringify(d)); };
+  const dsnap=(path)=>{const d=decode(path,store[path]); return {id:path.split("/").pop(),exists:!!d,data:()=>d?clone(d):undefined,metadata:{fromCache:false,hasPendingWrites:false}};};
+  window.LST_LOCAL={
+    reencrypt(prefix){ let n=0; Object.keys(store).forEach(k=>{ if(k.startsWith(prefix)&&isEnc(k)&&store[k]&&!store[k].__lk){ store[k]=encode(k,store[k]); n++; } }); if(n) persist(); return n; },
+    wipe(prefix){ let n=0; Object.keys(store).forEach(k=>{ if(k.startsWith(prefix)){ delete store[k]; n++; } }); persist(); return n; },
+    refresh(){ subs.forEach(f=>f()); },
+    size(){ try{ return (localStorage.getItem(KEY)||"").length; }catch(e){ return 0; } }
+  };
+  const docRef=(path)=>({id:path.split("/").pop(),path,
+    get:async()=>dsnap(path),
+    set:async(d)=>{store[path]=encode(path,clone(d)); persist();},
+    update:async(d)=>{const old=decode(path,store[path]); if(!old) throw {code:"invalid_argument"}; store[path]=encode(path,{...old,...clone(d)}); persist();},
+    delete:async()=>{delete store[path]; persist();},
+    onSnapshot:(next)=>{const f=()=>next(dsnap(path)); subs.add(f); setTimeout(f,0); return ()=>subs.delete(f);},
+    collection:(c)=>colRef(path+"/"+c)});
+  const colRef=(path,q={})=>{
+    const run=()=>{const depth=path.split("/").length+1; let docs=Object.keys(store).filter(k=>k.startsWith(path+"/")&&k.split("/").length===depth).map(dsnap).filter(d=>d.exists);
+      if(q.order){const [f,dir]=q.order; docs.sort((a,b)=>{const x=a.data()[f]??"",y=b.data()[f]??""; return (x<y?-1:x>y?1:0)*(dir==="desc"?-1:1);});}
+      if(q.lim) docs=docs.slice(0,q.lim); return {docs,size:docs.length,empty:!docs.length,docChanges:()=>[],metadata:{fromCache:false,hasPendingWrites:false}};};
+    return {path,
+      doc:(id)=>docRef(path+"/"+(id||("d"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)))),
+      add:async(d)=>{const r=colRef(path).doc(); await r.set(d); return r;},
+      orderBy:(f,dir)=>colRef(path,{...q,order:[f,dir]}), limit:(n)=>colRef(path,{...q,lim:n}), where:()=>colRef(path,q),
+      get:async()=>run(),
+      onSnapshot:(next)=>{const f=()=>next(run()); subs.add(f); setTimeout(f,0); return ()=>subs.delete(f);}};
+  };
+  const db={doc:docRef,collection:colRef};
+  let uname=""; try{uname=localStorage.getItem("lst-user")||"";}catch(e){}
+  const user={me:async()=>({id:"local:"+(uname||"기본 사용자"),name:uname||"기본 사용자",isOwner:false,canEdit:false}),
+    id:async()=>"local:"+(uname||"기본 사용자"),canEdit:async()=>false,isOwner:async()=>false,can:async()=>null,profiles:async()=>({})};
+  const downloads={save:async({filename,data})=>{const blob=data instanceof Blob?data:new Blob([data]); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1500); return {status:"saved"};}};
+  window.claude={use:async(name)=>({db,user,downloads})[name]||null};
+}
+
+
+const SRC = {law:{label:"법령",cls:"law"}, nibp:{label:"행정지침·해석",cls:"nibp"}, cmc:{label:"가톨릭중앙의료원",cls:"hosp"}, hosp:{label:"병원 내규",cls:"hosp"}, ref:{label:"참고(타 기관)",cls:"nibp"}};
+/* 병원 내규: 코드에 직접 넣을 때는 GUIDES에 {src:"hosp", hospital:"병원명", ...}, 운영 중에는 지침·해석 탭에서 등록(db 'hosprules') */
+let HOSP_RULES = [];           // db에서 읽은 내규
+let curHosp = "부천성모병원";
+try{ curHosp = localStorage.getItem("lst-hosp") || curHosp; }catch(e){}
+function allGuides(){
+  const fromCode = GUIDES.filter(g=>g.src!=="hosp" || !g.hospital || g.hospital===curHosp);
+  const fromDb = HOSP_RULES.filter(r=>r.hospital===curHosp).map(r=>({src:"hosp", hospital:r.hospital, ref:r.ref, routes:r.routes||[], q:r.q, a:r.a, _id:r._id}));
+  return fromCode.concat(fromDb);
+}
+function esc(t){return String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+/* ============================================================
+   용어 풀이(마우스 올리기·탭) · 가족관계도 · 결정 흐름도
+   ============================================================ */
+const TERM_KEYS = Object.keys(TERMS).sort((a,b)=>b.length-a.length);
+function T(word,label){return `<span class="term" tabindex="0" data-t="${esc(word)}">${esc(label||word)}</span>`;}
+function linkTerms(text){ // 일반 텍스트에 용어 표시(첫 등장만)
+  const used=new Set(); let out=esc(text);
+  TERM_KEYS.forEach(k=>{ if(used.has(k)) return; const e=esc(k); const i=out.indexOf(e); if(i<0) return;
+    if(out.slice(0,i).lastIndexOf("<")>out.slice(0,i).lastIndexOf(">")) return;
+    out=out.slice(0,i)+T(k)+out.slice(i+e.length); used.add(k); });
+  return out;
+}
+/* 말풍선 */
+const tip=document.createElement("div"); tip.className="tip"; tip.id="termTip"; tip.hidden=true; tip.setAttribute("role","tooltip"); document.body.appendChild(tip);
+let tipFor=null;
+function showTip(el){ const k=el.dataset.t; if(!TERMS[k]) return; if(tipFor&&tipFor!==el) tipFor.removeAttribute("aria-describedby"); tipFor=el; el.setAttribute("aria-describedby","termTip"); tip.innerHTML=`<b>${esc(k)}</b>${esc(TERMS[k])}`; tip.hidden=false;
+  const r=el.getBoundingClientRect(), w=Math.min(300, window.innerWidth-24); tip.style.width=w+"px";
+  let x=Math.max(12, Math.min(r.left+r.width/2-w/2, window.innerWidth-w-12)); tip.style.left=x+"px";
+  const h=tip.offsetHeight; let y=r.top-h-8; if(y<8) y=r.bottom+8; tip.style.top=y+"px"; }
+function hideTip(){ tip.hidden=true; if(tipFor) tipFor.removeAttribute("aria-describedby"); tipFor=null; }
+document.addEventListener("mouseover",e=>{const t=e.target.closest?.(".term"); if(t) showTip(t);});
+document.addEventListener("mouseout",e=>{const t=e.target.closest?.(".term"); if(t&&!t.contains(e.relatedTarget)) hideTip();});
+document.addEventListener("focusin",e=>{const t=e.target.closest?.(".term"); if(t) showTip(t);});
+document.addEventListener("focusout",e=>{if(e.target.closest?.(".term")) hideTip();});
+document.addEventListener("click",e=>{const t=e.target.closest?.(".term"); if(t){ e.preventDefault(); tipFor===t?hideTip():showTip(t); } else if(!e.target.closest?.(".tip")) hideTip();});
+window.addEventListener("scroll",()=>{ if(tipFor) hideTip(); },{passive:true});
+
+/* ---------- 가족관계도 ---------- */
+function famTree(v){
+  const t1=v.sp+v.ch+v.pa, t2=v.gc+v.gp;
+  const tier = t1>0?1 : t2>0?2 : v.sb>0?3 : 0;
+  const s1 = v.sp+v.ch+v.gc+v.pa+v.gp; // 진술 가능군
+  const node=(key,label,sub,x,y,n,inTier,canStmt)=>{
+    const state = n<=0?"none": inTier?"on":"off";
+    return `<g class="ft-n ft-${state}"><rect x="${x-46}" y="${y-22}" width="92" height="44" rx="10"/>
+      <text x="${x}" y="${y-4}" text-anchor="middle" class="ft-l">${label}</text>
+      <text x="${x}" y="${y+13}" text-anchor="middle" class="ft-s">${n>0?n+"명":"없음"} · ${sub}</text>
+      ${canStmt&&n>0?`<g class="ft-badge"><rect x="${x+22}" y="${y-31}" width="30" height="16" rx="8"/><text x="${x+37}" y="${y-19.5}" text-anchor="middle">진술</text></g>`:""}</g>`;
+  };
+  const P={x:180,y:180};
+  const lines=`<g class="ft-line">
+    <line x1="180" y1="62" x2="180" y2="98"/><line x1="180" y1="142" x2="180" y2="158"/>
+    <polyline points="180,150 56,150 56,158" fill="none"/>
+    <line x1="226" y1="180" x2="258" y2="180"/>
+    <line x1="180" y1="202" x2="180" y2="238"/><line x1="180" y1="282" x2="180" y2="318"/></g>
+    <text x="242" y="174" text-anchor="middle" class="ft-e">혼인</text>
+    <text x="186" y="84" class="ft-e">직계존속 2촌</text><text x="186" y="152" class="ft-e" dy="0"></text>
+    <text x="186" y="224" class="ft-e">직계비속 1촌</text><text x="186" y="304" class="ft-e">직계비속 2촌</text>`;
+  const svg=`<svg viewBox="0 0 360 370" role="img" aria-label="환자 기준 가족관계도: 색이 칠해진 칸이 지금 구성에서 전원합의 대상이고, 진술 표시는 진술에 참여할 수 있는 가족입니다">
+    ${lines}
+    ${node("gp","조부모","2촌",180,40,v.gp,tier===2,s1>0)}
+    ${node("pa","부모","1촌",180,120,v.pa,tier===1,s1>0)}
+    ${node("sb","형제자매","2촌 방계",56,180,v.sb,tier===3,s1===0)}
+    <g class="ft-n ft-pt"><rect x="134" y="158" width="92" height="44" rx="10"/><text x="180" y="185" text-anchor="middle" class="ft-l">환자</text></g>
+    ${node("sp","배우자","촌수 없음",304,180,v.sp,tier===1,s1>0)}
+    ${node("ch","자녀","1촌",180,260,v.ch,tier===1,s1>0)}
+    ${node("gc","손자녀","2촌",180,340,v.gc,tier===2,s1>0)}
+  </svg>`;
+  const tierTxt = tier===1?"1순위(배우자·부모·자녀)":tier===2?"2순위(조부모·손자녀)":tier===3?"3순위(형제자매)":"해당 없음";
+  return `<figure class="ft">${svg}<figcaption><span class="lgi"><span class="lg lg-on"></span>전원합의 대상</span><span class="lgi">(${tierTxt})</span><span class="lgi"><span class="lg lg-off"></span>이번 구성에선 대상 아님</span><span class="lgi"><span class="lg lg-badge">진술</span>진술 참여 가능</span></figcaption></figure>`;
+}
+
+/* ---------- 결정 흐름도 (단계형 · 국립연명의료관리기관 흐름도 구조) ---------- */
+const FX = { // 결정된 답에 따라 흐리게 할 칸
+  start:{yes:["NOTEOL","PRE"],terminal:["*","!NOTEOL","!start"],pending:["*","!PRE","!start"]},
+  doc:{plan:["col2","col3","s4"],ad:["col1","col3","s4"],none:["col1","col2"]},
+  adcap:{yes:["B"],no:["B1"]}, cap:{yes:["s4"],no:["A"]},
+  age:{yes:["M"],no:["est","anyfam","C","D","NONE","s5x"]}, est:{yes:["anyfam","D","NONE"],no:["C"]}, anyfam:{yes:["NONE"],no:["D"]}};
+const FX_VAL = {start:["yes","terminal","pending"],doc:["plan","ad","none"],adcap:["yes","no"],cap:["yes","no"],age:["yes","no"],est:["yes","no"],anyfam:["yes","no"]};
+function drawFlow(){
+  const el=document.getElementById("flowSvg"); if(!el) return;
+  const visited=new Set(), dim=new Set(); let dimAll=false; const keep=new Set();
+  (trail||[]).forEach(t=>{ visited.add(t.id); const i=NODES[t.id].opts.findIndex(o=>o[0]===t.label); const v=FX_VAL[t.id]?.[i]; const rule=FX[t.id]?.[v]||[];
+    rule.forEach(x=>{ if(x==="*") dimAll=true; else if(x[0]==="!") keep.add(x.slice(1)); else dim.add(x); }); });
+  const cur = window._lastRes ? null : (window._curNode||"start"), res=window._lastRes;
+  const curA=cur; const visA=visited;
+  const q=(k,num,title,sub)=>`<button type="button" class="fq2${k===curA?" cur":visA.has(k)?" on":""}" data-node="${k}" data-x="${k}"><span class="num">${num}</span><span><b>${title}</b>${sub?`<small>${sub}</small>`:""}</span></button>`;
+  const r=(k,lab,title,form)=>{ const tag=RESULTS[k].tag[0]; return `<div class="fr2 fr2-${tag}${res===k?" hit":""}" data-x="${k}"><span class="lab">${lab}</span><b>${title}</b>${form?`<small>${form}</small>`:""}</div>`; };
+  const down=`<div class="fa2" aria-hidden="true"></div>`;
+  el.innerHTML=`<div class="fl2">
+    <div class="fl2-row">${q("start","1","임종과정에 있는 환자 판단","담당의사 + 해당 분야 전문의 · 제9호")}</div>
+    <div class="fl2-side">${r("NOTEOL","말기까지","이행 불가","계획서 작성은 가능")}${r("PRE","판단 전","판단부터","제9호 판단서")}</div>
+    ${down}
+    <div class="fl2-row">${q("doc","2","연명의료결정 의사표시가 있나요?","연명의료계획서 · 사전연명의료의향서")}</div>
+    <div class="fl2-cols">
+      <div class="fl2-col" data-x="col1"><span class="br">계획서 있음</span>${down}${r("A2","→","계획서 확인","조회·확인")}</div>
+      <div class="fl2-col" data-x="col2"><span class="br">의향서 있음</span>${down}${q("adcap","3","③ 의사능력","")}
+        <div class="fl2-pair">${r("B1","있음","담당의사 확인","제10호")}${r("B","없음","의사 2인 확인","제10호")}</div></div>
+      <div class="fl2-col" data-x="col3"><span class="br">둘 다 없음</span>${down}${q("cap","3","③ 의사능력","")}
+        <div class="fl2-pair">${r("A","있음","계획서 작성","제1호")}<div class="fr2 fr2-next" data-x="s4n"><span class="lab">없음</span><b>④로</b></div></div></div>
+    </div>
+    <div class="fl2-s4" data-x="s4">
+      <div class="fl2-row">${q("age","4","환자가 19세 이상인가요?","미성년이면 친권자가 결정")}</div>
+      <div class="fl2-pair wide">${r("M","미성년","친권자 결정","제12호 · 의사 2인")}<div class="fr2 fr2-next" data-x="s5x"><span class="lab">19세 이상</span><b>⑤로</b></div></div>
+      ${down}
+      <div class="fl2-row">${q("est","5","환자의 의사를 추정할 수 있나요?","가족 2명 이상 일치 진술")}</div>
+      <div class="fl2-pair wide">${r("C","가능","가족 2명 이상의 일치하는 진술","제11호 · 의사 2인")}<div class="fr2 fr2-next" data-x="anyfam"><span class="lab">불가능</span><b>⑥으로</b></div></div>
+      ${down}
+      <div class="fl2-row">${q("anyfam","6","합의할 가족이 있나요?","전원합의 대상 19세 이상 가족")}</div>
+      <div class="fl2-pair wide">${r("D","있음","환자가족 전원 합의","제12호 · 의사 2인")}${r("NONE","없음","윤리위원회 상담","결정 경로 없음")}</div>
+    </div>
+    <div class="fl2-legend"><span class="lgi"><i class="lg2 cur"></i>지금 단계</span><span class="lgi"><i class="lg2 on"></i>지나온 단계</span><span class="lgi"><i class="lg2 hit"></i>결정 방법</span></div>
+  </div>`;
+  // 흐리게
+  el.querySelectorAll("[data-x]").forEach(n=>{ const k=n.dataset.x; const hide = dimAll ? !keep.has(k) : dim.has(k); if(hide && !(k==="s4"&&false)) n.classList.add("dim"); });
+  // age 노드는 흐름도에서 ④에 포함: 미성년 결정 시 표시
+  el.querySelectorAll("[data-node]").forEach(g=>{ const go=()=>{ let k=g.dataset.node; const i=trail.findIndex(t=>t.id===k); if(i>=0){ trail=trail.slice(0,i); renderNode(k);} else if(k==="start"){ trail=[]; renderNode("start"); } }; g.onclick=go; });
+}
+
+/* ---------- 결정 경로 ---------- */
+const NODES = {
+  start:{q:"담당의사와 해당 분야 전문의 1명이 '임종과정'으로 판단했나요?", hint:"연명의료 중단·유보의 이행은 임종과정에 있는 환자에게만 할 수 있습니다. 판단 결과는 별지 제9호서식에 의사 2인이 작성합니다.", opts:[
+    ["예, 판단서(제9호)를 작성했습니다","",()=>"doc"],
+    ["아니요, 말기 진단까지입니다","수개월 이내 사망이 예상되는 상태",()=>"R:NOTEOL"],
+    ["아직 판단 전입니다","",()=>"R:PRE"]]},
+  doc:{q:"환자의 연명의료결정에 대한 의사표시(연명의료계획서 또는 사전연명의료의향서)가 있나요?", hint:"연명의료 정보처리시스템과 전자의무기록의 '연명' 칸에서 조회합니다. 다른 병원에서 등록한 것도 효력이 있습니다.", opts:[
+    ["연명의료계획서가 있습니다","",()=>"R:A2"],
+    ["사전연명의료의향서가 있습니다","",()=>"adcap"],
+    ["둘 다 없습니다","",()=>"cap"]]},
+  adcap:{q:"환자가 지금 의향서 내용을 확인할 의사능력이 있나요?", hint:"의사능력이 있으면 담당의사가 환자에게 직접 확인하고, 없으면 의사 2인이 의향서의 적법성을 확인합니다.", opts:[
+    ["있습니다","",()=>"R:B1"],["없습니다","",()=>"R:B"]]},
+  cap:{q:"환자에게 의사능력이 있나요?", hint:"의사능력이 있으면 환자와 함께 연명의료계획서를 작성합니다.", opts:[
+    ["있습니다","",()=>"R:A"],["없습니다","",()=>"age"]]},
+  age:{q:"환자가 19세 이상인가요?", hint:"미성년 환자는 가족 진술 대신 친권자인 법정대리인이 결정합니다.", opts:[
+    ["예, 19세 이상","",()=>"est"],["아니요, 미성년자","",()=>"R:M"]]},
+  est:{q:"환자의 평소 의사를 추정할 수 있나요?", hint:"환자가 충분한 기간 일관되게 밝힌 연명의료 의사를 19세 이상 가족 2명 이상이 일치하게 진술할 수 있어야 합니다(가족이 1명뿐이면 그 1명). 반대 진술이나 반대 증거가 없어야 합니다.", opts:[
+    ["가능합니다","가족 진술이 일치함",()=>"R:C"],
+    ["불가능합니다","진술할 내용이 없거나 가족 사이 의견이 다름",()=>"anyfam"]]},
+  anyfam:{q:"전원합의 대상 가족이 1명 이상 있나요?", hint:"가족 탭에서 누가 대상인지 계산할 수 있습니다.", opts:[
+    ["예, 있습니다","",()=>"R:D"],["아니요, 가족이 없습니다","",()=>"R:NONE"]]},
+};
+
+const RESULTS = {
+  PRE:{tag:["wait","먼저 판단"],title:"임종과정 판단부터 하세요",law:"법 §16",
+    who:["담당의사 (전공의 가능)","해당 분야 전문의 1명 (과 제한 없음, 기관이 정함)"],
+    docs:["임종과정에 있는 환자 판단서 (별지 제9호)"],
+    steps:["담당의사와 해당 분야 전문의 1명이 함께 판단합니다(호스피스전문기관 이용 말기환자는 담당의사 단독 가능).","두 의사가 각자 판단 내용과 일시를 적고, 담당의사가 두 판단이 같은지 확인해 서명합니다.","판단 후 이 화면에서 다시 경로를 확인하세요."]},
+  NOTEOL:{tag:["stop","이행 불가"],title:"아직 이행할 수 없습니다. 계획서 작성은 가능합니다",law:"법 §10 · §15",
+    who:["담당의사 (전공의 가능)"],docs:["연명의료계획서 (별지 제1호, 환자 요청 시)"],
+    steps:["말기환자는 연명의료 유보·중단의 이행 대상이 아닙니다.","환자가 원하면 담당의사가 연명의료계획서를 작성해 미리 의사를 남길 수 있습니다. 미성년자는 환자와 법정대리인에게 설명합니다.","임종과정으로 판단되면 등록된 계획서가 환자의 의사가 됩니다."]},
+  A:{tag:["go","환자 본인 결정"],title:"환자와 연명의료계획서를 작성합니다",law:"법 §10 · §17①1",
+    who:["담당의사 (전공의 가능)"],docs:["임종과정에 있는 환자 판단서 (별지 제9호)","연명의료계획서 (별지 제1호) 작성","연명의료중단등결정 이행서 (별지 제13호)"],
+    steps:["의사능력이 있는 환자의 요청으로 담당의사가 설명사항 6가지를 설명하고 연명의료계획서를 작성·등록합니다.","환자에게 병명·상태·시술 내용과 결과를 설명합니다.","가족 요청만으로 결정하지 않습니다. 의사표현이 가능한 환자의 의사가 우선입니다.","서명·기명날인·녹화·녹취 중 하나로 확인받습니다. 지장은 안 됩니다.","이행서(별지 제13호)를 이행 후 7일 이내 정보처리시스템으로 통보합니다."]},
+  A2:{tag:["go","환자 본인 결정"],title:"등록된 연명의료계획서를 환자의 의사로 봅니다",law:"법 §17①1",
+    who:["담당의사 (전공의 가능)"],docs:["임종과정에 있는 환자 판단서 (별지 제9호)","연명의료계획서 (별지 제1호, 조회)","연명의료중단등결정 이행서 (별지 제13호)"],route:"A",
+    steps:["정보처리시스템에서 계획서를 조회하고 시술 항목을 확인합니다.","계획서는 기한 제한 없이 유효하고, 다른 병원에서 등록한 것도 효력이 있습니다.","유보·중단할 시술은 담당의사가 의학적으로 판단하고, 이행서(별지 제13호)를 7일 이내 통보합니다."]},
+  B1:{tag:["go","환자 본인 결정"],title:"담당의사가 환자에게 의향서 내용을 확인합니다",law:"법 §17①2",route:"B",
+    who:["담당의사 (전공의 가능)"],docs:["임종과정에 있는 환자 판단서 (별지 제9호)","환자의사 확인서(사전연명의료의향서) (별지 제10호, 의사능력 있음 칸)","연명의료중단등결정 이행서 (별지 제13호)"],
+    steps:["정보처리시스템에서 의향서를 조회합니다.","의향서는 지금의 병 상태를 알고 쓴 것이 아니므로, 내용을 환자에게 보여 주고 지금도 같은 뜻인지 확인합니다.","뜻이 달라졌으면 계획서를 새로 작성합니다(기존 의향서는 효력을 잃음).","같은 뜻이면 제10호서식에 조회일·등록번호를 적고 담당의사가 서명합니다.","이행서(별지 제13호)를 7일 이내 통보합니다."]},
+  B:{tag:["go","환자 본인 결정"],title:"의사 2인이 사전연명의료의향서를 확인합니다",law:"법 §17①2",
+    who:["담당의사 (전공의 가능)","해당 분야 전문의 1명"],docs:["임종과정에 있는 환자 판단서 (별지 제9호)","환자의사 확인서(사전연명의료의향서) (별지 제10호)","연명의료중단등결정 이행서 (별지 제13호)"],
+    steps:["정보처리시스템에서 의향서를 조회합니다. 조회되는 의향서는 적법하게 작성된 것으로 봅니다.","담당의사와 해당 분야 전문의 1명이 의사능력이 없다는 의학적 판단과 의향서의 적법성을 함께 확인하고, 확인서에 조회 일자와 등록번호를 적습니다.","시행 전 민간 서식(사전의료지시서 등)은 의향서로 인정되지 않습니다.","이행서(별지 제13호)를 7일 이내 통보합니다."]},
+  C:{tag:["go","가족 진술"],title:"환자가족 2명 이상의 일치하는 진술",law:"법 §17①3",
+    who:["담당의사 (전공의 가능)","해당 분야 전문의 1명","19세 이상 가족 2명 이상(1명뿐이면 1명)"],
+    docs:["임종과정에 있는 환자 판단서 (별지 제9호)","환자의사 확인서(환자가족 진술) (별지 제11호)","가족관계 증빙서류 확인 (사본 보관 의무 없음)","연명의료중단등결정 이행서 (별지 제13호)"],
+    steps:["진술 가족: 배우자·직계비속·직계존속 중 19세 이상, 이들이 없을 때만 형제자매.","환자가 평소 충분한 기간 일관되게 밝힌 의사를 진술해야 합니다. 가족의 희망이 아닙니다.","다른 가족의 반대 진술이나 객관적 반대 증거가 있으면 이 경로를 쓸 수 없습니다.","진술 내용은 가족이 직접 쓰는 것이 원칙입니다. 해외·거동 불편 가족은 본인 확인이 되는 녹취·녹화로 대신할 수 있습니다.","민간 사전의료지시서 등은 진술의 증거자료로 쓸 수 있습니다.","담당의사와 해당 분야 전문의 1명이 진술을 확인하고, 이행서를 7일 이내 통보합니다."]},
+  D:{tag:["go","가족 전원합의"],title:"환자가족 전원의 합의",law:"법 §18①2 · §18② · 시행령 §10",
+    who:["담당의사 (전공의 가능)","해당 분야 전문의 1명","합의 대상 가족 전원"],
+    docs:["임종과정에 있는 환자 판단서 (별지 제9호)","친권자 및 환자가족 의사 확인서 (별지 제12호)","가족관계 증빙서류, 제외 가족의 제외 사유 증명서류","연명의료중단등결정 이행서 (별지 제13호)"],
+    steps:["합의 대상: 배우자 + 부모·자녀 전원 → 없으면 조부모·손자녀 → 없으면 형제자매 (모두 19세 이상).","실종선고, 행방불명 신고 후 1년 이상, 의식불명·치매 등으로 의사표명이 불가하다고 전문의가 진단·확인한 가족은 제외합니다. 제외하려면 증명서류를 받아 확인합니다. 단순 연락두절은 제외 사유가 아닙니다.","모두 한자리에 모일 필요는 없고, 녹취·녹화로 합의를 확인할 수 있습니다.","한 명이라도 반대하면 결정할 수 없습니다.","담당의사나 전문의가 환자가 중단을 원하지 않았다는 사실을 확인하면 이 경로를 쓸 수 없습니다."]},
+  M:{tag:["go","친권자 결정"],title:"미성년 환자: 친권자인 법정대리인 결정",law:"법 §18①1",
+    who:["담당의사 (전공의 가능)","해당 분야 전문의 1명","친권자인 법정대리인"],
+    docs:["임종과정에 있는 환자 판단서 (별지 제9호)","친권자 및 환자가족 의사 확인서 (별지 제12호, 미성년자 칸)","친권자 확인 서류","연명의료중단등결정 이행서 (별지 제13호)"],
+    steps:["미성년자는 사전연명의료의향서를 작성할 수 없습니다.","친권자인 법정대리인이 연명의료중단등결정의 의사를 표시합니다.","담당의사와 해당 분야 전문의 1명이 확인합니다."]},
+  NONE:{tag:["stop","결정 불가"],title:"법상 결정 경로가 없습니다",law:"법 §17 · §18",
+    who:["의료기관윤리위원회"],docs:[],
+    steps:["본인이 남긴 계획서·의향서도 없고 법정 가족도 없으면 현행법상 이행이 어렵습니다.","의료기관윤리위원회에 상담을 요청하세요.","통증 완화, 영양분·물·산소 공급 등 기본 돌봄은 계속합니다."]},
+};
+
+const pPath = document.getElementById("pathBody");
+let trail = [];
+const EOL_CRIT=[
+  ["회생의 가능성이 없습니다",""],
+  ["치료에도 불구하고 회복되지 않습니다",""],
+  ["급속도로 증상이 악화되어 사망에 임박했습니다","참고: 혈압 저하, 맥박 증가, 산소포화도 90% 미만, 소변량 감소, 의식 변화, 체인-스토크스 호흡 등(대한의학회 기준)"],
+  ["담당의사와 해당 분야 전문의 1명이 각각 판단해 제9호 판단서를 작성했습니다","호스피스전문기관에서 호스피스를 이용하는 말기환자는 담당의사 1명의 판단으로 갈음할 수 있습니다."]];
+let eolChecks=[false,false,false,false];
+function renderStart(){
+  const n=NODES.start, all=eolChecks.every(Boolean);
+  pPath.innerHTML = trailHTML() + `<div class="card fade"><p class="q">임종과정에 있는 환자인지 확인하세요</p>
+    <p class="qhint">${linkTerms("연명의료 중단·유보의 이행은 임종과정에 있는 환자에게만 할 수 있습니다. 아래 조건을 모두 확인하면 다음 단계가 열립니다.")}</p>
+    <div class="chk" id="eolChk">${EOL_CRIT.map(([t,h],i)=>`<label><input type="checkbox" data-i="${i}" ${eolChecks[i]?"checked":""}><span>${linkTerms(t)}${h?`<span class="ts">${esc(h)}</span>`:""}</span></label>`).join("")}</div>
+    <p class="status" style="margin:10px 0 0">${all?"모든 조건을 확인했습니다.":`조건 ${eolChecks.filter(Boolean).length}/4 확인`}</p>
+    <div class="choices" id="ch" style="margin-top:8px"></div></div>`;
+  const ch=document.getElementById("ch");
+  if(all){ const b=document.createElement("button"); b.className="go-next"; b.innerHTML=`임종과정 판단 완료 · 다음 단계로<small>제9호 판단서 작성 완료</small>`; b.onclick=()=>{trail.push({id:"start",label:n.opts[0][0]}); renderNode(n.opts[0][2]());}; ch.appendChild(b); }
+  [1,2].forEach(k=>{ const [label,small,next]=n.opts[k]; const b=document.createElement("button"); b.innerHTML=label+(small?`<small>${small}</small>`:""); b.onclick=()=>{trail.push({id:"start",label}); renderNode(next());}; ch.appendChild(b); });
+  document.querySelectorAll("#eolChk input").forEach(i=>i.onchange=()=>{eolChecks[+i.dataset.i]=i.checked; renderStart(); drawFlow();});
+  drawFlow();
+}
+function renderNode(id){
+  if(id.startsWith("R:")) return renderResult(id.slice(2));
+  if(id==="start"){ window._curNode="start"; window._lastRes=null; return renderStart(); }
+  window._curNode=id; window._lastRes=null;
+  const n = NODES[id];
+  pPath.innerHTML = trailHTML() + `<div class="card fade"><p class="q">${n.q}</p>${n.hint?`<p class="qhint">${linkTerms(n.hint)}</p>`:""}<div class="choices" id="ch"></div></div>`;
+  const ch = document.getElementById("ch");
+  n.opts.forEach(([label,small,next])=>{
+    const b=document.createElement("button");
+    b.innerHTML = label + (small?`<small>${small}</small>`:"");
+    b.onclick=()=>{trail.push({id,label});renderNode(next());};
+    ch.appendChild(b);
+  });
+  drawFlow();
+}
+function trailHTML(){
+  if(!trail.length) return "";
+  return `<div class="row" style="align-items:center;justify-content:space-between"><div class="trail">${trail.map(t=>`<span>${t.label}</span>`).join("")}</div><div class="row"><button class="btn" onclick="back()">이전</button><button class="btn" onclick="restart()">처음부터</button></div></div>`;
+}
+function back(){const t=trail.pop(); renderNode(t?t.id:"start");}
+function restart(){trail=[]; eolChecks=[false,false,false,false]; renderNode("start");}
+function badge(g){const s=SRC[g.src];return `<span class="src ${s.cls}">${esc(g.src==="hosp"&&g.hospital?g.hospital+" · "+g.ref:g.ref)}</span>`;}
+function guideP(g){return `<p style="margin:6px 0 0"><b>${esc(g.q)}</b> ${esc(g.a)} ${badge(g)}</p>`;}
+function renderResult(key){
+  window._lastRes = key; window._curNode=null;
+  const r = RESULTS[key], routeKey = r.route||key;
+  const G = allGuides();
+  const related = G.filter(g=>((g.src!=="hosp" && g.src!=="cmc") || g.ref.includes("영상")) && g.routes.includes(routeKey) && (guideUnlocked()||g.src==="law"));
+  const hosp = G.filter(g=>(g.src==="hosp"||g.src==="cmc") && !g.ref.includes("영상") && g.routes.includes(routeKey));
+  pPath.innerHTML = trailHTML() + `<div class="card result fade">
+    <span class="tag ${r.tag[0]}">${r.tag[1]}</span>
+    <h2>${r.title}</h2><span class="src law">${r.law}</span>
+    ${guideUnlocked()?`<div class="hospbox"><div class="ttl">가톨릭중앙의료원 지침 · ${esc(curHosp)} 내규 (필수 적용)</div>${hosp.map(guideP).join("")}${hosp.some(g=>g.src==="hosp")?"":`<p class="empty" style="margin:6px 0 0">${esc(curHosp)} 내규 중 이 경로에 등록된 항목은 아직 없습니다.</p>`}</div>`:lockedBox("원내 지침 · 내규 · 행정해석")}
+    <h3>확인하는 사람</h3><ul>${r.who.map(w=>`<li>${w}</li>`).join("")}</ul>
+    ${r.docs.length?`<h3>남길 서류</h3><ul>${r.docs.map(d=>`<li>${d}</li>`).join("")}</ul>`:""}
+    <h3>절차와 주의</h3><ul>${r.steps.map(s=>`<li>${linkTerms(s)}</li>`).join("")}</ul>
+    ${key!=="NONE"&&key!=="PRE"&&key!=="NOTEOL"?`<h3>공통</h3><ul><li>통증 완화, 영양분·물·산소의 단순 공급은 중단하지 않습니다. <span class="src law">§19②</span></li></ul>`:""}
+    <div class="row" style="margin-top:12px"><button class="btn" id="toCase">이 경로로 환자 케이스 만들기</button></div>
+  </div>
+  ${related.length?`<div class="card"><p class="q">${guideUnlocked()?"관련 조문":"관련 법령 조문"}</p>${related.map(g=>`<details><summary>${esc(g.q)}</summary><p>${esc(g.a)} ${badge(g)}</p></details>`).join("")}</div>`:""}`;
+  document.getElementById("toCase").onclick=()=>window.caseFromTrail && window.caseFromTrail(trail);
+  drawFlow();
+}
+window.back=back; window.restart=restart;
+
+/* ---------- 가족 범위 ---------- */
+const FAM = [["sp","배우자",1],["ch","자녀",20],["pa","부모",4],["gc","손자녀",30],["gp","조부모",8],["sb","형제자매",20]];
+const FAM_MAX = Object.fromEntries(FAM.map(([k,,m])=>[k,m]));
+const famVals = {sp:1,ch:2,pa:0,gc:0,gp:0,sb:1};
+const fi = document.getElementById("famInputs");
+FAM.forEach(([k,label,max])=>{
+  const d=document.createElement("div"); d.className="field";
+  d.innerHTML=`<label for="f-${k}">${label}</label><div class="stepper"><button aria-label="${label} 줄이기" data-k="${k}" data-d="-1">−</button><input id="f-${k}" inputmode="numeric" value="${famVals[k]}"><button aria-label="${label} 늘리기" data-k="${k}" data-d="1">+</button></div>`;
+  fi.appendChild(d);
+  const inp=d.querySelector("input");
+  d.querySelectorAll("button").forEach(b=>b.onclick=()=>{famVals[k]=Math.max(0,Math.min(max,(famVals[k]||0)+ +b.dataset.d));inp.value=famVals[k];calcFam();});
+  inp.oninput=()=>{const v=parseInt(String(inp.value).replace(/\D/g,""),10);famVals[k]=isNaN(v)?0:Math.max(0,Math.min(max,v));calcFam();};
+  inp.onblur=()=>{inp.value=famVals[k];};
+  inp.setAttribute("aria-describedby","famMaxNote");
+});
+function list(pairs){return pairs.filter(([,n])=>n>0).map(([l,n])=>`${l} ${n}명`).join(", ");}
+function calcFam(){
+  const v=famVals;
+  // §17 진술: 배우자·직계비속(자녀·손자녀)·직계존속(부모·조부모), 없으면 형제자매
+  const s1=[["배우자",v.sp],["자녀",v.ch],["손자녀",v.gc],["부모",v.pa],["조부모",v.gp]];
+  const s1n=v.sp+v.ch+v.gc+v.pa+v.gp;
+  let stmt, stmtNeed;
+  if(s1n>0){stmt=list(s1);stmtNeed=s1n>=2?"이 중 2명 이상의 일치하는 진술":"가족이 1명이므로 그 1명의 진술";}
+  else if(v.sb>0){stmt=`형제자매 ${v.sb}명`;stmtNeed=v.sb>=2?"이 중 2명 이상의 일치하는 진술":"1명이므로 그 1명의 진술";}
+  else {stmt=null;}
+  // §18 전원합의: ① 배우자+1촌 → ② 2촌 → ③ 형제자매
+  const t1=v.sp+v.ch+v.pa, t2=v.gc+v.gp;
+  let agree, tier, n;
+  if(t1>0){agree=list([["배우자",v.sp],["자녀",v.ch],["부모",v.pa]]);tier="1순위: 배우자 및 1촌 이내 직계존·비속";n=t1;}
+  else if(t2>0){agree=list([["손자녀",v.gc],["조부모",v.gp]]);tier="2순위: 2촌 이내 직계존·비속";n=t2;}
+  else if(v.sb>0){agree=`형제자매 ${v.sb}명`;tier="3순위: 형제자매";n=v.sb;}
+  else agree=null;
+  const excl=[];
+  if(t1>0&&t2>0) excl.push(`손자녀·조부모 ${t2}명`);
+  if((t1>0||t2>0)&&v.sb>0) excl.push(`형제자매 ${v.sb}명`);
+  document.getElementById("famOut").innerHTML=`
+    <div class="box"><b>가족 진술 <span class="src law">§17①3</span></b>${stmt?`<div class="big">${stmt}</div><div>${linkTerms(stmtNeed)}</div>`:`<div class="empty">진술할 수 있는 가족이 없습니다.</div>`}</div>
+    <div class="box"><b>전원합의 <span class="src law">§18①2 · §18②</span></b>${agree?`<div style="font-size:.82rem;color:var(--muted)">${linkTerms(tier)}</div><div class="big">${agree}</div><div>총 ${n}명 ${T("전원합의","전원의 합의")}가 필요합니다.</div>${excl.length?`<div style="font-size:.85rem;color:var(--muted);margin-top:4px">합의 대상 아님: ${excl.join(", ")}</div>`:""}`:`<div class="empty">합의할 가족이 없습니다. 결정 경로가 없으니 의료기관윤리위원회에 상담하세요.</div>`}</div>
+    <div style="font-size:.8rem;color:var(--muted)">진술은 ${T("촌수")} 제한 없이 ${T("배우자")}·${T("직계존·비속","직계존비속")}이 먼저이고, ${T("전원합의")}는 순위별로 끊어집니다. 앞 순위에 한 명이라도 있으면 뒤 순위는 대상이 아닙니다.</div>`;
+  const ft=document.getElementById("famTree"); if(ft) ft.innerHTML=famTree(v);
+  renderFamDocs(v, t1>0?1:t2>0?2:v.sb>0?3:0);
+}
+function renderFamDocs(v,tier){
+  const el=document.getElementById("famDocs"); if(!el) return;
+  const li=a=>`<li>${a}</li>`;
+  const base=[
+    `<b>환자 본인 기준 ${T("가족관계증명서")}</b>: 환자 이름으로 발급되고 주민등록번호 13자리가 모두 보이는 것. 배우자·부모·자녀가 여기서 확인됩니다.`,
+    `진술·합의하는 <b>가족의 신분 확인</b>(신분증 등)과 확인서의 관계·서명이 일치하는지 확인합니다.`,
+    `확인한 증명서의 사본을 보관할 법적 의무는 없습니다. 확인서에는 19세 이상 가족의 총 인원수를 적습니다. <span class="src nibp">안내서 p.52</span>`];
+  const tierDocs = tier===1?[] : tier===2?[
+    `<b>손자녀</b>: 환자 기준 증명서에는 나오지 않으므로 <b>자녀 기준 가족관계증명서</b>(또는 ${T("제적등본")})로 환자–자녀–손자녀 관계를 잇습니다.`,
+    `<b>조부모</b>: <b>부모 기준 가족관계증명서</b>(또는 제적등본)로 확인합니다.`,
+    `1순위(배우자·부모·자녀)가 없다는 근거: 사망한 가족의 ${T("기본증명서")}·제적등본 등.`
+  ] : tier===3?[
+    `<b>형제자매</b>: 환자 기준 증명서에는 나오지 않으므로 <b>부모 기준 가족관계증명서</b>(또는 제적등본)로 확인합니다.`,
+    `1·2순위(배우자·직계존비속)가 모두 없다는 근거: 사망한 가족의 기본증명서·제적등본 등.`
+  ] : [];
+  const excl=[
+    `${T("행방불명")}: 경찰관서에 행방불명 신고를 한 날부터 1년 이상 지났음을 보여 주는 서류`,
+    `${T("실종선고")}: 실종선고가 기록된 기본증명서 또는 심판서`,
+    `의식불명·치매 등으로 의사를 표명할 수 없음: 해당 분야 전문의 1명 이상의 진단·확인 서류(진단서·소견서)`];
+  const other=[
+    `해외 거주·거동 불편 가족은 본인임을 확인할 수 있는 <b>녹취·녹화</b>로 진술·합의할 수 있습니다. 서명란에 녹취·녹화를 표시합니다.`,
+    `입양한 가족: 일반${T("양자")}의 친생부모가 참여하면 ${T("입양관계증명서")}로 관계를 확인합니다. ${T("친양자")}는 가족관계증명서로 충분합니다.`,
+    `미성년 환자: 환자의 가족관계증명서·기본증명서로 ${T("친권자")}를 확인합니다(별지 제12호 미성년자 칸).`];
+  el.innerHTML=`<h3 class="dh">모든 경우</h3><ul class="dl">${base.map(li).join("")}</ul>
+    ${tierDocs.length?`<h3 class="dh">지금 구성에서 추가로</h3><ul class="dl">${tierDocs.map(li).join("")}</ul>`:tier===1?`<p class="qhint" style="margin:4px 0">지금 구성(1순위)은 환자 기준 가족관계증명서 한 장으로 대부분 확인됩니다.</p>`:""}
+    <h3 class="dh">합의 대상에서 빼는 가족이 있으면 <span class="src law">시행령 §10</span></h3><ul class="dl">${excl.map(li).join("")}</ul>
+    <h3 class="dh">경우에 따라</h3><ul class="dl">${other.map(li).join("")}</ul>`;
+}
+calcFam();
+
+/* ---------- 지침·해석 ---------- */
+let gFilter="all";
+const gf=document.getElementById("gf");
+[["all","전체"],["fav","★ 즐겨찾기"],["law","법령"]].forEach(([k,l])=>{
+  const b=document.createElement("button");b.textContent=l;b.setAttribute("aria-pressed",k==="all");
+  b.onclick=()=>{gFilter=k;gf.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));renderGuides();};
+  gf.appendChild(b);
+});
+document.getElementById("gq").oninput=renderGuides;
+function renderGuides(){
+  const q=document.getElementById("gq").value.trim();
+  const open=guideUnlocked();
+  const favs=getFavs();
+  const items=allGuides().filter(g=>(open||g.src==="law")&&(gFilter==="all"||(gFilter==="fav"?favs.includes(gKey(g)):g.src===gFilter))&&(!q||textMatch(g.q+" "+g.a+" "+g.ref,q)));
+  const el=document.getElementById("glist");
+  if(!open && gFilter!=="all" && gFilter!=="law" && gFilter!=="fav"){ el.innerHTML=lockedBox("내규·행정해석은 잠겨 있습니다"); return; }
+  if(!items.length){el.innerHTML= gFilter==="fav"&&!q?`<p class="empty" style="margin:0">즐겨찾기한 항목이 없습니다. 항목 오른쪽 ☆를 누르면 여기에 모입니다.</p>`: gFilter==="hosp"&&!q?`<p class="q">${esc(curHosp)} 내규가 아직 없습니다</p><p class="qhint" style="margin:0">관리자가 아래 '병원 내규 추가'에서 조항별로 등록하면 여기와 결정 경로 결과 화면에 함께 나옵니다.</p>`:`<p class="empty" style="margin:0">찾는 항목이 없습니다. 다른 낱말로 검색해 보세요.</p>`;return;}
+  el.innerHTML=items.map(g=>{const k=gKey(g), on=favs.includes(k); return `<div class="gitem glist-row"><details data-gk="${esc(k)}"><summary>${esc(g.q)}</summary><p>${esc(g.a)}</p><p>${badge(g)} <span style="font-size:.75rem;color:var(--muted)">${SRC[g.src].label}${g.checked?` · 대조 ${esc(g.checked)}`:""}</span>${g._id&&window.canAdmin?` <button class="btn danger" style="padding:2px 8px;font-size:.75rem" data-del="${g._id}">삭제</button>`:""}</p></details><button type="button" class="star" data-fav="${esc(k)}" aria-pressed="${on}" aria-label="${on?"즐겨찾기 해제":"즐겨찾기"}: ${esc(g.q)}">${on?"★":"☆"}</button></div>`;}).join("");
+  el.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{toggleFav(b.dataset.fav); renderGuides();});
+  el.querySelectorAll("details[data-gk]").forEach(d=>d.addEventListener("toggle",()=>{ if(d.open) pushRecent(d.dataset.gk); }));
+  if(!open) el.innerHTML+=lockedBox("법령 조문만 보입니다. 내규·행정해석은 잠겨 있습니다");
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>window.deleteRule&&window.deleteRule(b.dataset.del,b));
+}
+renderGuides();
+
+/* ---------- 탭 ---------- */
+const TAB_KEYS=["path","case","forms","ref","family","core","guide"];
+const tabBtns=[...document.querySelectorAll("nav.tabs button")];
+tabBtns.forEach(b=>{ const k=b.dataset.tab, pn=document.getElementById("p-"+k); b.setAttribute("aria-controls","p-"+k); b.tabIndex=b.getAttribute("aria-selected")==="true"?0:-1; if(pn){ pn.setAttribute("role","tabpanel"); pn.setAttribute("aria-labelledby",b.id); } });
+function selectTab(b,focus){
+  tabBtns.forEach(x=>{x.setAttribute("aria-selected",x===b); x.tabIndex=x===b?0:-1;});
+  TAB_KEYS.forEach(k=>{const pn=document.getElementById("p-"+k); if(pn) pn.hidden = k!==b.dataset.tab;});
+  try{localStorage.setItem("lst-tab",b.dataset.tab);}catch(e){}
+  if(focus) b.focus();
+  window.scrollTo({top:0});
+  if(window.onTabShown) window.onTabShown(b.dataset.tab);
+}
+tabBtns.forEach(b=>{ b.onclick=()=>selectTab(b); b.onkeydown=e=>{ const i=tabBtns.indexOf(b); let j=null; if(e.key==="ArrowRight") j=(i+1)%tabBtns.length; else if(e.key==="ArrowLeft") j=(i-1+tabBtns.length)%tabBtns.length; else if(e.key==="Home") j=0; else if(e.key==="End") j=tabBtns.length-1; if(j!==null){ e.preventDefault(); selectTab(tabBtns[j],true); } }; });
+try{const t=localStorage.getItem("lst-tab"); if(t) document.querySelector(`[data-tab="${t}"]`)?.click();}catch(e){}
+
+/* ============================================================
+   환자 케이스 · 플로우 차팅 · 병원 내규 (db / user / sample 사용)
+   - 케이스: data/users/<내 id>/<caseId>  (본인만 읽고 씀, 변경 이력 log 포함)
+   - 병원 내규: hosprules/<id>          (모두 읽기, 편집 권한자만 쓰기)
+   - 원문 텍스트·이미지는 저장하지 않음. 저장 전·전송 전 식별정보 자동 마스킹
+   ============================================================ */
+const ROUTE_LABEL = {PRE:"판단 전",NOTEOL:"말기(이행 불가)",A:"계획서 작성",A2:"계획서 확인",B1:"의향서(담당의사 확인)",B:"의향서(의사 2인 확인)",C:"가족 진술",D:"가족 전원합의",M:"미성년 친권자",NONE:"결정 경로 없음"};
+const LST_ITEMS = ["심폐소생술","인공호흡기","CRRT/혈액투석","혈압상승제","ECMO","수혈","항암제"];
+const AGE_BANDS = ["","0-18","19-39","40-59","60-69","70-79","80-89","90+"];
+const FAMK = [["sp","배우자"],["ch","자녀"],["pa","부모"],["gc","손자녀"],["gp","조부모"],["sb","형제자매"]];
+const FIELD_Q = [
+  ["eol","임종과정 판단",[["yes","의사 2인 판단 완료"],["terminal","말기 진단까지"],["pending","판단 전"]]],
+  ["talk","환자의 의사능력",[["yes","있음"],["no","없음"]]],
+  ["plan","등록된 연명의료계획서",[["yes","있음"],["no","없음"]]],
+  ["ad","등록된 사전연명의료의향서",[["yes","있음"],["no","없음"]]],
+  ["adult","19세 이상",[["yes","예"],["no","미성년"]]],
+  ["stmt","환자의 의사 추정 (가족 2명 이상 일치 진술)",[["yes","가능"],["no","불가능"]]],
+];
+const ANS = {yes:"예",no:"아니요",terminal:"말기까지",pending:"판단 전",plan:"계획서 있음",ad:"의향서 있음",none:"둘 다 없음"};
+
+/* ---------- 식별정보 마스킹 ---------- */
+function maskPII(t){
+  let n=0; const r=(re,rep)=>{t=t.replace(re,(...m)=>{n++;return typeof rep==="function"?rep(...m):rep.replace(/\$(\d)/g,(_,i)=>m[+i]??"");});};
+  t=String(t||"");
+  const SUR="김이박최정강조윤장임한오서신권황안송류전홍고문양손배백허유남심노하곽성차주우구민진지엄채원천방공현함변염여추도소석선설마길연위표명기반왕금옥육인맹제모탁국어은편용예봉경사부";
+  const SUR2="남궁|제갈|선우|독고|황보|서문|사공|동방";
+  const NOT_NAME=/^(선생|교수|환자|보호|간호|담당|주치|어머|아버|할머|할아|아드|따님|부인|남편|아내|가족|본인|자녀|형제|자매|의사|전공|인턴|레지|당직|병동|외래|응급|중환|상태|소견|의식|호흡|혈압|기관|기계|소생|연명|요청|동의|설명|면담|진술|이행|중단|유보|판단|확인|서명|녹취|녹화|위원|사무|원무|의료|정보|시스|서식|계획|의향|사전|임종|말기|회복|치료|투석|항암|수혈|산소|영양|통증|진정|모르|모두|모든|대부|일부|다른|같은|그분|이분|저분|성인|미성|부모|자식|사위|며느|손자|손녀|조부|조모|친척|지인|신부|수녀|목사|스님|사회|복지|코디|선교|원목|교목|우리|해당|각각|이송|이동|이상|이전|이후|이미|이번|이야|이유|정보|정도|정상|정리|정맥|안정|안전|안내|전원|전체|전화|전달|전문|조치|조절|조금|유지|유보|고통|고려|고열|문제|문의|양상|양호|양측|변화|변경|기도|기저|방문|공급|공유|현재|신청|신체|서류|서명|송부|진정|진행|진단|진술|진료|지금|지속|지시|주의|주사|주기|구토|구강|하루|하지|강하|강력|장기|장시|임종|임상|한번|한명|오늘|오전|오후|오래|최근|최선|최대|최소|박동|황달|윤리|성향|차이|추가|추후|도움|소생|소견|소변|석션|선택|설명|마지막|명확|기관|반대|반응|왕래|금식|인공|인지|맹목|제외|제공|모두|국가|어제|은퇴|용량|예후|예정|경과|경우|경련|사망|사전|사실|부족|부담|원함|원하|원치|위험|위해|표현|표시|길게|연락|연명|여러|여부|권유|권고|민원|심정|심폐|함께|허락|홍보|채혈|노력|하고|우선|우측|좌측|명이|명은|명을|명의)/;
+  const nm=`(?:${SUR2})[가-힣]{1,2}|[${SUR}][가-힣]{1,2}`, nm3=`(?:${SUR2})[가-힣]{1,2}|[${SUR}][가-힣]{2}`;
+  const okName=w=>!NOT_NAME.test(w);
+  // 주민등록번호(하이픈·공백·붙여쓰기)
+  r(/\d{6}\s*[-–]\s*[1-8][\d*]{6}/g,"[주민번호]");
+  r(/(^|[^\d])(\d{6})\s+([1-8]\d{6})(?!\d)/g,(m,a)=>a+"[주민번호]");
+  r(/(^|[^\d])\d{6}[1-8]\d{6}(?!\d)/g,(m,a)=>a+"[주민번호]");
+  r(/[\w.+-]+@[\w-]+\.[\w.]+/g,"[이메일]");
+  // 연락처(+82, 공백·점·하이픈, 붙여쓰기)
+  r(/\+82[\s.-]*0?1[016789][\s.-]*\d{3,4}[\s.-]*\d{4}(?!\d)/g,"[연락처]");
+  r(/(^|[^\d])01[016789][\s.-]*\d{3,4}[\s.-]*\d{4}(?!\d)/g,(m,a)=>a+"[연락처]");
+  r(/(^|[^\d])0(?:2|[3-6][1-5])[\s.)-]*\d{3,4}[\s.-]*\d{4}(?!\d)/g,(m,a)=>a+"[연락처]");
+  // 등록번호·병록번호·환자번호·차트번호
+  r(/(등록\s*번호|병록\s*번호|환자\s*번호|차트\s*번호|진료\s*번호|원무\s*번호|ID)\s*[:：]?\s*[A-Za-z]?[\d][\d\s-]{3,}\d/gi,(m,a)=>a+" [번호]");
+  // 생년월일(라벨 있음·'…생')
+  r(/(생년월일|생일|DOB)\s*[:：]?\s*(?:\d{2,4}\s*[.\-\/년]\s*\d{1,2}\s*[.\-\/월]\s*\d{1,2}\s*일?|\d{6,8})/gi,"$1 [생년월일]");
+  r(/(?:19|20)?\d{2}\s*[.\-\/년]\s*\d{1,2}\s*[.\-\/월]\s*\d{1,2}\s*일?\s*생(?![가-힣])/g,"[생년월일]");
+  // 이름: 라벨 뒤
+  r(new RegExp(`(성\\s*명|이\\s*름|환자명|성함|보호자(?:명)?|환자\\s*성명|수진자|주치의|담당의(?:사)?|교수)\\s*[:：]?\\s*(${nm})(?![가-힣])`,"g"),(m,a,b)=>okName(b)?a+" [이름]":m);
+  // 이름: 호칭·역할 앞뒤 (환자 홍길동 / 남궁민수 환자 / 간호사 박미영 / 홍길동님)
+  r(new RegExp(`(환자|보호자|간호사|의사|전공의|인턴|교수|아들|딸|배우자|남편|아내|부인|어머니|아버지|모친|부친|형|누나|오빠|언니|동생|손자|손녀|며느리|사위)\\s+(${nm3})(?=(?:이|가|은|는|을|를|의|와|과|도|에게|께|씨|님)?(?![가-힣]))`,"g"),(m,a,b)=>okName(b)?a+" [이름]":m);
+  r(new RegExp(`(^|[^가-힣])(${nm3})\\s?(님|씨|환자분|보호자분|환자|보호자|간호사|교수님|선생님)(?=(?:이|가|은|는|을|를|의|와|과|도|에게|께)?(?![가-힣]))`,"g"),(m,a,b,c)=>okName(b)?a+"[이름] "+c:m);
+  r(/(주\s*소)\s*[:：]?\s*[^\n]{4,}/g,"$1 [주소]");
+  r(/(^|[^\d.])\d{7,}(?![\d.])/g,(m,a)=>a+"[번호]");
+  return {text:t,count:n};
+}
+
+/* ---------- 경로 엔진 ---------- */
+function famSum(f){return FAMK.reduce((a,[k])=>a+(+f.family?.[k]||0),0);}
+function computeFlow(f){
+  const anyfam = f.anyfam || (famSum(f)>0?"yes":(f.famKnown?"no":""));
+  const doc = f.plan==="yes"?"plan" : f.ad==="yes"?"ad" : (f.plan==="no"&&f.ad==="no")?"none" : "";
+  const steps=[]; let id="start";
+  const noFam = f.famKnown && famSum(f)===0;
+  const pick={start:f.eol,doc,adcap:f.talk,cap:f.talk,age:f.adult,est:(f.stmt==="yes"&&noFam)?"no":f.stmt,anyfam};
+  const next={
+    start:v=>({yes:"doc",terminal:"R:NOTEOL",pending:"R:PRE"})[v],
+    doc:v=>({plan:"R:A2",ad:"adcap",none:"cap"})[v],
+    adcap:v=>({yes:"R:B1",no:"R:B"})[v], cap:v=>({yes:"R:A",no:"age"})[v],
+    age:v=>({yes:"est",no:"R:M"})[v], est:v=>({yes:"R:C",no:"anyfam"})[v], anyfam:v=>({yes:"R:D",no:"R:NONE"})[v]};
+  for(let g=0;g<10;g++){
+    const v=pick[id]; steps.push({id,q:NODES[id].q,v});
+    if(!v) return {steps,need:id,route:null};
+    const nx=next[id](v); if(!nx) return {steps,need:id,route:null};
+    if(nx.startsWith("R:")) return {steps,need:null,route:nx.slice(2)};
+    id=nx;
+  }
+  return {steps,need:id,route:null};
+}
+function ckLabel(k){ const t=CK[k]; if(guideUnlocked()||!/^\[CMC/.test(t)) return t; return ({notify:"이미 시행 중인 연명의료 중단 전 원내 지침에 따른 사전 고지 (내용은 잠금 해제 후 확인)",airway:"인공호흡기 중단 시 원내 지침에 따른 처치 확인 (내용은 잠금 해제 후 확인)",p1cmc:"의사능력 있는 환자: 원내 권고 확인 (내용은 잠금 해제 후 확인)",dnr:"DNR 판단 시 원내 지침 확인 (내용은 잠금 해제 후 확인)"})[k]||t; }
+const CK = {
+  emr:"전자의무기록 '연명' 칸·정보처리시스템에서 등록 서식 조회",
+  j9:"임종과정 판단서(제9호): 담당의사·전문의가 의학적 판단을 각자 기술",
+  p1:"연명의료계획서(제1호): 설명사항 6가지 설명·체크, 환자 서명(지장 불가)",
+  p1q:"등록된 연명의료계획서 조회·확인",
+  f10:"환자의사 확인서(제10호): 의향서 등록번호·조회일 기재, 확인일 ≥ 조회일",
+  p1cmc:"의사능력 있는 환자: 원내 지침 확인",
+  fam:"가족관계증명서 확인(환자 이름 발급, 주민번호 13자리)",
+  f11:"환자의사 확인서(제11호): 각 가족이 직접 진술, 진술자=하단 명단, 의사 2인 서명",
+  excl:"제외 가족이 있으면 제외 사유 증명서류 확인",
+  f12:"친권자 및 환자가족 의사 확인서(제12호): 전원 서명, 녹취·녹화는 서명란 표기",
+  par:"친권자 확인 서류(미성년자는 친권자 모두 서명)",
+  notify:"이미 시행 중인 연명의료 중단 전 원내 지침에 따른 사전 고지",
+  airway:"인공호흡기 중단 시 원내 지침에 따른 처치 확인",
+  f13:"이행서(제13호): 실제 유보·중단 항목 체크, 이행일 ≥ 제9호 작성일",
+  sys:"정보처리시스템 통보(이행 후 7일 이내)",
+  fee:"해당 수가 코드로 행위료 처방",
+  eth:"의료기관윤리위원회(임상의료윤리위원회) 상담·자문 요청",
+  dnr:"DNR 판단 시 원내 지침 확인",
+};
+function checklist(route,f){
+  const base={PRE:["emr","j9"],NOTEOL:["emr","p1","dnr"],A:["emr","j9","p1"],A2:["emr","j9","p1q"],B1:["emr","j9","p1cmc","f10"],B:["emr","j9","f10"],C:["emr","j9","fam","f11"],D:["emr","j9","fam","excl","f12"],M:["emr","j9","par","f12"],NONE:["emr","eth","dnr"]}[route]||["emr","j9"];
+  const go=["A","A2","B1","B","C","D","M"].includes(route);
+  const out=[...base];
+  if(go){ if((f.lst||[]).length) out.push("notify"); if((f.lst||[]).includes("인공호흡기")) out.push("airway"); out.push("f13","sys","fee"); }
+  return out;
+}
+
+/* ---------- 상태 ---------- */
+let DB=null, USER=null, SAMPLE=null, UID=null;
+let CASES=[], localOnly=false, cur=null, saving=Promise.resolve();
+const elList=document.getElementById("caseList"), elEd=document.getElementById("caseEditor"), elListCard=document.getElementById("caseListCard");
+function now(){return new Date().toISOString();}
+function fmt(t){if(!t)return"";const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;}
+function blankCase(){
+  const d=new Date(); const code=`${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
+  return {id:null,label:"케이스 "+code,ageBand:"",sex:"",ward:"",hospital:curHosp,diag:"",notes:"",
+    fields:{eol:"",talk:"",plan:"",ad:"",adult:"",stmt:"",anyfam:"",famKnown:false,family:{sp:0,ch:0,pa:0,gc:0,gp:0,sb:0},lst:[]},
+    checks:{},route:null,createdAt:now(),updatedAt:now(),log:[]};
+}
+
+/* ---------- 목록 ---------- */
+function renderList(){
+  const oldN=CASES.filter(c=>c.updatedAt && Date.now()-new Date(c.updatedAt).getTime()>90*864e5).length;
+  const oldNote=oldN?`<p class="inline-note" style="margin:0 0 8px">90일 넘게 수정하지 않은 케이스가 ${oldN}건 있습니다. 필요 없으면 설정 → '오래된 케이스 정리'에서 지울 수 있습니다.</p>`:"";
+  if(!CASES.length){elList.innerHTML=`<p class="empty" style="margin:0">아직 저장한 케이스가 없습니다. '새 케이스'로 시작하거나, 결정 경로 결과에서 '이 경로로 환자 케이스 만들기'를 누르세요.${localOnly?" (이 보기에서는 저장되지 않고 화면을 닫으면 사라집니다.)":""}</p>`;return;}
+  elList.innerHTML=oldNote+CASES.map(c=>{
+    const fl=computeFlow(c.fields); const ck=fl.route?checklist(fl.route,c.fields):[]; const done=ck.filter(k=>c.checks?.[k]).length;
+    return `<button class="citem" data-id="${esc(c.id)}"><span><b>${esc(c.label)}</b> <span class="meta">${esc([c.ageBand&&c.ageBand+"세",c.sex==="M"?"남":c.sex==="F"?"여":"",c.ward].filter(Boolean).join(" · "))}</span><br><span class="meta">${fl.route?esc(ROUTE_LABEL[fl.route]):"확인 필요"} · 체크 ${done}/${ck.length} · ${esc(c.hospital||"")}</span></span><span class="meta">${fmt(c.updatedAt)}</span></button>`;}).join("");
+  elList.querySelectorAll(".citem").forEach(b=>b.onclick=()=>openCase(CASES.find(c=>c.id===b.dataset.id)));
+}
+function openCase(c){cur=JSON.parse(JSON.stringify(c)); cur._orig=JSON.parse(JSON.stringify(c)); elListCard.hidden=true; elEd.hidden=false; renderEditor(); window.scrollTo({top:0});}
+function caseDirty(){ if(!cur) return false; const pick=c=>JSON.stringify({l:c.label,a:c.ageBand,s:c.sex,w:c.ward,d:c.diag,n:c.notes,f:c.fields,i:c.implDate||""}); return !cur._orig || pick(cur)!==pick(cur._orig) && !(cur.id===null && pick(cur)===pick({...blankCase(),label:cur.label,createdAt:cur.createdAt})); }
+function closeCase(){cur=null; elEd.hidden=true; elListCard.hidden=false; elEd.innerHTML=""; renderList();}
+document.getElementById("newCase").onclick=()=>openCase(blankCase());
+
+window.caseFromTrail=(tr)=>{
+  const c=blankCase(); const map={start:["eol",["yes","terminal","pending"]],adcap:["talk",["yes","no"]],cap:["talk",["yes","no"]],age:["adult",["yes","no"]],est:["stmt",["yes","no"]],anyfam:["anyfam",["yes","no"]]};
+  tr.forEach(t=>{const i=NODES[t.id].opts.findIndex(o=>o[0]===t.label); if(i<0) return;
+    if(t.id==="doc"){ if(i===0) c.fields.plan="yes"; if(i===1){c.fields.plan="no"; c.fields.ad="yes";} if(i===2){c.fields.plan="no"; c.fields.ad="no";} return; }
+    const m=map[t.id]; if(m) c.fields[m[0]]=m[1][i];});
+  c.log.push({t:now(),m:"결정 경로 화면에서 생성"});
+  document.querySelector('[data-tab="case"]').click(); openCase(c);
+};
+
+/* ---------- 편집기 ---------- */
+function segHTML(name,opts,val,label){return `<div class="seg" role="group" aria-label="${esc(label||name)}" data-f="${name}">${opts.map(([v,l])=>`<button type="button" data-v="${v}" aria-pressed="${val===v}">${esc(l)}</button>`).join("")}</div>`;}
+function renderEditor(){
+  const c=cur, f=c.fields;
+  elEd.innerHTML=`
+  <div class="card">
+    <div class="toolbar"><p class="q" style="margin:0">${c.id?"케이스 수정":"새 케이스"}</p><div class="row"><button class="btn" id="cBack">목록</button><button class="btn primary" id="cSave">저장</button></div></div>
+    <div class="mpv" id="cMaskPv" hidden style="margin-top:8px"></div>
+    <p class="status" id="cStatus" style="margin:6px 0 0">${localOnly?"이 보기에서는 저장되지 않습니다(로그인·권한 필요).":"저장하면 본인 이력에 남습니다."}</p>
+    <div class="grid3" style="margin-top:10px">
+      <div class="field"><label for="cLabel">익명 별칭</label><input type="text" id="cLabel" value="${esc(c.label)}"></div>
+      <div class="field"><label for="cAge">연령대</label><select id="cAge">${AGE_BANDS.map(a=>`<option value="${a}" ${a===c.ageBand?"selected":""}>${a?a+"세":"선택"}</option>`).join("")}</select></div>
+      <div class="field"><label for="cSex">성별</label><select id="cSex"><option value="">선택</option><option value="M" ${c.sex==="M"?"selected":""}>남</option><option value="F" ${c.sex==="F"?"selected":""}>여</option></select></div>
+      <div class="field"><label for="cWard">병동·진료과</label><input type="text" id="cWard" value="${esc(c.ward)}" placeholder="예: MICU"></div>
+    </div>
+    <p class="qhint" style="margin:8px 0 0">별칭에 이름·등록번호를 쓰지 마세요. 저장할 때 자동으로 <b>일부</b> 가리고, 가린 결과를 먼저 보여 드립니다.</p>
+  </div>
+
+  <div class="card online-only" id="capCard">
+    <p class="q">환자 정보 불러오기 (선택)</p>
+    <p class="qhint">전자의무기록 화면의 글을 복사해 붙여넣거나, 화면 캡처 이미지를 붙여넣기(Ctrl+V)·끌어놓기·선택하세요. 글은 식별정보를 가린 뒤에만 분석에 보내고, 원문과 이미지는 저장하지 않습니다.</p>
+    <textarea id="cPaste" placeholder="여기에 전자의무기록 내용을 붙여넣거나 캡처 이미지를 Ctrl+V 하세요"></textarea>
+    <div class="drop" id="cDrop" style="margin-top:8px">캡처 이미지를 여기로 끌어놓거나 <label style="color:var(--accent);cursor:pointer;text-decoration:underline">파일 선택<input type="file" id="cFile" accept="image/*" hidden></label></div>
+    <div id="cImgWrap" hidden style="margin-top:8px">
+      <p class="qhint" style="margin:0 0 6px"><b style="color:var(--stop)">이름·등록번호·주민번호가 보이는 부분을 드래그해 검게 가리세요.</b> 가린 이미지만 분석에 보냅니다.</p>
+      <canvas class="redact" id="cCanvas"></canvas>
+      <div class="row" style="margin-top:6px"><button class="btn" id="cUndo">가리기 취소</button><button class="btn" id="cClearImg">이미지 빼기</button></div>
+    </div>
+    <div id="cMaskWrap" hidden style="margin-top:8px"><p class="fq">분석에 보낼 글 (가린 결과)</p><div class="pv" id="cMasked"></div></div>
+    <div class="row" style="margin-top:10px"><button class="btn primary" id="cExtract">익명 정보 추출</button><span class="status" id="cExStatus"></span></div>
+  </div>
+
+  <div class="card">
+    <p class="q">판단 정보</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${FIELD_Q.map(([k,l,opts])=>`<div><p class="fq">${esc(l)}</p>${segHTML(k,opts,f[k],l)}</div>`).join("")}
+      <div><p class="fq">19세 이상 가족 (전원합의 판단용)</p><div class="grid3">${FAMK.map(([k,l])=>`<div class="field"><label for="cf-${k}">${l}</label><input type="text" inputmode="numeric" id="cf-${k}" value="${+f.family[k]||0}"></div>`).join("")}</div></div>
+      <div><p class="fq">현재 시행 중인 연명의료 (중단 여부 판단)</p><div class="seg" role="group" aria-label="현재 시행 중인 연명의료" id="cLst">${LST_ITEMS.map(x=>`<button type="button" data-v="${esc(x)}" aria-pressed="${(f.lst||[]).includes(x)}">${esc(x)}</button>`).join("")}</div></div>
+      <div class="grid3"><div class="field"><label for="cDiag">주진단(질환명만)</label><input type="text" id="cDiag" value="${esc(c.diag)}"></div></div>
+      <div class="field"><label for="cNotes">메모 (식별정보 금지)</label><textarea id="cNotes" style="min-height:70px">${esc(c.notes)}</textarea></div>
+    </div>
+  </div>
+
+  <div class="card"><p class="q">플로우 차트</p><div id="cFlow"></div></div>
+  <div class="card" id="cResultCard"></div>
+  <div class="card"><p class="q">이력</p><ol class="log" id="cLog"></ol>${c.id?`<div class="row" style="margin-top:10px"><button class="btn danger" id="cDel">케이스 삭제</button></div>`:""}</div>`;
+
+  // 바인딩
+  elEd.querySelectorAll(".seg[data-f]").forEach(sg=>sg.querySelectorAll("button").forEach(b=>b.onclick=()=>{const k=sg.dataset.f; f[k]=f[k]===b.dataset.v?"":b.dataset.v; sg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",f[k]===x.dataset.v)); refreshFlow();}));
+  FAMK.forEach(([k])=>{const i=document.getElementById("cf-"+k); i.oninput=()=>{const v=parseInt(String(i.value).replace(/\D/g,""),10); f.family[k]=isNaN(v)?0:Math.max(0,Math.min(FAM_MAX[k]||30,v)); f.famKnown=true; refreshFlow();}; i.onblur=()=>{i.value=+f.family[k]||0;};});
+  document.getElementById("cLst").querySelectorAll("button").forEach(b=>b.onclick=()=>{const v=b.dataset.v; f.lst=(f.lst||[]).includes(v)?f.lst.filter(x=>x!==v):[...(f.lst||[]),v]; b.setAttribute("aria-pressed",f.lst.includes(v)); refreshFlow();});
+  const bindTxt=(id,key)=>{document.getElementById(id).oninput=e=>{c[key]=e.target.value;};};
+  bindTxt("cLabel","label"); bindTxt("cWard","ward"); bindTxt("cDiag","diag"); bindTxt("cNotes","notes");
+  document.getElementById("cAge").onchange=e=>c.ageBand=e.target.value;
+  document.getElementById("cSex").onchange=e=>c.sex=e.target.value;
+  document.getElementById("cBack").onclick=e=>{ if(caseDirty() && e.currentTarget.dataset.confirm!=="1"){ e.currentTarget.dataset.confirm="1"; e.currentTarget.textContent="저장 안 하고 나가기"; const st=document.getElementById("cStatus"); st.className="status err"; st.textContent="저장하지 않은 수정이 있습니다. 저장하려면 '저장'을, 버리려면 한 번 더 누르세요."; return; } closeCase(); };
+  document.getElementById("cSave").onclick=()=>saveCase("저장");
+  if(c._lastMsg){ const st=document.getElementById("cStatus"); st.textContent=c._lastMsg; }
+  if(c.id) document.getElementById("cDel").onclick=delCase;
+  bindCapture();
+  refreshFlow(); renderLog();
+}
+function renderLog(){
+  const l=(cur.log||[]).slice().reverse();
+  document.getElementById("cLog").innerHTML=l.length?l.map(e=>`<li>${fmt(e.t)} · ${esc(e.m)}</li>`).join(""):`<li>아직 이력이 없습니다.</li>`;
+}
+function refreshFlow(){
+  const c=cur, f=c.fields, fl=computeFlow(f);
+  const steps=fl.steps.map((s,i)=>`${i?'<div class="flink"></div>':""}<div class="fnode ${s.v?"on":"need"}"><span class="fqtxt">${esc(s.q)}</span><span class="fans">${s.v?esc(ANS[s.v]||s.v):"확인 필요"}</span></div>`).join("");
+  let end="";
+  if(fl.route){const r=RESULTS[fl.route]; end=`<div class="flink"></div><div class="fnode end ${r.tag[0]}"><span class="fqtxt"><b>${esc(r.title)}</b></span><span class="fans">${esc(r.tag[1])}</span></div>`;}
+  document.getElementById("cFlow").innerHTML=`<div class="flow">${steps}${end}</div>${fl.need?`<p class="qhint" style="margin:8px 0 0">점선 단계의 정보를 채우면 다음 단계로 이어집니다.</p>`:""}`;
+  c.route=fl.route;
+  const rc=document.getElementById("cResultCard");
+  if(!fl.route){rc.innerHTML=`<p class="q">해야 할 일</p><p class="empty" style="margin:0">경로가 정해지면 서식과 체크리스트가 나옵니다.</p>`;return;}
+  const r=RESULTS[fl.route], key=r.route||fl.route, G=allGuides();
+  const must=G.filter(g=>(g.src==="hosp"||g.src==="cmc")&&!g.ref.includes("영상")&&g.routes.includes(key));
+  const ck=checklist(fl.route,f);
+  const implISO=c.implDate||"", f13=implISO?implISO+"T12:00:00":c.checks?.f13;
+  rc.innerHTML=`<span class="tag ${r.tag[0]}">${esc(r.tag[1])}</span><h2 style="font-size:1.1rem;margin:0 0 4px">${esc(r.title)}</h2><span class="src law">${esc(r.law)}</span>
+    ${(f.lst||[]).length&&["A","A2","B1","B","C","D","M"].includes(fl.route)?`<p class="qhint" style="margin:8px 0 0"><b>중단</b>에 해당합니다(시행 중: ${esc(f.lst.join(", "))}).</p>`:""}
+    ${["A","A2","B1","B","C","D","M"].includes(fl.route)?`<div class="grid3" style="margin-top:10px"><div class="field"><label for="cImpl">이행일 (숫자 8자리 입력 가능)</label><input type="text" inputmode="numeric" id="cImpl" class="datein" placeholder="예: 20261127" value="${esc(c.implDate||"")}"></div></div>`:""}
+    <h3 style="font-size:.82rem;color:var(--muted);margin:14px 0 6px">체크리스트</h3>
+    <div class="chk">${ck.map(k=>{const t=c.checks?.[k]; const lbl=ckLabel(k); let due=""; if(k==="sys"&&f13&&!t){const d=new Date(new Date(f13).getTime()+7*864e5); due=` <span class="due">통보 기한 ${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}${implISO?"":" (제13호 체크 시각 기준 · 이행일을 넣으면 정확해집니다)"}</span>`;} return `<label><input type="checkbox" data-k="${k}" ${t?"checked":""}><span>${esc(lbl)}${t?`<span class="ts">완료 ${fmt(t)}</span>`:due?`<span class="ts">${due}</span>`:""}</span></label>`;}).join("")}</div>
+    ${guideUnlocked()?`<div class="hospbox"><div class="ttl">가톨릭중앙의료원 지침 · ${esc(curHosp)} 내규</div>${must.map(guideP).join("")||'<p class="empty" style="margin:4px 0 0">해당 항목 없음</p>'}</div>`:lockedBox("원내 지침 · 내규")}
+    <h3 style="font-size:.82rem;color:var(--muted);margin:14px 0 6px">확인하는 사람</h3><ul>${r.who.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>
+    <div class="row" style="margin-top:12px"><button class="btn" type="button" id="handoverBtn">인수인계용 한 장 요약</button></div>`;
+  const ci=document.getElementById("cImpl"); if(ci){ bindDateInput(ci,v=>{ if(v!==(c.implDate||"")){ c.implDate=v; c.log.push({t:now(),m:v?`이행일 ${v}`:"이행일 지움"}); renderLog(); refreshFlow(); if(c.id) saveCase(null);} }); }
+  const hc=document.getElementById("handoverBtn"); if(hc) hc.onclick=()=>handoverPrint(c);
+  rc.querySelectorAll("input[data-k]").forEach(i=>i.onchange=()=>{
+    const k=i.dataset.k; c.checks=c.checks||{};
+    if(i.checked){c.checks[k]=now(); c.log.push({t:now(),m:`완료: ${CK[k]}`});} else {delete c.checks[k]; c.log.push({t:now(),m:`완료 취소: ${CK[k]}`});}
+    refreshFlow(); renderLog(); if(c.id) saveCase(null);
+  });
+}
+
+/* ---------- 저장 · 이력 ---------- */
+function diffLog(o,c){
+  const out=[]; if(!o) return out;
+  FIELD_Q.forEach(([k,l])=>{const a=o.fields?.[k]||"",b=c.fields[k]||""; if(a!==b) out.push(`${l}: ${ANS[a]||a||"미확인"} → ${ANS[b]||b||"미확인"}`);});
+  if(JSON.stringify(o.fields?.family)!==JSON.stringify(c.fields.family)) out.push("가족 구성 변경: "+FAMK.map(([k,l])=>`${l} ${+c.fields.family[k]||0}`).join(", "));
+  if(JSON.stringify(o.fields?.lst||[])!==JSON.stringify(c.fields.lst||[])) out.push("시행 중 연명의료: "+((c.fields.lst||[]).join(", ")||"없음"));
+  if((o.route||"")!==(c.route||"")) out.push(`경로: ${ROUTE_LABEL[o.route]||"미정"} → ${ROUTE_LABEL[c.route]||"미정"}`);
+  ["label","ageBand","sex","ward","diag","notes"].forEach(k=>{if((o[k]||"")!==(c[k]||"")) out.push(({label:"별칭",ageBand:"연령대",sex:"성별",ward:"병동",diag:"주진단",notes:"메모"})[k]+" 수정");});
+  return out;
+}
+function saveCase(reason){
+  const c=cur; if(!c) return;
+  const MF={label:"익명 별칭",ward:"병동·진료과",diag:"주진단",notes:"메모"};
+  const changed=Object.keys(MF).map(k=>[k,maskPII(c[k])]).filter(([,m])=>m.count);
+  if(reason && changed.length && !c._maskOk){
+    const box=document.getElementById("cMaskPv"); if(box){ box.hidden=false; box.innerHTML=`<b>저장 전에 아래처럼 가립니다. 이름 등이 아직 남아 있으면 '취소'를 누르고 직접 지우세요.</b><dl>${changed.map(([k,m])=>`<dt>${MF[k]}</dt><dd>${esc(m.text)}</dd>`).join("")}</dl><div class="row"><button class="btn primary" type="button" id="cMaskOk">가린 대로 저장</button><button class="btn" type="button" id="cMaskNo">취소</button></div>`;
+      document.getElementById("cMaskOk").onclick=()=>{c._maskOk=true; box.hidden=true; saveCase(reason); c._maskOk=false;};
+      document.getElementById("cMaskNo").onclick=()=>{box.hidden=true;}; box.scrollIntoView({block:"nearest"}); return; }
+  }
+  changed.forEach(([k,m])=>{c[k]=m.text; const el=document.getElementById({label:"cLabel",ward:"cWard",diag:"cDiag",notes:"cNotes"}[k]); if(el) el.value=m.text;});
+  const isNew=!c.id;
+  if(reason){ const d=isNew?[]:diffLog(c._orig,c); if(isNew) c.log.push({t:now(),m:`케이스 생성 (${curHosp})`}); d.forEach(m=>c.log.push({t:now(),m})); }
+  c.log=c.log.slice(-300); c.updatedAt=now(); c.hospital=c.hospital||curHosp;
+  const st=document.getElementById("cStatus");
+  const body={label:c.label,ageBand:c.ageBand,sex:c.sex,ward:c.ward,hospital:c.hospital,diag:c.diag,notes:c.notes,fields:c.fields,checks:c.checks||{},route:c.route||null,implDate:c.implDate||"",createdAt:c.createdAt,updatedAt:c.updatedAt,log:c.log};
+  if(localOnly||!DB||!UID){
+    if(isNew) c.id="local-"+Date.now(); const i=CASES.findIndex(x=>x.id===c.id); const copy={...body,id:c.id}; i>=0?CASES[i]=copy:CASES.unshift(copy);
+    c._orig=JSON.parse(JSON.stringify(copy)); if(st) st.textContent="이 화면에만 임시 보관했습니다(저장되지 않음)."; renderLog(); return;
+  }
+  const ref = isNew ? DB.collection("data/users/"+UID).doc() : DB.collection("data/users/"+UID).doc(c.id);
+  if(isNew) c.id=ref.id;
+  if(st){st.className="status"; st.textContent="저장 중…";}
+  saving = saving.then(()=>ref.set(body)).then(()=>{c._orig=JSON.parse(JSON.stringify({...body,id:c.id})); c._lastMsg=`저장됨 ${fmt(c.updatedAt)}`; if(st) st.textContent=c._lastMsg; renderLog(); if(isNew&&reason) renderEditor(); bumpStat("save");})
+    .catch(e=>{if(st){st.className="status err"; st.textContent=e.code==="quota_exceeded"?"저장 공간이 가득 찼습니다. 설정에서 오래된 케이스를 정리해 주세요.":e.code==="locked"?"잠금 상태라 저장하지 못했습니다. 다시 로그인하세요.":"저장하지 못했습니다. 권한(Contributor 이상)과 로그인 상태를 확인하세요.";} if(isNew) c.id=null;});
+}
+function delCase(){
+  const b=document.getElementById("cDel");
+  if(b.dataset.confirm!=="1"){b.dataset.confirm="1"; b.textContent="한 번 더 누르면 삭제됩니다"; return;}
+  const id=cur.id;
+  if(localOnly||!DB||!UID||id.startsWith("local-")){CASES=CASES.filter(x=>x.id!==id); closeCase(); return;}
+  DB.collection("data/users/"+UID).doc(id).delete().then(closeCase).catch(()=>{b.textContent="삭제하지 못했습니다";});
+}
+
+/* ---------- 붙여넣기 · 캡처 · 추출 ---------- */
+let rects=[], img=null;
+function bindCapture(){
+  const ta=document.getElementById("cPaste"), drop=document.getElementById("cDrop"), file=document.getElementById("cFile");
+  ta.oninput=()=>showMasked();
+  ta.addEventListener("paste",e=>{const it=[...(e.clipboardData?.items||[])].find(x=>x.type.startsWith("image/")); if(it){e.preventDefault(); loadImage(it.getAsFile());}});
+  ["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("on");}));
+  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("on");}));
+  drop.addEventListener("drop",e=>{const fl=[...(e.dataTransfer?.files||[])].find(x=>x.type.startsWith("image/")); if(fl) loadImage(fl);});
+  file.onchange=()=>{if(file.files[0]) loadImage(file.files[0]); file.value="";};
+  document.getElementById("cUndo").onclick=()=>{rects.pop(); drawImg();};
+  document.getElementById("cClearImg").onclick=()=>{img=null; rects=[]; document.getElementById("cImgWrap").hidden=true;};
+  document.getElementById("cExtract").onclick=extract;
+  if(img){document.getElementById("cImgWrap").hidden=false; drawImg();}
+  bindCanvas();
+}
+function showMasked(){const v=document.getElementById("cPaste").value; const w=document.getElementById("cMaskWrap"); if(!v.trim()){w.hidden=true;return;} const m=maskPII(v); w.hidden=false; document.getElementById("cMasked").textContent=m.text+(m.count?`\n\n— 식별정보 ${m.count}곳을 가렸습니다. 남은 이름이 있으면 위 원문에서 지우세요.`:"\n\n— 자동으로 가린 곳이 없습니다. 이름 등이 남아 있지 않은지 확인하세요.");}
+function loadImage(fileObj){
+  const fr=new FileReader(); fr.onload=()=>{const im=new Image(); im.onload=()=>{img=im; rects=[]; document.getElementById("cImgWrap").hidden=false; drawImg();}; im.src=fr.result;}; fr.readAsDataURL(fileObj);
+}
+function drawImg(tmp){
+  const cv=document.getElementById("cCanvas"); if(!cv||!img) return;
+  const sc=Math.min(1,1400/img.width); cv.width=Math.round(img.width*sc); cv.height=Math.round(img.height*sc);
+  const x=cv.getContext("2d"); x.drawImage(img,0,0,cv.width,cv.height); x.fillStyle="#000";
+  [...rects,...(tmp?[tmp]:[])].forEach(r=>x.fillRect(r.x,r.y,r.w,r.h));
+}
+function bindCanvas(){
+  const cv=document.getElementById("cCanvas"); if(!cv) return; let st=null;
+  const pt=e=>{const b=cv.getBoundingClientRect(); return {x:(e.clientX-b.left)*cv.width/b.width,y:(e.clientY-b.top)*cv.height/b.height};};
+  cv.onpointerdown=e=>{st=pt(e); cv.setPointerCapture(e.pointerId);};
+  cv.onpointermove=e=>{if(!st)return; const p=pt(e); drawImg({x:Math.min(st.x,p.x),y:Math.min(st.y,p.y),w:Math.abs(p.x-st.x),h:Math.abs(p.y-st.y)});};
+  cv.onpointerup=e=>{if(!st)return; const p=pt(e); const r={x:Math.min(st.x,p.x),y:Math.min(st.y,p.y),w:Math.abs(p.x-st.x),h:Math.abs(p.y-st.y)}; if(r.w>4&&r.h>4) rects.push(r); st=null; drawImg();};
+}
+async function extract(){
+  const s=document.getElementById("cExStatus"), btn=document.getElementById("cExtract");
+  const raw=document.getElementById("cPaste").value; const m=maskPII(raw);
+  if(!m.text.trim()&&!img){s.className="status err"; s.textContent="붙여넣은 글이나 이미지가 없습니다."; return;}
+  if(!SAMPLE){s.className="status err"; s.textContent="이 보기에서는 자동 추출을 쓸 수 없습니다. 아래 판단 정보를 직접 고르세요."; return;}
+  let blob=null;
+  if(img){ blob=await new Promise(r=>document.getElementById("cCanvas").toBlob(r,"image/png")); }
+  const prompt=`당신은 병원 연명의료 절차 안내 도구의 정보 추출기입니다. 아래 ${img?"이미지와 ":""}텍스트는 환자 기록의 일부입니다.
+규칙: 이름, 주민등록번호, 등록번호, 연락처, 주소, 생년월일, 의료진 이름 등 개인을 식별할 수 있는 정보는 절대 출력하지 마세요. 기록에 근거가 없으면 빈 문자열("") 또는 null로 두고 추측하지 마세요.
+아래 형식의 JSON 객체 하나만 출력하세요:
+{"ageBand":"0-18|19-39|40-59|60-69|70-79|80-89|90+|","sex":"M|F|","eol":"yes|terminal|pending|","talk":"yes|no|","plan":"yes|no|","ad":"yes|no|","stmt":"yes|no|","family":{"sp":null,"ch":null,"pa":null,"gc":null,"gp":null,"sb":null},"lst":[],"diag":"","notes":""}
+정의: eol=yes는 담당의사와 전문의가 임종과정이라고 판단한 기록이 있을 때, terminal은 말기 진단만 있을 때, pending은 임종과정 판단을 아직 하지 않았다는 기록이 있을 때. talk=환자가 지금 의사표현을 할 수 있는지. plan/ad=등록된 연명의료계획서/사전연명의료의향서가 있는지. stmt=환자의 평소 연명의료 거부 의사를 가족이 일관되게 진술할 수 있는지. family=19세 이상 배우자(sp)·자녀(ch)·부모(pa)·손자녀(gc)·조부모(gp)·형제자매(sb) 인원(모르면 null). lst=현재 시행 중인 것만 다음 중에서: ${JSON.stringify(LST_ITEMS)}. diag=주진단 질환명만 20자 이내. notes=연명의료 결정에 필요한 임상 요약 120자 이내, 식별정보 금지.
+${m.text.trim()?"텍스트:\n"+m.text.slice(0,20000):"(텍스트 없음)"}`;
+  btn.disabled=true; s.className="status"; s.textContent="분석 중…(처음에는 사용 허락을 묻습니다)";
+  try{
+    const out=await SAMPLE.json(prompt, blob?{images:blob}:{});
+    applyExtract(out); s.textContent="추출한 값을 채웠습니다. 맞는지 확인하고 저장하세요."; cur.log.push({t:now(),m:`${img?"캡처 이미지":"붙여넣은 글"}에서 익명 정보 추출`}); renderLog();
+    document.getElementById("cPaste").value=""; document.getElementById("cMaskWrap").hidden=true; img=null; rects=[]; document.getElementById("cImgWrap").hidden=true;
+  }catch(e){
+    s.className="status err";
+    s.textContent=({not_granted:"사용을 허락하지 않아 추출하지 못했습니다. 판단 정보를 직접 고르세요.",rate_limited:"요청이 많습니다. 잠시 뒤 다시 누르세요.",images_unavailable:"이 보기에서는 이미지 분석을 쓸 수 없습니다. 글을 붙여넣어 주세요.",image_rejected:"이미지를 읽지 못했습니다. PNG·JPG로 다시 캡처해 주세요."})[e?.code]||"추출하지 못했습니다. 판단 정보를 직접 고르세요.";
+  }finally{btn.disabled=false;}
+}
+function applyExtract(o){
+  if(!o||typeof o!=="object") return; const c=cur, f=c.fields;
+  const pickv=(v,ok)=>ok.includes(v)?v:"";
+  if(AGE_BANDS.includes(o.ageBand)&&o.ageBand) c.ageBand=o.ageBand;
+  if(["M","F"].includes(o.sex)) c.sex=o.sex;
+  [["eol",["yes","terminal","pending"]],["talk",["yes","no"]],["plan",["yes","no"]],["ad",["yes","no"]],["stmt",["yes","no"]]].forEach(([k,ok])=>{const v=pickv(o[k],ok); if(v) f[k]=v;});
+  if(c.ageBand) f.adult = c.ageBand==="0-18"?"no":"yes";
+  if(o.family&&typeof o.family==="object"){let any=false; FAMK.forEach(([k])=>{const n=o.family[k]; if(Number.isFinite(n)&&n>=0){f.family[k]=Math.min(30,Math.round(n)); any=true;}}); if(any) f.famKnown=true;}
+  if(Array.isArray(o.lst)) f.lst=o.lst.filter(x=>LST_ITEMS.includes(x));
+  if(typeof o.diag==="string"&&o.diag) c.diag=maskPII(o.diag.slice(0,40)).text;
+  if(typeof o.notes==="string"&&o.notes) c.notes=maskPII(o.notes.slice(0,300)).text;
+  renderEditor();
+}
+
+/* ---------- 병원 선택 · 내규 관리 ---------- */
+const hospSel=document.getElementById("hospSel");
+function renderHospSel(){
+  const set=new Set(["부천성모병원",curHosp]); GUIDES.forEach(g=>g.hospital&&set.add(g.hospital)); HOSP_RULES.forEach(r=>r.hospital&&set.add(r.hospital));
+  hospSel.innerHTML=[...set].map(h=>`<option ${h===curHosp?"selected":""}>${esc(h)}</option>`).join("");
+}
+hospSel.onchange=()=>{curHosp=hospSel.value; try{localStorage.setItem("lst-hosp",curHosp);}catch(e){} renderGuides(); if(cur) refreshFlow(); rerenderPath();};
+function rerenderPath(){ if(window._lastRes && document.querySelector("#p-path .result")) renderResult(window._lastRes); }
+renderHospSel();
+const rRoutes=document.getElementById("rRoutes"); let rSel=new Set();
+Object.entries(ROUTE_LABEL).filter(([k])=>k!=="A2").forEach(([k,l])=>{const b=document.createElement("button"); b.type="button"; b.textContent=l; b.setAttribute("aria-pressed","false"); b.onclick=()=>{rSel.has(k)?rSel.delete(k):rSel.add(k); b.setAttribute("aria-pressed",rSel.has(k));}; rRoutes.appendChild(b);});
+document.getElementById("rHosp").value=curHosp;
+document.getElementById("rSave").onclick=async()=>{
+  const st=document.getElementById("rStatus"); const h=document.getElementById("rHosp").value.trim(), ref=document.getElementById("rRef").value.trim(), q=document.getElementById("rQ").value.trim(), a=document.getElementById("rA").value.trim();
+  if(!h||!q||!a){st.className="status err"; st.textContent="병원, 제목, 내용을 채워 주세요."; return;}
+  if(!DB){st.className="status err"; st.textContent="이 보기에서는 등록할 수 없습니다."; return;}
+  st.className="status"; st.textContent="등록 중…";
+  try{ await DB.collection("hosprules").add({hospital:h,ref:ref||"내규",q,a,routes:[...rSel],createdBy:UID||"",createdAt:now()});
+    st.textContent="등록했습니다."; ["rRef","rQ","rA"].forEach(i=>document.getElementById(i).value=""); rSel.clear(); rRoutes.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed","false"));
+    if(h!==curHosp){curHosp=h; try{localStorage.setItem("lst-hosp",h);}catch(e){}}
+  }catch(e){st.className="status err"; st.textContent="등록하지 못했습니다. 편집 권한(Editor 이상)이 필요합니다.";}
+};
+window.deleteRule=(id,b)=>{ if(b.dataset.confirm!=="1"){b.dataset.confirm="1"; b.textContent="한 번 더 누르면 삭제"; return;} DB?.collection("hosprules").doc(id).delete().catch(()=>{b.textContent="삭제 실패";}); };
+
+/* ---------- 초기화 ---------- */
+window._capsReady=(async()=>{
+  renderList();
+  try{ DB = await claude.use("db"); }catch(e){ DB=null; }
+  try{ USER = await claude.use("user"); }catch(e){ USER=null; }
+  try{ SAMPLE = await claude.use("sample"); }catch(e){ SAMPLE=null; }
+  if(SAMPLE){ try{ const lim=await SAMPLE.limits(); if(!lim?.images) document.getElementById("cDrop")?.setAttribute("title","이 보기에서는 이미지 분석을 쓸 수 없습니다"); }catch(e){} }
+  const who=document.getElementById("whoami");
+  if(USER){ const me=await USER.me(); UID=me.id; who.textContent = UID ? `사용자: ${me.name||"나"}` : "로그인하지 않아 케이스가 저장되지 않습니다";
+    window.canAdmin = await USER.canEdit().catch(()=>false);
+  } else { who.textContent="이 보기에서는 케이스가 저장되지 않습니다"; }
+  // 내규 관리 폼
+  document.getElementById("ruleForm").hidden=!(DB&&window.canAdmin);
+  if(!(DB&&window.canAdmin)) document.getElementById("ruleAdminHint").textContent="병원 내규 등록은 이 페이지의 편집 권한자(Editor 이상)만 할 수 있습니다. 내규 추가가 필요하면 관리자에게 요청하세요.";
+  if(DB){
+    DB.collection("hosprules").limit(500).onSnapshot(snap=>{HOSP_RULES=snap.docs.map(d=>({...d.data(),_id:d.id})); renderHospSel(); renderGuides(); if(cur) refreshFlow();},()=>{});
+    if(UID){
+      DB.collection("data/users/"+UID).orderBy("updatedAt","desc").limit(200).onSnapshot(snap=>{CASES=snap.docs.filter(d=>!d.id.startsWith("_")).map(d=>({...d.data(),id:d.id})); window.onCasesLoaded&&window.onCasesLoaded(); if(!cur) renderList();},()=>{localOnly=true; renderList();});
+    } else localOnly=true;
+  } else localOnly=true;
+  renderList();
+})();
+
+/* ============================================================
+   윤리 자문·심의 의뢰 (표준운영지침 별지1 심의/자문 의뢰서)
+   - 내 의뢰: referrals/<내 id> 문서의 items 맵 (본인 쓰기, 편집 권한자=의료윤리사무국 읽기·상태 변경)
+   - 환자 식별정보는 저장하지 않음(자동 마스킹)
+   ============================================================ */
+const REF_STATUS = ["제출됨","접수","검토 중","신속자문 완료","소위원회 회부","위원회 상정","결과 통보","종결"];
+const REQ_KIND = ["교직원","환자 본인","환자 가족","기타"];
+const REF_SECTIONS = [
+  ["title","안건(한 줄 요약)",1],
+  ["motive","의뢰 동기 · 윤리적 쟁점",4],
+  ["medical","의학적 상태 (기저질환·치료 경과·현재 상태·임종과정 판단 여부)",4],
+  ["prognosis","예후와 삶의 질 (생존 가능성, 회복 시 남을 장애, 편안함을 위한 계획)",3],
+  ["patientWish","환자의 의향 및 선호 (의사결정능력, 이전에 밝힌 뜻)",3],
+  ["proxyWish","환자 가족·대리인의 의향 및 선호",3],
+  ["decider","주 의사결정자",1],
+  ["social","가족관계·사회경제적·종교적 상황, 이해상충",2],
+  ["legal","법적 분쟁 진행 여부",1],
+  ["tried","의뢰 전 해결을 위해 시도한 방법",2],
+  ["goal","자문(심의)을 통해 얻고자 하는 것",2],
+];
+let REF={}, refMine=[], refInbox=[], refCur=null, DL=null, refIsAdmin=false;
+const elRef=document.getElementById("p-ref");
+function refBlank(){
+  return {id:"r"+Date.now().toString(36)+Math.random().toString(36).slice(2,5), type:"자문", kind:"사례", urgency:"일반",
+    reqName:"", reqDept:"", reqPhone:"", reqKind:"교직원", reqKindEtc:"", raw:"", caseId:"",
+    title:"",motive:"",medical:"",prognosis:"",patientWish:"",proxyWish:"",decider:"",social:"",legal:"",tried:"",goal:"",
+    status:"작성 중", createdAt:now(), submittedAt:null, log:[], reply:""};
+}
+function refRender(){
+  elRef.innerHTML=`
+  <div class="card">
+    <p class="q">윤리 자문·심의 의뢰</p>
+    <p class="qhint" style="margin:0 0 6px">의뢰서는 윤리적 의사결정 4분면(의학적 문제 · 환자의 선호 · 삶의 질 · 맥락)에 맞춰 정리됩니다.</p>
+    <p class="qhint" style="margin:0">진료 중 겪는 윤리적 딜레마를 적으면 표준운영지침의 <b>별지1 심의/자문 의뢰서</b> 형식으로 정리해 임상의료윤리위원회(의료윤리사무국)에 제출합니다. 응급이면 먼저 <b>032-340-2019</b>로 전화하세요. 자문은 24시간 의뢰할 수 있고, 익명 의뢰는 안 되며 담당 의료진에게 접수 사실이 통지됩니다.</p>
+    <div class="row" style="margin-top:10px"><button class="btn primary" id="refNew">새 의뢰서 작성</button></div>
+  </div>
+  <div id="refEdit"></div>
+  <div class="card online-only"><p class="q">내 의뢰</p><div class="clist" id="refMineList"></div></div>
+  <div class="card online-only" id="refInboxCard" hidden><p class="q">접수함 (의료윤리사무국)</p><p class="qhint" style="margin:0 0 8px">편집 권한자에게만 보입니다. 상태와 회신을 적으면 요청인 화면에 바로 반영됩니다.</p><div class="clist" id="refInboxList"></div></div>`;
+  document.getElementById("refNew").onclick=()=>{refCur=refBlank(); refEditor();};
+  refLists();
+  if(refCur) refEditor();
+}
+function refLists(){
+  const m=document.getElementById("refMineList"); if(!m) return;
+  m.innerHTML=refMine.length?refMine.map(r=>`<button class="citem" data-r="${esc(r.id)}"><span><b>${esc(r.title||"(제목 없음)")}</b><br><span class="meta">${esc(r.type)} · ${esc(r.urgency)} · ${fmt(r.submittedAt||r.createdAt)}</span>${r.reply?`<br><span class="meta">회신: ${esc(r.reply.slice(0,60))}</span>`:""}</span><span class="tag ${r.status==="종결"||r.status==="결과 통보"?"go":"wait"}" style="margin:0">${esc(r.status)}</span></button>`).join(""):`<p class="empty" style="margin:0">제출한 의뢰가 없습니다.</p>`;
+  m.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{refCur=JSON.parse(JSON.stringify(refMine.find(x=>x.id===b.dataset.r))); refEditor(true);});
+  const ib=document.getElementById("refInboxCard");
+  if(ib){ ib.hidden=!refIsAdmin; const il=document.getElementById("refInboxList");
+    il.innerHTML=refInbox.length?refInbox.map(r=>`<div class="citem" style="cursor:default;flex-direction:column;align-items:stretch"><div class="toolbar"><span><b>${esc(r.title||"(제목 없음)")}</b> <span class="meta">${esc(r.type)} · ${esc(r.urgency)} · ${esc(r.reqName)} ${esc(r.reqDept)} · ${fmt(r.submittedAt)}</span></span><button class="btn" data-view="${esc(r._owner)}|${esc(r.id)}">미리보기</button></div>
+      <div class="row" style="margin-top:6px"><select data-st="${esc(r._owner)}|${esc(r.id)}">${REF_STATUS.map(s=>`<option ${s===r.status?"selected":""}>${s}</option>`).join("")}</select><input type="text" data-rp="${esc(r._owner)}|${esc(r.id)}" value="${esc(r.reply||"")}" placeholder="요청인에게 보낼 회신" style="flex:1"><button class="btn" data-save="${esc(r._owner)}|${esc(r.id)}">반영</button></div></div>`).join(""):`<p class="empty" style="margin:0">접수된 의뢰가 없습니다.</p>`;
+    il.querySelectorAll("[data-save]").forEach(b=>b.onclick=()=>refAdminSave(b.dataset.save,b));
+    il.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{const [o,id]=b.dataset.view.split("|"); const r=refInbox.find(x=>x._owner===o&&x.id===id); refPreview(r);});
+  }
+}
+function refEditor(readonly){
+  const r=refCur, el=document.getElementById("refEdit"); const locked=readonly||r.status!=="작성 중";
+  const RK_LABEL={reqKind:"요청인 구분",type:"자문 또는 심의",kind:"사례 구분",urgency:"긴급도"};
+  const segRef=(k,opts)=>`<div class="seg" role="group" aria-label="${RK_LABEL[k]||k}" data-rk="${k}">${opts.map(o=>`<button type="button" data-v="${esc(o)}" aria-pressed="${r[k]===o}" ${locked?"disabled":""}>${esc(o)}</button>`).join("")}</div>`;
+  el.innerHTML=`<div class="card">
+    <div class="toolbar"><p class="q" style="margin:0">${locked?"제출한 의뢰서":"의뢰서 작성"}</p><div class="row"><button class="btn" id="refClose">닫기</button></div></div>
+    ${locked?`<p class="status" style="margin:6px 0 0">상태: <b>${esc(r.status)}</b>${r.reply?` · 회신: ${esc(r.reply)}`:""}</p>`:""}
+    ${locked?"":`<p class="fq" style="margin-top:12px">1. 딜레마를 자유롭게 적으세요 (환자 이름·등록번호는 적지 마세요)</p>
+    <textarea id="refRaw" placeholder="예: 80대 COPD 환자, 인공호흡기 3주째. 아들은 중단을 원하고 딸은 계속 치료를 원함. 환자는 평소 '기계에 의지하고 싶지 않다'고 말했다고 하나 서류는 없음. 주치의는 임종과정 판단이 이르다고 봄…">${esc(r.raw)}</textarea>
+    <div class="grid3" style="margin-top:8px"><div class="field"><label for="refCase">내 케이스 연결 (선택)</label><select id="refCase"><option value="">연결 안 함</option>${CASES.map(c=>`<option value="${esc(c.id)}" ${c.id===r.caseId?"selected":""}>${esc(c.label)}</option>`).join("")}</select></div></div>
+    <div class="row online-only" style="margin-top:8px"><button class="btn primary" id="refAI">서식으로 정리</button><span class="status" id="refAIst"></span></div>`}
+    <p class="fq" style="margin-top:14px">${locked?"":"2. "}요청인</p>
+    <div class="grid3">
+      <div class="field"><label for="refName">성명</label><input type="text" id="refName" value="${esc(r.reqName)}" ${locked?"disabled":""}></div>
+      <div class="field"><label for="refDept">소속·직종</label><input type="text" id="refDept" value="${esc(r.reqDept)}" placeholder="예: 내과 전공의" ${locked?"disabled":""}></div>
+      <div class="field"><label for="refPhone">연락처(내선·휴대폰)</label><input type="text" id="refPhone" value="${esc(r.reqPhone)}" ${locked?"disabled":""}></div>
+    </div>
+    <div style="margin-top:8px">${segRef("reqKind",REQ_KIND)}</div>
+    <div class="field" id="refEtcWrap" style="margin-top:8px" ${r.reqKind==="기타"?"":"hidden"}><label for="refEtc">기타 요청인 (관계·직종)</label><input type="text" id="refEtc" value="${esc(r.reqKindEtc||"")}" ${locked?"disabled":""}></div>
+    <p class="fq" style="margin-top:12px">${locked?"":"3. "}구분</p>
+    <div style="display:flex;flex-direction:column;gap:8px">${segRef("type",["자문","심의"])}${segRef("kind",["사례","비사례(정책)"])}${segRef("urgency",["응급","24시간 이내","일반"])}</div>
+    <p class="qhint" style="margin:6px 0 0">자문: 윤리적 딜레마 해결 도움 · 심의: 연명의료 결정·이행 관련 요청 사항이나 담당의사 교체 등 위원회 의결이 필요한 경우</p>
+    <p class="fq" style="margin-top:12px">${locked?"":"4. "}심의/자문 요청 내용</p>
+    <div style="display:flex;flex-direction:column;gap:10px">${REF_SECTIONS.map(([k,l,rows])=>`<div class="field"><label for="rf-${k}">${l}</label>${rows===1?`<input type="text" id="rf-${k}" value="${esc(r[k])}" ${locked?"disabled":""}>`:`<textarea id="rf-${k}" style="min-height:${rows*26}px" ${locked?"disabled":""}>${esc(r[k])}</textarea>`}</div>`).join("")}</div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="refPrev">미리보기</button>${locked?"":`<button class="btn primary online-only" id="refSubmit">위원회에 제출</button>`}<span class="status" id="refSt"></span></div>
+    ${locked?"":`<p class="qhint standalone-only" style="margin:6px 0 0">미리보기에서 PDF로 저장하거나 인쇄해 병원정보시스템 또는 의료윤리사무국(032-340-2019)으로 의뢰하세요.</p><p class="qhint online-only" style="margin:6px 0 0">제출하면 의료윤리사무국 접수함에 들어갑니다. 원내 규정에 따라 병원정보시스템 의뢰가 필요하면 미리보기에서 PDF로 저장해 첨부하세요.</p>`}
+  </div>`;
+  document.getElementById("refClose").onclick=()=>{refPull(); refDraftSave(true); refCur=null; el.innerHTML="";};
+  document.getElementById("refPrev").onclick=()=>{refPull(); refPreview(refCur);};
+  if(locked) return;
+  el.querySelectorAll(".seg[data-rk]").forEach(sg=>sg.querySelectorAll("button").forEach(b=>b.onclick=()=>{r[sg.dataset.rk]=b.dataset.v; sg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); if(sg.dataset.rk==="reqKind") document.getElementById("refEtcWrap").hidden=b.dataset.v!=="기타"; refDraftSave();}));
+  el.addEventListener("input",()=>refDraftSave());
+  document.getElementById("refAI").onclick=refAI;
+  document.getElementById("refSubmit").onclick=refSubmit;
+}
+function refPull(){
+  const r=refCur; if(!r||r.status!=="작성 중") return;
+  const g=id=>document.getElementById(id);
+  if(g("refRaw")) r.raw=maskPII(g("refRaw").value).text; if(g("refCase")) r.caseId=g("refCase").value; if(g("refEtc")) r.reqKindEtc=g("refEtc").value.trim();
+  r.casesum=r.caseId?caseSummary(r.caseId):"";
+  r.reqName=g("refName").value.trim(); r.reqDept=g("refDept").value.trim(); r.reqPhone=g("refPhone").value.trim();
+  REF_SECTIONS.forEach(([k])=>{r[k]=maskPII(g("rf-"+k).value).text; g("rf-"+k).value=r[k];});
+}
+function caseSummary(id){
+  const c=CASES.find(x=>x.id===id); if(!c) return "";
+  const fl=computeFlow(c.fields);
+  return `연결 케이스(익명): ${c.ageBand?c.ageBand+"세 ":""}${c.sex==="M"?"남":c.sex==="F"?"여":""} ${c.diag||""} / 경로: ${fl.route?ROUTE_LABEL[fl.route]:"미정"} / 시행 중: ${(c.fields.lst||[]).join(", ")||"없음"} / 메모: ${c.notes||""}`;
+}
+async function refAI(){
+  refPull(); const r=refCur, st=document.getElementById("refAIst"), btn=document.getElementById("refAI");
+  const text=maskPII(r.raw).text.trim(); const cs=r.caseId?caseSummary(r.caseId):"";
+  if(!text&&!cs){st.className="status err"; st.textContent="딜레마 내용을 먼저 적어 주세요."; return;}
+  if(!SAMPLE){st.className="status err"; st.textContent="이 보기에서는 자동 정리를 쓸 수 없습니다. 아래 칸을 직접 채워 주세요."; return;}
+  const prompt=`당신은 가톨릭대학교 부천성모병원 임상의료윤리위원회의 의뢰 접수를 돕는 도우미입니다. 의료진이 적은 윤리적 딜레마를 표준운영지침의 심의/자문 의뢰서(별지1)와 자문 기록지 항목에 맞게 정리하세요.
+규칙: 환자·가족·의료진의 이름, 등록번호, 생년월일, 연락처, 구체적 날짜 등 식별정보는 쓰지 마세요. 적힌 내용만 정리하고 없는 사실을 지어내지 마세요. 정보가 없으면 "확인 필요"라고 쓰세요. 존댓말 문장, 각 항목 300자 이내.
+판단 기준: "심의"는 연명의료중단등결정·이행에 관한 요청 사항이나 담당의사 교체처럼 위원회 의결이 필요한 경우, 그 밖의 윤리적 딜레마 해결 도움은 "자문". 특정 환자 사례면 "사례", 기관 정책이면 "비사례(정책)". 지금 바로 결정이 필요하면 "응급", 하루 안이면 "24시간 이내", 아니면 "일반".
+정리 틀은 윤리적 의사결정 4분면(의학적 문제, 환자의 선호, 삶의 질, 맥락적 특성)을 따르세요. medical에는 기저질환·치료 경과·현재 상태·임종과정 판단 여부, prognosis에는 생존 가능성과 삶의 질 측면의 예후, decider에는 주 의사결정자(관계만, 이름 금지), legal에는 법적 분쟁 진행 여부를 적으세요.
+JSON 하나만 출력: {"type":"자문|심의","kind":"사례|비사례(정책)","urgency":"응급|24시간 이내|일반","title":"","motive":"","medical":"","prognosis":"","patientWish":"","proxyWish":"","decider":"","social":"","legal":"","tried":"","goal":""}
+의료진 입력:
+${text||"(없음)"}
+${cs}`;
+  btn.disabled=true; st.className="status"; st.textContent="정리 중…(처음에는 사용 허락을 묻습니다)";
+  try{
+    const o=await SAMPLE.json(prompt);
+    if(["자문","심의"].includes(o.type)) r.type=o.type; if(["사례","비사례(정책)"].includes(o.kind)) r.kind=o.kind; if(["응급","24시간 이내","일반"].includes(o.urgency)) r.urgency=o.urgency;
+    REF_SECTIONS.forEach(([k])=>{if(typeof o[k]==="string") r[k]=maskPII(o[k].slice(0,600)).text;});
+    refEditor(); document.getElementById("refAIst").textContent="정리했습니다. 내용을 확인·수정한 뒤 미리보기와 제출을 하세요.";
+    if(r.urgency==="응급") document.getElementById("refAIst").textContent+=" 응급이면 032-340-2019로 먼저 전화하세요.";
+  }catch(e){ st.className="status err"; st.textContent=({not_granted:"사용을 허락하지 않아 정리하지 못했습니다. 칸을 직접 채워 주세요.",rate_limited:"요청이 많습니다. 잠시 뒤 다시 누르세요."})[e?.code]||"정리하지 못했습니다. 칸을 직접 채워 주세요."; }
+  finally{ const b=document.getElementById("refAI"); if(b) b.disabled=false; }
+}
+function refValidate(r){
+  const miss=[]; if(!r.reqName) miss.push("요청인 성명"); if(!r.reqPhone) miss.push("연락처"); if(!r.title) miss.push("안건"); if(!r.motive) miss.push("의뢰 동기");
+  return miss;
+}
+async function refSubmit(){
+  refPull(); const r=refCur, st=document.getElementById("refSt");
+  const miss=refValidate(r); if(miss.length){st.className="status err"; st.textContent="다음을 채워 주세요: "+miss.join(", "); return;}
+  if(!DB||!UID){st.className="status err"; st.textContent="이 보기에서는 제출할 수 없습니다. 미리보기에서 PDF로 저장해 병원정보시스템으로 의뢰하세요."; return;}
+  const b=document.getElementById("refSubmit");
+  if(b.dataset.confirm!=="1"){b.dataset.confirm="1"; b.textContent="한 번 더 누르면 제출됩니다"; return;}
+  r.status="제출됨"; r.submittedAt=now(); r.log=[...(r.log||[]),{t:now(),m:"제출"}]; r.casesum=r.caseId?caseSummary(r.caseId):"";
+  st.className="status"; st.textContent="제출 중…";
+  try{
+    const ref=DB.doc("referrals/"+UID); const snap=await ref.get(); const cur=snap.exists?snap.data():{items:{}};
+    const items={...(cur.items||{})}; items[r.id]=r;
+    await ref.set({items, updatedAt:now()});
+    st.textContent="제출했습니다. 의료윤리사무국이 확인하면 상태가 바뀝니다."; refCur=JSON.parse(JSON.stringify(r)); refDraftClear(); refEditor(true);
+  }catch(e){ r.status="작성 중"; st.className="status err"; st.textContent=e?.code==="quota_exceeded"?"저장 공간이 가득 찼습니다.":"제출하지 못했습니다. 권한(Contributor 이상)과 로그인 상태를 확인하세요."; }
+}
+async function refAdminSave(key,b){
+  const [owner,id]=key.split("|"); const st=document.querySelector(`[data-st="${CSS.escape(key)}"]`).value, rp=document.querySelector(`[data-rp="${CSS.escape(key)}"]`).value;
+  b.disabled=true;
+  try{ const ref=DB.doc("referrals/"+owner); const snap=await ref.get(); const d=snap.data(); const it=d.items[id];
+    it.status=st; it.reply=maskPII(rp).text; it.log=[...(it.log||[]),{t:now(),m:`상태: ${st}${rp?" · 회신":""}`}];
+    await ref.set({...d,items:{...d.items,[id]:it},updatedAt:now()}); b.textContent="반영됨";
+  }catch(e){ b.textContent="실패"; } finally{ b.disabled=false; setTimeout(()=>b.textContent="반영",1500); }
+}
+
+/* ---------- 미리보기 · 이미지/PDF 저장 ---------- */
+function refFormHTML(r){
+  const d=new Date(r.submittedAt||Date.now());
+  const rawSec = r.raw&&r.raw.trim()?`<div class="pf-sec"><b>딜레마 내용(요청인 자유 기술)</b><div>${esc(r.raw).replace(/\n/g,"<br>")}</div></div>`:"";
+  const sec=rawSec+REF_SECTIONS.filter(([k])=>k!=="title"&&r[k]).map(([k,l])=>`<div class="pf-sec"><b>${esc(l)}</b><div>${esc(r[k]).replace(/\n/g,"<br>")}</div></div>`).join("");
+  const box=k=>REQ_KIND.map(x=>`${r.reqKind===x?"■":"□"} ${x==="기타"?`기타[${esc(r.reqKindEtc||"")}]`:x}`).join(" / ");
+  return `<div class="pf" id="pfSheet">
+    <div class="pf-tag">&lt;별지 1&gt; 심의/자문 의뢰서 CMC 10/2021</div>
+    <h1 class="pf-h">심의/자문 의뢰서</h1>
+    <table class="pf-t">
+      <tr><th rowspan="2">요청인</th><td><span class="pf-l">성명</span> ${esc(r.reqName)} ${r.reqDept?`(${esc(r.reqDept)})`:""}</td><td><span class="pf-l">연락처</span> ${esc(r.reqPhone)}</td></tr>
+      <tr><td colspan="2">${box()}</td></tr>
+      <tr><th>구분</th><td colspan="2">${esc(r.type)} · ${esc(r.kind)} · ${esc(r.urgency)}</td></tr>
+      <tr><th>심의/<br>자문<br>요청<br>내용</th><td colspan="2" class="pf-body"><div class="pf-sec"><b>안건</b><div>${esc(r.title)}</div></div>${sec}${r.casesum?`<div class="pf-sec"><b>참고</b><div>${esc(r.casesum)}</div></div>`:""}</td></tr>
+    </table>
+    <p class="pf-date">${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.</p>
+    <p class="pf-sign">요청인 : ${esc(r.reqName)} <span class="pf-l">(서명 또는 인)</span></p>
+    <p class="pf-to">가톨릭대학교 부천성모병원 임상의료윤리위원회 위원장 귀중</p>
+  </div>`;
+}
+function refPreview(r){
+  const bg=document.createElement("div"); bg.className="sheet-bg"; bg.style.alignItems="stretch";
+  bg.innerHTML=`<div class="sheet" style="max-width:860px;max-height:100%;border-radius:0;gap:10px">
+    <div class="toolbar"><h2>의뢰서 미리보기</h2><div class="row"><button class="btn" data-a="png">이미지 저장</button><button class="btn" data-a="pdf">PDF 저장</button><button class="btn standalone-only" data-a="print">인쇄</button><button class="btn" data-a="close">닫기</button></div></div>
+    <p class="status" id="pvSt" style="margin:0">PDF로 저장한 뒤 열어서 인쇄할 수 있습니다.</p>
+    <div class="pf-wrap"><div class="pf-scale">${refFormHTML(r)}</div></div></div>`;
+  document.body.appendChild(bg);
+  const fit=()=>{const w=bg.querySelector(".pf-wrap"), sc=bg.querySelector(".pf-scale"), sh=bg.querySelector("#pfSheet"); const k=Math.min(1,(w.clientWidth-24)/sh.offsetWidth); sc.style.transform=k<1?`scale(${k})`:""; sc.style.transformOrigin="top left"; sc.style.width=sh.offsetWidth+"px"; sc.style.height=(sh.offsetHeight*k)+"px";};
+  fit(); window.addEventListener("resize",fit);
+  const close=()=>{bg.remove(); window.removeEventListener("resize",fit);};
+  bg.addEventListener("click",e=>{if(e.target===bg) close();});
+  bg.querySelector('[data-a="close"]').onclick=close;
+  const fname=`심의자문의뢰서_${(r.title||"의뢰").replace(/[\\/:*?"<>|\s]+/g,"_").slice(0,30)}`;
+  bg.querySelector('[data-a="png"]').onclick=()=>refExport(bg,"png",fname);
+  bg.querySelector('[data-a="pdf"]').onclick=()=>refExport(bg,"pdf",fname);
+  bg.querySelector('[data-a="print"]').onclick=()=>{ const css=[...document.querySelectorAll("style")].map(x=>x.textContent).join("\n"); const w=window.open("","_blank"); if(!w) return;
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(fname)}</title><style>${css}\nbody{background:#fff;margin:0}@page{size:A4;margin:10mm}.pf{width:auto;padding:0}</style></head><body>${bg.querySelector("#pfSheet").outerHTML}</body></html>`); w.document.close(); w.focus(); setTimeout(()=>w.print(),300); };
+}
+/* PDF 쪽 나눔: 글줄이 잘리지 않도록 항목·문단 경계에서 자릅니다 */
+function pageCuts(node,total,pageH,k){
+  const top=node.getBoundingClientRect().top;
+  const marks=new Set([0,total]);
+  node.querySelectorAll(".pf-sec, .pf-sec > div, tr, p, .pf-sec br").forEach(e=>{ const r=e.getBoundingClientRect(); marks.add(Math.round((r.bottom-top)*k)); marks.add(Math.round((r.top-top)*k)); });
+  // 긴 문단 안에서도 줄 사이에서 자르도록 글줄 경계를 더함
+  node.querySelectorAll(".pf-sec > div").forEach(d=>{ const rg=document.createRange(); rg.selectNodeContents(d); [...rg.getClientRects()].forEach(r=>marks.add(Math.round((r.bottom-top)*k)+2)); });
+  const ms=[...marks].filter(v=>v>=0&&v<=total).sort((a,b)=>a-b);
+  const cuts=[0]; let y=0;
+  while(total-y>pageH){ const lim=y+pageH; let best=ms.filter(v=>v>y+pageH*0.5&&v<=lim).pop(); if(!best) best=lim; cuts.push(best); y=best; }
+  cuts.push(total); return cuts;
+}
+async function refExport(bg,kind,fname){
+  const st=bg.querySelector("#pvSt");
+  if(!DL){st.className="status err"; st.textContent="이 보기에서는 파일 저장을 쓸 수 없습니다. 화면을 캡처해 사용하세요."; return;}
+  if(!window.html2canvas||(kind==="pdf"&&!window.jspdf)){st.className="status err"; st.textContent="저장 도구를 불러오지 못했습니다. 네트워크를 확인하세요."; return;}
+  st.className="status"; st.textContent="만드는 중…";
+  try{
+    const node=bg.querySelector("#pfSheet"), sc=bg.querySelector(".pf-scale"); const keep=sc.style.transform; sc.style.transform="";
+    let canvas; try{ canvas=await html2canvas(node,{scale:2,backgroundColor:"#ffffff"}); } finally { sc.style.transform=keep; }
+    let blob, name;
+    if(kind==="png"){ blob=await new Promise(res=>canvas.toBlob(res,"image/png")); name=fname+".png"; }
+    else{
+      const {jsPDF}=window.jspdf; const pdf=new jsPDF({unit:"mm",format:"a4"}); const pw=210, ph=297, m=10, iw=pw-2*m;
+      const pxPerMm=canvas.width/iw, pageH=Math.floor((ph-2*m)*pxPerMm);
+      const cuts=pageCuts(node, canvas.height, pageH, canvas.width/node.offsetWidth);
+      for(let i=0;i<cuts.length-1;i++){
+        const y=cuts[i], hgt=cuts[i+1]-cuts[i];
+        const c=document.createElement("canvas"); c.width=canvas.width; c.height=hgt;
+        const cx=c.getContext("2d"); cx.fillStyle="#fff"; cx.fillRect(0,0,c.width,c.height);
+        cx.drawImage(canvas,0,y,canvas.width,hgt,0,0,canvas.width,hgt);
+        if(i) pdf.addPage(); pdf.addImage(c.toDataURL("image/jpeg",0.92),"JPEG",m,m,iw,hgt/pxPerMm);
+      }
+      blob=pdf.output("blob"); name=fname+".pdf";
+    }
+    const res=await DL.save({filename:name,data:blob});
+    st.textContent=res?.status==="saved"?"저장했습니다.":"전달했습니다.";
+  }catch(e){ st.className="status err"; st.textContent=e?.code==="declined"?"저장을 취소했습니다.":"저장하지 못했습니다."; }
+}
+
+/* ---------- 초기화 ---------- */
+refRender();
+(async()=>{
+  try{ DL=await claude.use("downloads"); }catch(e){ DL=null; }
+  try{ await window._capsReady; }catch(e){}
+  refIsAdmin = !!window.canAdmin;
+  if(DB&&UID){
+    DB.doc("referrals/"+UID).onSnapshot(s=>{const d=s.exists?s.data():{items:{}}; refMine=Object.values(d.items||{}).sort((a,b)=>(b.submittedAt||"").localeCompare(a.submittedAt||"")); refLists();},()=>{});
+    if(refIsAdmin) DB.collection("referrals").limit(500).onSnapshot(s=>{refInbox=[]; s.docs.forEach(d=>Object.values(d.data().items||{}).forEach(it=>refInbox.push({...it,_owner:d.id}))); refInbox.sort((a,b)=>(b.submittedAt||"").localeCompare(a.submittedAt||"")); refLists();},()=>{});
+  }
+  refLists();
+})();
+
+/* ---------- 핵심 정리: 선택한 병원 내규 요약 ---------- */
+function renderHospCore(){
+  const el=document.getElementById("hospCore"); if(!el) return;
+  if(!guideUnlocked()){ el.innerHTML=`<p class="q" style="color:var(--hosp)">${esc(curHosp)} 내규</p>`+lockedBox("내규는 잠겨 있습니다"); return; }
+  const hs=allGuides().filter(g=>g.src==="hosp");
+  el.innerHTML=`<p class="q" style="color:var(--hosp)">${esc(curHosp)} 내규</p>`+(hs.length?`<ul style="margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px">${hs.map(g=>`<li><b>${esc(g.q)}</b> · ${esc(g.a)} ${badge(g)}</li>`).join("")}</ul>`:`<p class="empty" style="margin:0">등록된 내규가 없습니다. 지침 탭 아래 '병원 내규 추가'에서 등록할 수 있습니다.</p>`);
+}
+renderHospCore();
+const _rg=renderGuides; renderGuides=function(){_rg(); renderHospCore();};
+
+document.getElementById("glossList").innerHTML=Object.entries(TERMS).map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+/* ---------- 앱 셸 ---------- */
+const APP_INFO={developer:"노상엽",email:"ace@cmcnu.or.kr",created:"2026-10-06",modified:CONTENT_META.modified,version:CONTENT_META.version};
+document.querySelectorAll(".js-mod").forEach(e=>e.textContent=APP_INFO.modified);
+document.querySelectorAll(".js-ver").forEach(e=>e.textContent=APP_INFO.version);
+document.querySelectorAll(".js-basis").forEach(e=>e.textContent=CONTENT_META.basis);
+document.querySelectorAll(".js-review").forEach(e=>e.textContent=CONTENT_META.review);
+const sheet=document.getElementById("sheet");
+document.getElementById("menuBtn").onclick=()=>openSettings();
+document.getElementById("logoutBtn").onclick=()=>logout();
+document.getElementById("sheetClose").onclick=()=>closeSettings();
+sheet.addEventListener("click",e=>{if(e.target===sheet) closeSettings();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape") closeSettings();});
+const srcT=document.getElementById("srcToggle");
+function setSrc(on){document.body.classList.toggle("show-src",on); srcT.setAttribute("aria-checked",on); try{localStorage.setItem("lst-src",on?"1":"0");}catch(e){}}
+srcT.onclick=()=>setSrc(srcT.getAttribute("aria-checked")!=="true");
+try{setSrc(localStorage.getItem("lst-src")==="1");}catch(e){setSrc(false);}
+const notice=document.getElementById("notice");
+document.getElementById("noticeClose").onclick=()=>{notice.hidden=true; try{localStorage.setItem("lst-notice","0");}catch(e){}};
+document.getElementById("noticeShow").onclick=()=>{notice.hidden=false; closeSettings(); try{localStorage.removeItem("lst-notice");}catch(e){}};
+try{if(localStorage.getItem("lst-notice")==="0") notice.hidden=true;}catch(e){}
+const hosp2=document.getElementById("hospSel2");
+function syncHosp2(){hosp2.innerHTML=hospSel.innerHTML; hosp2.value=hospSel.value;}
+hosp2.onchange=()=>{hospSel.value=hosp2.value; hospSel.onchange();};
+
+/* ============================================================
+   사용자 등록·로그인 · 내규/행정해석 잠금(톱니바퀴 설정)
+   ※ 화면 접근을 나누는 장치입니다. 브라우저 안에서 동작하므로 강한 보안 수단은 아닙니다.
+   ============================================================ */
+/* ---------- 암호 도구 (순수 JS: http 원내망·파일로 열어도 동작) ---------- */
+function utf8(s){ return new TextEncoder().encode(String(s)); }
+function concatB(...arrs){ let n=0; arrs.forEach(a=>n+=a.length); const o=new Uint8Array(n); let p=0; arrs.forEach(a=>{o.set(a,p); p+=a.length;}); return o; }
+function hexOf(u){ let s=""; for(let i=0;i<u.length;i++) s+=u[i].toString(16).padStart(2,"0"); return s; }
+function hexTo(h){ const o=new Uint8Array(h.length/2); for(let i=0;i<o.length;i++) o[i]=parseInt(h.substr(i*2,2),16); return o; }
+function b64Of(u){ let s=""; for(let i=0;i<u.length;i+=0x8000) s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000)); return btoa(s); }
+function b64To(b){ const s=atob(b); const o=new Uint8Array(s.length); for(let i=0;i<s.length;i++) o[i]=s.charCodeAt(i); return o; }
+function randBytes(n){ const a=new Uint8Array(n); if(window.crypto&&crypto.getRandomValues) crypto.getRandomValues(a); else for(let i=0;i<n;i++) a[i]=Math.random()*256|0; return a; }
+var SHA_K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+function sha256Bytes(b){
+  const l=b.length, n=((l+9+63)>>6)<<6, m=new Uint8Array(n); m.set(b); m[l]=0x80;
+  const dv=new DataView(m.buffer); dv.setUint32(n-4,(l*8)>>>0); dv.setUint32(n-8,Math.floor(l/0x20000000));
+  let h0=0x6a09e667,h1=0xbb67ae85,h2=0x3c6ef372,h3=0xa54ff53a,h4=0x510e527f,h5=0x9b05688c,h6=0x1f83d9ab,h7=0x5be0cd19; const w=new Uint32Array(64);
+  for(let o=0;o<n;o+=64){
+    for(let i=0;i<16;i++) w[i]=dv.getUint32(o+i*4);
+    for(let i=16;i<64;i++){ const x=w[i-15], y=w[i-2]; const s0=((x>>>7)|(x<<25))^((x>>>18)|(x<<14))^(x>>>3), s1=((y>>>17)|(y<<15))^((y>>>19)|(y<<13))^(y>>>10); w[i]=(w[i-16]+s0+w[i-7]+s1)>>>0; }
+    let a=h0,bb=h1,c=h2,d=h3,e=h4,f=h5,g=h6,hh=h7;
+    for(let i=0;i<64;i++){ const S1=((e>>>6)|(e<<26))^((e>>>11)|(e<<21))^((e>>>25)|(e<<7)), ch=(e&f)^(~e&g), t1=(hh+S1+ch+SHA_K[i]+w[i])>>>0, S0=((a>>>2)|(a<<30))^((a>>>13)|(a<<19))^((a>>>22)|(a<<10)), mj=(a&bb)^(a&c)^(bb&c), t2=(S0+mj)>>>0;
+      hh=g; g=f; f=e; e=(d+t1)>>>0; d=c; c=bb; bb=a; a=(t1+t2)>>>0; }
+    h0=(h0+a)>>>0; h1=(h1+bb)>>>0; h2=(h2+c)>>>0; h3=(h3+d)>>>0; h4=(h4+e)>>>0; h5=(h5+f)>>>0; h6=(h6+g)>>>0; h7=(h7+hh)>>>0;
+  }
+  const out=new Uint8Array(32), od=new DataView(out.buffer); [h0,h1,h2,h3,h4,h5,h6,h7].forEach((v,i)=>od.setUint32(i*4,v)); return out;
+}
+function sha256(str){ return hexOf(sha256Bytes(utf8(str))); }
+function hmacSha256(key,msg){
+  if(key.length>64) key=sha256Bytes(key);
+  const k=new Uint8Array(64); k.set(key); const ip=new Uint8Array(64), op=new Uint8Array(64);
+  for(let i=0;i<64;i++){ ip[i]=k[i]^0x36; op[i]=k[i]^0x5c; }
+  return sha256Bytes(concatB(op, sha256Bytes(concatB(ip,msg))));
+}
+function pbkdf2Sha256(pw,saltHex,iter){
+  const P=utf8(pw); let u=hmacSha256(P, concatB(hexTo(saltHex), new Uint8Array([0,0,0,1]))); const t=u.slice();
+  for(let i=1;i<iter;i++){ u=hmacSha256(P,u); for(let j=0;j<32;j++) t[j]^=u[j]; }
+  return t;
+}
+/* 케이스 암호화: SHA-256 카운터 방식 + HMAC 무결성 확인 */
+var LSTK={
+  key(){ let h=null; try{ h=sessionStorage.getItem("lst-ck"); }catch(e){} return h&&h.length===64?hexTo(h):null; },
+  derive(pw,saltHex){ return hexOf(pbkdf2Sha256(pw,saltHex,10000)); },
+  sealWith(k,plain){
+    const ek=sha256Bytes(concatB(k,utf8("enc"))), mk=sha256Bytes(concatB(k,utf8("mac"))), nonce=randBytes(16), pt=utf8(plain), ct=new Uint8Array(pt.length);
+    for(let i=0,blk=0;i<pt.length;i+=32,blk++){ const ks=sha256Bytes(concatB(ek,nonce,new Uint8Array([blk>>>24&255,blk>>>16&255,blk>>>8&255,blk&255]))); const lim=Math.min(32,pt.length-i); for(let j=0;j<lim;j++) ct[i+j]=pt[i+j]^ks[j]; }
+    return {__lk:1,n:b64Of(nonce),c:b64Of(ct),m:hexOf(hmacSha256(mk,concatB(nonce,ct)))};
+  },
+  openWith(k,o){
+    const ek=sha256Bytes(concatB(k,utf8("enc"))), mk=sha256Bytes(concatB(k,utf8("mac"))), nonce=b64To(o.n), ct=b64To(o.c);
+    if(hexOf(hmacSha256(mk,concatB(nonce,ct)))!==o.m) throw new Error("bad key");
+    const pt=new Uint8Array(ct.length);
+    for(let i=0,blk=0;i<ct.length;i+=32,blk++){ const ks=sha256Bytes(concatB(ek,nonce,new Uint8Array([blk>>>24&255,blk>>>16&255,blk>>>8&255,blk&255]))); const lim=Math.min(32,ct.length-i); for(let j=0;j<lim;j++) pt[i+j]=ct[i+j]^ks[j]; }
+    return new TextDecoder().decode(pt);
+  },
+  seal(plain){ const k=this.key(); if(!k) throw {code:"locked"}; return this.sealWith(k,plain); },
+  open(o){ const k=this.key(); if(!k) throw {code:"locked"}; return this.openWith(k,o); }
+};
+const ADMIN_HASH="43c8b016c798db49fa9f968c9a8197e6f6649c1530d085f03fae58e289e58ead"; // 내규·행정해석 비밀번호
+const ss={get:k=>{try{return sessionStorage.getItem(k);}catch(e){return null;}},set:(k,v)=>{try{sessionStorage.setItem(k,v);}catch(e){}},del:k=>{try{sessionStorage.removeItem(k);}catch(e){}}};
+const ls={get:k=>{try{return localStorage.getItem(k);}catch(e){return null;}},set:(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}}};
+function checkAdmin(pw){
+  let o=null; try{ o=JSON.parse(localStorage.getItem("lst-admin2")||"null"); }catch(e){}
+  if(o&&o.salt&&o.hash) return pwHash(o.salt,String(pw))===o.hash;
+  return sha256("lst-admin:"+String(pw).replace(/\D/g,""))===ADMIN_HASH;
+}
+function guideUnlocked(){ return false; try{return sessionStorage.getItem("lst-gl")==="1";}catch(e){return false;} }
+function lockedBox(what){ return `<div class="lockbox"><b>${what}</b><span>공개판에는 원내 지침·내규·행정해석이 없습니다. 원내 배포판에서 확인하세요.</span></div>`; }
+function salt(){ const a=new Uint8Array(12); (window.crypto||{}).getRandomValues?crypto.getRandomValues(a):a.forEach((_,i)=>a[i]=Math.random()*256|0); return [...a].map(x=>x.toString(16).padStart(2,"0")).join(""); }
+
+/* 로컬 사용자 저장소: 사번 → {name, no, salt, hash, createdAt} (원내 배포판·로그인 정보 없는 보기) */
+const LU={all:()=>{try{return JSON.parse(ls.get("lst-users3")||"{}");}catch(e){return {};}}, save:o=>ls.set("lst-users3",JSON.stringify(o))};
+const normNo=v=>String(v||"").trim().replace(/\s+/g,"").toUpperCase();
+const userKey=(name,no)=>`${name}(${no})`;
+
+const gate=document.createElement("div"); gate.className="gate"; document.body.appendChild(gate);
+let gateMode="local", gateUid=null, gateAuth=null;
+function gateShell(inner){
+  const art=document.querySelector(".cover-main"), logo=document.querySelector(".flogo-l");
+  const artOk=art&&art.complete&&art.naturalWidth>0, logoOk=logo&&!logo.hidden&&logo.naturalWidth>0;
+  return `<div class="gate-card${artOk?" art":""}">${artOk?`<div class="gate-art"><img class="ga-bg" src="${art.getAttribute("src")}" alt="" aria-hidden="true"><img class="ga-main" src="${art.getAttribute("src")}" alt="기대와 용기 · 가톨릭대학교 부천성모병원"></div>`:""}<div class="gate-body">
+    <h2>연명의료 현장 길라잡이</h2><p class="who" style="margin:0">가톨릭대학교 부천성모병원</p>
+    ${inner}
+    ${logoOk?`<img class="gate-logo" src="${logo.getAttribute("src")}" alt="가톨릭대학교 부천성모병원">`:""}
+    <p class="who" style="margin:0;text-align:center">개발자 노상엽 · ace@cmcnu.or.kr</p>
+  </div></div>`;
+}
+function localUsers(){ return Object.values(LU.all()).filter(r=>r&&r.no&&r.hash).sort((a,b)=>(b.lastAt||b.createdAt||"").localeCompare(a.lastAt||a.createdAt||"")); }
+function defaultView(){ return gateMode==="db" ? (gateAuth?"pw":"reg") : (localUsers().length?"list":"reg"); }
+function showGate(msg,view){
+  view=view||defaultView();
+  document.documentElement.classList.add("gated"); gate.hidden=false; setInert(true);
+  const errP=`<p class="status err" id="gMsg">${msg?esc(msg):""}</p>`;
+  let inner="";
+  if(view==="list"){
+    const us=localUsers(); const last=ls.get("lst-last"); const sel=us.some(u=>u.no===last)?last:us[0].no;
+    inner=`<form id="gateForm" autocomplete="off">
+      <p class="gate-h">사용자를 고르고 비밀번호를 입력하세요</p>
+      <div class="ulist" role="radiogroup" aria-label="등록된 사용자">${us.map(u=>`<label class="uitem"><input type="radio" name="gU" value="${esc(u.no)}" ${u.no===sel?"checked":""}><span class="uav" aria-hidden="true">${esc(u.name.slice(0,1))}</span><span class="un"><b>${esc(u.name)}</b><small>사번 ${esc(maskNo(u.no))}</small></span></label>`).join("")}</div>
+      <div class="field"><label for="gPw">비밀번호</label><input type="password" id="gPw" required maxlength="64" autocomplete="current-password"></div>
+      ${errP}
+      <button class="btn primary" type="submit" style="width:100%">입장</button>
+      <div class="row" style="justify-content:space-between;gap:6px"><button class="linkbtn" type="button" id="gNew">+ 새 사용자 등록</button><button class="linkbtn" type="button" id="gForgot">비밀번호를 잊었어요</button></div>
+    </form>`;
+  } else if(view==="pw"){
+    inner=`<form id="gateForm" autocomplete="off">
+      <p class="gate-h">비밀번호를 입력하세요</p>
+      <div class="ulist"><div class="uitem on"><span class="uav" aria-hidden="true">${esc(gateAuth.name.slice(0,1))}</span><span class="un"><b>${esc(gateAuth.name)}</b><small>사번 ${esc(gateAuth.no)}</small></span></div></div>
+      <div class="field"><label for="gPw">비밀번호</label><input type="password" id="gPw" required maxlength="64" autocomplete="current-password"></div>
+      ${errP}
+      <button class="btn primary" type="submit" style="width:100%">입장</button>
+      <button class="linkbtn" type="button" id="gForgot">비밀번호를 잊었어요</button>
+    </form>`;
+  } else {
+    const back = gateMode==="local" && localUsers().length;
+    inner=`<form id="gateForm" autocomplete="off">
+      <p class="gate-h">처음 사용 · 사용자 등록</p>
+      <div class="field"><label for="gName">이름</label><input type="text" id="gName" required maxlength="20"></div>
+      <div class="field"><label for="gNo">사번</label><input type="text" id="gNo" required maxlength="20" inputmode="numeric"></div>
+      <div class="field"><label for="gPw">비밀번호 (4자 이상)</label><input type="password" id="gPw" required minlength="4" maxlength="64" autocomplete="new-password"></div>
+      <div class="field"><label for="gPw2">비밀번호 확인</label><input type="password" id="gPw2" required maxlength="64" autocomplete="new-password"></div>
+      ${errP}
+      <button class="btn primary" type="submit" style="width:100%">등록하고 입장</button>
+      ${back?`<button class="btn" type="button" id="gBack" style="width:100%">등록된 사용자 목록으로</button>`:""}
+      <p class="who" style="margin:0">등록 후에는 목록에서 이름을 고르고 비밀번호만 입력하면 됩니다.</p>
+    </form>`;
+  }
+  gate.innerHTML=gateShell(inner);
+  const f=document.getElementById("gateForm");
+  setTimeout(()=>{ (view==="reg"?document.getElementById("gName"):document.getElementById("gPw"))?.focus(); },50);
+  document.getElementById("gForgot")?.addEventListener("click",()=>forgot());
+  document.getElementById("gNew")?.addEventListener("click",()=>showGate("","reg"));
+  document.getElementById("gBack")?.addEventListener("click",()=>showGate("","list"));
+  f.querySelectorAll('input[name="gU"]').forEach(r=>{ r.addEventListener("change",()=>{document.getElementById("gPw").value=""; document.getElementById("gMsg").textContent="";}); r.closest("label").addEventListener("click",ev=>{ if(ev.detail>0) setTimeout(()=>document.getElementById("gPw").focus(),0); }); });
+  f.onsubmit=e=>{e.preventDefault(); view==="reg"?doRegister():doEnter(view);};
+}
+function setInert(on){ document.querySelectorAll(".appbar,.wrap,nav.tabs").forEach(e=>{ e.inert=on; if(on) e.setAttribute("aria-hidden","true"); else e.removeAttribute("aria-hidden"); }); }
+function enter(){ setInert(false); gate.hidden=true; document.documentElement.classList.remove("gated"); afterEnter(); const w=document.getElementById("whoami"); if(w&&window._who) w.textContent="사용자: "+window._who; }
+function pwHash(s,pw){ return sha256(s+":"+pw); }
+function finish(name,no){
+  const key=userKey(name,no);
+  if(gateMode==="db"){ window._who=key; ss.set("lst-auth",gateUid); return enter(); }
+  const all=LU.all(); if(all[no]){ all[no].lastAt=now(); LU.save(all); } ls.set("lst-last",no);
+  ss.set("lst-auth",key);
+  if(ls.get("lst-user")!==key){ ls.set("lst-user",key); location.reload(); } else { window._who=key; enter(); }
+}
+function doEnter(view){
+  const pw=document.getElementById("gPw").value;
+  let rec;
+  if(view==="pw") rec=gateAuth;
+  else { const no=(document.querySelector('input[name="gU"]:checked')||{}).value; rec=LU.all()[no]; ls.set("lst-last",no||""); }
+  if(!rec) return showGate("사용자를 고르세요.",view);
+  const fk="u:"+rec.no, wait=failWait(fk); if(wait) return showGate(`비밀번호를 여러 번 틀려 ${wait}초 뒤에 다시 입력할 수 있습니다.`,view);
+  if(pwHash(rec.salt,pw)!==rec.hash){ const w=failNote(fk); return showGate("비밀번호가 맞지 않습니다."+(w?` ${w}초 뒤에 다시 입력하세요.`:""),view); }
+  failClear(fk);
+  if(gateMode!=="db"){ const all=LU.all(); if(!all[rec.no].ksalt){ all[rec.no].ksalt=salt(); LU.save(all); } ss.set("lst-ck",LSTK.derive(pw,all[rec.no].ksalt)); }
+  finish(rec.name,rec.no);
+}
+function doRegister(){
+  const name=document.getElementById("gName").value.trim(), no=normNo(document.getElementById("gNo").value), pw=document.getElementById("gPw").value, pw2=document.getElementById("gPw2").value;
+  const again=m=>{ showGate(m,"reg"); document.getElementById("gName").value=name; document.getElementById("gNo").value=no; };
+  if(!name||!no) return again("이름과 사번을 입력하세요.");
+  if(pw.length<4) return again("비밀번호는 4자 이상으로 정하세요.");
+  if(pw!==pw2) return again("비밀번호 확인이 일치하지 않습니다.");
+  const sl=salt(), rec={name,no,salt:sl,hash:pwHash(sl,pw),createdAt:now()};
+  if(gateMode==="db"){
+    DB.doc("data/users/"+gateUid+"/_auth").set(rec).then(()=>{gateAuth=rec; finish(name,no);}).catch(()=>again("등록하지 못했습니다. 권한(Contributor 이상)을 확인하세요."));
+  } else {
+    const all=LU.all(); if(all[no]){ ls.set("lst-last",no); return showGate("이미 등록된 사번입니다. 목록에서 고르고 비밀번호를 입력하세요.","list"); }
+    rec.ksalt=salt(); all[no]=rec; LU.save(all); ss.set("lst-ck",LSTK.derive(pw,rec.ksalt)); finish(name,no);
+  }
+}
+function forgot(){
+  gate.innerHTML=`<div class="gate-card"><h2>비밀번호 · 등록 정보 초기화</h2>
+    <p class="qhint" style="margin:0">관리자 비밀번호를 입력하면 ${gateMode==="db"?"이 계정의 등록 정보(이름·비밀번호)를 지우고 다시 등록할 수 있습니다. 저장된 케이스는 그대로 남습니다.":"해당 사번의 등록 정보와 <b>그 사용자의 케이스를 모두 지웁니다</b>. 케이스는 본인 비밀번호로 잠겨 있어 비밀번호 없이는 열 수 없기 때문입니다. 백업 파일이 있으면 다시 등록한 뒤 가져올 수 있습니다."} 관리자 비밀번호는 관리자(개발자 노상엽)에게 문의하세요.</p>
+    <form id="fgForm" autocomplete="off">${gateMode==="local"?`<div class="field"><label for="fgNo">사번</label><input type="text" id="fgNo" required value="${esc((document.querySelector('input[name="gU"]:checked')||{}).value||"")}"></div>`:""}
+    <div class="field"><label for="fgPw">관리자 비밀번호</label><input type="password" id="fgPw" required></div>
+    <p class="status err" id="fgMsg"></p><button class="btn primary" type="submit" style="width:100%">초기화</button><button class="btn" type="button" id="fgBack" style="width:100%">돌아가기</button></form></div>`;
+  document.getElementById("fgBack").onclick=()=>showGate();
+  document.getElementById("fgForm").onsubmit=async e=>{e.preventDefault(); const msg=document.getElementById("fgMsg");
+    const aw=failWait("admin"); if(aw){ msg.textContent=`여러 번 틀려 ${aw}초 뒤에 다시 입력할 수 있습니다.`; return; }
+    if(!checkAdmin(document.getElementById("fgPw").value)){ const w=failNote("admin"); msg.textContent="관리자 비밀번호가 맞지 않습니다."+(w?` ${w}초 뒤에 다시 입력하세요.`:""); return; }
+    failClear("admin");
+    if(gateMode==="db"){ try{ await DB.doc("data/users/"+gateUid+"/_auth").delete(); gateAuth=null; showGate("등록 정보를 지웠습니다. 새로 입력하세요."); }catch(_){ msg.textContent="초기화하지 못했습니다."; } }
+    else { const n=normNo(document.getElementById("fgNo").value), all=LU.all(); if(!all[n]){ msg.textContent="등록되지 않은 사번입니다."; return; } const gone=all[n]; delete all[n]; LU.save(all); const wiped=window.LST_LOCAL?LST_LOCAL.wipe("data/users/local:"+userKey(gone.name,gone.no)+"/"):0; showGate(`등록 정보${wiped?`와 케이스 ${wiped}건`:""}을 지웠습니다. 다시 등록하세요.`,"reg"); }
+  };
+}
+async function initGate(){
+  const cm=document.querySelector(".cover-main"), cb=document.querySelector(".cover-bg"); if(cm&&cb) cb.src=cm.getAttribute("src");
+  const imgReady=im=>new Promise(r=>{ if(!im||im.complete) return r(); im.addEventListener("load",r,{once:true}); im.addEventListener("error",r,{once:true}); setTimeout(r,2500); });
+  gate.hidden=false; setInert(true); document.documentElement.classList.add("gated"); gate.innerHTML=`<div class="gate-card"><p class="status">불러오는 중…</p></div>`;
+  try{ await window._capsReady; }catch(e){}
+  await Promise.all([imgReady(cm),imgReady(document.querySelector(".flogo-l"))]);
+  if(!window.LST_STANDALONE && DB && UID){
+    gateMode="db"; gateUid=UID;
+    try{ const s=await DB.doc("data/users/"+UID+"/_auth").get(); gateAuth=s.exists?s.data():null; }catch(e){ gateAuth=null; }
+    if(gateAuth && !(gateAuth.no&&gateAuth.hash)) gateAuth=null; // 이전 방식 등록은 새로 입력
+    if(gateAuth && ss.get("lst-auth")===UID){ window._who=userKey(gateAuth.name,gateAuth.no); return enter(); }
+    showGate();
+  } else {
+    gateMode="local"; const cur=ls.get("lst-user");
+    if(cur && ss.get("lst-auth")===cur && ss.get("lst-ck") && Object.values(LU.all()).some(r=>userKey(r.name,r.no)===cur)){ window._who=cur; return enter(); }
+    showGate();
+  }
+}
+function logout(){ ss.del("lst-auth"); ss.del("lst-gl"); ss.del("lst-ck"); location.reload(); }
+
+/* 톱니바퀴: 내규·행정해석 잠금 해제 */
+function renderLockSection(){ const el0=document.getElementById("lockSec"); if(el0){ el0.innerHTML=`<div class="row2"><span>공개판<br><span class="who">법령 기준 내용만 담았습니다. 원내 지침·내규·행정해석은 원내 배포판에서 보세요.</span></span></div>`; } return;
+  const el=document.getElementById("lockSec"); if(!el) return; const on=guideUnlocked();
+  el.innerHTML = on ? `<div class="row2"><span>내규·행정해석 <b style="color:var(--ok)">열림</b><br><span class="who">브라우저를 닫으면 다시 잠깁니다</span></span><button class="btn" type="button" id="glLock">잠그기</button></div><div class="row2"><span>관리자 비밀번호 변경<br><span class="who">이 기기에만 적용됩니다</span></span><button class="btn" type="button" id="adminChg">변경</button></div><div id="adminChgBox"></div>`
+    : `<form class="row2" id="glForm" autocomplete="off"><span>내규·행정해석 <b style="color:var(--stop)">잠김</b><br><span class="who">비밀번호를 입력하세요</span></span><span class="row" style="flex-wrap:nowrap"><input type="password" id="glPw" placeholder="비밀번호" style="width:9rem"><button class="btn primary" type="submit">열기</button></span></form><p class="status err" id="glMsg" style="margin:0"></p>`;
+  document.getElementById("glLock")?.addEventListener("click",()=>{ss.del("lst-gl"); refreshLocks();});
+  const f=document.getElementById("glForm"); if(f) f.onsubmit=e=>{e.preventDefault(); const m=document.getElementById("glMsg"); const aw=failWait("admin"); if(aw){ m.textContent=`여러 번 틀려 ${aw}초 뒤에 다시 입력할 수 있습니다.`; return; } if(checkAdmin(document.getElementById("glPw").value)){ failClear("admin"); ss.set("lst-gl","1"); refreshLocks(); } else { const w=failNote("admin"); m.textContent="비밀번호가 맞지 않습니다."+(w?` ${w}초 뒤에 다시 입력하세요.`:""); } };
+  const cb=document.getElementById("adminChg"); if(cb) cb.onclick=()=>adminChange();
+}
+function applyLockables(){ const on=guideUnlocked(); document.querySelectorAll(".lockable").forEach(el=>{ el.dataset.locked=on?"0":"1"; let lb=el.querySelector(":scope > .lockbox"); if(!on&&!lb){ el.insertAdjacentHTML("beforeend",lockedBox(el.dataset.lockWhat||"내규·행정해석")); } if(on&&lb) lb.remove(); }); }
+function refreshLocks(){ renderLockSection(); renderGuides(); applyLockables(); if(window.renderForms) renderForms(); if(window._lastRes && document.querySelector("#pathBody .result")) renderResult(window._lastRes); if(typeof cur!=="undefined"&&cur) refreshFlow(); }
+let sheetReturn=null;
+function openSettings(){ sheetReturn=document.activeElement; const sh=document.getElementById("sheet"); sh.hidden=false; try{syncHosp2();}catch(e){} renderLockSection(); if(window.renderSettingsExtra) renderSettingsExtra(); setTimeout(()=>document.getElementById("sheetClose").focus(),0); }
+function closeSettings(){ const sh=document.getElementById("sheet"); if(sh.hidden) return; sh.hidden=true; if(sheetReturn&&sheetReturn.focus) sheetReturn.focus(); }
+document.getElementById("sheet").addEventListener("keydown",e=>{ if(e.key!=="Tab") return; const f=[...document.querySelectorAll("#sheet button:not([disabled]),#sheet input:not([disabled]),#sheet select,#sheet summary,#sheet [tabindex='0']")].filter(x=>x.offsetParent!==null); if(!f.length) return; const a=f[0], z=f[f.length-1]; if(e.shiftKey&&document.activeElement===a){ e.preventDefault(); z.focus(); } else if(!e.shiftKey&&document.activeElement===z){ e.preventDefault(); a.focus(); } });
+window.openSettings=openSettings;
+
+/* ============================================================
+   2026-11 고도화 기능
+   서식 길잡이 · 상황별 빠른 안내 · 통합 검색 · 즐겨찾기 · 큰 글씨/야간 · 연락처 · 개정 동향
+   교육 퀴즈 · 백업 · 오래된 케이스 정리 · 의견 보내기 · 사용 기록 · 자동 잠금 · 오류 대기
+   ============================================================ */
+function lsGet(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+function userTag(){ try{ return localStorage.getItem("lst-user")||"" }catch(e){ return ""; } }
+function maskNo(no){ no=String(no||""); if(no.length<=3) return no.replace(/./g,"*"); return no.slice(0,2)+"*".repeat(Math.max(1,no.length-3))+no.slice(-1); }
+
+/* ---------- 비밀번호 연속 오류 대기 ---------- */
+function failWait(k){ const f=lsGet("lst-fail",{})[k]; if(!f||!f.until) return 0; const s=Math.ceil((f.until-Date.now())/1000); return s>0?s:0; }
+function failNote(k){ const all=lsGet("lst-fail",{}); const f=all[k]||{n:0}; f.n=(f.n||0)+1; let wait=0; if(f.n>=5){ wait=Math.min(600,30*Math.pow(2,Math.floor((f.n-5)/5))); f.until=Date.now()+wait*1000; } all[k]=f; lsSet("lst-fail",all); return wait; }
+function failClear(k){ const all=lsGet("lst-fail",{}); delete all[k]; lsSet("lst-fail",all); }
+
+/* ---------- 날짜 입력: 숫자 8자리(20261127)만 눌러도 날짜로 ---------- */
+function normDate(v){
+  v=String(v||"").trim(); if(!v) return "";
+  const d=v.replace(/\D/g,"");
+  let y,m,dd;
+  if(d.length===8){ y=+d.slice(0,4); m=+d.slice(4,6); dd=+d.slice(6,8); }
+  else { const mm=v.match(/^(\d{4})\D+(\d{1,2})\D+(\d{1,2})/); if(!mm) return null; y=+mm[1]; m=+mm[2]; dd=+mm[3]; }
+  const dt=new Date(y,m-1,dd); if(dt.getFullYear()!==y||dt.getMonth()!==m-1||dt.getDate()!==dd) return null;
+  return `${y}-${String(m).padStart(2,"0")}-${String(dd).padStart(2,"0")}`;
+}
+function bindDateInput(el,onCommit){
+  el.addEventListener("input",()=>{ const d=el.value.replace(/\D/g,""); if(/^\d{8}$/.test(d)&&el.value.length===8){ const n=normDate(d); if(n){ el.value=n; el.removeAttribute("aria-invalid"); onCommit&&onCommit(n); } } });
+  const commit=()=>{ const n=normDate(el.value); if(n===null){ el.setAttribute("aria-invalid","true"); return; } el.removeAttribute("aria-invalid"); el.value=n; onCommit&&onCommit(n); };
+  el.addEventListener("change",commit); el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); commit(); } });
+}
+
+/* ---------- 검색 도우미: 띄어쓰기·대소문자 무시, 초성 ---------- */
+function choseong(s){ const C="ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ"; let o=""; for(const ch of String(s)){ const c=ch.charCodeAt(0); o+= (c>=0xAC00&&c<=0xD7A3)? C[Math.floor((c-0xAC00)/588)] : ch; } return o; }
+function normQ(s){ return String(s||"").toLowerCase().replace(/[\s·.,()\-]/g,""); }
+function textMatch(text,q){ const nq=normQ(q); if(!nq) return true; const nt=normQ(text); if(nt.includes(nq)) return true; if(/^[ㄱ-ㅎ]+$/.test(nq)) return normQ(choseong(text)).includes(nq); return false; }
+
+/* ---------- 즐겨찾기 · 최근 본 항목 ---------- */
+function gKey(g){ return (g.src+"|"+(g.ref||"")+"|"+g.q).slice(0,160); }
+function getFavs(){ return lsGet("lst-favs:"+userTag(),[]); }
+function toggleFav(k){ const f=getFavs(); const i=f.indexOf(k); i>=0?f.splice(i,1):f.unshift(k); lsSet("lst-favs:"+userTag(),f.slice(0,100)); bumpStat("fav"); }
+function pushRecent(k){ const r=lsGet("lst-recent:"+userTag(),[]).filter(x=>x!==k); r.unshift(k); lsSet("lst-recent:"+userTag(),r.slice(0,8)); renderRecent(); }
+function renderRecent(){
+  const el=document.getElementById("gRecent"); if(!el) return;
+  const open=guideUnlocked(), map=new Map(allGuides().map(g=>[gKey(g),g]));
+  const items=lsGet("lst-recent:"+userTag(),[]).map(k=>map.get(k)).filter(g=>g&&(open||g.src==="law"));
+  el.hidden=!items.length; if(!items.length) return;
+  el.innerHTML=`<p class="q">최근 본 항목</p>`+items.map(g=>`<details class="glist-row"><summary>${esc(g.q)}</summary><p>${esc(g.a)} ${badge(g)}</p></details>`).join("");
+}
+
+/* ---------- 사용 기록(이 기기) ---------- */
+function bumpStat(k){ const s=lsGet("lst-stat",{}); s[k]=(s[k]||0)+1; s._since=s._since||new Date().toISOString().slice(0,10); lsSet("lst-stat",s); }
+var _rr0=renderResult; renderResult=function(k){ _rr0(k); bumpStat("route:"+k); };
+
+/* ---------- 상황별 빠른 안내 ---------- */
+function renderQuick(){
+  const el=document.getElementById("quickStart"); if(!el) return;
+  el.innerHTML=`<p class="qhint" style="margin:0 0 8px">자주 묻는 상황을 고르면 핵심 절차를 먼저 보여 줍니다. 실제 이행은 위 결정 경로로 확인하세요.</p><div class="qs">${QUICK.map(x=>`<button type="button" data-qs="${x.id}"><b>${esc(x.t)}</b><small>${esc(x.sub)}</small></button>`).join("")}</div><div id="qsOut"></div>`;
+  el.querySelectorAll("[data-qs]").forEach(b=>b.onclick=()=>{
+    const x=QUICK.find(y=>y.id===b.dataset.qs); bumpStat("quick:"+x.id);
+    const out=document.getElementById("qsOut");
+    out.innerHTML=`<div class="card fade" style="margin-top:10px"><p class="q">${esc(x.t)}</p><ol style="margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px">${x.steps.map(s=>`<li>${linkTerms(s)}</li>`).join("")}</ol>
+      <div class="row" style="margin-top:10px">${x.route?`<button class="btn" type="button" id="qsRoute">이 경로의 절차 보기</button>`:""}<button class="btn" type="button" id="qsGuide">관련 지침 찾기</button></div></div>`;
+    if(x.route) document.getElementById("qsRoute").onclick=()=>{ trail=[]; renderResult(x.route); window.scrollTo({top:0}); };
+    document.getElementById("qsGuide").onclick=()=>{ goGuide(x.q); };
+    out.scrollIntoView({block:"nearest"});
+  });
+}
+function goGuide(q){ const b=document.querySelector('[data-tab="guide"]'); selectTab(b); const gq=document.getElementById("gq"); gq.value=q||""; renderGuides(); }
+
+/* ---------- 서식 길잡이 탭 ---------- */
+function formTip(t){ return `<li>${esc(t.t)} <span class="src ${t.src==="law"?"law":t.src==="cmc"?"hosp":"nibp"}">${esc(t.ref)}</span></li>`; }
+function renderForms(){
+  const el=document.getElementById("p-forms"); if(!el) return; const open=guideUnlocked();
+  const d=window._fdates||{};
+  el.innerHTML=`<div class="card"><p class="q">법정 서식 길잡이</p><p class="qhint" style="margin:0">연명의료결정법 시행규칙 별지 서식입니다. 작성 순서는 <b>제9호(판단서) → 환자 의사 확인(제1·10·11·12호) → 제13호(이행서)</b>이고, 모든 칸은 빈칸 없이 씁니다.</p></div>
+  <div class="card" id="orderCheck"><p class="q">작성 날짜 점검</p><p class="qhint">서식에 적을 날짜를 넣으면 순서가 맞는지 바로 확인합니다. 숫자 8자리(예: 20261127)만 눌러도 됩니다. 이 화면의 날짜는 저장되지 않습니다.</p>
+    <div class="grid3">
+      <div class="field"><label for="fd9a">제9호 두 의사의 판단일 중 늦은 날</label><input type="text" inputmode="numeric" class="datein" id="fd9a" placeholder="예: 20261127" value="${esc(d.fd9a||"")}"></div>
+      <div class="field"><label for="fd9c">제9호 담당의사 확인일</label><input type="text" inputmode="numeric" class="datein" id="fd9c" placeholder="예: 20261127" value="${esc(d.fd9c||"")}"></div>
+      <div class="field"><label for="fd6q">의향서 조회일 (제10호)</label><input type="text" inputmode="numeric" class="datein" id="fd6q" placeholder="해당할 때" value="${esc(d.fd6q||"")}"></div>
+      <div class="field"><label for="fd10">제10호 확인일</label><input type="text" inputmode="numeric" class="datein" id="fd10" placeholder="해당할 때" value="${esc(d.fd10||"")}"></div>
+      <div class="field"><label for="fd13">제13호 이행일</label><input type="text" inputmode="numeric" class="datein" id="fd13" placeholder="예: 20261128" value="${esc(d.fd13||"")}"></div>
+    </div><div id="orderOut" style="margin-top:8px"></div></div>
+  ${FORMS.map(f=>{ const tips=f.tips.filter(t=>open||t.src!=="cmc"); const hidden=f.tips.length-tips.length; return `<div class="card formcard" id="form-${f.no}"><h3><span class="formno">제${f.no}호</span>${esc(f.name)}</h3>
+    <dl class="kv"><dt>누가</dt><dd>${esc(f.who)}</dd><dt>언제</dt><dd>${esc(f.when)}</dd></dl>
+    <ul style="margin:8px 0 0;padding-left:1.1em;display:flex;flex-direction:column;gap:3px">${f.key.map(k=>`<li>${linkTerms(k)}</li>`).join("")}${tips.map(formTip).join("")}</ul>
+    ${hidden?`<p class="inline-note" style="margin:6px 0 0">🔒 원내 작성 요령 ${hidden}건은 톱니바퀴(설정)에서 잠금을 풀면 보입니다.</p>`:""}
+    ${f.routes.length?`<p class="inline-note" style="margin:6px 0 0">쓰는 경로: ${f.routes.map(r=>esc(ROUTE_LABEL[r]||r)).join(" · ")}</p>`:""}</div>`; }).join("")}`;
+  const ids=["fd9a","fd9c","fd6q","fd10","fd13"];
+  ids.forEach(id=>{ const i=document.getElementById(id); bindDateInput(i,v=>{ window._fdates={...(window._fdates||{}),[id]:v}; checkOrder(); }); });
+  checkOrder();
+}
+function checkOrder(){
+  const d=window._fdates||{}, out=document.getElementById("orderOut"); if(!out) return;
+  const bad=[], good=[];
+  const cmp=(a,b,msg,okmsg)=>{ if(d[a]&&d[b]){ (d[b]>=d[a]?good:bad).push(d[b]>=d[a]?okmsg:msg); } };
+  cmp("fd9a","fd9c","제9호 담당의사 확인일이 두 의사의 판단일보다 빠릅니다.","제9호 확인일이 판단일 이후입니다.");
+  cmp("fd6q","fd10","제10호 확인일이 의향서 조회일보다 빠릅니다.","제10호 확인일이 조회일 이후입니다.");
+  cmp("fd9a","fd13","제13호 이행일이 제9호 판단일보다 빠릅니다. 제9호를 먼저 작성해야 합니다.","이행일이 제9호 판단일 이후입니다.");
+  cmp("fd9a","fd10","제10호 확인일이 제9호 판단일보다 빠릅니다. 제9호를 먼저 작성합니다.","제10호가 제9호 뒤에 작성되었습니다.");
+  let due="";
+  if(d.fd13){ const t=new Date(d.fd13+"T00:00:00"); t.setDate(t.getDate()+7); const ds=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`; const today=new Date().toISOString().slice(0,10); due=`<p style="margin:6px 0 0"><b>정보처리시스템 통보 기한: ${ds}</b>${ds<today?` <span class="due" style="color:var(--stop)">기한이 지났습니다</span>`:""}</p>`; }
+  out.innerHTML=(bad.length?`<ul class="warnlist">${bad.map(x=>`<li>${x}</li>`).join("")}</ul>`:"")+(good.length?`<ul class="oklist">${good.map(x=>`<li>${x}</li>`).join("")}</ul>`:"")+due+(!bad.length&&!good.length&&!due?`<p class="inline-note" style="margin:0">날짜를 두 개 이상 넣으면 점검 결과가 나옵니다.</p>`:"");
+}
+
+/* ---------- 연락처 · 개정 동향 ---------- */
+function renderContacts(){
+  const el=document.getElementById("contactCard"); if(!el) return;
+  el.innerHTML=`<p class="q">바로 연락</p><div style="display:flex;flex-direction:column;gap:8px">${CONTACTS.map(c=>`<div class="row" style="align-items:center;justify-content:space-between"><span><b>${esc(c.name)}</b><br><span class="inline-note">${esc(c.note)}</span></span><a class="btn primary" href="tel:${esc(c.tel.replace(/\D/g,""))}" style="text-decoration:none">${esc(c.tel)} 전화</a></div>`).join("")}</div>
+    <p class="q" style="margin-top:12px;font-size:.92rem">관련 누리집</p><ul style="margin:0;padding-left:1.1em">${LINKS.map(l=>`<li><a href="${esc(l.url)}" target="_blank" rel="noopener" style="color:var(--accent)">${esc(l.name)}</a> <span class="inline-note">${esc(l.note)}</span></li>`).join("")}</ul>`;
+}
+function renderLawNews(){
+  const el=document.getElementById("lawNews"); if(!el) return;
+  el.innerHTML=`<p class="q">법령·제도 개정 동향 <span class="inline-note">(기준일 ${esc(CONTENT_META.basis)})</span></p><p class="qhint">국회 통과·시행 전인 안은 앱 내용에 반영하지 않습니다. 확정되면 결정 경로를 다시 검토합니다.</p>
+  <div class="tbl"><table><tr><th>날짜</th><th>내용</th><th>상태</th></tr>${LAWNEWS.slice().reverse().map(n=>`<tr><td style="white-space:nowrap">${esc(n.d)}</td><td><b>${esc(n.t)}</b><br><span class="inline-note">${esc(n.x)}</span></td><td style="white-space:nowrap"><span class="pill">${esc(n.s)}</span></td></tr>`).join("")}</table></div>`;
+}
+
+/* ---------- 교육 퀴즈 ---------- */
+var EDU_ST=null, EDU_REC=null;
+function eduDoc(){ return (DB&&UID)?DB.doc("data/users/"+UID+"/_edu"):null; }
+async function loadEdu(){ const r=eduDoc(); if(!r){ EDU_REC=lsGet("lst-edu:"+userTag(),null); renderEdu(); return; } try{ const s=await r.get(); EDU_REC=s.exists?s.data():null; }catch(e){ EDU_REC=null; } renderEdu(); }
+function saveEdu(rec){ EDU_REC=rec; const r=eduDoc(); if(r){ r.set(rec).catch(()=>lsSet("lst-edu:"+userTag(),rec)); } else lsSet("lst-edu:"+userTag(),rec); }
+function renderEdu(){
+  const el=document.getElementById("eduCard"); if(!el) return;
+  if(!EDU_ST){
+    el.innerHTML=`<p class="q">교육 퀴즈</p><p class="qhint" style="margin:0">핵심 규정 ${EDU.length}문항입니다. 신규 전공의·인턴 오리엔테이션에 쓰세요. 기록은 본인만 봅니다.</p>
+      ${EDU_REC?`<p class="status" style="margin:8px 0 0">최고 ${EDU_REC.best}/${EDU.length}점 · 마지막 ${esc(String(EDU_REC.last||"").slice(0,10))}${EDU_REC.best===EDU.length?" · <b style='color:var(--ok)'>전 문항 정답</b>":""}</p>`:""}
+      <div class="row" style="margin-top:10px"><button class="btn primary" type="button" id="eduStart">시작</button></div>`;
+    document.getElementById("eduStart").onclick=()=>{ EDU_ST={i:0,score:0,ans:null}; renderEdu(); };
+    return;
+  }
+  const s=EDU_ST;
+  if(s.i>=EDU.length){
+    const best=Math.max(s.score,EDU_REC?.best||0); saveEdu({best,last:new Date().toISOString(),lastScore:s.score,count:(EDU_REC?.count||0)+1}); bumpStat("edu");
+    el.innerHTML=`<p class="q">교육 퀴즈 결과</p><p class="big" style="margin:0">${s.score} / ${EDU.length}</p><p class="qhint">${s.score===EDU.length?"모두 맞혔습니다.":"틀린 문항은 지침 탭에서 다시 확인해 보세요."}</p><div class="row"><button class="btn" type="button" id="eduAgain">다시 풀기</button><button class="btn" type="button" id="eduEnd">닫기</button></div>`;
+    document.getElementById("eduAgain").onclick=()=>{ EDU_ST={i:0,score:0,ans:null}; renderEdu(); };
+    document.getElementById("eduEnd").onclick=()=>{ EDU_ST=null; renderEdu(); };
+    return;
+  }
+  const it=EDU[s.i];
+  el.innerHTML=`<p class="inline-note" style="margin:0">${s.i+1} / ${EDU.length} · 맞힌 문항 ${s.score}</p><p class="q" style="margin-top:4px">${esc(it.q)}</p>
+    <div class="quiz-opt" role="group" aria-label="보기">${it.o.map((o,j)=>`<button type="button" data-j="${j}" ${s.ans!==null?"disabled":""} class="${s.ans!==null?(j===it.a?"right":j===s.ans?"wrong":""):""}">${esc(o)}</button>`).join("")}</div>
+    ${s.ans!==null?`<p class="qhint" style="margin:10px 0 0" role="status"><b>${s.ans===it.a?"정답":"오답"}</b> · ${esc(it.e)}</p><div class="row" style="margin-top:8px"><button class="btn primary" type="button" id="eduNext">${s.i+1<EDU.length?"다음 문항":"결과 보기"}</button></div>`:""}`;
+  el.querySelectorAll("[data-j]").forEach(b=>b.onclick=()=>{ s.ans=+b.dataset.j; if(s.ans===it.a) s.score++; renderEdu(); });
+  const nx=document.getElementById("eduNext"); if(nx){ nx.onclick=()=>{ s.i++; s.ans=null; renderEdu(); }; nx.focus(); }
+}
+
+/* ---------- 케이스 인수인계 요약 ---------- */
+function handoverPrint(c){
+  const f=c.fields, fl=computeFlow(f), r=fl.route?RESULTS[fl.route]:null, ck=fl.route?checklist(fl.route,f):[];
+  const fam=FAMK.map(([k,l])=>(+f.family?.[k]||0)?`${l} ${+f.family[k]}`:"").filter(Boolean).join(", ")||"미입력";
+  let due=""; const base=c.implDate?c.implDate+"T12:00:00":c.checks?.f13; if(base&&!c.checks?.sys){ const d=new Date(new Date(base).getTime()+7*864e5); due=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+  const html=`<div class="pf" id="pfSheet"><div class="pf-tag">연명의료 현장 길라잡이 · 인수인계 요약 (익명)</div><h1 class="pf-h" style="letter-spacing:.1em">연명의료 진행 요약</h1>
+    <table class="pf-t">
+      <tr><th>케이스</th><td>${esc(c.label)} · ${esc([c.ageBand&&c.ageBand+"세",c.sex==="M"?"남":c.sex==="F"?"여":"",c.ward].filter(Boolean).join(" · "))}</td></tr>
+      <tr><th>주진단</th><td>${esc(c.diag||"-")}</td></tr>
+      <tr><th>경로</th><td>${r?`<b>${esc(r.title)}</b> (${esc(r.law)})`:"확인 필요: "+esc(NODES[fl.need]?.q||"")}</td></tr>
+      <tr><th>판단 정보</th><td>${fl.steps.map(s=>`${esc(s.q)} → <b>${s.v?esc(ANS[s.v]||s.v):"확인 필요"}</b>`).join("<br>")}</td></tr>
+      <tr><th>가족</th><td>${esc(fam)}</td></tr>
+      <tr><th>시행 중</th><td>${esc((f.lst||[]).join(", ")||"없음")}</td></tr>
+      <tr><th>이행일</th><td>${esc(c.implDate||"-")}${due?` · 통보 기한 <b>${due}</b>`:""}</td></tr>
+      <tr><th>할 일</th><td>${ck.map(k=>`${c.checks?.[k]?"■":"□"} ${esc(ckLabel(k))}${c.checks?.[k]?` <span class="pf-l">(${fmt(c.checks[k])})</span>`:""}`).join("<br>")||"-"}</td></tr>
+      <tr><th>메모</th><td>${esc(maskPII(c.notes||"").text||"-").replace(/\n/g,"<br>")}</td></tr>
+    </table><p class="pf-date" style="text-align:right;margin:14px 0 0">출력 ${new Date().toLocaleString("ko-KR")}</p></div>`;
+  showDocPreview("인수인계 요약", html, `인수인계요약_${(c.label||"케이스").replace(/[\\/:*?"<>|\s]+/g,"_").slice(0,30)}`);
+}
+function showDocPreview(title,html,fname){
+  const bg=document.createElement("div"); bg.className="sheet-bg"; bg.style.alignItems="stretch";
+  bg.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}" style="max-width:860px;max-height:100%;border-radius:0;gap:10px">
+    <div class="toolbar"><h2>${esc(title)}</h2><div class="row"><button class="btn" data-a="png">이미지 저장</button><button class="btn" data-a="pdf">PDF 저장</button><button class="btn" data-a="print">인쇄</button><button class="btn" data-a="close">닫기</button></div></div>
+    <p class="status" id="pvSt" style="margin:0">환자 식별정보가 없는지 확인한 뒤 저장·인쇄하세요.</p>
+    <div class="pf-wrap"><div class="pf-scale">${html}</div></div></div>`;
+  document.body.appendChild(bg);
+  const fit=()=>{const w=bg.querySelector(".pf-wrap"), sc=bg.querySelector(".pf-scale"), sh=bg.querySelector("#pfSheet"); const k=Math.min(1,(w.clientWidth-24)/sh.offsetWidth); sc.style.transform=k<1?`scale(${k})`:""; sc.style.transformOrigin="top left"; sc.style.width=sh.offsetWidth+"px"; sc.style.height=(sh.offsetHeight*k)+"px";};
+  fit(); window.addEventListener("resize",fit);
+  const close=()=>{bg.remove(); window.removeEventListener("resize",fit);};
+  bg.addEventListener("click",e=>{if(e.target===bg) close();});
+  bg.addEventListener("keydown",e=>{if(e.key==="Escape"){ e.stopPropagation(); close(); }});
+  bg.querySelector('[data-a="close"]').onclick=close;
+  bg.querySelector('[data-a="png"]').onclick=()=>refExport(bg,"png",fname);
+  bg.querySelector('[data-a="pdf"]').onclick=()=>refExport(bg,"pdf",fname);
+  bg.querySelector('[data-a="print"]').onclick=()=>{ const css=[...document.querySelectorAll("style")].map(x=>x.textContent).join("\n"); const w=window.open("","_blank"); if(!w){ const st=bg.querySelector("#pvSt"); st.className="status err"; st.textContent="이 보기에서는 인쇄 창을 열 수 없습니다. PDF로 저장해 인쇄하세요."; return; }
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(fname)}</title><style>${css}\nbody{background:#fff;margin:0}@page{size:A4;margin:10mm}.pf{width:auto;padding:0}</style></head><body>${bg.querySelector("#pfSheet").outerHTML}</body></html>`); w.document.close(); w.focus(); setTimeout(()=>w.print(),300); };
+  setTimeout(()=>bg.querySelector('[data-a="close"]').focus(),0);
+}
+
+/* ---------- 윤리 자문 의뢰서 임시 저장 ---------- */
+var _rdT=null;
+function refDraftDoc(){ return (DB&&UID&&!localOnly)?DB.doc("data/users/"+UID+"/_refdraft"):null; }
+function refDraftSave(now_){
+  if(!refCur||refCur.status!=="작성 중") return;
+  clearTimeout(_rdT);
+  const run=()=>{ const r=refCur; if(!r) return; const g=id=>document.getElementById(id);
+    if(g("refRaw")) r.raw=g("refRaw").value; if(g("refCase")) r.caseId=g("refCase").value; if(g("refEtc")) r.reqKindEtc=g("refEtc").value;
+    if(g("refName")){ r.reqName=g("refName").value; r.reqDept=g("refDept").value; r.reqPhone=g("refPhone").value; }
+    REF_SECTIONS.forEach(([k])=>{ if(g("rf-"+k)) r[k]=g("rf-"+k).value; });
+    const d=refDraftDoc(); if(!d) return;
+    const clean=JSON.parse(JSON.stringify(r)); clean.raw=maskPII(clean.raw||"").text; REF_SECTIONS.forEach(([k])=>clean[k]=maskPII(clean[k]||"").text);
+    d.set({r:clean,savedAt:now()}).then(()=>{ const st=document.getElementById("refSt"); if(st&&!st.textContent) st.textContent="임시 저장됨"; }).catch(()=>{});
+  };
+  if(now_) run(); else _rdT=setTimeout(run,900);
+}
+function refDraftClear(){ const d=refDraftDoc(); if(d) d.delete().catch(()=>{}); }
+async function refDraftLoad(){
+  const d=refDraftDoc(); if(!d||refCur) return;
+  try{ const s=await d.get(); if(!s.exists) return; const r=s.data().r; if(!r||r.status!=="작성 중") return;
+    refCur=r; refEditor(); const st=document.getElementById("refSt"); if(st) st.textContent=`작성 중이던 의뢰서를 불러왔습니다 (${fmt(s.data().savedAt)}).`;
+  }catch(e){}
+}
+
+/* ---------- 통합 검색 ---------- */
+function openSearch(){
+  const back=document.activeElement;
+  const bg=document.createElement("div"); bg.className="srch-bg"; bg.setAttribute("role","dialog"); bg.setAttribute("aria-modal","true"); bg.setAttribute("aria-label","통합 검색");
+  bg.innerHTML=`<div class="srch"><div class="toolbar"><input type="search" id="sq" placeholder="용어·지침·서식·상황 검색 (초성도 됩니다: ㅈㅇㅎㅇ)" aria-label="통합 검색어" style="flex:1"><button class="btn" type="button" id="sClose">닫기</button></div><div id="sOut" aria-live="polite"></div></div>`;
+  document.body.appendChild(bg);
+  const close=()=>{ bg.remove(); if(back&&back.focus) back.focus(); };
+  bg.addEventListener("click",e=>{ if(e.target===bg) close(); });
+  bg.addEventListener("keydown",e=>{ if(e.key==="Escape"){ e.stopPropagation(); close(); } });
+  document.getElementById("sClose").onclick=close;
+  const inp=document.getElementById("sq"), out=document.getElementById("sOut");
+  const run=()=>{
+    const q=inp.value.trim(); if(!q){ out.innerHTML=`<p class="inline-note" style="margin:0">예: 의향서, 형제자매, 녹취, 제9호, 통보, ㅁㅅㄴ</p>`; return; }
+    const open=guideUnlocked();
+    const terms=Object.entries(TERMS).filter(([k,v])=>textMatch(k,q)||textMatch(v,q)).slice(0,8);
+    const guides=allGuides().filter(g=>(open||g.src==="law")&&textMatch(g.q+" "+g.a+" "+g.ref,q)).slice(0,12);
+    const forms=FORMS.filter(f=>textMatch(`제${f.no}호 ${f.name} ${f.who} ${f.when} ${f.key.join(" ")}`,q));
+    const res=Object.entries(RESULTS).filter(([k,r])=>textMatch(r.title+" "+r.steps.join(" ")+" "+ROUTE_LABEL[k],q));
+    const qs=QUICK.filter(x=>textMatch(x.t+" "+x.sub+" "+x.steps.join(" "),q));
+    const lockedN=open?0:allGuides().filter(g=>g.src!=="law"&&textMatch(g.q+" "+g.a+" "+g.ref,q)).length;
+    let h="";
+    if(qs.length) h+=`<h3>상황별 안내</h3>`+qs.map(x=>`<div class="sres"><b>${esc(x.t)}</b><p>${esc(x.steps[0])}</p><button class="btn" type="button" data-go="quick:${x.id}">열기</button></div>`).join("");
+    if(forms.length) h+=`<h3>서식</h3>`+forms.map(f=>`<div class="sres"><b>제${f.no}호 ${esc(f.name)}</b><p>${esc(f.who)} · ${esc(f.when)}</p><button class="btn" type="button" data-go="form:${f.no}">서식 길잡이에서 보기</button></div>`).join("");
+    if(res.length) h+=`<h3>결정 경로 결과</h3>`+res.map(([k,r])=>`<div class="sres"><b>${esc(r.title)}</b><p>${esc(ROUTE_LABEL[k]||"")} · ${esc(r.law)}</p><button class="btn" type="button" data-go="route:${k}">절차 보기</button></div>`).join("");
+    if(terms.length) h+=`<h3>용어</h3>`+terms.map(([k,v])=>`<div class="sres"><b>${esc(k)}</b><p>${esc(v)}</p></div>`).join("");
+    if(guides.length) h+=`<h3>지침·해석</h3>`+guides.map(g=>`<details class="sres"><summary>${esc(g.q)}</summary><p>${esc(g.a)} ${badge(g)}</p></details>`).join("");
+    if(lockedN) h+=`<p class="inline-note">🔒 잠긴 내규·행정해석에서 ${lockedN}건이 더 있습니다. 톱니바퀴(설정)에서 잠금을 풀면 보입니다.</p>`;
+    out.innerHTML=h||`<p class="empty" style="margin:0">찾는 내용이 없습니다. 다른 낱말이나 초성으로 찾아보세요.</p>`;
+    out.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ const [t,v]=b.dataset.go.split(":"); close();
+      if(t==="form"){ selectTab(document.querySelector('[data-tab="forms"]')); setTimeout(()=>document.getElementById("form-"+v)?.scrollIntoView({block:"start"}),50); }
+      else if(t==="route"){ selectTab(document.querySelector('[data-tab="path"]')); trail=[]; renderResult(v); }
+      else if(t==="quick"){ selectTab(document.querySelector('[data-tab="path"]')); const qb=document.getElementById("quickBox"); qb.open=true; document.querySelector(`[data-qs="${v}"]`)?.click(); }
+    });
+    bumpStat("search");
+  };
+  let t=null; inp.oninput=()=>{ clearTimeout(t); t=setTimeout(run,150); }; run(); setTimeout(()=>inp.focus(),0);
+}
+document.getElementById("searchBtn").onclick=openSearch;
+document.addEventListener("keydown",e=>{ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"&&!document.documentElement.classList.contains("gated")){ e.preventDefault(); openSearch(); } });
+
+/* ---------- 큰 글씨 · 야간 보기 ---------- */
+function applyView(){
+  const fs=lsGet("lst-fs","1"), th=lsGet("lst-theme","light");
+  document.documentElement.style.setProperty("--fs",fs); document.documentElement.dataset.theme=th;
+  document.querySelectorAll("#fsSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===String(fs)));
+  document.querySelectorAll("#thSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===th));
+}
+document.querySelectorAll("#fsSeg button").forEach(b=>b.onclick=()=>{ lsSet("lst-fs",b.dataset.v); applyView(); });
+document.querySelectorAll("#thSeg button").forEach(b=>b.onclick=()=>{ lsSet("lst-theme",b.dataset.v); applyView(); });
+applyView();
+
+/* ---------- 자동 잠금 ---------- */
+var IDLE_LAST=Date.now();
+["pointerdown","keydown","scroll","touchstart","input"].forEach(ev=>document.addEventListener(ev,()=>{ IDLE_LAST=Date.now(); },{passive:true,capture:true}));
+function idleMinutes(){ const v=+lsGet("lst-idle",15); return [5,10,15,30].includes(v)?v:15; }
+function lockNow(){ try{ sessionStorage.removeItem("lst-auth"); sessionStorage.removeItem("lst-ck"); sessionStorage.removeItem("lst-gl"); }catch(e){} location.reload(); }
+setInterval(()=>{ if(document.documentElement.classList.contains("gated")) return; if(Date.now()-IDLE_LAST>idleMinutes()*60000) lockNow(); },15000);
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&!document.documentElement.classList.contains("gated")&&Date.now()-IDLE_LAST>idleMinutes()*60000) lockNow(); });
+const idleSel=document.getElementById("idleSel"); idleSel.value=String(idleMinutes()); idleSel.onchange=()=>lsSet("lst-idle",+idleSel.value);
+
+/* ---------- 관리자 비밀번호 변경 ---------- */
+function adminChange(){
+  const box=document.getElementById("adminChgBox"); if(!box) return;
+  box.innerHTML=`<form id="acForm" class="card" style="display:flex;flex-direction:column;gap:8px;margin-top:6px" autocomplete="off">
+    <div class="field"><label for="acOld">현재 관리자 비밀번호</label><input type="password" id="acOld" required></div>
+    <div class="field"><label for="acNew">새 관리자 비밀번호 (8자 이상, 숫자만은 안 됨)</label><input type="password" id="acNew" required minlength="8"></div>
+    <div class="field"><label for="acNew2">새 비밀번호 확인</label><input type="password" id="acNew2" required></div>
+    <p class="status err" id="acMsg"></p><div class="row"><button class="btn primary" type="submit">변경</button><button class="btn" type="button" id="acCancel">취소</button></div>
+    <p class="inline-note" style="margin:0">이 기기(브라우저)에만 적용됩니다. 다른 기기는 각각 바꾸어야 합니다.</p></form>`;
+  document.getElementById("acCancel").onclick=()=>{ box.innerHTML=""; };
+  document.getElementById("acForm").onsubmit=e=>{ e.preventDefault(); const m=document.getElementById("acMsg"), o=document.getElementById("acOld").value, n=document.getElementById("acNew").value, n2=document.getElementById("acNew2").value;
+    const aw=failWait("admin"); if(aw){ m.textContent=`여러 번 틀려 ${aw}초 뒤에 다시 입력할 수 있습니다.`; return; }
+    if(!checkAdmin(o)){ const w=failNote("admin"); m.textContent="현재 관리자 비밀번호가 맞지 않습니다."+(w?` ${w}초 뒤에 다시 입력하세요.`:""); return; }
+    if(n.length<8||/^\d+$/.test(n)){ m.textContent="새 비밀번호는 8자 이상이고 숫자만으로 되어 있으면 안 됩니다."; return; }
+    if(n!==n2){ m.textContent="새 비밀번호 확인이 일치하지 않습니다."; return; }
+    failClear("admin"); const sl=salt(); lsSet("lst-admin2",{salt:sl,hash:pwHash(sl,n),at:new Date().toISOString()});
+    box.innerHTML=`<p class="status" style="margin:6px 0 0;color:var(--ok)">관리자 비밀번호를 바꿨습니다.</p>`; };
+}
+
+/* ---------- 설정: 백업 · 정리 · 의견 · 기록 ---------- */
+function renderSettingsExtra(){
+  applyView(); idleSel.value=String(idleMinutes());
+  const ds=document.getElementById("dataSec");
+  if(ds){
+    const can=DB&&UID&&!localOnly;
+    const old=CASES.filter(c=>c.updatedAt&&Date.now()-new Date(c.updatedAt).getTime()>90*864e5);
+    const size=window.LST_LOCAL?Math.round(LST_LOCAL.size()/1024):0;
+    ds.innerHTML=`<div class="row2"><span>내 케이스 백업<br><span class="who">비밀번호를 정해 암호화한 파일로 내려받습니다${size?` · 이 기기 사용량 약 ${size}KB`:""}</span></span><button class="btn" type="button" id="bkOut" ${can?"":"disabled"}>내보내기</button></div>
+      <div class="row2"><span>백업 가져오기<br><span class="who">다른 기기에서 만든 백업 파일을 지금 사용자로 불러옵니다</span></span><label class="btn" style="cursor:pointer" ${can?"":"aria-disabled='true'"}>파일 선택<input type="file" id="bkIn" accept=".json,application/json" hidden ${can?"":"disabled"}></label></div>
+      <div id="bkBox"></div>
+      <div class="row2"><span>오래된 케이스 정리<br><span class="who">90일 넘게 수정하지 않은 케이스 ${old.length}건</span></span><button class="btn danger" type="button" id="oldDel" ${old.length&&can?"":"disabled"}>정리</button></div>`;
+    const bo=document.getElementById("bkOut"); if(bo) bo.onclick=()=>backupAsk("out");
+    const bi=document.getElementById("bkIn"); if(bi) bi.onchange=()=>{ if(bi.files[0]) backupAsk("in",bi.files[0]); bi.value=""; };
+    const od=document.getElementById("oldDel"); if(od) od.onclick=async()=>{ if(od.dataset.confirm!=="1"){ od.dataset.confirm="1"; od.textContent=`${old.length}건 지우기`; return; } od.disabled=true; let n=0; for(const c of old){ try{ await DB.collection("data/users/"+UID).doc(c.id).delete(); n++; }catch(e){} } od.textContent=`${n}건 지움`; };
+  }
+  const cl=document.getElementById("changelog"); if(cl) cl.innerHTML=CHANGELOG.map(c=>`<p style="margin:8px 0 2px"><b>${esc(c.v)}</b> <span class="inline-note">${esc(c.d)}</span></p><ul style="margin:0;padding-left:1.1em;font-size:.85rem">${c.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>`).join("");
+  const us=document.getElementById("usageStat"); if(us){ const s=lsGet("lst-stat",{}); const rows=Object.entries(s).filter(([k])=>k.startsWith("route:")).sort((a,b)=>b[1]-a[1]);
+    us.innerHTML=`<p class="inline-note" style="margin:6px 0">${s._since?`${esc(s._since)}부터 · `:""}이 기기에만 남고 어디에도 보내지 않습니다.</p><ul style="margin:0;padding-left:1.1em;font-size:.85rem"><li>로그인 ${s.login||0}회 · 케이스 저장 ${s.save||0}회 · 검색 ${s.search||0}회 · 퀴즈 ${s.edu||0}회</li>${rows.map(([k,n])=>`<li>${esc(ROUTE_LABEL[k.slice(6)]||k.slice(6))} 결과 ${n}회</li>`).join("")}</ul>`; }
+}
+function backupAsk(mode,file){
+  const box=document.getElementById("bkBox"); if(!box) return;
+  box.innerHTML=`<form id="bkForm" class="card" style="display:flex;flex-direction:column;gap:8px" autocomplete="off"><div class="field"><label for="bkPw">${mode==="out"?"백업 파일 비밀번호 (6자 이상, 잊으면 열 수 없습니다)":"백업 파일 비밀번호"}</label><input type="password" id="bkPw" required minlength="${mode==="out"?6:1}"></div>
+    <p class="status" id="bkMsg"></p><div class="row"><button class="btn primary" type="submit">${mode==="out"?"내려받기":"가져오기"}</button><button class="btn" type="button" id="bkCancel">취소</button></div></form>`;
+  document.getElementById("bkCancel").onclick=()=>{ box.innerHTML=""; };
+  setTimeout(()=>document.getElementById("bkPw").focus(),0);
+  document.getElementById("bkForm").onsubmit=async e=>{ e.preventDefault(); const pw=document.getElementById("bkPw").value, m=document.getElementById("bkMsg");
+    try{
+      if(mode==="out"){
+        if(pw.length<6){ m.className="status err"; m.textContent="6자 이상으로 정하세요."; return; }
+        m.className="status"; m.textContent="만드는 중…";
+        const sl=salt(), k=hexTo(LSTK.derive(pw,sl));
+        const data={cases:CASES.map(c=>({...c})),exportedAt:now(),app:CONTENT_META.version};
+        const file={app:"lst-guide-backup",v:1,salt:sl,iter:10000,createdAt:now(),data:LSTK.sealWith(k,JSON.stringify(data))};
+        const d=new Date(), nm=`연명의료길라잡이_백업_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}.json`;
+        const blob=new Blob([JSON.stringify(file)],{type:"application/json"});
+        if(DL){ await DL.save({filename:nm,data:blob}); } else { const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=nm; a.click(); }
+        m.textContent=`케이스 ${CASES.length}건을 백업했습니다.`;
+      } else {
+        const txt=await file.text(); const f=JSON.parse(txt); if(f.app!=="lst-guide-backup") throw new Error("형식");
+        const k=hexTo(hexOf(pbkdf2Sha256(pw,f.salt,f.iter||10000))); let data;
+        try{ data=JSON.parse(LSTK.openWith(k,f.data)); }catch(_){ m.className="status err"; m.textContent="비밀번호가 맞지 않거나 파일이 손상되었습니다."; return; }
+        let n=0; for(const c of (data.cases||[])){ const ex=CASES.find(x=>x.id===c.id); if(ex&&(ex.updatedAt||"")>=(c.updatedAt||"")) continue; const {id,...body}=c; await DB.collection("data/users/"+UID).doc(id||undefined).set(body); n++; }
+        m.className="status"; m.textContent=`케이스 ${n}건을 가져왔습니다${(data.cases||[]).length>n?` (이미 있는 최신 케이스 ${(data.cases||[]).length-n}건은 건너뜀)`:""}.`;
+      }
+    }catch(err){ m.className="status err"; m.textContent=mode==="out"?"백업하지 못했습니다.":"백업 파일을 읽지 못했습니다."; }
+  };
+}
+document.getElementById("fbBtn").onclick=()=>{
+  const body=`[앱 버전] ${CONTENT_META.version}\n[화면] \n[내용] \n\n(환자 이름·등록번호 등 식별정보는 적지 마세요)`;
+  location.href=`mailto:${APP_INFO.email}?subject=${encodeURIComponent("[연명의료 현장 길라잡이] 의견·오류")}&body=${encodeURIComponent(body)}`;
+};
+
+/* ---------- 탭 표시 · 로그인 뒤 처리 · 바로가기 주소 ---------- */
+window.onTabShown=t=>{ if(t==="forms") renderForms(); if(t==="guide") renderRecent(); if(t==="core"){ renderContacts(); renderLawNews(); renderEdu(); } };
+function applyDeepLink(){
+  const h=new URLSearchParams((location.hash||"").replace(/^#/,""));
+  const tab=h.get("tab"), route=h.get("route"), q=h.get("q");
+  if(tab&&TAB_KEYS.includes(tab)) selectTab(document.querySelector(`[data-tab="${tab}"]`));
+  if(route&&RESULTS[route]){ selectTab(document.querySelector('[data-tab="path"]')); trail=[]; renderResult(route); }
+  if(q){ goGuide(q); }
+}
+function afterEnter(){
+  if(window.LST_STANDALONE&&window.LST_LOCAL&&LSTK.key()){ try{ LST_LOCAL.reencrypt("data/users/"+(UID||"local:"+userTag())+"/"); }catch(e){} LST_LOCAL.refresh(); }
+  IDLE_LAST=Date.now(); bumpStat("login");
+  renderRecent(); loadEdu(); refDraftLoad(); applyDeepLink();
+}
+renderQuick(); renderContacts(); renderLawNews(); renderEdu();
+
+renderNode("start");
+applyLockables();
+initGate();
+</script>
+<script>
+if("serviceWorker" in navigator && location.protocol!=="file:"){ window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
+</script>
+</body>
+</html>
